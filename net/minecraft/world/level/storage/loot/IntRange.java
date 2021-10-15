@@ -1,0 +1,145 @@
+package net.minecraft.world.level.storage.loot;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import java.util.Objects;
+import java.util.Set;
+import javax.annotation.Nullable;
+import net.minecraft.util.ChatDeserializer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParameter;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
+
+public class IntRange {
+    @Nullable
+    final NumberProvider min;
+    @Nullable
+    final NumberProvider max;
+    private final IntRange.IntLimiter limiter;
+    private final IntRange.IntChecker predicate;
+
+    public Set<LootContextParameter<?>> getReferencedContextParams() {
+        Builder<LootContextParameter<?>> builder = ImmutableSet.builder();
+        if (this.min != null) {
+            builder.addAll(this.min.getReferencedContextParams());
+        }
+
+        if (this.max != null) {
+            builder.addAll(this.max.getReferencedContextParams());
+        }
+
+        return builder.build();
+    }
+
+    IntRange(@Nullable NumberProvider numberProvider, @Nullable NumberProvider numberProvider2) {
+        this.min = numberProvider;
+        this.max = numberProvider2;
+        if (numberProvider == null) {
+            if (numberProvider2 == null) {
+                this.limiter = (context, value) -> {
+                    return value;
+                };
+                this.predicate = (context, value) -> {
+                    return true;
+                };
+            } else {
+                this.limiter = (context, value) -> {
+                    return Math.min(numberProvider2.getInt(context), value);
+                };
+                this.predicate = (context, value) -> {
+                    return value <= numberProvider2.getInt(context);
+                };
+            }
+        } else if (numberProvider2 == null) {
+            this.limiter = (context, value) -> {
+                return Math.max(numberProvider.getInt(context), value);
+            };
+            this.predicate = (context, value) -> {
+                return value >= numberProvider.getInt(context);
+            };
+        } else {
+            this.limiter = (context, value) -> {
+                return MathHelper.clamp(value, numberProvider.getInt(context), numberProvider2.getInt(context));
+            };
+            this.predicate = (context, value) -> {
+                return value >= numberProvider.getInt(context) && value <= numberProvider2.getInt(context);
+            };
+        }
+
+    }
+
+    public static IntRange exact(int value) {
+        ConstantValue constantValue = ConstantValue.exactly((float)value);
+        return new IntRange(constantValue, constantValue);
+    }
+
+    public static IntRange range(int min, int max) {
+        return new IntRange(ConstantValue.exactly((float)min), ConstantValue.exactly((float)max));
+    }
+
+    public static IntRange lowerBound(int min) {
+        return new IntRange(ConstantValue.exactly((float)min), (NumberProvider)null);
+    }
+
+    public static IntRange upperBound(int max) {
+        return new IntRange((NumberProvider)null, ConstantValue.exactly((float)max));
+    }
+
+    public int clamp(LootTableInfo context, int value) {
+        return this.limiter.apply(context, value);
+    }
+
+    public boolean test(LootTableInfo context, int value) {
+        return this.predicate.test(context, value);
+    }
+
+    @FunctionalInterface
+    interface IntChecker {
+        boolean test(LootTableInfo context, int value);
+    }
+
+    @FunctionalInterface
+    interface IntLimiter {
+        int apply(LootTableInfo context, int value);
+    }
+
+    public static class Serializer implements JsonDeserializer<IntRange>, JsonSerializer<IntRange> {
+        @Override
+        public IntRange deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
+            if (jsonElement.isJsonPrimitive()) {
+                return IntRange.exact(jsonElement.getAsInt());
+            } else {
+                JsonObject jsonObject = ChatDeserializer.convertToJsonObject(jsonElement, "value");
+                NumberProvider numberProvider = jsonObject.has("min") ? ChatDeserializer.getAsObject(jsonObject, "min", jsonDeserializationContext, NumberProvider.class) : null;
+                NumberProvider numberProvider2 = jsonObject.has("max") ? ChatDeserializer.getAsObject(jsonObject, "max", jsonDeserializationContext, NumberProvider.class) : null;
+                return new IntRange(numberProvider, numberProvider2);
+            }
+        }
+
+        @Override
+        public JsonElement serialize(IntRange intRange, Type type, JsonSerializationContext jsonSerializationContext) {
+            JsonObject jsonObject = new JsonObject();
+            if (Objects.equals(intRange.max, intRange.min)) {
+                return jsonSerializationContext.serialize(intRange.min);
+            } else {
+                if (intRange.max != null) {
+                    jsonObject.add("max", jsonSerializationContext.serialize(intRange.max));
+                }
+
+                if (intRange.min != null) {
+                    jsonObject.add("min", jsonSerializationContext.serialize(intRange.min));
+                }
+
+                return jsonObject;
+            }
+        }
+    }
+}

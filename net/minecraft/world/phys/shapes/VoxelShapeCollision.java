@@ -1,0 +1,27 @@
+package net.minecraft.world.phys.shapes;
+
+import net.minecraft.core.BlockPosition;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidTypeFlowing;
+
+public interface VoxelShapeCollision {
+    static VoxelShapeCollision empty() {
+        return VoxelShapeCollisionEntity.EMPTY;
+    }
+
+    static VoxelShapeCollision of(Entity entity) {
+        return new VoxelShapeCollisionEntity(entity);
+    }
+
+    boolean isDescending();
+
+    boolean isAbove(VoxelShape shape, BlockPosition pos, boolean defaultValue);
+
+    boolean hasItemOnFeet(Item item);
+
+    boolean isHoldingItem(Item item);
+
+    boolean canStandOnFluid(Fluid state, FluidTypeFlowing fluid);
+}
