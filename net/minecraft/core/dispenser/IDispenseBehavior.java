@@ -51,6 +51,8 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockBeehive;
 import net.minecraft.world.level.block.BlockCampfire;
+import net.minecraft.world.level.block.BlockCandle;
+import net.minecraft.world.level.block.BlockCandleCake;
 import net.minecraft.world.level.block.BlockDispenser;
 import net.minecraft.world.level.block.BlockFireAbstract;
 import net.minecraft.world.level.block.BlockPumpkinCarved;
@@ -60,8 +62,6 @@ import net.minecraft.world.level.block.BlockSkull;
 import net.minecraft.world.level.block.BlockTNT;
 import net.minecraft.world.level.block.BlockWitherSkull;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.IFluidSource;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityBeehive;
@@ -420,7 +420,7 @@ public interface IDispenseBehavior {
                 if (BlockFireAbstract.canBePlacedAt(level, blockPos, direction)) {
                     level.setTypeUpdate(blockPos, BlockFireAbstract.getState(level, blockPos));
                     level.gameEvent((Entity)null, GameEvent.BLOCK_PLACE, blockPos);
-                } else if (!BlockCampfire.canLight(blockState) && !CandleBlock.canLight(blockState) && !CandleCakeBlock.canLight(blockState)) {
+                } else if (!BlockCampfire.canLight(blockState) && !BlockCandle.canLight(blockState) && !BlockCandleCake.canLight(blockState)) {
                     if (blockState.getBlock() instanceof BlockTNT) {
                         BlockTNT.explode(level, blockPos);
                         level.removeBlock(blockPos, false);

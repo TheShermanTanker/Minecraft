@@ -391,7 +391,7 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     }
 
     @Override
-    public void levelEvent(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data) {
+    public void triggerEffect(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data) {
     }
 
     @Override

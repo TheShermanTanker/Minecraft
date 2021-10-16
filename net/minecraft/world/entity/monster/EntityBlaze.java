@@ -219,7 +219,7 @@ public class EntityBlaze extends EntityMonster {
                         if (this.attackStep > 1) {
                             double h = Math.sqrt(Math.sqrt(d)) * 0.5D;
                             if (!this.blaze.isSilent()) {
-                                this.blaze.level.levelEvent((EntityHuman)null, 1018, this.blaze.getChunkCoordinates(), 0);
+                                this.blaze.level.triggerEffect((EntityHuman)null, 1018, this.blaze.getChunkCoordinates(), 0);
                             }
 
                             for(int i = 0; i < 1; ++i) {

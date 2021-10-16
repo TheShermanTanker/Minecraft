@@ -116,8 +116,8 @@ import net.minecraft.world.level.entity.EntityPersistentStorage;
 import net.minecraft.world.level.entity.EntitySectionManagerPersistent;
 import net.minecraft.world.level.entity.EntityTickList;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.entity.IWorldCallback;
 import net.minecraft.world.level.entity.IWorldEntityAccess;
-import net.minecraft.world.level.entity.WorldCallback;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
 import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
@@ -805,12 +805,12 @@ public class WorldServer extends World implements GeneratorAccessSeed {
     }
 
     @Override
-    public void globalLevelEvent(int eventId, BlockPosition pos, int data) {
+    public void broadcastWorldEvent(int eventId, BlockPosition pos, int data) {
         this.server.getPlayerList().sendAll(new PacketPlayOutWorldEvent(eventId, pos, data, true));
     }
 
     @Override
-    public void levelEvent(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data) {
+    public void triggerEffect(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data) {
         this.server.getPlayerList().sendPacketNearby(player, (double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), 64.0D, this.getDimensionKey(), new PacketPlayOutWorldEvent(eventId, pos, data, false));
     }
 
@@ -1433,7 +1433,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
         return this.entityManager.isPositionTicking(chunkPos);
     }
 
-    final class EntityCallbacks implements WorldCallback<Entity> {
+    final class EntityCallbacks implements IWorldCallback<Entity> {
         @Override
         public void onCreated(Entity entity) {
         }

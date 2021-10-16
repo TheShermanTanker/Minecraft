@@ -12,13 +12,13 @@ import org.apache.logging.log4j.Logger;
 
 public class EntitySectionManagerTransient<T extends EntityAccess> {
     static final Logger LOGGER = LogManager.getLogger();
-    final WorldCallback<T> callbacks;
+    final IWorldCallback<T> callbacks;
     final EntityLookup<T> entityStorage;
     final EntitySectionStorage<T> sectionStorage;
     private final LongSet tickingChunks = new LongOpenHashSet();
     private final IWorldEntityAccess<T> entityGetter;
 
-    public EntitySectionManagerTransient(Class<T> entityClass, WorldCallback<T> handler) {
+    public EntitySectionManagerTransient(Class<T> entityClass, IWorldCallback<T> handler) {
         this.entityStorage = new EntityLookup<>();
         this.sectionStorage = new EntitySectionStorage<>(entityClass, (pos) -> {
             return this.tickingChunks.contains(pos) ? Visibility.TICKING : Visibility.TRACKED;
@@ -90,7 +90,7 @@ public class EntitySectionManagerTransient<T extends EntityAccess> {
         return this.entityStorage.count() + "," + this.sectionStorage.count() + "," + this.tickingChunks.size();
     }
 
-    class Callback implements EntityWorldCallback {
+    class Callback implements IEntityCallback {
         private final T entity;
         private long currentSectionKey;
         private EntitySection<T> currentSection;

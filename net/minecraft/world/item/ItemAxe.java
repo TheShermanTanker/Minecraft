@@ -44,11 +44,11 @@ public class ItemAxe extends ItemTool {
             optional4 = optional;
         } else if (optional2.isPresent()) {
             level.playSound(player, blockPos, SoundEffects.AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            level.levelEvent(player, 3005, blockPos, 0);
+            level.triggerEffect(player, 3005, blockPos, 0);
             optional4 = optional2;
         } else if (optional3.isPresent()) {
             level.playSound(player, blockPos, SoundEffects.AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            level.levelEvent(player, 3004, blockPos, 0);
+            level.triggerEffect(player, 3004, blockPos, 0);
             optional4 = optional3;
         }
 

@@ -408,7 +408,7 @@ public class Block extends BlockBase implements IMaterial {
     }
 
     protected void spawnDestroyParticles(World world, EntityHuman player, BlockPosition pos, IBlockData state) {
-        world.levelEvent(player, 2001, pos, getCombinedId(state));
+        world.triggerEffect(player, 2001, pos, getCombinedId(state));
     }
 
     public void playerWillDestroy(World world, BlockPosition pos, IBlockData state, EntityHuman player) {

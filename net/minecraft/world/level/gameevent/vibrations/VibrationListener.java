@@ -4,8 +4,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.tags.GameEventTags;
 import net.minecraft.tags.TagsBlock;
+import net.minecraft.tags.TagsGameEvent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipBlockStateContext;
@@ -77,11 +77,11 @@ public class VibrationListener implements GameEventListener {
     private boolean isValidVibration(GameEvent event, @Nullable Entity entity) {
         if (this.receivingEvent.isPresent()) {
             return false;
-        } else if (!GameEventTags.VIBRATIONS.isTagged(event)) {
+        } else if (!TagsGameEvent.VIBRATIONS.isTagged(event)) {
             return false;
         } else {
             if (entity != null) {
-                if (GameEventTags.IGNORE_VIBRATIONS_SNEAKING.isTagged(event) && entity.isSteppingCarefully()) {
+                if (TagsGameEvent.IGNORE_VIBRATIONS_SNEAKING.isTagged(event) && entity.isSteppingCarefully()) {
                     return false;
                 }
 

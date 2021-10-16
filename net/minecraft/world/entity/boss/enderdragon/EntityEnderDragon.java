@@ -525,7 +525,7 @@ public class EntityEnderDragon extends EntityInsentient implements IMonster {
             }
 
             if (this.dragonDeathTime == 1 && !this.isSilent()) {
-                this.level.globalLevelEvent(1028, this.getChunkCoordinates(), 0);
+                this.level.broadcastWorldEvent(1028, this.getChunkCoordinates(), 0);
             }
         }
 

@@ -40,7 +40,7 @@ public class ItemSpade extends ItemTool {
                 blockState3 = blockState2;
             } else if (blockState.getBlock() instanceof BlockCampfire && blockState.get(BlockCampfire.LIT)) {
                 if (!level.isClientSide()) {
-                    level.levelEvent((EntityHuman)null, 1009, blockPos, 0);
+                    level.triggerEffect((EntityHuman)null, 1009, blockPos, 0);
                 }
 
                 BlockCampfire.dowse(context.getEntity(), level, blockPos, blockState);

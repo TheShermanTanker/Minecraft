@@ -86,7 +86,7 @@ public class EntitySkeleton extends EntitySkeletonAbstract {
     protected void doFreezeConversion() {
         this.convertTo(EntityTypes.STRAY, true);
         if (!this.isSilent()) {
-            this.level.levelEvent((EntityHuman)null, 1048, this.getChunkCoordinates(), 0);
+            this.level.triggerEffect((EntityHuman)null, 1048, this.getChunkCoordinates(), 0);
         }
 
     }

@@ -227,7 +227,7 @@ public class EntityZombieVillager extends EntityZombie implements VillagerDataHo
 
         villager.addEffect(new MobEffect(MobEffects.CONFUSION, 200, 0));
         if (!this.isSilent()) {
-            world.levelEvent((EntityHuman)null, 1027, this.getChunkCoordinates(), 0);
+            world.triggerEffect((EntityHuman)null, 1027, this.getChunkCoordinates(), 0);
         }
 
     }

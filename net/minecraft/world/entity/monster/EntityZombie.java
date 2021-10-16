@@ -251,7 +251,7 @@ public class EntityZombie extends EntityMonster {
     protected void doUnderWaterConversion() {
         this.convertToZombieType(EntityTypes.DROWNED);
         if (!this.isSilent()) {
-            this.level.levelEvent((EntityHuman)null, 1040, this.getChunkCoordinates(), 0);
+            this.level.triggerEffect((EntityHuman)null, 1040, this.getChunkCoordinates(), 0);
         }
 
     }
@@ -406,7 +406,7 @@ public class EntityZombie extends EntityMonster {
             zombieVillager.setOffers(villager.getOffers().createTag());
             zombieVillager.setVillagerXp(villager.getExperience());
             if (!this.isSilent()) {
-                world.levelEvent((EntityHuman)null, 1026, this.getChunkCoordinates(), 0);
+                world.triggerEffect((EntityHuman)null, 1026, this.getChunkCoordinates(), 0);
             }
         }
 

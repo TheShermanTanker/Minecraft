@@ -108,7 +108,7 @@ public abstract class WorldGenerator<FC extends WorldGenFeatureConfiguration> {
     public static final WorldGenerator<WorldGenFeatureRandom2> SIMPLE_RANDOM_SELECTOR = register("simple_random_selector", new WorldGenFeatureRandom2Configuration(WorldGenFeatureRandom2.CODEC));
     public static final WorldGenerator<WorldGenFeatureChoiceConfiguration> RANDOM_BOOLEAN_SELECTOR = register("random_boolean_selector", new WorldGenFeatureChoice(WorldGenFeatureChoiceConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureCompositeConfiguration> DECORATED = register("decorated", new WorldGenFeatureComposite(WorldGenFeatureCompositeConfiguration.CODEC));
-    public static final WorldGenerator<GeodeConfiguration> GEODE = register("geode", new GeodeFeature(GeodeConfiguration.CODEC));
+    public static final WorldGenerator<GeodeConfiguration> GEODE = register("geode", new WorldGenFeatureGeode(GeodeConfiguration.CODEC));
     public static final WorldGenerator<DripstoneClusterConfiguration> DRIPSTONE_CLUSTER = register("dripstone_cluster", new WorldGenFeatureDripstoneCluster(DripstoneClusterConfiguration.CODEC));
     public static final WorldGenerator<LargeDripstoneConfiguration> LARGE_DRIPSTONE = register("large_dripstone", new WorldGenFeatureDripstoneLarge(LargeDripstoneConfiguration.CODEC));
     public static final WorldGenerator<SmallDripstoneConfiguration> SMALL_DRIPSTONE = register("small_dripstone", new WorldGenFeatureDripstoneSmall(SmallDripstoneConfiguration.CODEC));

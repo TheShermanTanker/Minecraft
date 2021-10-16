@@ -81,7 +81,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockSweetBerryBush;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CaveVines;
+import net.minecraft.world.level.block.ICaveVine;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3D;
@@ -891,7 +891,7 @@ public class EntityFox extends EntityAnimal {
         @Override
         protected boolean isValidTarget(IWorldReader world, BlockPosition pos) {
             IBlockData blockState = world.getType(pos);
-            return blockState.is(Blocks.SWEET_BERRY_BUSH) && blockState.get(BlockSweetBerryBush.AGE) >= 2 || CaveVines.hasGlowBerries(blockState);
+            return blockState.is(Blocks.SWEET_BERRY_BUSH) && blockState.get(BlockSweetBerryBush.AGE) >= 2 || ICaveVine.hasGlowBerries(blockState);
         }
 
         @Override
@@ -914,7 +914,7 @@ public class EntityFox extends EntityAnimal {
                 IBlockData blockState = EntityFox.this.level.getType(this.blockPos);
                 if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
                     this.pickSweetBerries(blockState);
-                } else if (CaveVines.hasGlowBerries(blockState)) {
+                } else if (ICaveVine.hasGlowBerries(blockState)) {
                     this.pickGlowBerry(blockState);
                 }
 
@@ -922,7 +922,7 @@ public class EntityFox extends EntityAnimal {
         }
 
         private void pickGlowBerry(IBlockData state) {
-            CaveVines.harvest(state, EntityFox.this.level, this.blockPos);
+            ICaveVine.harvest(state, EntityFox.this.level, this.blockPos);
         }
 
         private void pickSweetBerries(IBlockData state) {

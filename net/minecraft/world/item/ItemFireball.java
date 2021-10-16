@@ -9,9 +9,9 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.context.ItemActionContext;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.BlockCampfire;
+import net.minecraft.world.level.block.BlockCandle;
+import net.minecraft.world.level.block.BlockCandleCake;
 import net.minecraft.world.level.block.BlockFireAbstract;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -27,7 +27,7 @@ public class ItemFireball extends Item {
         BlockPosition blockPos = context.getClickPosition();
         IBlockData blockState = level.getType(blockPos);
         boolean bl = false;
-        if (!BlockCampfire.canLight(blockState) && !CandleBlock.canLight(blockState) && !CandleCakeBlock.canLight(blockState)) {
+        if (!BlockCampfire.canLight(blockState) && !BlockCandle.canLight(blockState) && !BlockCandleCake.canLight(blockState)) {
             blockPos = blockPos.relative(context.getClickedFace());
             if (BlockFireAbstract.canBePlacedAt(level, blockPos, context.getHorizontalDirection())) {
                 this.playSound(level, blockPos);

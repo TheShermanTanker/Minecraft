@@ -70,7 +70,7 @@ public class EntityZombieHusk extends EntityZombie {
     protected void doUnderWaterConversion() {
         this.convertToZombieType(EntityTypes.ZOMBIE);
         if (!this.isSilent()) {
-            this.level.levelEvent((EntityHuman)null, 1041, this.getChunkCoordinates(), 0);
+            this.level.triggerEffect((EntityHuman)null, 1041, this.getChunkCoordinates(), 0);
         }
 
     }

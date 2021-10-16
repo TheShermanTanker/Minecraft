@@ -26,16 +26,16 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.VoxelShapeCollision;
 import net.minecraft.world.phys.shapes.VoxelShapes;
 
-public class CandleCakeBlock extends BlockCandleAbstract {
+public class BlockCandleCake extends BlockCandleAbstract {
     public static final BlockStateBoolean LIT = BlockCandleAbstract.LIT;
     protected static final float AABB_OFFSET = 1.0F;
     protected static final VoxelShape CAKE_SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 8.0D, 15.0D);
     protected static final VoxelShape CANDLE_SHAPE = Block.box(7.0D, 8.0D, 7.0D, 9.0D, 14.0D, 9.0D);
     protected static final VoxelShape SHAPE = VoxelShapes.or(CAKE_SHAPE, CANDLE_SHAPE);
-    private static final Map<Block, CandleCakeBlock> BY_CANDLE = Maps.newHashMap();
+    private static final Map<Block, BlockCandleCake> BY_CANDLE = Maps.newHashMap();
     private static final Iterable<Vec3D> PARTICLE_OFFSETS = ImmutableList.of(new Vec3D(0.5D, 1.0D, 0.5D));
 
-    protected CandleCakeBlock(Block candle, BlockBase.Info settings) {
+    protected BlockCandleCake(Block candle, BlockBase.Info settings) {
         super(settings);
         this.registerDefaultState(this.stateDefinition.getBlockData().set(LIT, Boolean.valueOf(false)));
         BY_CANDLE.put(candle, this);

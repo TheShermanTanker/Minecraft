@@ -15,7 +15,7 @@ public interface EntityAccess {
 
     AxisAlignedBB getBoundingBox();
 
-    void setWorldCallback(EntityWorldCallback listener);
+    void setWorldCallback(IEntityCallback listener);
 
     Stream<? extends EntityAccess> recursiveStream();
 

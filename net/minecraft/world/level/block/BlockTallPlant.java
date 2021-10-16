@@ -97,7 +97,7 @@ public class BlockTallPlant extends BlockPlant {
             if (blockState.is(state.getBlock()) && blockState.get(HALF) == BlockPropertyDoubleBlockHalf.LOWER) {
                 IBlockData blockState2 = blockState.hasProperty(BlockProperties.WATERLOGGED) && blockState.get(BlockProperties.WATERLOGGED) ? Blocks.WATER.getBlockData() : Blocks.AIR.getBlockData();
                 world.setTypeAndData(blockPos, blockState2, 35);
-                world.levelEvent(player, 2001, blockPos, Block.getCombinedId(blockState));
+                world.triggerEffect(player, 2001, blockPos, Block.getCombinedId(blockState));
             }
         }
 

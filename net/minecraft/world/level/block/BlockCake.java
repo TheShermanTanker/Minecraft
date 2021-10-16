@@ -50,13 +50,13 @@ public class BlockCake extends Block {
         Item item = itemStack.getItem();
         if (itemStack.is(TagsItem.CANDLES) && state.get(BITES) == 0) {
             Block block = Block.asBlock(item);
-            if (block instanceof CandleBlock) {
+            if (block instanceof BlockCandle) {
                 if (!player.isCreative()) {
                     itemStack.subtract(1);
                 }
 
                 world.playSound((EntityHuman)null, pos, SoundEffects.CAKE_ADD_CANDLE, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                world.setTypeUpdate(pos, CandleCakeBlock.byCandle(block));
+                world.setTypeUpdate(pos, BlockCandleCake.byCandle(block));
                 world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
                 player.awardStat(StatisticList.ITEM_USED.get(item));
                 return EnumInteractionResult.SUCCESS;

@@ -1,6 +1,6 @@
 package net.minecraft.world.level.block;
 
-public class LevelEvent {
+public class WorldEvent {
     public static final int SOUND_DISPENSER_DISPENSE = 1000;
     public static final int SOUND_DISPENSER_FAIL = 1001;
     public static final int SOUND_DISPENSER_PROJECTILE_LAUNCH = 1002;

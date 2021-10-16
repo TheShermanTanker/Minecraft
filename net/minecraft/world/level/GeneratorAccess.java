@@ -54,14 +54,14 @@ public interface GeneratorAccess extends ICombinedAccess, IWorldTime {
 
     void addParticle(ParticleParam parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
 
-    void levelEvent(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data);
+    void triggerEffect(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data);
 
     default int getLogicalHeight() {
         return this.getDimensionManager().getLogicalHeight();
     }
 
     default void triggerEffect(int eventId, BlockPosition pos, int data) {
-        this.levelEvent((EntityHuman)null, eventId, pos, data);
+        this.triggerEffect((EntityHuman)null, eventId, pos, data);
     }
 
     void gameEvent(@Nullable Entity entity, GameEvent event, BlockPosition pos);

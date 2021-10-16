@@ -2,8 +2,8 @@ package net.minecraft.world.level.entity;
 
 import net.minecraft.world.entity.Entity;
 
-public interface EntityWorldCallback {
-    EntityWorldCallback NULL = new EntityWorldCallback() {
+public interface IEntityCallback {
+    IEntityCallback NULL = new IEntityCallback() {
         @Override
         public void onMove() {
         }

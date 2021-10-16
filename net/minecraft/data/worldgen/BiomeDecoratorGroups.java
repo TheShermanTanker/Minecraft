@@ -19,13 +19,13 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformFloat;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.BlockCaveVines;
 import net.minecraft.world.level.block.BlockDripleafBig;
 import net.minecraft.world.level.block.BlockDripleafSmall;
 import net.minecraft.world.level.block.BlockHugeMushroom;
 import net.minecraft.world.level.block.BlockSweetBerryBush;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CaveVines;
-import net.minecraft.world.level.block.CaveVinesBlock;
+import net.minecraft.world.level.block.ICaveVine;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
@@ -387,8 +387,8 @@ public class BiomeDecoratorGroups {
     public static final WorldGenFeatureConfigured<?, ?> ROOTED_AZALEA_TREES = register("rooted_azalea_trees", WorldGenerator.ROOT_SYSTEM.configured(new RootSystemConfiguration(() -> {
         return AZALEA_TREE;
     }, 3, 3, TagsBlock.LUSH_GROUND_REPLACEABLE.getName(), new WorldGenFeatureStateProviderSimpl(Blocks.ROOTED_DIRT.getBlockData()), 20, 100, 3, 2, new WorldGenFeatureStateProviderSimpl(Blocks.HANGING_ROOTS.getBlockData()), 20, 2)).decorated(WorldGenDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12))).range(BiomeDecoratorGroups.Decorators.RANGE_BOTTOM_TO_60).squared().rarity(2));
-    private static final WorldGenFeatureStateProviderWeighted CAVE_VINES_BODY_PROVIDER = new WorldGenFeatureStateProviderWeighted(weightedBlockStateBuilder().add(Blocks.CAVE_VINES_PLANT.getBlockData(), 4).add(Blocks.CAVE_VINES_PLANT.getBlockData().set(CaveVines.BERRIES, Boolean.valueOf(true)), 1));
-    private static final RandomizedIntStateProvider CAVE_VINES_HEAD_PROVIDER = new RandomizedIntStateProvider(new WorldGenFeatureStateProviderWeighted(weightedBlockStateBuilder().add(Blocks.CAVE_VINES.getBlockData(), 4).add(Blocks.CAVE_VINES.getBlockData().set(CaveVines.BERRIES, Boolean.valueOf(true)), 1)), CaveVinesBlock.AGE, UniformInt.of(17, 25));
+    private static final WorldGenFeatureStateProviderWeighted CAVE_VINES_BODY_PROVIDER = new WorldGenFeatureStateProviderWeighted(weightedBlockStateBuilder().add(Blocks.CAVE_VINES_PLANT.getBlockData(), 4).add(Blocks.CAVE_VINES_PLANT.getBlockData().set(ICaveVine.BERRIES, Boolean.valueOf(true)), 1));
+    private static final RandomizedIntStateProvider CAVE_VINES_HEAD_PROVIDER = new RandomizedIntStateProvider(new WorldGenFeatureStateProviderWeighted(weightedBlockStateBuilder().add(Blocks.CAVE_VINES.getBlockData(), 4).add(Blocks.CAVE_VINES.getBlockData().set(ICaveVine.BERRIES, Boolean.valueOf(true)), 1)), BlockCaveVines.AGE, UniformInt.of(17, 25));
     public static final WorldGenFeatureConfigured<GrowingPlantConfiguration, ?> CAVE_VINE = register("cave_vine", WorldGenerator.GROWING_PLANT.configured(new GrowingPlantConfiguration(SimpleWeightedRandomList.<IntProvider>builder().add(UniformInt.of(1, 20), 2).add(UniformInt.of(1, 3), 3).add(UniformInt.of(1, 7), 10).build(), EnumDirection.DOWN, CAVE_VINES_BODY_PROVIDER, CAVE_VINES_HEAD_PROVIDER, false)));
     public static final WorldGenFeatureConfigured<GrowingPlantConfiguration, ?> CAVE_VINE_IN_MOSS = register("cave_vine_in_moss", WorldGenerator.GROWING_PLANT.configured(new GrowingPlantConfiguration(SimpleWeightedRandomList.<IntProvider>builder().add(UniformInt.of(1, 4), 5).add(UniformInt.of(2, 8), 1).build(), EnumDirection.DOWN, CAVE_VINES_BODY_PROVIDER, CAVE_VINES_HEAD_PROVIDER, false)));
     public static final WorldGenFeatureConfigured<?, ?> CAVE_VINES = register("cave_vines", CAVE_VINE.decorated(WorldGenDecorator.CAVE_SURFACE.configured(new CaveDecoratorConfiguration(CaveSurface.CEILING, 12))).range(BiomeDecoratorGroups.Decorators.RANGE_BOTTOM_TO_60).squared().count(60));

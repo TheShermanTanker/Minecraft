@@ -172,7 +172,7 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
                 IBlockData blockState = world.getType(blockPos);
                 if (blockState.is(this) && blockState.get(PART) == BlockPropertyBedPart.HEAD) {
                     world.setTypeAndData(blockPos, Blocks.AIR.getBlockData(), 35);
-                    world.levelEvent(player, 2001, blockPos, Block.getCombinedId(blockState));
+                    world.triggerEffect(player, 2001, blockPos, Block.getCombinedId(blockState));
                 }
             }
         }

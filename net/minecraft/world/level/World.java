@@ -761,7 +761,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
 
     public abstract int getWorldMapCount();
 
-    public void globalLevelEvent(int eventId, BlockPosition pos, int data) {
+    public void broadcastWorldEvent(int eventId, BlockPosition pos, int data) {
     }
 
     public CrashReportSystemDetails fillReportDetails(CrashReport report) {

@@ -40,7 +40,7 @@ public class ItemRecord extends Item {
             ItemStack itemStack = context.getItemStack();
             if (!level.isClientSide) {
                 ((BlockJukeBox)Blocks.JUKEBOX).setRecord(level, blockPos, blockState, itemStack);
-                level.levelEvent((EntityHuman)null, 1010, blockPos, Item.getId(this));
+                level.triggerEffect((EntityHuman)null, 1010, blockPos, Item.getId(this));
                 itemStack.subtract(1);
                 EntityHuman player = context.getEntity();
                 if (player != null) {

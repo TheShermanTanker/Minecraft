@@ -42,7 +42,7 @@ public class HoneycombItem extends Item {
 
             itemStack.subtract(1);
             level.setTypeAndData(blockPos, state, 11);
-            level.levelEvent(player, 3003, blockPos, 0);
+            level.triggerEffect(player, 3003, blockPos, 0);
             return EnumInteractionResult.sidedSuccess(level.isClientSide);
         }).orElse(EnumInteractionResult.PASS);
     }

@@ -192,7 +192,7 @@ public class EntityPotion extends EntityProjectileThrowable implements ItemSuppl
         } else if (BlockCandleAbstract.isLit(blockState)) {
             BlockCandleAbstract.extinguish((EntityHuman)null, blockState, this.level, pos);
         } else if (BlockCampfire.isLitCampfire(blockState)) {
-            this.level.levelEvent((EntityHuman)null, 1009, pos, 0);
+            this.level.triggerEffect((EntityHuman)null, 1009, pos, 0);
             BlockCampfire.dowse(this.getShooter(), this.level, pos, blockState);
             this.level.setTypeUpdate(pos, blockState.set(BlockCampfire.LIT, Boolean.valueOf(false)));
         }

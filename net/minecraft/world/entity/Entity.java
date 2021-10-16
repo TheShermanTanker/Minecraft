@@ -91,7 +91,7 @@ import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionManager;
 import net.minecraft.world.level.entity.EntityAccess;
-import net.minecraft.world.level.entity.EntityWorldCallback;
+import net.minecraft.world.level.entity.IEntityCallback;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEventListenerRegistrar;
 import net.minecraft.world.level.levelgen.HeightMap;
@@ -197,7 +197,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     private static final DataWatcherObject<Boolean> DATA_NO_GRAVITY = DataWatcher.defineId(Entity.class, DataWatcherRegistry.BOOLEAN);
     protected static final DataWatcherObject<EntityPose> DATA_POSE = DataWatcher.defineId(Entity.class, DataWatcherRegistry.POSE);
     private static final DataWatcherObject<Integer> DATA_TICKS_FROZEN = DataWatcher.defineId(Entity.class, DataWatcherRegistry.INT);
-    private EntityWorldCallback levelCallback = EntityWorldCallback.NULL;
+    private IEntityCallback levelCallback = IEntityCallback.NULL;
     private Vec3D packetCoordinates;
     public boolean noCulling;
     public boolean hasImpulse;
@@ -441,7 +441,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
 
             if (this.getTicksFrozen() > 0) {
                 this.setTicksFrozen(0);
-                this.level.levelEvent((EntityHuman)null, 1009, this.blockPosition, 1);
+                this.level.triggerEffect((EntityHuman)null, 1009, this.blockPosition, 1);
             }
         }
 
@@ -3046,7 +3046,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     }
 
     @Override
-    public void setWorldCallback(EntityWorldCallback listener) {
+    public void setWorldCallback(IEntityCallback listener) {
         this.levelCallback = listener;
     }
 

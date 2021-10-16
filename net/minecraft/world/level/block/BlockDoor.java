@@ -168,7 +168,7 @@ public class BlockDoor extends Block {
         } else {
             state = state.cycle(OPEN);
             world.setTypeAndData(pos, state, 10);
-            world.levelEvent(player, state.get(OPEN) ? this.getOpenSound() : this.getCloseSound(), pos, 0);
+            world.triggerEffect(player, state.get(OPEN) ? this.getOpenSound() : this.getCloseSound(), pos, 0);
             world.gameEvent(player, this.isOpen(state) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos);
             return EnumInteractionResult.sidedSuccess(world.isClientSide);
         }
@@ -208,7 +208,7 @@ public class BlockDoor extends Block {
     }
 
     private void playSound(World world, BlockPosition pos, boolean open) {
-        world.levelEvent((EntityHuman)null, open ? this.getOpenSound() : this.getCloseSound(), pos, 0);
+        world.triggerEffect((EntityHuman)null, open ? this.getOpenSound() : this.getCloseSound(), pos, 0);
     }
 
     @Override

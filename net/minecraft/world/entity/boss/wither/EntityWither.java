@@ -222,7 +222,7 @@ public class EntityWither extends EntityMonster implements IPowerable, IRangedEn
                 Explosion.Effect blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.Effect.DESTROY : Explosion.Effect.NONE;
                 this.level.createExplosion(this, this.locX(), this.getHeadY(), this.locZ(), 7.0F, false, blockInteraction);
                 if (!this.isSilent()) {
-                    this.level.globalLevelEvent(1023, this.getChunkCoordinates(), 0);
+                    this.level.broadcastWorldEvent(1023, this.getChunkCoordinates(), 0);
                 }
             }
 
@@ -302,7 +302,7 @@ public class EntityWither extends EntityMonster implements IPowerable, IRangedEn
                     }
 
                     if (bl) {
-                        this.level.levelEvent((EntityHuman)null, 1022, this.getChunkCoordinates(), 0);
+                        this.level.triggerEffect((EntityHuman)null, 1022, this.getChunkCoordinates(), 0);
                     }
                 }
             }
@@ -384,7 +384,7 @@ public class EntityWither extends EntityMonster implements IPowerable, IRangedEn
 
     private void performRangedAttack(int headIndex, double targetX, double targetY, double targetZ, boolean charged) {
         if (!this.isSilent()) {
-            this.level.levelEvent((EntityHuman)null, 1024, this.getChunkCoordinates(), 0);
+            this.level.triggerEffect((EntityHuman)null, 1024, this.getChunkCoordinates(), 0);
         }
 
         double d = this.getHeadX(headIndex);

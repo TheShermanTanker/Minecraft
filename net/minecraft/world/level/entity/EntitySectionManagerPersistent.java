@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 public class EntitySectionManagerPersistent<T extends EntityAccess> implements AutoCloseable {
     static final Logger LOGGER = LogManager.getLogger();
     final Set<UUID> knownUuids = Sets.newHashSet();
-    final WorldCallback<T> callbacks;
+    final IWorldCallback<T> callbacks;
     private final EntityPersistentStorage<T> permanentStorage;
     private final EntityLookup<T> visibleEntityStorage;
     public final EntitySectionStorage<T> sectionStorage;
@@ -42,7 +42,7 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
     private final LongSet chunksToUnload = new LongOpenHashSet();
     private final Queue<ChunkEntities<T>> loadingInbox = Queues.newConcurrentLinkedQueue();
 
-    public EntitySectionManagerPersistent(Class<T> entityClass, WorldCallback<T> handler, EntityPersistentStorage<T> dataAccess) {
+    public EntitySectionManagerPersistent(Class<T> entityClass, IWorldCallback<T> handler, EntityPersistentStorage<T> dataAccess) {
         this.visibleEntityStorage = new EntityLookup<>();
         this.sectionStorage = new EntitySectionStorage<>(entityClass, this.chunkVisibility);
         this.chunkVisibility.defaultReturnValue(Visibility.HIDDEN);
@@ -234,7 +234,7 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
 
     private void unloadEntity(EntityAccess entity) {
         entity.setRemoved(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-        entity.setWorldCallback(EntityWorldCallback.NULL);
+        entity.setWorldCallback(IEntityCallback.NULL);
     }
 
     private void processUnloads() {
@@ -349,7 +349,7 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
         return this.knownUuids.size() + "," + this.visibleEntityStorage.count() + "," + this.sectionStorage.count() + "," + this.chunkLoadStatuses.size() + "," + this.chunkVisibility.size() + "," + this.loadingInbox.size() + "," + this.chunksToUnload.size();
     }
 
-    class Callback implements EntityWorldCallback {
+    class Callback implements IEntityCallback {
         private final T entity;
         private long currentSectionKey;
         private EntitySection<T> currentSection;

@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockBed;
 import net.minecraft.world.level.block.BlockBeehive;
 import net.minecraft.world.level.block.BlockBeetroot;
+import net.minecraft.world.level.block.BlockCandle;
 import net.minecraft.world.level.block.BlockCarrots;
 import net.minecraft.world.level.block.BlockCocoa;
 import net.minecraft.world.level.block.BlockComposter;
@@ -46,8 +47,7 @@ import net.minecraft.world.level.block.BlockSweetBerryBush;
 import net.minecraft.world.level.block.BlockTNT;
 import net.minecraft.world.level.block.BlockTallPlant;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CaveVines;
+import net.minecraft.world.level.block.ICaveVine;
 import net.minecraft.world.level.block.state.properties.BlockPropertyBedPart;
 import net.minecraft.world.level.block.state.properties.BlockPropertyDoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.BlockPropertySlabType;
@@ -185,7 +185,7 @@ public class BlockLoot implements Consumer<BiConsumer<MinecraftKey, LootTable.Bu
     }
 
     private static LootTable.Builder createCaveVinesDrop(Block drop) {
-        return LootTable.lootTable().withPool(LootSelector.lootPool().add(LootItem.lootTableItem(Items.GLOW_BERRIES)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(drop).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(CaveVines.BERRIES, true))));
+        return LootTable.lootTable().withPool(LootSelector.lootPool().add(LootItem.lootTableItem(Items.GLOW_BERRIES)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(drop).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(ICaveVine.BERRIES, true))));
     }
 
     private static LootTable.Builder createOreDrop(Block dropWithSilkTouch, Item drop) {
@@ -238,7 +238,7 @@ public class BlockLoot implements Consumer<BiConsumer<MinecraftKey, LootTable.Bu
     }
 
     private static LootTable.Builder createCandleDrops(Block candle) {
-        return LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(applyExplosionDecay(candle, LootItem.lootTableItem(candle).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(2.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(candle).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(CandleBlock.CANDLES, 2)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(3.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(candle).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(CandleBlock.CANDLES, 3)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(4.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(candle).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(CandleBlock.CANDLES, 4)))))));
+        return LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(applyExplosionDecay(candle, LootItem.lootTableItem(candle).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(2.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(candle).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockCandle.CANDLES, 2)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(3.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(candle).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockCandle.CANDLES, 3)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(4.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(candle).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockCandle.CANDLES, 4)))))));
     }
 
     private static LootTable.Builder createCandleCakeDrops(Block candle) {

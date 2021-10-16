@@ -24,10 +24,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfigurat
 import net.minecraft.world.level.levelgen.synth.NoiseGeneratorNormal;
 import net.minecraft.world.level.material.Fluid;
 
-public class GeodeFeature extends WorldGenerator<GeodeConfiguration> {
+public class WorldGenFeatureGeode extends WorldGenerator<GeodeConfiguration> {
     private static final EnumDirection[] DIRECTIONS = EnumDirection.values();
 
-    public GeodeFeature(Codec<GeodeConfiguration> configCodec) {
+    public WorldGenFeatureGeode(Codec<GeodeConfiguration> configCodec) {
         super(configCodec);
     }
 

@@ -1,6 +1,6 @@
 package net.minecraft.world.level.entity;
 
-public interface WorldCallback<T> {
+public interface IWorldCallback<T> {
     void onCreated(T entity);
 
     void onDestroyed(T entity);

@@ -96,10 +96,10 @@ public class BlockTrapdoor extends BlockFacingHorizontal implements IBlockWaterl
     protected void playSound(@Nullable EntityHuman player, World world, BlockPosition pos, boolean open) {
         if (open) {
             int i = this.material == Material.METAL ? 1037 : 1007;
-            world.levelEvent(player, i, pos, 0);
+            world.triggerEffect(player, i, pos, 0);
         } else {
             int j = this.material == Material.METAL ? 1036 : 1013;
-            world.levelEvent(player, j, pos, 0);
+            world.triggerEffect(player, j, pos, 0);
         }
 
         world.gameEvent(player, open ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos);

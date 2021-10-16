@@ -125,7 +125,7 @@ public class BlockFenceGate extends BlockFacingHorizontal {
         }
 
         boolean bl = state.get(OPEN);
-        world.levelEvent(player, bl ? 1008 : 1014, pos, 0);
+        world.triggerEffect(player, bl ? 1008 : 1014, pos, 0);
         world.gameEvent(player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos);
         return EnumInteractionResult.sidedSuccess(world.isClientSide);
     }
@@ -137,7 +137,7 @@ public class BlockFenceGate extends BlockFacingHorizontal {
             if (state.get(POWERED) != bl) {
                 world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(bl)).set(OPEN, Boolean.valueOf(bl)), 2);
                 if (state.get(OPEN) != bl) {
-                    world.levelEvent((EntityHuman)null, bl ? 1008 : 1014, pos, 0);
+                    world.triggerEffect((EntityHuman)null, bl ? 1008 : 1014, pos, 0);
                     world.gameEvent(bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, pos);
                 }
             }

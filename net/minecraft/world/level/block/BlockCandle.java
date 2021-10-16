@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3D;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.VoxelShapeCollision;
 
-public class CandleBlock extends BlockCandleAbstract implements IBlockWaterlogged {
+public class BlockCandle extends BlockCandleAbstract implements IBlockWaterlogged {
     public static final int MIN_CANDLES = 1;
     public static final int MAX_CANDLES = 4;
     public static final BlockStateInteger CANDLES = BlockProperties.CANDLES;
@@ -54,7 +54,7 @@ public class CandleBlock extends BlockCandleAbstract implements IBlockWaterlogge
     private static final VoxelShape THREE_AABB = Block.box(5.0D, 0.0D, 6.0D, 10.0D, 6.0D, 11.0D);
     private static final VoxelShape FOUR_AABB = Block.box(5.0D, 0.0D, 5.0D, 11.0D, 6.0D, 10.0D);
 
-    public CandleBlock(BlockBase.Info settings) {
+    public BlockCandle(BlockBase.Info settings) {
         super(settings);
         this.registerDefaultState(this.stateDefinition.getBlockData().set(CANDLES, Integer.valueOf(1)).set(LIT, Boolean.valueOf(false)).set(WATERLOGGED, Boolean.valueOf(false)));
     }

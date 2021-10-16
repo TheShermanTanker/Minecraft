@@ -155,7 +155,7 @@ public abstract class BlockFireAbstract extends Block {
     @Override
     public void playerWillDestroy(World world, BlockPosition pos, IBlockData state, EntityHuman player) {
         if (!world.isClientSide()) {
-            world.levelEvent((EntityHuman)null, 1009, pos, 0);
+            world.triggerEffect((EntityHuman)null, 1009, pos, 0);
         }
 
         super.playerWillDestroy(world, pos, state, player);

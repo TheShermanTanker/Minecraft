@@ -217,7 +217,7 @@ public class EntityGhast extends EntityFlying implements IMonster {
                 World level = this.ghast.level;
                 ++this.chargeTime;
                 if (this.chargeTime == 10 && !this.ghast.isSilent()) {
-                    level.levelEvent((EntityHuman)null, 1015, this.ghast.getChunkCoordinates(), 0);
+                    level.triggerEffect((EntityHuman)null, 1015, this.ghast.getChunkCoordinates(), 0);
                 }
 
                 if (this.chargeTime == 20) {
@@ -227,7 +227,7 @@ public class EntityGhast extends EntityFlying implements IMonster {
                     double g = livingEntity.getY(0.5D) - (0.5D + this.ghast.getY(0.5D));
                     double h = livingEntity.locZ() - (this.ghast.locZ() + vec3.z * 4.0D);
                     if (!this.ghast.isSilent()) {
-                        level.levelEvent((EntityHuman)null, 1016, this.ghast.getChunkCoordinates(), 0);
+                        level.triggerEffect((EntityHuman)null, 1016, this.ghast.getChunkCoordinates(), 0);
                     }
 
                     EntityLargeFireball largeFireball = new EntityLargeFireball(level, this.ghast, f, g, h, this.ghast.getPower());

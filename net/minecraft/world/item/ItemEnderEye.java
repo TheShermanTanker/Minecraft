@@ -54,7 +54,7 @@ public class ItemEnderEye extends Item {
                         }
                     }
 
-                    level.globalLevelEvent(1038, blockPos2.offset(1, 0, 1), 0);
+                    level.broadcastWorldEvent(1038, blockPos2.offset(1, 0, 1), 0);
                 }
 
                 return EnumInteractionResult.CONSUME;
@@ -84,7 +84,7 @@ public class ItemEnderEye extends Item {
                     }
 
                     world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.ENDER_EYE_LAUNCH, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
-                    world.levelEvent((EntityHuman)null, 1003, user.getChunkCoordinates(), 0);
+                    world.triggerEffect((EntityHuman)null, 1003, user.getChunkCoordinates(), 0);
                     if (!user.getAbilities().instabuild) {
                         itemStack.subtract(1);
                     }

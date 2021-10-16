@@ -66,7 +66,7 @@ public class DragonControllerStrafe extends DragonControllerAbstract {
                         double s = this.attackTarget.getY(0.5D) - p;
                         double t = this.attackTarget.locZ() - q;
                         if (!this.dragon.isSilent()) {
-                            this.dragon.level.levelEvent((EntityHuman)null, 1017, this.dragon.getChunkCoordinates(), 0);
+                            this.dragon.level.triggerEffect((EntityHuman)null, 1017, this.dragon.getChunkCoordinates(), 0);
                         }
 
                         EntityDragonFireball dragonFireball = new EntityDragonFireball(this.dragon.level, this.dragon, r, s, t);

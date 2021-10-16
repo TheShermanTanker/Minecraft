@@ -10,10 +10,10 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.VoxelShapeCollision;
 
-public class CarpetBlock extends Block {
+public class BlockCarpetBase extends Block {
     protected static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 1.0D, 16.0D);
 
-    public CarpetBlock(BlockBase.Info settings) {
+    public BlockCarpetBase(BlockBase.Info settings) {
         super(settings);
     }
 

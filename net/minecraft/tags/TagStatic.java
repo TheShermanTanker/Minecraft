@@ -50,7 +50,7 @@ public class TagStatic {
     }
 
     private static Set<TagUtil<?>> getAllKnownHelpers() {
-        return ImmutableSet.of(TagsBlock.HELPER, TagsItem.HELPER, TagsFluid.HELPER, TagsEntity.HELPER, GameEventTags.HELPER);
+        return ImmutableSet.of(TagsBlock.HELPER, TagsItem.HELPER, TagsFluid.HELPER, TagsEntity.HELPER, TagsGameEvent.HELPER);
     }
 
     private static void makeSureAllKnownHelpersAreLoaded() {

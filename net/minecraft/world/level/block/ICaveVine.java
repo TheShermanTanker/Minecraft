@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.block.state.properties.BlockStateBoolean;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public interface CaveVines {
+public interface ICaveVine {
     VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 16.0D, 15.0D);
     BlockStateBoolean BERRIES = BlockProperties.BERRIES;
 

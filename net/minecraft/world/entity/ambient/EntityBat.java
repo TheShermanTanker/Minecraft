@@ -136,13 +136,13 @@ public class EntityBat extends EntityAmbient {
                 if (this.level.getNearestPlayer(BAT_RESTING_TARGETING, this) != null) {
                     this.setAsleep(false);
                     if (!bl) {
-                        this.level.levelEvent((EntityHuman)null, 1025, blockPos, 0);
+                        this.level.triggerEffect((EntityHuman)null, 1025, blockPos, 0);
                     }
                 }
             } else {
                 this.setAsleep(false);
                 if (!bl) {
-                    this.level.levelEvent((EntityHuman)null, 1025, blockPos, 0);
+                    this.level.triggerEffect((EntityHuman)null, 1025, blockPos, 0);
                 }
             }
         } else {
