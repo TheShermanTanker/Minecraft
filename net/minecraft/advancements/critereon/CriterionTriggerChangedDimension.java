@@ -9,7 +9,7 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.level.World;
 
-public class CriterionTriggerChangedDimension extends CriterionTriggerAbstract<CriterionTriggerChangedDimension.TriggerInstance> {
+public class CriterionTriggerChangedDimension extends CriterionTriggerAbstract<CriterionTriggerChangedDimension.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("changed_dimension");
 
     @Override
@@ -18,10 +18,10 @@ public class CriterionTriggerChangedDimension extends CriterionTriggerAbstract<C
     }
 
     @Override
-    public CriterionTriggerChangedDimension.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerChangedDimension.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         ResourceKey<World> resourceKey = jsonObject.has("from") ? ResourceKey.create(IRegistry.DIMENSION_REGISTRY, new MinecraftKey(ChatDeserializer.getAsString(jsonObject, "from"))) : null;
         ResourceKey<World> resourceKey2 = jsonObject.has("to") ? ResourceKey.create(IRegistry.DIMENSION_REGISTRY, new MinecraftKey(ChatDeserializer.getAsString(jsonObject, "to"))) : null;
-        return new CriterionTriggerChangedDimension.TriggerInstance(composite, resourceKey, resourceKey2);
+        return new CriterionTriggerChangedDimension.CriterionInstanceTrigger(composite, resourceKey, resourceKey2);
     }
 
     public void trigger(EntityPlayer player, ResourceKey<World> from, ResourceKey<World> to) {
@@ -30,32 +30,32 @@ public class CriterionTriggerChangedDimension extends CriterionTriggerAbstract<C
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         @Nullable
         private final ResourceKey<World> from;
         @Nullable
         private final ResourceKey<World> to;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, @Nullable ResourceKey<World> from, @Nullable ResourceKey<World> to) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, @Nullable ResourceKey<World> from, @Nullable ResourceKey<World> to) {
             super(CriterionTriggerChangedDimension.ID, player);
             this.from = from;
             this.to = to;
         }
 
-        public static CriterionTriggerChangedDimension.TriggerInstance changedDimension() {
-            return new CriterionTriggerChangedDimension.TriggerInstance(CriterionConditionEntity.Composite.ANY, (ResourceKey<World>)null, (ResourceKey<World>)null);
+        public static CriterionTriggerChangedDimension.CriterionInstanceTrigger changedDimension() {
+            return new CriterionTriggerChangedDimension.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, (ResourceKey<World>)null, (ResourceKey<World>)null);
         }
 
-        public static CriterionTriggerChangedDimension.TriggerInstance changedDimension(ResourceKey<World> from, ResourceKey<World> to) {
-            return new CriterionTriggerChangedDimension.TriggerInstance(CriterionConditionEntity.Composite.ANY, from, to);
+        public static CriterionTriggerChangedDimension.CriterionInstanceTrigger changedDimension(ResourceKey<World> from, ResourceKey<World> to) {
+            return new CriterionTriggerChangedDimension.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, from, to);
         }
 
-        public static CriterionTriggerChangedDimension.TriggerInstance changedDimensionTo(ResourceKey<World> to) {
-            return new CriterionTriggerChangedDimension.TriggerInstance(CriterionConditionEntity.Composite.ANY, (ResourceKey<World>)null, to);
+        public static CriterionTriggerChangedDimension.CriterionInstanceTrigger changedDimensionTo(ResourceKey<World> to) {
+            return new CriterionTriggerChangedDimension.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, (ResourceKey<World>)null, to);
         }
 
-        public static CriterionTriggerChangedDimension.TriggerInstance changedDimensionFrom(ResourceKey<World> from) {
-            return new CriterionTriggerChangedDimension.TriggerInstance(CriterionConditionEntity.Composite.ANY, from, (ResourceKey<World>)null);
+        public static CriterionTriggerChangedDimension.CriterionInstanceTrigger changedDimensionFrom(ResourceKey<World> from) {
+            return new CriterionTriggerChangedDimension.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, from, (ResourceKey<World>)null);
         }
 
         public boolean matches(ResourceKey<World> from, ResourceKey<World> to) {

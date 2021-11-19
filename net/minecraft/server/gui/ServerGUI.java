@@ -91,7 +91,7 @@ public class ServerGUI extends JComponent {
 
     private JComponent buildInfoPanel() {
         JPanel jPanel = new JPanel(new BorderLayout());
-        GuiStatsComponent statsComponent = new GuiStatsComponent(this.server);
+        GUIComponentStatistics statsComponent = new GUIComponentStatistics(this.server);
         this.finalizers.add(statsComponent::close);
         jPanel.add(statsComponent, "North");
         jPanel.add(this.buildPlayerPanel(), "Center");

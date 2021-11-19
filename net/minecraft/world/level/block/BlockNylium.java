@@ -3,7 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.data.worldgen.BiomeDecoratorGroups;
+import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.IWorldReader;
@@ -49,10 +49,10 @@ public class BlockNylium extends Block implements IBlockFragilePlantElement {
         IBlockData blockState = world.getType(pos);
         BlockPosition blockPos = pos.above();
         if (blockState.is(Blocks.CRIMSON_NYLIUM)) {
-            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, BiomeDecoratorGroups.Configs.CRIMSON_FOREST_CONFIG, 3, 1);
+            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, WorldGenBiomeDecoratorGroups.Configs.CRIMSON_FOREST_CONFIG, 3, 1);
         } else if (blockState.is(Blocks.WARPED_NYLIUM)) {
-            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, BiomeDecoratorGroups.Configs.WARPED_FOREST_CONFIG, 3, 1);
-            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, BiomeDecoratorGroups.Configs.NETHER_SPROUTS_CONFIG, 3, 1);
+            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, WorldGenBiomeDecoratorGroups.Configs.WARPED_FOREST_CONFIG, 3, 1);
+            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, WorldGenBiomeDecoratorGroups.Configs.NETHER_SPROUTS_CONFIG, 3, 1);
             if (random.nextInt(8) == 0) {
                 WorldGenFeatureTwistingVines.place(world, random, blockPos, 3, 1, 2);
             }

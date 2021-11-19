@@ -65,6 +65,7 @@ import net.minecraft.network.protocol.game.PacketPlayInItemName;
 import net.minecraft.network.protocol.game.PacketPlayInJigsawGenerate;
 import net.minecraft.network.protocol.game.PacketPlayInKeepAlive;
 import net.minecraft.network.protocol.game.PacketPlayInPickItem;
+import net.minecraft.network.protocol.game.PacketPlayInPong;
 import net.minecraft.network.protocol.game.PacketPlayInRecipeDisplayed;
 import net.minecraft.network.protocol.game.PacketPlayInRecipeSettings;
 import net.minecraft.network.protocol.game.PacketPlayInResourcePackStatus;
@@ -95,7 +96,6 @@ import net.minecraft.network.protocol.game.PacketPlayOutPosition;
 import net.minecraft.network.protocol.game.PacketPlayOutSetSlot;
 import net.minecraft.network.protocol.game.PacketPlayOutTabComplete;
 import net.minecraft.network.protocol.game.PacketPlayOutVehicleMove;
-import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
@@ -105,7 +105,7 @@ import net.minecraft.util.UtilColor;
 import net.minecraft.util.thread.IAsyncTaskHandler;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityExperienceOrb;
 import net.minecraft.world.entity.EnumMoveType;
@@ -151,7 +151,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PlayerConnection implements ServerPlayerConnection, PacketListenerPlayIn {
+public class PlayerConnection implements PlayerConnectionServer, PacketListenerPlayIn {
     static final Logger LOGGER = LogManager.getLogger();
     private static final int LATENCY_CHECK_INTERVAL = 15000;
     public final NetworkManager connection;
@@ -864,7 +864,7 @@ public class PlayerConnection implements ServerPlayerConnection, PacketListenerP
 
                             this.player.setLocation(d, e, f, g, h);
                             if (this.player.noPhysics || this.player.isSleeping() || (!bl2 || !serverLevel.getCubes(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB)) {
-                                this.clientIsFloating = n >= -0.03125D && this.player.gameMode.getGameMode() != EnumGamemode.SPECTATOR && !this.server.getAllowFlight() && !this.player.getAbilities().mayfly && !this.player.hasEffect(MobEffects.LEVITATION) && !this.player.isGliding() && this.noBlocksAround(this.player);
+                                this.clientIsFloating = n >= -0.03125D && this.player.gameMode.getGameMode() != EnumGamemode.SPECTATOR && !this.server.getAllowFlight() && !this.player.getAbilities().mayfly && !this.player.hasEffect(MobEffectList.LEVITATION) && !this.player.isGliding() && this.noBlocksAround(this.player);
                                 this.player.getWorldServer().getChunkSource().movePlayer(this.player);
                                 this.player.doCheckFallDamage(this.player.locY() - l, packet.isOnGround());
                                 this.player.setOnGround(packet.isOnGround());
@@ -1056,7 +1056,7 @@ public class PlayerConnection implements ServerPlayerConnection, PacketListenerP
     }
 
     @Override
-    public void handlePong(ServerboundPongPacket packet) {
+    public void handlePong(PacketPlayInPong packet) {
     }
 
     @Override

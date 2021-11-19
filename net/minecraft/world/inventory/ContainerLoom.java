@@ -2,7 +2,7 @@ package net.minecraft.world.inventory;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.IInventory;
 import net.minecraft.world.InventorySubcontainer;
@@ -88,7 +88,7 @@ public class ContainerLoom extends Container {
                 context.execute((world, pos) -> {
                     long l = world.getTime();
                     if (ContainerLoom.this.lastSoundTime != l) {
-                        world.playSound((EntityHuman)null, pos, SoundEffects.UI_LOOM_TAKE_RESULT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        world.playSound((EntityHuman)null, pos, SoundEffects.UI_LOOM_TAKE_RESULT, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                         ContainerLoom.this.lastSoundTime = l;
                     }
 

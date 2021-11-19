@@ -10,7 +10,7 @@ import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -151,8 +151,8 @@ public class EntitySquid extends EntityWaterAnimal {
             this.tentacleAngle = MathHelper.abs(MathHelper.sin(this.tentacleMovement)) * (float)Math.PI * 0.25F;
             if (!this.level.isClientSide) {
                 double e = this.getMot().y;
-                if (this.hasEffect(MobEffects.LEVITATION)) {
-                    e = 0.05D * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1);
+                if (this.hasEffect(MobEffectList.LEVITATION)) {
+                    e = 0.05D * (double)(this.getEffect(MobEffectList.LEVITATION).getAmplifier() + 1);
                 } else if (!this.isNoGravity()) {
                     e -= 0.08D;
                 }

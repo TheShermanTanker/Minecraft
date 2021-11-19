@@ -30,9 +30,6 @@ import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.ChatMessageType;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.PacketPlayInSettings;
 import net.minecraft.network.protocol.game.PacketPlayOutAbilities;
 import net.minecraft.network.protocol.game.PacketPlayOutAnimation;
@@ -40,6 +37,9 @@ import net.minecraft.network.protocol.game.PacketPlayOutBlockChange;
 import net.minecraft.network.protocol.game.PacketPlayOutCamera;
 import net.minecraft.network.protocol.game.PacketPlayOutChat;
 import net.minecraft.network.protocol.game.PacketPlayOutCloseWindow;
+import net.minecraft.network.protocol.game.PacketPlayOutCombatEnter;
+import net.minecraft.network.protocol.game.PacketPlayOutCombatExit;
+import net.minecraft.network.protocol.game.PacketPlayOutCombatKill;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityEffect;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityStatus;
 import net.minecraft.network.protocol.game.PacketPlayOutExperience;
@@ -70,12 +70,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ITextFilter;
 import net.minecraft.server.network.PlayerConnection;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.stats.RecipeBookServer;
-import net.minecraft.stats.ServerStatisticManager;
 import net.minecraft.stats.Statistic;
 import net.minecraft.stats.StatisticList;
+import net.minecraft.stats.StatisticManagerServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Unit;
 import net.minecraft.world.EnumHand;
@@ -84,7 +84,7 @@ import net.minecraft.world.ITileInventory;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -143,7 +143,7 @@ public class EntityPlayer extends EntityHuman {
     public final MinecraftServer server;
     public final PlayerInteractManager gameMode;
     private final AdvancementDataPlayer advancements;
-    private final ServerStatisticManager stats;
+    private final StatisticManagerServer stats;
     private float lastRecordedHealthAndAbsorption = Float.MIN_VALUE;
     private int lastRecordedFoodLevel = Integer.MIN_VALUE;
     private int lastRecordedAirLevel = Integer.MIN_VALUE;
@@ -384,13 +384,13 @@ public class EntityPlayer extends EntityHuman {
     @Override
     public void enterCombat() {
         super.enterCombat();
-        this.connection.sendPacket(new ClientboundPlayerCombatEnterPacket());
+        this.connection.sendPacket(new PacketPlayOutCombatEnter());
     }
 
     @Override
     public void exitCombat() {
         super.exitCombat();
-        this.connection.sendPacket(new ClientboundPlayerCombatEndPacket(this.getCombatTracker()));
+        this.connection.sendPacket(new PacketPlayOutCombatExit(this.getCombatTracker()));
     }
 
     @Override
@@ -519,7 +519,7 @@ public class EntityPlayer extends EntityHuman {
         boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES);
         if (bl) {
             IChatBaseComponent component = this.getCombatTracker().getDeathMessage();
-            this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component), (future) -> {
+            this.connection.send(new PacketPlayOutCombatKill(this.getCombatTracker(), component), (future) -> {
                 if (!future.isSuccess()) {
                     int i = 256;
                     String string = component.getString(256);
@@ -527,7 +527,7 @@ public class EntityPlayer extends EntityHuman {
                     IChatBaseComponent component3 = (new ChatMessage("death.attack.even_more_magic", this.getScoreboardDisplayName())).format((style) -> {
                         return style.setChatHoverable(new ChatHoverable(ChatHoverable.EnumHoverAction.SHOW_TEXT, component2));
                     });
-                    this.connection.sendPacket(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3));
+                    this.connection.sendPacket(new PacketPlayOutCombatKill(this.getCombatTracker(), component3));
                 }
 
             });
@@ -542,7 +542,7 @@ public class EntityPlayer extends EntityHuman {
                 this.server.getPlayerList().sendMessage(component, ChatMessageType.SYSTEM, SystemUtils.NIL_UUID);
             }
         } else {
-            this.connection.sendPacket(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), ChatComponentText.EMPTY));
+            this.connection.sendPacket(new PacketPlayOutCombatKill(this.getCombatTracker(), ChatComponentText.EMPTY));
         }
 
         this.releaseShoulderEntities();
@@ -1148,7 +1148,7 @@ public class EntityPlayer extends EntityHuman {
     protected void onEffectAdded(MobEffect effect, @Nullable Entity source) {
         super.onEffectAdded(effect, source);
         this.connection.sendPacket(new PacketPlayOutEntityEffect(this.getId(), effect));
-        if (effect.getMobEffect() == MobEffects.LEVITATION) {
+        if (effect.getMobEffect() == MobEffectList.LEVITATION) {
             this.levitationStartTime = this.tickCount;
             this.levitationStartPos = this.getPositionVector();
         }
@@ -1167,7 +1167,7 @@ public class EntityPlayer extends EntityHuman {
     protected void onEffectRemoved(MobEffect effect) {
         super.onEffectRemoved(effect);
         this.connection.sendPacket(new PacketPlayOutRemoveEntityEffect(this.getId(), effect.getMobEffect()));
-        if (effect.getMobEffect() == MobEffects.LEVITATION) {
+        if (effect.getMobEffect() == MobEffectList.LEVITATION) {
             this.levitationStartPos = null;
         }
 
@@ -1301,7 +1301,7 @@ public class EntityPlayer extends EntityHuman {
         this.lastActionTime = SystemUtils.getMonotonicMillis();
     }
 
-    public ServerStatisticManager getStatisticManager() {
+    public StatisticManagerServer getStatisticManager() {
         return this.stats;
     }
 
@@ -1461,7 +1461,7 @@ public class EntityPlayer extends EntityHuman {
     }
 
     @Override
-    public void playNotifySound(SoundEffect event, SoundCategory category, float volume, float pitch) {
+    public void playNotifySound(SoundEffect event, EnumSoundCategory category, float volume, float pitch) {
         this.connection.sendPacket(new PacketPlayOutNamedSoundEffect(event, category, this.locX(), this.locY(), this.locZ(), volume, pitch));
     }
 

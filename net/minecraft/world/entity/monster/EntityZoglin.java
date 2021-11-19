@@ -14,7 +14,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
@@ -89,7 +89,7 @@ public class EntityZoglin extends EntityMonster implements IMonster, IOglin {
     }
 
     private static void initIdleActivity(BehaviorController<EntityZoglin> brain) {
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BehaviorAttackTargetSet<>(EntityZoglin::findNearestValidAttackTarget), new BehaviorRunSometimes(new BehaviorLookTarget(8.0F), UniformInt.of(30, 60)), new BehaviorGateSingle(ImmutableList.of(Pair.of(new BehaviorStrollRandomUnconstrained(0.4F), 2), Pair.of(new BehaviorLookWalk(0.4F, 3), 2), Pair.of(new BehaviorNop(30, 60), 1)))));
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BehaviorAttackTargetSet<>(EntityZoglin::findNearestValidAttackTarget), new BehaviorRunSometimes(new BehaviorLookTarget(8.0F), IntProviderUniform.of(30, 60)), new BehaviorGateSingle(ImmutableList.of(Pair.of(new BehaviorStrollRandomUnconstrained(0.4F), 2), Pair.of(new BehaviorLookWalk(0.4F, 3), 2), Pair.of(new BehaviorNop(30, 60), 1)))));
     }
 
     private static void initFightActivity(BehaviorController<EntityZoglin> brain) {

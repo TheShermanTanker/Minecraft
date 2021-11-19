@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Map;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.EnumInteractionResult;
@@ -36,7 +36,7 @@ public class ItemSpade extends ItemTool {
             IBlockData blockState2 = FLATTENABLES.get(blockState.getBlock());
             IBlockData blockState3 = null;
             if (blockState2 != null && level.getType(blockPos.above()).isAir()) {
-                level.playSound(player, blockPos, SoundEffects.SHOVEL_FLATTEN, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                level.playSound(player, blockPos, SoundEffects.SHOVEL_FLATTEN, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 blockState3 = blockState2;
             } else if (blockState.getBlock() instanceof BlockCampfire && blockState.get(BlockCampfire.LIT)) {
                 if (!level.isClientSide()) {

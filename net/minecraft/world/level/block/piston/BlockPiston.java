@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.entity.EntityLiving;
@@ -179,7 +179,7 @@ public class BlockPiston extends BlockDirectional {
             }
 
             world.setTypeAndData(pos, state.set(EXTENDED, Boolean.valueOf(true)), 67);
-            world.playSound((EntityHuman)null, pos, SoundEffects.PISTON_EXTEND, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.25F + 0.6F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.PISTON_EXTEND, EnumSoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.25F + 0.6F);
             world.gameEvent(GameEvent.PISTON_EXTEND, pos);
         } else if (type == 1 || type == 2) {
             TileEntity blockEntity = world.getTileEntity(pos.relative(direction));
@@ -218,7 +218,7 @@ public class BlockPiston extends BlockDirectional {
                 world.removeBlock(pos.relative(direction), false);
             }
 
-            world.playSound((EntityHuman)null, pos, SoundEffects.PISTON_CONTRACT, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.15F + 0.6F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.PISTON_CONTRACT, EnumSoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.15F + 0.6F);
             world.gameEvent(GameEvent.PISTON_CONTRACT, pos);
         }
 

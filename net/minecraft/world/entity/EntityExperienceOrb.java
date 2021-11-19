@@ -7,7 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityExperienceOrb;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -305,7 +305,7 @@ public class EntityExperienceOrb extends Entity {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.AMBIENT;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.AMBIENT;
     }
 }

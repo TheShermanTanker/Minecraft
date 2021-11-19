@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.InventorySubcontainer;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -126,7 +126,7 @@ public class BehaviorFarm extends Behavior<EntityVillager> {
                         }
 
                         if (bl) {
-                            serverLevel.playSound((EntityHuman)null, (double)this.aboveFarmlandPos.getX(), (double)this.aboveFarmlandPos.getY(), (double)this.aboveFarmlandPos.getZ(), SoundEffects.CROP_PLANTED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                            serverLevel.playSound((EntityHuman)null, (double)this.aboveFarmlandPos.getX(), (double)this.aboveFarmlandPos.getY(), (double)this.aboveFarmlandPos.getZ(), SoundEffects.CROP_PLANTED, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                             itemStack.subtract(1);
                             if (itemStack.isEmpty()) {
                                 simpleContainer.setItem(i, ItemStack.EMPTY);

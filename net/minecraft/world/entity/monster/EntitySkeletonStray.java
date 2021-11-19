@@ -6,7 +6,7 @@ import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.projectile.EntityArrow;
@@ -55,7 +55,7 @@ public class EntitySkeletonStray extends EntitySkeletonAbstract {
     protected EntityArrow getArrow(ItemStack arrow, float damageModifier) {
         EntityArrow abstractArrow = super.getArrow(arrow, damageModifier);
         if (abstractArrow instanceof EntityTippedArrow) {
-            ((EntityTippedArrow)abstractArrow).addEffect(new MobEffect(MobEffects.MOVEMENT_SLOWDOWN, 600));
+            ((EntityTippedArrow)abstractArrow).addEffect(new MobEffect(MobEffectList.MOVEMENT_SLOWDOWN, 600));
         }
 
         return abstractArrow;

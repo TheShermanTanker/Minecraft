@@ -35,7 +35,7 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
     final IWorldCallback<T> callbacks;
     private final EntityPersistentStorage<T> permanentStorage;
     private final EntityLookup<T> visibleEntityStorage;
-    public final EntitySectionStorage<T> sectionStorage;
+    final EntitySectionStorage<T> sectionStorage;
     private final IWorldEntityAccess<T> entityGetter;
     private final Long2ObjectMap<Visibility> chunkVisibility = new Long2ObjectOpenHashMap<>();
     private final Long2ObjectMap<EntitySectionManagerPersistent.ChunkLoadStatus> chunkLoadStatuses = new Long2ObjectOpenHashMap<>();

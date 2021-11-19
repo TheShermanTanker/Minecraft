@@ -166,7 +166,7 @@ public abstract class MobSpawnerAbstract {
         }
 
         this.spawnPotentials.getRandom(this.random).ifPresent((spawnData) -> {
-            this.c(world, pos, spawnData);
+            this.setSpawnData(world, pos, spawnData);
         });
         this.broadcastEvent(world, pos, 1);
     }
@@ -184,10 +184,10 @@ public abstract class MobSpawnerAbstract {
 
         this.spawnPotentials = WeightedRandomList.create(list);
         if (nbt.hasKeyOfType("SpawnData", 10)) {
-            this.c(world, pos, new MobSpawnerData(1, nbt.getCompound("SpawnData")));
+            this.setSpawnData(world, pos, new MobSpawnerData(1, nbt.getCompound("SpawnData")));
         } else if (!list.isEmpty()) {
             this.spawnPotentials.getRandom(this.random).ifPresent((spawnData) -> {
-                this.c(world, pos, spawnData);
+                this.setSpawnData(world, pos, spawnData);
             });
         }
 
@@ -259,7 +259,7 @@ public abstract class MobSpawnerAbstract {
         }
     }
 
-    public void c(@Nullable World world, BlockPosition pos, MobSpawnerData spawnEntry) {
+    public void setSpawnData(@Nullable World world, BlockPosition pos, MobSpawnerData spawnEntry) {
         this.nextSpawnData = spawnEntry;
     }
 

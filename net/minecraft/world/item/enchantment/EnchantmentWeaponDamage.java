@@ -1,7 +1,7 @@
 package net.minecraft.world.item.enchantment;
 
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EnumItemSlot;
@@ -66,7 +66,7 @@ public class EnchantmentWeaponDamage extends Enchantment {
             EntityLiving livingEntity = (EntityLiving)target;
             if (this.type == 2 && level > 0 && livingEntity.getMonsterType() == EnumMonsterType.ARTHROPOD) {
                 int i = 20 + user.getRandom().nextInt(10 * level);
-                livingEntity.addEffect(new MobEffect(MobEffects.MOVEMENT_SLOWDOWN, i, 3));
+                livingEntity.addEffect(new MobEffect(MobEffectList.MOVEMENT_SLOWDOWN, i, 3));
             }
         }
 

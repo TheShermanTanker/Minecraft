@@ -2,7 +2,7 @@ package net.minecraft.world.effect;
 
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
-public class MobEffectAttackDamage extends MobEffectList {
+public class MobEffectAttackDamage extends MobEffectBase {
     protected final double multiplier;
 
     protected MobEffectAttackDamage(MobEffectInfo type, int color, double modifier) {

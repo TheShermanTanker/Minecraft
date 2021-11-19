@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 
-public class CriterionTriggerUsedEnderEye extends CriterionTriggerAbstract<CriterionTriggerUsedEnderEye.TriggerInstance> {
+public class CriterionTriggerUsedEnderEye extends CriterionTriggerAbstract<CriterionTriggerUsedEnderEye.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("used_ender_eye");
 
     @Override
@@ -14,9 +14,9 @@ public class CriterionTriggerUsedEnderEye extends CriterionTriggerAbstract<Crite
     }
 
     @Override
-    public CriterionTriggerUsedEnderEye.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerUsedEnderEye.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionValue.DoubleRange doubles = CriterionConditionValue.DoubleRange.fromJson(jsonObject.get("distance"));
-        return new CriterionTriggerUsedEnderEye.TriggerInstance(composite, doubles);
+        return new CriterionTriggerUsedEnderEye.CriterionInstanceTrigger(composite, doubles);
     }
 
     public void trigger(EntityPlayer player, BlockPosition strongholdPos) {
@@ -28,10 +28,10 @@ public class CriterionTriggerUsedEnderEye extends CriterionTriggerAbstract<Crite
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionValue.DoubleRange level;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionValue.DoubleRange distance) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionValue.DoubleRange distance) {
             super(CriterionTriggerUsedEnderEye.ID, player);
             this.level = distance;
         }

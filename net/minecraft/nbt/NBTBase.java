@@ -36,7 +36,7 @@ public interface NBTBase {
     NBTBase clone();
 
     default String asString() {
-        return (new StringTagVisitor()).visit(this);
+        return (new TagVisitorString()).visit(this);
     }
 
     void accept(TagVisitor visitor);

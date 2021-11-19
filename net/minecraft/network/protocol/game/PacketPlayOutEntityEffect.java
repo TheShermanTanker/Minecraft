@@ -3,7 +3,7 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 
 public class PacketPlayOutEntityEffect implements Packet<PacketListenerPlayOut> {
     private static final int FLAG_AMBIENT = 1;
@@ -17,7 +17,7 @@ public class PacketPlayOutEntityEffect implements Packet<PacketListenerPlayOut> 
 
     public PacketPlayOutEntityEffect(int entityId, MobEffect effect) {
         this.entityId = entityId;
-        this.effectId = (byte)(MobEffectList.getId(effect.getMobEffect()) & 255);
+        this.effectId = (byte)(MobEffectBase.getId(effect.getMobEffect()) & 255);
         this.effectAmplifier = (byte)(effect.getAmplifier() & 255);
         if (effect.getDuration() > 32767) {
             this.effectDurationTicks = 32767;

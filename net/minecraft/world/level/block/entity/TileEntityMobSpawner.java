@@ -19,8 +19,8 @@ public class TileEntityMobSpawner extends TileEntity {
         }
 
         @Override
-        public void c(@Nullable World world, BlockPosition pos, MobSpawnerData spawnEntry) {
-            super.c(world, pos, spawnEntry);
+        public void setSpawnData(@Nullable World world, BlockPosition pos, MobSpawnerData spawnEntry) {
+            super.setSpawnData(world, pos, spawnEntry);
             if (world != null) {
                 IBlockData blockState = world.getType(pos);
                 world.notify(pos, blockState, blockState, 4);

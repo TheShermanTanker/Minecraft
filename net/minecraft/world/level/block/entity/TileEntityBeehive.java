@@ -11,7 +11,7 @@ import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.protocol.game.PacketDebug;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsEntity;
@@ -138,7 +138,7 @@ public class TileEntityBeehive extends TileEntity {
                 }
 
                 BlockPosition blockPos = this.getPosition();
-                this.level.playSound((EntityHuman)null, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), SoundEffects.BEEHIVE_ENTER, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                this.level.playSound((EntityHuman)null, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), SoundEffects.BEEHIVE_ENTER, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             }
 
             entity.die();
@@ -204,7 +204,7 @@ public class TileEntityBeehive extends TileEntity {
                             entity.setPositionRotation(e, g, h, entity.getYRot(), entity.getXRot());
                         }
 
-                        world.playSound((EntityHuman)null, pos, SoundEffects.BEEHIVE_EXIT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                        world.playSound((EntityHuman)null, pos, SoundEffects.BEEHIVE_EXIT, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                         return world.addEntity(entity);
                     }
                 } else {
@@ -256,7 +256,7 @@ public class TileEntityBeehive extends TileEntity {
             double d = (double)pos.getX() + 0.5D;
             double e = (double)pos.getY();
             double f = (double)pos.getZ() + 0.5D;
-            world.playSound((EntityHuman)null, d, e, f, SoundEffects.BEEHIVE_WORK, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, d, e, f, SoundEffects.BEEHIVE_WORK, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
         }
 
         PacketDebug.sendHiveInfo(world, pos, state, blockEntity);

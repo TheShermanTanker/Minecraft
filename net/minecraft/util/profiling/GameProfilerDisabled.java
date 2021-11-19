@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class GameProfilerDisabled implements GameProfilerFillerActive {
@@ -30,7 +30,7 @@ public class GameProfilerDisabled implements GameProfilerFillerActive {
     }
 
     @Override
-    public void markForCharting(MetricCategory type) {
+    public void markForCharting(EnumMetricCategory type) {
     }
 
     @Override
@@ -65,7 +65,7 @@ public class GameProfilerDisabled implements GameProfilerFillerActive {
     }
 
     @Override
-    public Set<Pair<String, MetricCategory>> getChartedPaths() {
+    public Set<Pair<String, EnumMetricCategory>> getChartedPaths() {
         return ImmutableSet.of();
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsItem;
@@ -145,7 +145,7 @@ public class BlockLectern extends BlockTileEntity {
             TileEntityLectern lecternBlockEntity = (TileEntityLectern)blockEntity;
             lecternBlockEntity.setBook(stack.cloneAndSubtract(1));
             setHasBook(world, pos, state, true);
-            world.playSound((EntityHuman)null, pos, SoundEffects.BOOK_PUT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.BOOK_PUT, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
         }
 

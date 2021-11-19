@@ -28,11 +28,11 @@ import net.minecraft.tags.TagsItem;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.TimeRange;
 import net.minecraft.util.VisibleForDebug;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityCreature;
@@ -114,7 +114,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
     public static final String TAG_HAS_NECTAR = "HasNectar";
     public static final String TAG_FLOWER_POS = "FlowerPos";
     public static final String TAG_HIVE_POS = "HivePos";
-    private static final UniformInt PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
+    private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private UUID persistentAngerTarget;
     private float rollAmount;
     private float rollAmountO;
@@ -235,7 +235,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
                 }
 
                 if (i > 0) {
-                    ((EntityLiving)target).addEffect(new MobEffect(MobEffects.POISON, i * 20, 0), this);
+                    ((EntityLiving)target).addEffect(new MobEffect(MobEffectList.POISON, i * 20, 0), this);
                 }
             }
 

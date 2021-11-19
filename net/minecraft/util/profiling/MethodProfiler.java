@@ -17,7 +17,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +37,7 @@ public class MethodProfiler implements GameProfilerFillerActive {
     @Nullable
     private MethodProfiler.PathEntry currentEntry;
     private final boolean warn;
-    private final Set<Pair<String, MetricCategory>> chartedPaths = new ObjectArraySet<>();
+    private final Set<Pair<String, EnumMetricCategory>> chartedPaths = new ObjectArraySet<>();
 
     public MethodProfiler(LongSupplier timeGetter, IntSupplier tickGetter, boolean checkTimeout) {
         this.startTimeNano = timeGetter.getAsLong();
@@ -97,7 +97,7 @@ public class MethodProfiler implements GameProfilerFillerActive {
     }
 
     @Override
-    public void markForCharting(MetricCategory type) {
+    public void markForCharting(EnumMetricCategory type) {
         this.chartedPaths.add(Pair.of(this.path, type));
     }
 
@@ -174,7 +174,7 @@ public class MethodProfiler implements GameProfilerFillerActive {
     }
 
     @Override
-    public Set<Pair<String, MetricCategory>> getChartedPaths() {
+    public Set<Pair<String, EnumMetricCategory>> getChartedPaths() {
         return this.chartedPaths;
     }
 

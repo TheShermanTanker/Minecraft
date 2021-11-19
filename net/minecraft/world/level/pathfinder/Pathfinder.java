@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.util.profiling.GameProfilerFiller;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.level.ChunkCache;
 
@@ -46,7 +46,7 @@ public class Pathfinder {
     @Nullable
     private PathEntity findPath(GameProfilerFiller profiler, PathPoint startNode, Map<PathDestination, BlockPosition> positions, float followRange, int distance, float rangeMultiplier) {
         profiler.enter("find_path");
-        profiler.markForCharting(MetricCategory.PATH_FINDING);
+        profiler.markForCharting(EnumMetricCategory.PATH_FINDING);
         Set<PathDestination> set = positions.keySet();
         startNode.g = 0.0F;
         startNode.h = this.getBestH(startNode, set);

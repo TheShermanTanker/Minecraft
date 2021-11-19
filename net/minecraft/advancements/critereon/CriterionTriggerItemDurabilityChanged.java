@@ -5,7 +5,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.item.ItemStack;
 
-public class CriterionTriggerItemDurabilityChanged extends CriterionTriggerAbstract<CriterionTriggerItemDurabilityChanged.TriggerInstance> {
+public class CriterionTriggerItemDurabilityChanged extends CriterionTriggerAbstract<CriterionTriggerItemDurabilityChanged.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("item_durability_changed");
 
     @Override
@@ -14,11 +14,11 @@ public class CriterionTriggerItemDurabilityChanged extends CriterionTriggerAbstr
     }
 
     @Override
-    public CriterionTriggerItemDurabilityChanged.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerItemDurabilityChanged.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("durability"));
         CriterionConditionValue.IntegerRange ints2 = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("delta"));
-        return new CriterionTriggerItemDurabilityChanged.TriggerInstance(composite, itemPredicate, ints, ints2);
+        return new CriterionTriggerItemDurabilityChanged.CriterionInstanceTrigger(composite, itemPredicate, ints, ints2);
     }
 
     public void trigger(EntityPlayer player, ItemStack stack, int durability) {
@@ -27,24 +27,24 @@ public class CriterionTriggerItemDurabilityChanged extends CriterionTriggerAbstr
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionItem item;
         private final CriterionConditionValue.IntegerRange durability;
         private final CriterionConditionValue.IntegerRange delta;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionValue.IntegerRange durability, CriterionConditionValue.IntegerRange delta) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionValue.IntegerRange durability, CriterionConditionValue.IntegerRange delta) {
             super(CriterionTriggerItemDurabilityChanged.ID, player);
             this.item = item;
             this.durability = durability;
             this.delta = delta;
         }
 
-        public static CriterionTriggerItemDurabilityChanged.TriggerInstance changedDurability(CriterionConditionItem item, CriterionConditionValue.IntegerRange durability) {
+        public static CriterionTriggerItemDurabilityChanged.CriterionInstanceTrigger changedDurability(CriterionConditionItem item, CriterionConditionValue.IntegerRange durability) {
             return changedDurability(CriterionConditionEntity.Composite.ANY, item, durability);
         }
 
-        public static CriterionTriggerItemDurabilityChanged.TriggerInstance changedDurability(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionValue.IntegerRange durability) {
-            return new CriterionTriggerItemDurabilityChanged.TriggerInstance(player, item, durability, CriterionConditionValue.IntegerRange.ANY);
+        public static CriterionTriggerItemDurabilityChanged.CriterionInstanceTrigger changedDurability(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionValue.IntegerRange durability) {
+            return new CriterionTriggerItemDurabilityChanged.CriterionInstanceTrigger(player, item, durability, CriterionConditionValue.IntegerRange.ANY);
         }
 
         public boolean matches(ItemStack stack, int durability) {

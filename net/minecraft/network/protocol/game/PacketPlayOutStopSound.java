@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 
 public class PacketPlayOutStopSound implements Packet<PacketListenerPlayOut> {
     private static final int HAS_SOURCE = 1;
@@ -12,9 +12,9 @@ public class PacketPlayOutStopSound implements Packet<PacketListenerPlayOut> {
     @Nullable
     private final MinecraftKey name;
     @Nullable
-    private final SoundCategory source;
+    private final EnumSoundCategory source;
 
-    public PacketPlayOutStopSound(@Nullable MinecraftKey soundId, @Nullable SoundCategory category) {
+    public PacketPlayOutStopSound(@Nullable MinecraftKey soundId, @Nullable EnumSoundCategory category) {
         this.name = soundId;
         this.source = category;
     }
@@ -22,7 +22,7 @@ public class PacketPlayOutStopSound implements Packet<PacketListenerPlayOut> {
     public PacketPlayOutStopSound(PacketDataSerializer buf) {
         int i = buf.readByte();
         if ((i & 1) > 0) {
-            this.source = buf.readEnum(SoundCategory.class);
+            this.source = buf.readEnum(EnumSoundCategory.class);
         } else {
             this.source = null;
         }
@@ -61,7 +61,7 @@ public class PacketPlayOutStopSound implements Packet<PacketListenerPlayOut> {
     }
 
     @Nullable
-    public SoundCategory getSource() {
+    public EnumSoundCategory getSource() {
         return this.source;
     }
 

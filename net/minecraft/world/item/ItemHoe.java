@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.EnumInteractionResult;
@@ -41,7 +41,7 @@ public class ItemHoe extends ItemTool {
             Consumer<ItemActionContext> consumer = pair.getSecond();
             if (predicate.test(context)) {
                 EntityHuman player = context.getEntity();
-                level.playSound(player, blockPos, SoundEffects.HOE_TILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                level.playSound(player, blockPos, SoundEffects.HOE_TILL, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 if (!level.isClientSide) {
                     consumer.accept(context);
                     if (player != null) {

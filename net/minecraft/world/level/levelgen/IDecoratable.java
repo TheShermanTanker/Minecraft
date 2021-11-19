@@ -1,8 +1,8 @@
 package net.minecraft.world.level.levelgen;
 
-import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderConstant;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenDecoratorFrequencyConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureChanceDecoratorRangeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureEmptyConfiguration2;
@@ -24,11 +24,11 @@ public interface IDecoratable<R> {
     }
 
     default R count(int count) {
-        return this.count(ConstantInt.of(count));
+        return this.count(IntProviderConstant.of(count));
     }
 
     default R countRandom(int maxCount) {
-        return this.count(UniformInt.of(0, maxCount));
+        return this.count(IntProviderUniform.of(0, maxCount));
     }
 
     default R rangeUniform(VerticalAnchor min, VerticalAnchor max) {

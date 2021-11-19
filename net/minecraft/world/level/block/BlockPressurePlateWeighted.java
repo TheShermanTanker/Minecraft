@@ -1,7 +1,7 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.entity.Entity;
@@ -37,12 +37,12 @@ public class BlockPressurePlateWeighted extends BlockPressurePlateAbstract {
 
     @Override
     protected void playOnSound(GeneratorAccess world, BlockPosition pos) {
-        world.playSound((EntityHuman)null, pos, SoundEffects.METAL_PRESSURE_PLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.90000004F);
+        world.playSound((EntityHuman)null, pos, SoundEffects.METAL_PRESSURE_PLATE_CLICK_ON, EnumSoundCategory.BLOCKS, 0.3F, 0.90000004F);
     }
 
     @Override
     protected void playOffSound(GeneratorAccess world, BlockPosition pos) {
-        world.playSound((EntityHuman)null, pos, SoundEffects.METAL_PRESSURE_PLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.75F);
+        world.playSound((EntityHuman)null, pos, SoundEffects.METAL_PRESSURE_PLATE_CLICK_OFF, EnumSoundCategory.BLOCKS, 0.3F, 0.75F);
     }
 
     @Override

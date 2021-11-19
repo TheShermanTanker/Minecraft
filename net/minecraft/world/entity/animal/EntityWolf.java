@@ -14,7 +14,7 @@ import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.TimeRange;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -79,7 +79,7 @@ public class EntityWolf extends EntityTameableAnimal implements IEntityAngerable
     private boolean isShaking;
     private float shakeAnim;
     private float shakeAnimO;
-    private static final UniformInt PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
+    private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private UUID persistentAngerTarget;
 
     public EntityWolf(EntityTypes<? extends EntityWolf> type, World world) {

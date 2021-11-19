@@ -12,7 +12,7 @@ import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntitySize;
@@ -131,13 +131,13 @@ public class EntityWitch extends EntityRaider implements IRangedEntity {
                 }
             } else {
                 PotionRegistry potion = null;
-                if (this.random.nextFloat() < 0.15F && this.isEyeInFluid(TagsFluid.WATER) && !this.hasEffect(MobEffects.WATER_BREATHING)) {
+                if (this.random.nextFloat() < 0.15F && this.isEyeInFluid(TagsFluid.WATER) && !this.hasEffect(MobEffectList.WATER_BREATHING)) {
                     potion = Potions.WATER_BREATHING;
-                } else if (this.random.nextFloat() < 0.15F && (this.isBurning() || this.getLastDamageSource() != null && this.getLastDamageSource().isFire()) && !this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+                } else if (this.random.nextFloat() < 0.15F && (this.isBurning() || this.getLastDamageSource() != null && this.getLastDamageSource().isFire()) && !this.hasEffect(MobEffectList.FIRE_RESISTANCE)) {
                     potion = Potions.FIRE_RESISTANCE;
                 } else if (this.random.nextFloat() < 0.05F && this.getHealth() < this.getMaxHealth()) {
                     potion = Potions.HEALING;
-                } else if (this.random.nextFloat() < 0.5F && this.getGoalTarget() != null && !this.hasEffect(MobEffects.MOVEMENT_SPEED) && this.getGoalTarget().distanceToSqr(this) > 121.0D) {
+                } else if (this.random.nextFloat() < 0.5F && this.getGoalTarget() != null && !this.hasEffect(MobEffectList.MOVEMENT_SPEED) && this.getGoalTarget().distanceToSqr(this) > 121.0D) {
                     potion = Potions.SWIFTNESS;
                 }
 
@@ -211,11 +211,11 @@ public class EntityWitch extends EntityRaider implements IRangedEntity {
                 }
 
                 this.setGoalTarget((EntityLiving)null);
-            } else if (g >= 8.0D && !target.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
+            } else if (g >= 8.0D && !target.hasEffect(MobEffectList.MOVEMENT_SLOWDOWN)) {
                 potion = Potions.SLOWNESS;
-            } else if (target.getHealth() >= 8.0F && !target.hasEffect(MobEffects.POISON)) {
+            } else if (target.getHealth() >= 8.0F && !target.hasEffect(MobEffectList.POISON)) {
                 potion = Potions.POISON;
-            } else if (g <= 3.0D && !target.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
+            } else if (g <= 3.0D && !target.hasEffect(MobEffectList.WEAKNESS) && this.random.nextFloat() < 0.25F) {
                 potion = Potions.WEAKNESS;
             }
 

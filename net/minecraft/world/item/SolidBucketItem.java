@@ -2,7 +2,7 @@ package net.minecraft.world.item;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -50,7 +50,7 @@ public class SolidBucketItem extends ItemBlock implements DispensibleContainerIt
                 world.setTypeAndData(pos, this.getBlock().getBlockData(), 3);
             }
 
-            world.playSound(player, pos, this.placeSound, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound(player, pos, this.placeSound, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             return true;
         } else {
             return false;

@@ -1,6 +1,6 @@
 package net.minecraft.world.item;
 
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.EntityLiving;
@@ -18,7 +18,7 @@ public class ItemSaddle extends Item {
             ISaddleable saddleable = (ISaddleable)entity;
             if (!saddleable.hasSaddle() && saddleable.canSaddle()) {
                 if (!user.level.isClientSide) {
-                    saddleable.saddle(SoundCategory.NEUTRAL);
+                    saddleable.saddle(EnumSoundCategory.NEUTRAL);
                     stack.subtract(1);
                 }
 

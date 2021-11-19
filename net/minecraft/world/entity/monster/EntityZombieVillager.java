@@ -22,7 +22,7 @@ import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.entity.EnumMobSpawn;
@@ -135,7 +135,7 @@ public class EntityZombieVillager extends EntityZombie implements VillagerDataHo
     public EnumInteractionResult mobInteract(EntityHuman player, EnumHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         if (itemStack.is(Items.GOLDEN_APPLE)) {
-            if (this.hasEffect(MobEffects.WEAKNESS)) {
+            if (this.hasEffect(MobEffectList.WEAKNESS)) {
                 if (!player.getAbilities().instabuild) {
                     itemStack.subtract(1);
                 }
@@ -172,8 +172,8 @@ public class EntityZombieVillager extends EntityZombie implements VillagerDataHo
         this.conversionStarter = uuid;
         this.villagerConversionTime = delay;
         this.getDataWatcher().set(DATA_CONVERTING_ID, true);
-        this.removeEffect(MobEffects.WEAKNESS);
-        this.addEffect(new MobEffect(MobEffects.DAMAGE_BOOST, delay, Math.min(this.level.getDifficulty().getId() - 1, 0)));
+        this.removeEffect(MobEffectList.WEAKNESS);
+        this.addEffect(new MobEffect(MobEffectList.DAMAGE_BOOST, delay, Math.min(this.level.getDifficulty().getId() - 1, 0)));
         this.level.broadcastEntityEffect(this, (byte)16);
     }
 
@@ -225,7 +225,7 @@ public class EntityZombieVillager extends EntityZombie implements VillagerDataHo
             }
         }
 
-        villager.addEffect(new MobEffect(MobEffects.CONFUSION, 200, 0));
+        villager.addEffect(new MobEffect(MobEffectList.CONFUSION, 200, 0));
         if (!this.isSilent()) {
             world.triggerEffect((EntityHuman)null, 1027, this.getChunkCoordinates(), 0);
         }

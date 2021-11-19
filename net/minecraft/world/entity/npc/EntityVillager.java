@@ -42,7 +42,7 @@ import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.InventorySubcontainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityExperienceOrb;
@@ -220,7 +220,7 @@ public class EntityVillager extends EntityVillagerAbstract implements Reputation
                     this.increaseProfessionLevelOnUpdate = false;
                 }
 
-                this.addEffect(new MobEffect(MobEffects.REGENERATION, 200, 0));
+                this.addEffect(new MobEffect(MobEffectList.REGENERATION, 200, 0));
             }
         }
 
@@ -402,8 +402,8 @@ public class EntityVillager extends EntityVillagerAbstract implements Reputation
             }
         }
 
-        if (player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE)) {
-            MobEffect mobEffectInstance = player.getEffect(MobEffects.HERO_OF_THE_VILLAGE);
+        if (player.hasEffect(MobEffectList.HERO_OF_THE_VILLAGE)) {
+            MobEffect mobEffectInstance = player.getEffect(MobEffectList.HERO_OF_THE_VILLAGE);
             int j = mobEffectInstance.getAmplifier();
 
             for(MerchantRecipe merchantOffer2 : this.getOffers()) {

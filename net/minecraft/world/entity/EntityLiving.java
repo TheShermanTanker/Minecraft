@@ -44,7 +44,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.ChunkProviderServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
@@ -61,9 +61,9 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.effect.MobEffectUtil;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.attributes.AttributeBase;
 import net.minecraft.world.entity.ai.attributes.AttributeDefaults;
@@ -150,7 +150,7 @@ public abstract class EntityLiving extends Entity {
     public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
     private final AttributeMapBase attributes;
     public CombatTracker combatTracker = new CombatTracker(this);
-    public final Map<MobEffectList, MobEffect> activeEffects = Maps.newHashMap();
+    public final Map<MobEffectBase, MobEffect> activeEffects = Maps.newHashMap();
     private final NonNullList<ItemStack> lastHandItemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> lastArmorItemStacks = NonNullList.withSize(4, ItemStack.EMPTY);
     public boolean swinging;
@@ -716,11 +716,11 @@ public abstract class EntityLiving extends Entity {
     }
 
     protected void tickPotionEffects() {
-        Iterator<MobEffectList> iterator = this.activeEffects.keySet().iterator();
+        Iterator<MobEffectBase> iterator = this.activeEffects.keySet().iterator();
 
         try {
             while(iterator.hasNext()) {
-                MobEffectList mobEffect = iterator.next();
+                MobEffectBase mobEffect = iterator.next();
                 MobEffect mobEffectInstance = this.activeEffects.get(mobEffect);
                 if (!mobEffectInstance.tick(this, () -> {
                     this.onEffectUpdated(mobEffectInstance, true, (Entity)null);
@@ -777,7 +777,7 @@ public abstract class EntityLiving extends Entity {
             Collection<MobEffect> collection = this.activeEffects.values();
             this.entityData.set(DATA_EFFECT_AMBIENCE_ID, areAllEffectsAmbient(collection));
             this.entityData.set(DATA_EFFECT_COLOR_ID, PotionUtil.getColor(collection));
-            this.setInvisible(this.hasEffect(MobEffects.INVISIBILITY));
+            this.setInvisible(this.hasEffect(MobEffectList.INVISIBILITY));
         }
 
     }
@@ -867,16 +867,16 @@ public abstract class EntityLiving extends Entity {
         return this.activeEffects.values();
     }
 
-    public Map<MobEffectList, MobEffect> getActiveEffectsMap() {
+    public Map<MobEffectBase, MobEffect> getActiveEffectsMap() {
         return this.activeEffects;
     }
 
-    public boolean hasEffect(MobEffectList effect) {
+    public boolean hasEffect(MobEffectBase effect) {
         return this.activeEffects.containsKey(effect);
     }
 
     @Nullable
-    public MobEffect getEffect(MobEffectList effect) {
+    public MobEffect getEffect(MobEffectBase effect) {
         return this.activeEffects.get(effect);
     }
 
@@ -904,8 +904,8 @@ public abstract class EntityLiving extends Entity {
 
     public boolean canBeAffected(MobEffect effect) {
         if (this.getMonsterType() == EnumMonsterType.UNDEAD) {
-            MobEffectList mobEffect = effect.getMobEffect();
-            if (mobEffect == MobEffects.REGENERATION || mobEffect == MobEffects.POISON) {
+            MobEffectBase mobEffect = effect.getMobEffect();
+            if (mobEffect == MobEffectList.REGENERATION || mobEffect == MobEffectList.POISON) {
                 return false;
             }
         }
@@ -930,11 +930,11 @@ public abstract class EntityLiving extends Entity {
     }
 
     @Nullable
-    public MobEffect removeEffectNoUpdate(@Nullable MobEffectList type) {
+    public MobEffect removeEffectNoUpdate(@Nullable MobEffectBase type) {
         return this.activeEffects.remove(type);
     }
 
-    public boolean removeEffect(MobEffectList type) {
+    public boolean removeEffect(MobEffectBase type) {
         MobEffect mobEffectInstance = this.removeEffectNoUpdate(type);
         if (mobEffectInstance != null) {
             this.onEffectRemoved(mobEffectInstance);
@@ -955,7 +955,7 @@ public abstract class EntityLiving extends Entity {
     protected void onEffectUpdated(MobEffect effect, boolean reapplyEffect, @Nullable Entity source) {
         this.effectsDirty = true;
         if (reapplyEffect && !this.level.isClientSide) {
-            MobEffectList mobEffect = effect.getMobEffect();
+            MobEffectBase mobEffect = effect.getMobEffect();
             mobEffect.removeAttributeModifiers(this, this.getAttributeMap(), effect.getAmplifier());
             mobEffect.addAttributeModifiers(this, this.getAttributeMap(), effect.getAmplifier());
         }
@@ -998,7 +998,7 @@ public abstract class EntityLiving extends Entity {
             return false;
         } else if (this.isDeadOrDying()) {
             return false;
-        } else if (source.isFire() && this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+        } else if (source.isFire() && this.hasEffect(MobEffectList.FIRE_RESISTANCE)) {
             return false;
         } else {
             if (this.isSleeping() && !this.level.isClientSide) {
@@ -1177,9 +1177,9 @@ public abstract class EntityLiving extends Entity {
 
                 this.setHealth(1.0F);
                 this.removeAllEffects();
-                this.addEffect(new MobEffect(MobEffects.REGENERATION, 900, 1));
-                this.addEffect(new MobEffect(MobEffects.ABSORPTION, 100, 1));
-                this.addEffect(new MobEffect(MobEffects.FIRE_RESISTANCE, 800, 0));
+                this.addEffect(new MobEffect(MobEffectList.REGENERATION, 900, 1));
+                this.addEffect(new MobEffect(MobEffectList.ABSORPTION, 100, 1));
+                this.addEffect(new MobEffect(MobEffectList.FIRE_RESISTANCE, 800, 0));
                 this.level.broadcastEntityEffect(this, (byte)35);
             }
 
@@ -1440,7 +1440,7 @@ public abstract class EntityLiving extends Entity {
     }
 
     protected int calculateFallDamage(float fallDistance, float damageMultiplier) {
-        MobEffect mobEffectInstance = this.getEffect(MobEffects.JUMP);
+        MobEffect mobEffectInstance = this.getEffect(MobEffectList.JUMP);
         float f = mobEffectInstance == null ? 0.0F : (float)(mobEffectInstance.getAmplifier() + 1);
         return MathHelper.ceil((fallDistance - 3.0F - f) * damageMultiplier);
     }
@@ -1492,8 +1492,8 @@ public abstract class EntityLiving extends Entity {
         if (source.isStarvation()) {
             return amount;
         } else {
-            if (this.hasEffect(MobEffects.DAMAGE_RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
-                int i = (this.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
+            if (this.hasEffect(MobEffectList.DAMAGE_RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
+                int i = (this.getEffect(MobEffectList.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
                 int j = 25 - i;
                 float f = amount * (float)j;
                 float g = amount;
@@ -1581,7 +1581,7 @@ public abstract class EntityLiving extends Entity {
         if (MobEffectUtil.hasDigSpeed(this)) {
             return 6 - (1 + MobEffectUtil.getDigSpeedAmplification(this));
         } else {
-            return this.hasEffect(MobEffects.DIG_SLOWDOWN) ? 6 + (1 + this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) * 2 : 6;
+            return this.hasEffect(MobEffectList.DIG_SLOWDOWN) ? 6 + (1 + this.getEffect(MobEffectList.DIG_SLOWDOWN).getAmplifier()) * 2 : 6;
         }
     }
 
@@ -1943,7 +1943,7 @@ public abstract class EntityLiving extends Entity {
     }
 
     public double getJumpBoostPower() {
-        return this.hasEffect(MobEffects.JUMP) ? (double)(0.1F * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1)) : 0.0D;
+        return this.hasEffect(MobEffectList.JUMP) ? (double)(0.1F * (float)(this.getEffect(MobEffectList.JUMP).getAmplifier() + 1)) : 0.0D;
     }
 
     protected void jump() {
@@ -1978,7 +1978,7 @@ public abstract class EntityLiving extends Entity {
         if (this.doAITick() || this.isControlledByLocalInstance()) {
             double d = 0.08D;
             boolean bl = this.getMot().y <= 0.0D;
-            if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
+            if (bl && this.hasEffect(MobEffectList.SLOW_FALLING)) {
                 d = 0.01D;
                 this.fallDistance = 0.0F;
             }
@@ -2002,7 +2002,7 @@ public abstract class EntityLiving extends Entity {
                     g += (this.getSpeed() - g) * h / 3.0F;
                 }
 
-                if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
+                if (this.hasEffect(MobEffectList.DOLPHINS_GRACE)) {
                     f = 0.96F;
                 }
 
@@ -2088,8 +2088,8 @@ public abstract class EntityLiving extends Entity {
                 float u = this.onGround ? t * 0.91F : 0.91F;
                 Vec3D vec37 = this.handleRelativeFrictionAndCalculateMovement(movementInput, t);
                 double v = vec37.y;
-                if (this.hasEffect(MobEffects.LEVITATION)) {
-                    v += (0.05D * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2D;
+                if (this.hasEffect(MobEffectList.LEVITATION)) {
+                    v += (0.05D * (double)(this.getEffect(MobEffectList.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2D;
                     this.fallDistance = 0.0F;
                 } else if (this.level.isClientSide && !this.level.isLoaded(blockPos)) {
                     if (this.locY() > (double)this.level.getMinBuildHeight()) {
@@ -2558,7 +2558,7 @@ public abstract class EntityLiving extends Entity {
 
     private void updateFallFlying() {
         boolean bl = this.getFlag(7);
-        if (bl && !this.onGround && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
+        if (bl && !this.onGround && !this.isPassenger() && !this.hasEffect(MobEffectList.LEVITATION)) {
             ItemStack itemStack = this.getEquipment(EnumItemSlot.CHEST);
             if (itemStack.is(Items.ELYTRA) && ItemElytra.isFlyEnabled(itemStack)) {
                 bl = true;
@@ -3190,7 +3190,7 @@ public abstract class EntityLiving extends Entity {
     public ItemStack eat(World world, ItemStack stack) {
         if (stack.isEdible()) {
             world.gameEvent(this, GameEvent.EAT, this.eyeBlockPosition());
-            world.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), this.getEatingSound(stack), SoundCategory.NEUTRAL, 1.0F, 1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
+            world.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), this.getEatingSound(stack), EnumSoundCategory.NEUTRAL, 1.0F, 1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
             this.addEatEffect(stack, world, this);
             if (!(this instanceof EntityHuman) || !((EntityHuman)this).getAbilities().instabuild) {
                 stack.subtract(1);
@@ -3307,7 +3307,7 @@ public abstract class EntityLiving extends Entity {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        return !this.level.isClientSide() && this.hasEffect(MobEffects.GLOWING) || super.isCurrentlyGlowing();
+        return !this.level.isClientSide() && this.hasEffect(MobEffectList.GLOWING) || super.isCurrentlyGlowing();
     }
 
     public void recreateFromPacket(PacketPlayOutSpawnEntityLiving packet) {

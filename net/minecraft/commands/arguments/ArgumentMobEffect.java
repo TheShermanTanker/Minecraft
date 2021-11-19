@@ -15,9 +15,9 @@ import net.minecraft.commands.ICompletionProvider;
 import net.minecraft.core.IRegistry;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 
-public class ArgumentMobEffect implements ArgumentType<MobEffectList> {
+public class ArgumentMobEffect implements ArgumentType<MobEffectBase> {
     private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_EFFECT = new DynamicCommandExceptionType((object) -> {
         return new ChatMessage("effect.effectNotFound", object);
@@ -27,12 +27,12 @@ public class ArgumentMobEffect implements ArgumentType<MobEffectList> {
         return new ArgumentMobEffect();
     }
 
-    public static MobEffectList getEffect(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, MobEffectList.class);
+    public static MobEffectBase getEffect(CommandContext<CommandListenerWrapper> commandContext, String string) {
+        return commandContext.getArgument(string, MobEffectBase.class);
     }
 
     @Override
-    public MobEffectList parse(StringReader stringReader) throws CommandSyntaxException {
+    public MobEffectBase parse(StringReader stringReader) throws CommandSyntaxException {
         MinecraftKey resourceLocation = MinecraftKey.read(stringReader);
         return IRegistry.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> {
             return ERROR_UNKNOWN_EFFECT.create(resourceLocation);

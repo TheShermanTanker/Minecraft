@@ -9,14 +9,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
+import net.minecraft.util.profiling.metrics.IProfilerMeasured;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
-import net.minecraft.util.profiling.metrics.ProfilerMeasured;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class IAsyncTaskHandler<R extends Runnable> implements ProfilerMeasured, Mailbox<R>, Executor {
+public abstract class IAsyncTaskHandler<R extends Runnable> implements IProfilerMeasured, Mailbox<R>, Executor {
     private final String name;
     private static final Logger LOGGER = LogManager.getLogger();
     private final Queue<R> pendingRunnables = Queues.newConcurrentLinkedQueue();
@@ -148,6 +148,6 @@ public abstract class IAsyncTaskHandler<R extends Runnable> implements ProfilerM
 
     @Override
     public List<MetricSampler> profiledMetrics() {
-        return ImmutableList.of(MetricSampler.create(this.name + "-pending-tasks", MetricCategory.EVENT_LOOPS, this::getPendingTasksCount));
+        return ImmutableList.of(MetricSampler.create(this.name + "-pending-tasks", EnumMetricCategory.EVENT_LOOPS, this::getPendingTasksCount));
     }
 }

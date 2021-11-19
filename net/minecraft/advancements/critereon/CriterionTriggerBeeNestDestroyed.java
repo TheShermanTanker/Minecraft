@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.IBlockData;
 
-public class CriterionTriggerBeeNestDestroyed extends CriterionTriggerAbstract<CriterionTriggerBeeNestDestroyed.TriggerInstance> {
+public class CriterionTriggerBeeNestDestroyed extends CriterionTriggerAbstract<CriterionTriggerBeeNestDestroyed.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("bee_nest_destroyed");
 
     @Override
@@ -20,11 +20,11 @@ public class CriterionTriggerBeeNestDestroyed extends CriterionTriggerAbstract<C
     }
 
     @Override
-    public CriterionTriggerBeeNestDestroyed.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerBeeNestDestroyed.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         Block block = deserializeBlock(jsonObject);
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("num_bees_inside"));
-        return new CriterionTriggerBeeNestDestroyed.TriggerInstance(composite, block, itemPredicate, ints);
+        return new CriterionTriggerBeeNestDestroyed.CriterionInstanceTrigger(composite, block, itemPredicate, ints);
     }
 
     @Nullable
@@ -45,21 +45,21 @@ public class CriterionTriggerBeeNestDestroyed extends CriterionTriggerAbstract<C
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         @Nullable
         private final Block block;
         private final CriterionConditionItem item;
         private final CriterionConditionValue.IntegerRange numBees;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, @Nullable Block block, CriterionConditionItem item, CriterionConditionValue.IntegerRange beeCount) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, @Nullable Block block, CriterionConditionItem item, CriterionConditionValue.IntegerRange beeCount) {
             super(CriterionTriggerBeeNestDestroyed.ID, player);
             this.block = block;
             this.item = item;
             this.numBees = beeCount;
         }
 
-        public static CriterionTriggerBeeNestDestroyed.TriggerInstance destroyedBeeNest(Block block, CriterionConditionItem.Builder itemPredicateBuilder, CriterionConditionValue.IntegerRange beeCountRange) {
-            return new CriterionTriggerBeeNestDestroyed.TriggerInstance(CriterionConditionEntity.Composite.ANY, block, itemPredicateBuilder.build(), beeCountRange);
+        public static CriterionTriggerBeeNestDestroyed.CriterionInstanceTrigger destroyedBeeNest(Block block, CriterionConditionItem.Builder itemPredicateBuilder, CriterionConditionValue.IntegerRange beeCountRange) {
+            return new CriterionTriggerBeeNestDestroyed.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, block, itemPredicateBuilder.build(), beeCountRange);
         }
 
         public boolean matches(IBlockData state, ItemStack stack, int count) {

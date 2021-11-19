@@ -22,7 +22,7 @@ import net.minecraft.world.BossBattle;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -522,7 +522,7 @@ public class EntityWither extends EntityMonster implements IPowerable, IRangedEn
 
     @Override
     public boolean canBeAffected(MobEffect effect) {
-        return effect.getMobEffect() == MobEffects.WITHER ? false : super.canBeAffected(effect);
+        return effect.getMobEffect() == MobEffectList.WITHER ? false : super.canBeAffected(effect);
     }
 
     class PathfinderGoalWitherSpawn extends PathfinderGoal {

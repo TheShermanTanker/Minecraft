@@ -2,7 +2,7 @@ package net.minecraft.world.level.block;
 
 import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumInteractionResult;
@@ -23,7 +23,7 @@ public interface ICaveVine {
         if (state.get(BERRIES)) {
             Block.popResource(world, pos, new ItemStack(Items.GLOW_BERRIES, 1));
             float f = MathHelper.randomBetween(world.random, 0.8F, 1.2F);
-            world.playSound((EntityHuman)null, pos, SoundEffects.CAVE_VINES_PICK_BERRIES, SoundCategory.BLOCKS, 1.0F, f);
+            world.playSound((EntityHuman)null, pos, SoundEffects.CAVE_VINES_PICK_BERRIES, EnumSoundCategory.BLOCKS, 1.0F, f);
             world.setTypeAndData(pos, state.set(BERRIES, Boolean.valueOf(false)), 2);
             return EnumInteractionResult.sidedSuccess(world.isClientSide);
         } else {

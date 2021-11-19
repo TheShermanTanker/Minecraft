@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.MathHelper;
@@ -74,7 +74,7 @@ public class BlockRespawnAnchor extends Block {
                 EntityPlayer serverPlayer = (EntityPlayer)player;
                 if (serverPlayer.getSpawnDimension() != world.getDimensionKey() || !pos.equals(serverPlayer.getSpawn())) {
                     serverPlayer.setRespawnPosition(world.getDimensionKey(), pos, 0.0F, false, true);
-                    world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.RESPAWN_ANCHOR_SET_SPAWN, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.RESPAWN_ANCHOR_SET_SPAWN, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                     return EnumInteractionResult.SUCCESS;
                 }
             }
@@ -129,14 +129,14 @@ public class BlockRespawnAnchor extends Block {
 
     public static void charge(World world, BlockPosition pos, IBlockData state) {
         world.setTypeAndData(pos, state.set(CHARGE, Integer.valueOf(state.get(CHARGE) + 1)), 3);
-        world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.RESPAWN_ANCHOR_CHARGE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.RESPAWN_ANCHOR_CHARGE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
     }
 
     @Override
     public void animateTick(IBlockData state, World world, BlockPosition pos, Random random) {
         if (state.get(CHARGE) != 0) {
             if (random.nextInt(100) == 0) {
-                world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.RESPAWN_ANCHOR_AMBIENT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.RESPAWN_ANCHOR_AMBIENT, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             }
 
             double d = (double)pos.getX() + 0.5D + (0.5D - random.nextDouble());

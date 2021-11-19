@@ -3,7 +3,7 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -132,7 +132,7 @@ public class BlockBell extends BlockTileEntity {
             }
 
             ((TileEntityBell)blockEntity).onHit(direction);
-            world.playSound((EntityHuman)null, pos, SoundEffects.BELL_BLOCK, SoundCategory.BLOCKS, 2.0F, 1.0F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.BELL_BLOCK, EnumSoundCategory.BLOCKS, 2.0F, 1.0F);
             world.gameEvent(entity, GameEvent.RING_BELL, pos);
             return true;
         } else {

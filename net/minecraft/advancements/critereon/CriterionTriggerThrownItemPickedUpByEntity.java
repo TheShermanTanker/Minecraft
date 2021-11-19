@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerThrownItemPickedUpByEntity extends CriterionTriggerAbstract<CriterionTriggerThrownItemPickedUpByEntity.TriggerInstance> {
+public class CriterionTriggerThrownItemPickedUpByEntity extends CriterionTriggerAbstract<CriterionTriggerThrownItemPickedUpByEntity.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("thrown_item_picked_up_by_entity");
 
     @Override
@@ -16,10 +16,10 @@ public class CriterionTriggerThrownItemPickedUpByEntity extends CriterionTrigger
     }
 
     @Override
-    protected CriterionTriggerThrownItemPickedUpByEntity.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    protected CriterionTriggerThrownItemPickedUpByEntity.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "entity", deserializationContext);
-        return new CriterionTriggerThrownItemPickedUpByEntity.TriggerInstance(composite, itemPredicate, composite2);
+        return new CriterionTriggerThrownItemPickedUpByEntity.CriterionInstanceTrigger(composite, itemPredicate, composite2);
     }
 
     public void trigger(EntityPlayer player, ItemStack stack, Entity entity) {
@@ -29,18 +29,18 @@ public class CriterionTriggerThrownItemPickedUpByEntity extends CriterionTrigger
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionItem item;
         private final CriterionConditionEntity.Composite entity;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionEntity.Composite entity) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionEntity.Composite entity) {
             super(CriterionTriggerThrownItemPickedUpByEntity.ID, player);
             this.item = item;
             this.entity = entity;
         }
 
-        public static CriterionTriggerThrownItemPickedUpByEntity.TriggerInstance itemPickedUpByEntity(CriterionConditionEntity.Composite player, CriterionConditionItem.Builder item, CriterionConditionEntity.Composite entity) {
-            return new CriterionTriggerThrownItemPickedUpByEntity.TriggerInstance(player, item.build(), entity);
+        public static CriterionTriggerThrownItemPickedUpByEntity.CriterionInstanceTrigger itemPickedUpByEntity(CriterionConditionEntity.Composite player, CriterionConditionItem.Builder item, CriterionConditionEntity.Composite entity) {
+            return new CriterionTriggerThrownItemPickedUpByEntity.CriterionInstanceTrigger(player, item.build(), entity);
         }
 
         public boolean matches(EntityPlayer player, ItemStack stack, LootTableInfo entityContext) {

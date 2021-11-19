@@ -10,7 +10,7 @@ import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -134,7 +134,7 @@ public class BehaviorVillageHeroGift extends Behavior<EntityVillager> {
     }
 
     private boolean isHero(EntityHuman player) {
-        return player.hasEffect(MobEffects.HERO_OF_THE_VILLAGE);
+        return player.hasEffect(MobEffectList.HERO_OF_THE_VILLAGE);
     }
 
     private boolean isWithinThrowingDistance(EntityVillager villager, EntityHuman player) {

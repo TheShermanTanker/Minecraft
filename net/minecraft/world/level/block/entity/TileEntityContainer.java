@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.ChestLock;
 import net.minecraft.world.IInventory;
@@ -74,7 +74,7 @@ public abstract class TileEntityContainer extends TileEntity implements IInvento
     public static boolean canUnlock(EntityHuman player, ChestLock lock, IChatBaseComponent containerName) {
         if (!player.isSpectator() && !lock.unlocksWith(player.getItemInMainHand())) {
             player.displayClientMessage(new ChatMessage("container.isLocked", containerName), true);
-            player.playNotifySound(SoundEffects.CHEST_LOCKED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            player.playNotifySound(SoundEffects.CHEST_LOCKED, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             return false;
         } else {
             return true;

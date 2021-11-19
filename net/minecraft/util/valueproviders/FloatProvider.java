@@ -10,11 +10,11 @@ import net.minecraft.core.IRegistry;
 public abstract class FloatProvider {
     private static final Codec<Either<Float, FloatProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(Codec.FLOAT, IRegistry.FLOAT_PROVIDER_TYPES.dispatch(FloatProvider::getType, FloatProviderType::codec));
     public static final Codec<FloatProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap((either) -> {
-        return either.map(ConstantFloat::of, (floatProvider) -> {
+        return either.map(FloatProviderConstant::of, (floatProvider) -> {
             return floatProvider;
         });
     }, (floatProvider) -> {
-        return floatProvider.getType() == FloatProviderType.CONSTANT ? Either.left(((ConstantFloat)floatProvider).getValue()) : Either.right(floatProvider);
+        return floatProvider.getType() == FloatProviderType.CONSTANT ? Either.left(((FloatProviderConstant)floatProvider).getValue()) : Either.right(floatProvider);
     });
 
     public static Codec<FloatProvider> codec(float min, float max) {

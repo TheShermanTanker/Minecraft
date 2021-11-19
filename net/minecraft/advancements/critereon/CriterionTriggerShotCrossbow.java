@@ -6,7 +6,7 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.IMaterial;
 
-public class CriterionTriggerShotCrossbow extends CriterionTriggerAbstract<CriterionTriggerShotCrossbow.TriggerInstance> {
+public class CriterionTriggerShotCrossbow extends CriterionTriggerAbstract<CriterionTriggerShotCrossbow.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("shot_crossbow");
 
     @Override
@@ -15,9 +15,9 @@ public class CriterionTriggerShotCrossbow extends CriterionTriggerAbstract<Crite
     }
 
     @Override
-    public CriterionTriggerShotCrossbow.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerShotCrossbow.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
-        return new CriterionTriggerShotCrossbow.TriggerInstance(composite, itemPredicate);
+        return new CriterionTriggerShotCrossbow.CriterionInstanceTrigger(composite, itemPredicate);
     }
 
     public void trigger(EntityPlayer player, ItemStack stack) {
@@ -26,20 +26,20 @@ public class CriterionTriggerShotCrossbow extends CriterionTriggerAbstract<Crite
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionItem item;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionItem item) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionItem item) {
             super(CriterionTriggerShotCrossbow.ID, player);
             this.item = item;
         }
 
-        public static CriterionTriggerShotCrossbow.TriggerInstance shotCrossbow(CriterionConditionItem itemPredicate) {
-            return new CriterionTriggerShotCrossbow.TriggerInstance(CriterionConditionEntity.Composite.ANY, itemPredicate);
+        public static CriterionTriggerShotCrossbow.CriterionInstanceTrigger shotCrossbow(CriterionConditionItem itemPredicate) {
+            return new CriterionTriggerShotCrossbow.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, itemPredicate);
         }
 
-        public static CriterionTriggerShotCrossbow.TriggerInstance shotCrossbow(IMaterial item) {
-            return new CriterionTriggerShotCrossbow.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionItem.Builder.item().of(item).build());
+        public static CriterionTriggerShotCrossbow.CriterionInstanceTrigger shotCrossbow(IMaterial item) {
+            return new CriterionTriggerShotCrossbow.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionItem.Builder.item().of(item).build());
         }
 
         public boolean matches(ItemStack stack) {

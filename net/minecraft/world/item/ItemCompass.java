@@ -7,7 +7,7 @@ import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -71,7 +71,7 @@ public class ItemCompass extends Item implements ItemVanishable {
         if (!level.getType(blockPos).is(Blocks.LODESTONE)) {
             return super.useOn(context);
         } else {
-            level.playSound((EntityHuman)null, blockPos, SoundEffects.LODESTONE_COMPASS_LOCK, SoundCategory.PLAYERS, 1.0F, 1.0F);
+            level.playSound((EntityHuman)null, blockPos, SoundEffects.LODESTONE_COMPASS_LOCK, EnumSoundCategory.PLAYERS, 1.0F, 1.0F);
             EntityHuman player = context.getEntity();
             ItemStack itemStack = context.getItemStack();
             boolean bl = !player.getAbilities().instabuild && itemStack.getCount() == 1;

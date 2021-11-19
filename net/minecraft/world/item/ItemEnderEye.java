@@ -4,7 +4,7 @@ import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -83,7 +83,7 @@ public class ItemEnderEye extends Item {
                         CriterionTriggers.USED_ENDER_EYE.trigger((EntityPlayer)user, blockPos);
                     }
 
-                    world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.ENDER_EYE_LAUNCH, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+                    world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.ENDER_EYE_LAUNCH, EnumSoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
                     world.triggerEffect((EntityHuman)null, 1003, user.getChunkCoordinates(), 0);
                     if (!user.getAbilities().instabuild) {
                         itemStack.subtract(1);

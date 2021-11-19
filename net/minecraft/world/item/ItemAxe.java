@@ -6,7 +6,7 @@ import java.util.Optional;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.EnumInteractionResult;
@@ -40,14 +40,14 @@ public class ItemAxe extends ItemTool {
         ItemStack itemStack = context.getItemStack();
         Optional<IBlockData> optional4 = Optional.empty();
         if (optional.isPresent()) {
-            level.playSound(player, blockPos, SoundEffects.AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            level.playSound(player, blockPos, SoundEffects.AXE_STRIP, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             optional4 = optional;
         } else if (optional2.isPresent()) {
-            level.playSound(player, blockPos, SoundEffects.AXE_SCRAPE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            level.playSound(player, blockPos, SoundEffects.AXE_SCRAPE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             level.triggerEffect(player, 3005, blockPos, 0);
             optional4 = optional2;
         } else if (optional3.isPresent()) {
-            level.playSound(player, blockPos, SoundEffects.AXE_WAX_OFF, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            level.playSound(player, blockPos, SoundEffects.AXE_WAX_OFF, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             level.triggerEffect(player, 3004, blockPos, 0);
             optional4 = optional3;
         }

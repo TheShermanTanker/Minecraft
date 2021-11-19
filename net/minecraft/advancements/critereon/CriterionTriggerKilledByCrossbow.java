@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerKilledByCrossbow extends CriterionTriggerAbstract<CriterionTriggerKilledByCrossbow.TriggerInstance> {
+public class CriterionTriggerKilledByCrossbow extends CriterionTriggerAbstract<CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("killed_by_crossbow");
 
     @Override
@@ -22,10 +22,10 @@ public class CriterionTriggerKilledByCrossbow extends CriterionTriggerAbstract<C
     }
 
     @Override
-    public CriterionTriggerKilledByCrossbow.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionEntity.Composite[] composites = CriterionConditionEntity.Composite.fromJsonArray(jsonObject, "victims", deserializationContext);
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("unique_entity_types"));
-        return new CriterionTriggerKilledByCrossbow.TriggerInstance(composite, composites, ints);
+        return new CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger(composite, composites, ints);
     }
 
     public void trigger(EntityPlayer player, Collection<Entity> piercingKilledEntities) {
@@ -42,17 +42,17 @@ public class CriterionTriggerKilledByCrossbow extends CriterionTriggerAbstract<C
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionEntity.Composite[] victims;
         private final CriterionConditionValue.IntegerRange uniqueEntityTypes;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite[] victims, CriterionConditionValue.IntegerRange uniqueEntityTypes) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite[] victims, CriterionConditionValue.IntegerRange uniqueEntityTypes) {
             super(CriterionTriggerKilledByCrossbow.ID, player);
             this.victims = victims;
             this.uniqueEntityTypes = uniqueEntityTypes;
         }
 
-        public static CriterionTriggerKilledByCrossbow.TriggerInstance crossbowKilled(CriterionConditionEntity.Builder... victimPredicates) {
+        public static CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger crossbowKilled(CriterionConditionEntity.Builder... victimPredicates) {
             CriterionConditionEntity.Composite[] composites = new CriterionConditionEntity.Composite[victimPredicates.length];
 
             for(int i = 0; i < victimPredicates.length; ++i) {
@@ -60,12 +60,12 @@ public class CriterionTriggerKilledByCrossbow extends CriterionTriggerAbstract<C
                 composites[i] = CriterionConditionEntity.Composite.wrap(builder.build());
             }
 
-            return new CriterionTriggerKilledByCrossbow.TriggerInstance(CriterionConditionEntity.Composite.ANY, composites, CriterionConditionValue.IntegerRange.ANY);
+            return new CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, composites, CriterionConditionValue.IntegerRange.ANY);
         }
 
-        public static CriterionTriggerKilledByCrossbow.TriggerInstance crossbowKilled(CriterionConditionValue.IntegerRange uniqueEntityTypes) {
+        public static CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger crossbowKilled(CriterionConditionValue.IntegerRange uniqueEntityTypes) {
             CriterionConditionEntity.Composite[] composites = new CriterionConditionEntity.Composite[0];
-            return new CriterionTriggerKilledByCrossbow.TriggerInstance(CriterionConditionEntity.Composite.ANY, composites, uniqueEntityTypes);
+            return new CriterionTriggerKilledByCrossbow.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, composites, uniqueEntityTypes);
         }
 
         public boolean matches(Collection<LootTableInfo> victimContexts, int uniqueEntityTypeCount) {

@@ -19,7 +19,7 @@ import net.minecraft.SystemUtils;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.CSVWriter;
 import net.minecraft.util.profiling.MethodProfilerResults;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -66,14 +66,14 @@ public class MetricsPersister {
         if (samplers.isEmpty()) {
             throw new IllegalArgumentException("Expected at least one sampler to persist");
         } else {
-            Map<MetricCategory, List<MetricSampler>> map = samplers.stream().collect(Collectors.groupingBy(MetricSampler::getCategory));
+            Map<EnumMetricCategory, List<MetricSampler>> map = samplers.stream().collect(Collectors.groupingBy(MetricSampler::getCategory));
             map.forEach((type, sampler) -> {
                 this.saveCategory(type, sampler, directory);
             });
         }
     }
 
-    private void saveCategory(MetricCategory type, List<MetricSampler> samplers, Path directory) {
+    private void saveCategory(EnumMetricCategory type, List<MetricSampler> samplers, Path directory) {
         Path path = directory.resolve(SystemUtils.sanitizeName(type.getDescription(), MinecraftKey::validPathChar) + ".csv");
         Writer writer = null;
 

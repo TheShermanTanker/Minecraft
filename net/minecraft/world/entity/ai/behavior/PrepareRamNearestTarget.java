@@ -10,7 +10,7 @@ import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.entity.EntityCreature;
@@ -96,7 +96,7 @@ public class PrepareRamNearestTarget<E extends EntityCreature> extends Behavior<
 
                     if (time - this.reachedRamPositionTimestamp.get() >= (long)this.ramPrepareTime) {
                         entity.getBehaviorController().setMemory(MemoryModuleType.RAM_TARGET, this.getEdgeOfBlock(blockPos, this.ramCandidate.get().getTargetPosition()));
-                        world.playSound((EntityHuman)null, entity, this.getPrepareRamSound.apply(entity), SoundCategory.HOSTILE, 1.0F, entity.getVoicePitch());
+                        world.playSound((EntityHuman)null, entity, this.getPrepareRamSound.apply(entity), EnumSoundCategory.HOSTILE, 1.0F, entity.getVoicePitch());
                         this.ramCandidate = Optional.empty();
                     }
                 }

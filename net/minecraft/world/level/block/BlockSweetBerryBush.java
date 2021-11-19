@@ -3,7 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -90,7 +90,7 @@ public class BlockSweetBerryBush extends BlockPlant implements IBlockFragilePlan
         } else if (i > 1) {
             int j = 1 + world.random.nextInt(2);
             popResource(world, pos, new ItemStack(Items.SWEET_BERRIES, j + (bl ? 1 : 0)));
-            world.playSound((EntityHuman)null, pos, SoundEffects.SWEET_BERRY_BUSH_PICK_BERRIES, SoundCategory.BLOCKS, 1.0F, 0.8F + world.random.nextFloat() * 0.4F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.SWEET_BERRY_BUSH_PICK_BERRIES, EnumSoundCategory.BLOCKS, 1.0F, 0.8F + world.random.nextFloat() * 0.4F);
             world.setTypeAndData(pos, state.set(AGE, Integer.valueOf(1)), 2);
             return EnumInteractionResult.sidedSuccess(world.isClientSide);
         } else {

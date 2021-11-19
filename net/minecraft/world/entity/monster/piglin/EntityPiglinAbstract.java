@@ -8,7 +8,7 @@ import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -101,7 +101,7 @@ public abstract class EntityPiglinAbstract extends EntityMonster {
     protected void finishConversion(WorldServer world) {
         EntityPigZombie zombifiedPiglin = this.convertTo(EntityTypes.ZOMBIFIED_PIGLIN, true);
         if (zombifiedPiglin != null) {
-            zombifiedPiglin.addEffect(new MobEffect(MobEffects.CONFUSION, 200, 0));
+            zombifiedPiglin.addEffect(new MobEffect(MobEffectList.CONFUSION, 200, 0));
         }
 
     }

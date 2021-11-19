@@ -16,7 +16,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
@@ -27,7 +27,7 @@ import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityInsentient;
@@ -258,7 +258,7 @@ public class EntityParrot extends EntityPerchable implements EntityBird {
                 itemStack.subtract(1);
             }
 
-            this.addEffect(new MobEffect(MobEffects.POISON, 900));
+            this.addEffect(new MobEffect(MobEffectList.POISON, 900));
             if (player.isCreative() || !this.isInvulnerable()) {
                 this.damageEntity(DamageSource.playerAttack(player), Float.MAX_VALUE);
             }
@@ -365,8 +365,8 @@ public class EntityParrot extends EntityPerchable implements EntityBird {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.NEUTRAL;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.NEUTRAL;
     }
 
     @Override

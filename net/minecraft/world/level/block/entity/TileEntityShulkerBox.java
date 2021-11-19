@@ -9,7 +9,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ContainerUtil;
@@ -159,7 +159,7 @@ public class TileEntityShulkerBox extends TileEntityLootable implements IWorldIn
             this.level.playBlockAction(this.worldPosition, this.getBlock().getBlock(), 1, this.openCount);
             if (this.openCount == 1) {
                 this.level.gameEvent(player, GameEvent.CONTAINER_OPEN, this.worldPosition);
-                this.level.playSound((EntityHuman)null, this.worldPosition, SoundEffects.SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+                this.level.playSound((EntityHuman)null, this.worldPosition, SoundEffects.SHULKER_BOX_OPEN, EnumSoundCategory.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
             }
         }
 
@@ -172,7 +172,7 @@ public class TileEntityShulkerBox extends TileEntityLootable implements IWorldIn
             this.level.playBlockAction(this.worldPosition, this.getBlock().getBlock(), 1, this.openCount);
             if (this.openCount <= 0) {
                 this.level.gameEvent(player, GameEvent.CONTAINER_CLOSE, this.worldPosition);
-                this.level.playSound((EntityHuman)null, this.worldPosition, SoundEffects.SHULKER_BOX_CLOSE, SoundCategory.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
+                this.level.playSound((EntityHuman)null, this.worldPosition, SoundEffects.SHULKER_BOX_CLOSE, EnumSoundCategory.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F);
             }
         }
 

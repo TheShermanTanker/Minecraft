@@ -21,7 +21,7 @@ import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.TimeRange;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSourceIndirect;
 import net.minecraft.world.entity.Entity;
@@ -68,7 +68,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
     private static final DataWatcherObject<Boolean> DATA_STARED_AT = DataWatcher.defineId(EntityEnderman.class, DataWatcherRegistry.BOOLEAN);
     private int lastStareSound = Integer.MIN_VALUE;
     private int targetChangeTime;
-    private static final UniformInt PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
+    private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
     private UUID persistentAngerTarget;
 

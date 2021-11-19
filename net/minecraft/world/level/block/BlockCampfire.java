@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsBlock;
@@ -141,7 +141,7 @@ public class BlockCampfire extends BlockTileEntity implements IBlockWaterlogged 
     public void animateTick(IBlockData state, World world, BlockPosition pos, Random random) {
         if (state.get(LIT)) {
             if (random.nextInt(10) == 0) {
-                world.playLocalSound((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.CAMPFIRE_CRACKLE, SoundCategory.BLOCKS, 0.5F + random.nextFloat(), random.nextFloat() * 0.7F + 0.6F, false);
+                world.playLocalSound((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.CAMPFIRE_CRACKLE, EnumSoundCategory.BLOCKS, 0.5F + random.nextFloat(), random.nextFloat() * 0.7F + 0.6F, false);
             }
 
             if (this.spawnParticles && random.nextInt(5) == 0) {
@@ -174,7 +174,7 @@ public class BlockCampfire extends BlockTileEntity implements IBlockWaterlogged 
             boolean bl = state.get(LIT);
             if (bl) {
                 if (!world.isClientSide()) {
-                    world.playSound((EntityHuman)null, pos, SoundEffects.GENERIC_EXTINGUISH_FIRE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    world.playSound((EntityHuman)null, pos, SoundEffects.GENERIC_EXTINGUISH_FIRE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 }
 
                 dowse((Entity)null, world, pos, state);

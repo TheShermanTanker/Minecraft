@@ -6,7 +6,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.ContainerUtil;
@@ -109,7 +109,7 @@ public class TileEntityChest extends TileEntityLootable implements LidBlockEntit
                 f += (double)direction.getAdjacentZ() * 0.5D;
             }
 
-            world.playSound((EntityHuman)null, d, e, f, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+            world.playSound((EntityHuman)null, d, e, f, soundEvent, EnumSoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
         }
     }
 

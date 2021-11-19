@@ -9,12 +9,12 @@ import javax.annotation.Nullable;
 
 public class MetricsRegistry {
     public static final MetricsRegistry INSTANCE = new MetricsRegistry();
-    private final WeakHashMap<ProfilerMeasured, Void> measuredInstances = new WeakHashMap<>();
+    private final WeakHashMap<IProfilerMeasured, Void> measuredInstances = new WeakHashMap<>();
 
     private MetricsRegistry() {
     }
 
-    public void add(ProfilerMeasured executor) {
+    public void add(IProfilerMeasured executor) {
         this.measuredInstances.put(executor, (Void)null);
     }
 

@@ -8,9 +8,9 @@ import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.core.particles.ParticleParamDustColorTransition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.context.BlockActionContext;
@@ -216,7 +216,7 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
         world.setTypeAndData(pos, state.set(PHASE, SculkSensorPhase.COOLDOWN).set(POWER, Integer.valueOf(0)), 3);
         world.getBlockTickList().scheduleTick(new BlockPosition(pos), state.getBlock(), 1);
         if (!state.get(WATERLOGGED)) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.SCULK_CLICKING_STOP, SoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.SCULK_CLICKING_STOP, EnumSoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
         }
 
         updateNeighbours(world, pos);
@@ -227,7 +227,7 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
         world.getBlockTickList().scheduleTick(new BlockPosition(pos), state.getBlock(), 40);
         updateNeighbours(world, pos);
         if (!state.get(WATERLOGGED)) {
-            world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.SCULK_CLICKING, SoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
+            world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.SCULK_CLICKING, EnumSoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
         }
 
     }
@@ -241,7 +241,7 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
                 double e = (double)pos.getY() + 0.25D;
                 double f = (double)pos.getZ() + 0.5D + (direction.getAdjacentZ() == 0 ? 0.5D - random.nextDouble() : (double)direction.getAdjacentZ() * 0.6D);
                 double g = (double)random.nextFloat() * 0.04D;
-                world.addParticle(DustColorTransitionOptions.SCULK_TO_REDSTONE, d, e, f, 0.0D, g, 0.0D);
+                world.addParticle(ParticleParamDustColorTransition.SCULK_TO_REDSTONE, d, e, f, 0.0D, g, 0.0D);
             }
         }
     }

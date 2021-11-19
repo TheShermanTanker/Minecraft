@@ -7,11 +7,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.WeightedRandom;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntitySize;
@@ -30,7 +30,7 @@ public class LongJumpToRandomPos<E extends EntityInsentient> extends Behavior<E>
     private static final int PREPARE_JUMP_DURATION = 40;
     private static final int MIN_PATHFIND_DISTANCE_TO_VALID_JUMP = 8;
     public static final int TIME_OUT_DURATION = 200;
-    private final UniformInt timeBetweenLongJumps;
+    private final IntProviderUniform timeBetweenLongJumps;
     private final int maxLongJumpHeight;
     private final int maxLongJumpWidth;
     private final float maxJumpVelocity;
@@ -41,7 +41,7 @@ public class LongJumpToRandomPos<E extends EntityInsentient> extends Behavior<E>
     private long prepareJumpStart;
     private Function<E, SoundEffect> getJumpSound;
 
-    public LongJumpToRandomPos(UniformInt cooldownRange, int verticalRange, int horizontalRange, float maxRange, Function<E, SoundEffect> function) {
+    public LongJumpToRandomPos(IntProviderUniform cooldownRange, int verticalRange, int horizontalRange, float maxRange, Function<E, SoundEffect> function) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT), 200);
         this.timeBetweenLongJumps = cooldownRange;
         this.maxLongJumpHeight = verticalRange;
@@ -101,7 +101,7 @@ public class LongJumpToRandomPos<E extends EntityInsentient> extends Behavior<E>
                 double e = d + mob.getJumpBoostPower();
                 mob.setMot(vec3.scale(e / d));
                 mob.getBehaviorController().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
-                serverLevel.playSound((EntityHuman)null, mob, this.getJumpSound.apply(mob), SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                serverLevel.playSound((EntityHuman)null, mob, this.getJumpSound.apply(mob), EnumSoundCategory.NEUTRAL, 1.0F, 1.0F);
             }
         } else {
             --this.findJumpTries;

@@ -6,7 +6,7 @@ import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.AdvancementDataPlayer;
 
-public class CriterionTriggerImpossible implements CriterionTrigger<CriterionTriggerImpossible.TriggerInstance> {
+public class CriterionTriggerImpossible implements CriterionTrigger<CriterionTriggerImpossible.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("impossible");
 
     @Override
@@ -15,11 +15,11 @@ public class CriterionTriggerImpossible implements CriterionTrigger<CriterionTri
     }
 
     @Override
-    public void addPlayerListener(AdvancementDataPlayer manager, CriterionTrigger.Listener<CriterionTriggerImpossible.TriggerInstance> conditions) {
+    public void addPlayerListener(AdvancementDataPlayer manager, CriterionTrigger.Listener<CriterionTriggerImpossible.CriterionInstanceTrigger> conditions) {
     }
 
     @Override
-    public void removePlayerListener(AdvancementDataPlayer manager, CriterionTrigger.Listener<CriterionTriggerImpossible.TriggerInstance> conditions) {
+    public void removePlayerListener(AdvancementDataPlayer manager, CriterionTrigger.Listener<CriterionTriggerImpossible.CriterionInstanceTrigger> conditions) {
     }
 
     @Override
@@ -27,11 +27,11 @@ public class CriterionTriggerImpossible implements CriterionTrigger<CriterionTri
     }
 
     @Override
-    public CriterionTriggerImpossible.TriggerInstance createInstance(JsonObject jsonObject, LootDeserializationContext deserializationContext) {
-        return new CriterionTriggerImpossible.TriggerInstance();
+    public CriterionTriggerImpossible.CriterionInstanceTrigger createInstance(JsonObject jsonObject, LootDeserializationContext deserializationContext) {
+        return new CriterionTriggerImpossible.CriterionInstanceTrigger();
     }
 
-    public static class TriggerInstance implements CriterionInstance {
+    public static class CriterionInstanceTrigger implements CriterionInstance {
         @Override
         public MinecraftKey getCriterion() {
             return CriterionTriggerImpossible.ID;

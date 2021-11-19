@@ -14,7 +14,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsFluid;
@@ -149,7 +149,7 @@ public class EntityZombie extends EntityMonster {
 
     }
 
-    protected boolean supportsBreakDoorGoal() {
+    public boolean supportsBreakDoorGoal() {
         return true;
     }
 
@@ -546,12 +546,12 @@ public class EntityZombie extends EntityMonster {
 
         @Override
         public void playDestroyProgressSound(GeneratorAccess world, BlockPosition pos) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.ZOMBIE_DESTROY_EGG, SoundCategory.HOSTILE, 0.5F, 0.9F + EntityZombie.this.random.nextFloat() * 0.2F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.ZOMBIE_DESTROY_EGG, EnumSoundCategory.HOSTILE, 0.5F, 0.9F + EntityZombie.this.random.nextFloat() * 0.2F);
         }
 
         @Override
         public void playBreakSound(World world, BlockPosition pos) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_BREAK, SoundCategory.BLOCKS, 0.7F, 0.9F + world.random.nextFloat() * 0.2F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_BREAK, EnumSoundCategory.BLOCKS, 0.7F, 0.9F + world.random.nextFloat() * 0.2F);
         }
 
         @Override

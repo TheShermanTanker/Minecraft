@@ -3,7 +3,7 @@ package net.minecraft.world.entity.monster;
 import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumDifficulty;
@@ -31,8 +31,8 @@ public abstract class EntityMonster extends EntityCreature implements IMonster {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.HOSTILE;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.HOSTILE;
     }
 
     @Override

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.world.IInventory;
 import net.minecraft.world.InventorySubcontainer;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -132,13 +132,13 @@ public class ContainerBeacon extends Container {
     }
 
     @Nullable
-    public MobEffectList getPrimaryEffect() {
-        return MobEffectList.fromId(this.beaconData.getProperty(1));
+    public MobEffectBase getPrimaryEffect() {
+        return MobEffectBase.fromId(this.beaconData.getProperty(1));
     }
 
     @Nullable
-    public MobEffectList getSecondaryEffect() {
-        return MobEffectList.fromId(this.beaconData.getProperty(2));
+    public MobEffectBase getSecondaryEffect() {
+        return MobEffectBase.fromId(this.beaconData.getProperty(2));
     }
 
     public void updateEffects(int primaryEffectId, int secondaryEffectId) {

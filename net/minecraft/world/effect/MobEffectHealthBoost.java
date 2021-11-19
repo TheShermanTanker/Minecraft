@@ -3,7 +3,7 @@ package net.minecraft.world.effect;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.attributes.AttributeMapBase;
 
-public class MobEffectHealthBoost extends MobEffectList {
+public class MobEffectHealthBoost extends MobEffectBase {
     public MobEffectHealthBoost(MobEffectInfo type, int color) {
         super(type, color);
     }

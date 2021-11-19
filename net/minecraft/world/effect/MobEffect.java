@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 public class MobEffect implements Comparable<MobEffect> {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final MobEffectList effect;
+    private final MobEffectBase effect;
     private int duration;
     private int amplifier;
     private boolean ambient;
@@ -19,27 +19,27 @@ public class MobEffect implements Comparable<MobEffect> {
     @Nullable
     private MobEffect hiddenEffect;
 
-    public MobEffect(MobEffectList type) {
+    public MobEffect(MobEffectBase type) {
         this(type, 0, 0);
     }
 
-    public MobEffect(MobEffectList type, int duration) {
+    public MobEffect(MobEffectBase type, int duration) {
         this(type, duration, 0);
     }
 
-    public MobEffect(MobEffectList type, int duration, int amplifier) {
+    public MobEffect(MobEffectBase type, int duration, int amplifier) {
         this(type, duration, amplifier, false, true);
     }
 
-    public MobEffect(MobEffectList type, int duration, int amplifier, boolean ambient, boolean visible) {
+    public MobEffect(MobEffectBase type, int duration, int amplifier, boolean ambient, boolean visible) {
         this(type, duration, amplifier, ambient, visible, visible);
     }
 
-    public MobEffect(MobEffectList type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
+    public MobEffect(MobEffectBase type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
         this(type, duration, amplifier, ambient, showParticles, showIcon, (MobEffect)null);
     }
 
-    public MobEffect(MobEffectList type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon, @Nullable MobEffect hiddenEffect) {
+    public MobEffect(MobEffectBase type, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon, @Nullable MobEffect hiddenEffect) {
         this.effect = type;
         this.duration = duration;
         this.amplifier = amplifier;
@@ -107,7 +107,7 @@ public class MobEffect implements Comparable<MobEffect> {
         return bl;
     }
 
-    public MobEffectList getMobEffect() {
+    public MobEffectBase getMobEffect() {
         return this.effect;
     }
 
@@ -208,7 +208,7 @@ public class MobEffect implements Comparable<MobEffect> {
     }
 
     public NBTTagCompound save(NBTTagCompound nbt) {
-        nbt.setByte("Id", (byte)MobEffectList.getId(this.getMobEffect()));
+        nbt.setByte("Id", (byte)MobEffectBase.getId(this.getMobEffect()));
         this.writeDetailsTo(nbt);
         return nbt;
     }
@@ -230,11 +230,11 @@ public class MobEffect implements Comparable<MobEffect> {
     @Nullable
     public static MobEffect load(NBTTagCompound nbt) {
         int i = nbt.getByte("Id");
-        MobEffectList mobEffect = MobEffectList.fromId(i);
+        MobEffectBase mobEffect = MobEffectBase.fromId(i);
         return mobEffect == null ? null : loadSpecifiedEffect(mobEffect, nbt);
     }
 
-    private static MobEffect loadSpecifiedEffect(MobEffectList type, NBTTagCompound nbt) {
+    private static MobEffect loadSpecifiedEffect(MobEffectBase type, NBTTagCompound nbt) {
         int i = nbt.getByte("Amplifier");
         int j = nbt.getInt("Duration");
         boolean bl = nbt.getBoolean("Ambient");

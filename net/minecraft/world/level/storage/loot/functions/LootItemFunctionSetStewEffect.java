@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import net.minecraft.core.IRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.ChatDeserializer;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemSuspiciousStew;
 import net.minecraft.world.item.Items;
@@ -28,9 +28,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 
 public class LootItemFunctionSetStewEffect extends LootItemFunctionConditional {
-    final Map<MobEffectList, NumberProvider> effectDurationMap;
+    final Map<MobEffectBase, NumberProvider> effectDurationMap;
 
-    LootItemFunctionSetStewEffect(LootItemCondition[] conditions, Map<MobEffectList, NumberProvider> map) {
+    LootItemFunctionSetStewEffect(LootItemCondition[] conditions, Map<MobEffectBase, NumberProvider> map) {
         super(conditions);
         this.effectDurationMap = ImmutableMap.copyOf(map);
     }
@@ -52,8 +52,8 @@ public class LootItemFunctionSetStewEffect extends LootItemFunctionConditional {
         if (stack.is(Items.SUSPICIOUS_STEW) && !this.effectDurationMap.isEmpty()) {
             Random random = context.getRandom();
             int i = random.nextInt(this.effectDurationMap.size());
-            Entry<MobEffectList, NumberProvider> entry = Iterables.get(this.effectDurationMap.entrySet(), i);
-            MobEffectList mobEffect = entry.getKey();
+            Entry<MobEffectBase, NumberProvider> entry = Iterables.get(this.effectDurationMap.entrySet(), i);
+            MobEffectBase mobEffect = entry.getKey();
             int j = entry.getValue().getInt(context);
             if (!mobEffect.isInstant()) {
                 j *= 20;
@@ -71,14 +71,14 @@ public class LootItemFunctionSetStewEffect extends LootItemFunctionConditional {
     }
 
     public static class Builder extends LootItemFunctionConditional.Builder<LootItemFunctionSetStewEffect.Builder> {
-        private final Map<MobEffectList, NumberProvider> effectDurationMap = Maps.newHashMap();
+        private final Map<MobEffectBase, NumberProvider> effectDurationMap = Maps.newHashMap();
 
         @Override
         protected LootItemFunctionSetStewEffect.Builder getThis() {
             return this;
         }
 
-        public LootItemFunctionSetStewEffect.Builder withEffect(MobEffectList effect, NumberProvider durationRange) {
+        public LootItemFunctionSetStewEffect.Builder withEffect(MobEffectBase effect, NumberProvider durationRange) {
             this.effectDurationMap.put(effect, durationRange);
             return this;
         }
@@ -96,7 +96,7 @@ public class LootItemFunctionSetStewEffect extends LootItemFunctionConditional {
             if (!object.effectDurationMap.isEmpty()) {
                 JsonArray jsonArray = new JsonArray();
 
-                for(MobEffectList mobEffect : object.effectDurationMap.keySet()) {
+                for(MobEffectBase mobEffect : object.effectDurationMap.keySet()) {
                     JsonObject jsonObject = new JsonObject();
                     MinecraftKey resourceLocation = IRegistry.MOB_EFFECT.getKey(mobEffect);
                     if (resourceLocation == null) {
@@ -115,11 +115,11 @@ public class LootItemFunctionSetStewEffect extends LootItemFunctionConditional {
 
         @Override
         public LootItemFunctionSetStewEffect deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            Map<MobEffectList, NumberProvider> map = Maps.newHashMap();
+            Map<MobEffectBase, NumberProvider> map = Maps.newHashMap();
             if (jsonObject.has("effects")) {
                 for(JsonElement jsonElement : ChatDeserializer.getAsJsonArray(jsonObject, "effects")) {
                     String string = ChatDeserializer.getAsString(jsonElement.getAsJsonObject(), "type");
-                    MobEffectList mobEffect = IRegistry.MOB_EFFECT.getOptional(new MinecraftKey(string)).orElseThrow(() -> {
+                    MobEffectBase mobEffect = IRegistry.MOB_EFFECT.getOptional(new MinecraftKey(string)).orElseThrow(() -> {
                         return new JsonSyntaxException("Unknown mob effect '" + string + "'");
                     });
                     NumberProvider numberProvider = ChatDeserializer.getAsObject(jsonElement.getAsJsonObject(), "duration", jsonDeserializationContext, NumberProvider.class);

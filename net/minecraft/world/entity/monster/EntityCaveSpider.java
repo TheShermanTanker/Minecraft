@@ -5,7 +5,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
@@ -39,7 +39,7 @@ public class EntityCaveSpider extends EntitySpider {
                 }
 
                 if (i > 0) {
-                    ((EntityLiving)target).addEffect(new MobEffect(MobEffects.POISON, i * 20, 0), this);
+                    ((EntityLiving)target).addEffect(new MobEffect(MobEffectList.POISON, i * 20, 0), this);
                 }
             }
 

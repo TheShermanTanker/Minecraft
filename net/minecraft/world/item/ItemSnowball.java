@@ -1,6 +1,6 @@
 package net.minecraft.world.item;
 
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -17,7 +17,7 @@ public class ItemSnowball extends Item {
     @Override
     public InteractionResultWrapper<ItemStack> use(World world, EntityHuman user, EnumHand hand) {
         ItemStack itemStack = user.getItemInHand(hand);
-        world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+        world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.SNOWBALL_THROW, EnumSoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
         if (!world.isClientSide) {
             EntitySnowball snowball = new EntitySnowball(world, user);
             snowball.setItem(itemStack);

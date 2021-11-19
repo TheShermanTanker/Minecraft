@@ -13,7 +13,7 @@ import net.minecraft.commands.CustomFunction;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.entity.item.EntityItem;
@@ -49,7 +49,7 @@ public class AdvancementRewards {
         for(MinecraftKey resourceLocation : this.loot) {
             for(ItemStack itemStack : player.server.getLootTableRegistry().getLootTable(resourceLocation).populateLoot(lootContext)) {
                 if (player.addItem(itemStack)) {
-                    player.level.playSound((EntityHuman)null, player.locX(), player.locY(), player.locZ(), SoundEffects.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                    player.level.playSound((EntityHuman)null, player.locX(), player.locY(), player.locZ(), SoundEffects.ITEM_PICKUP, EnumSoundCategory.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
                     bl = true;
                 } else {
                     EntityItem itemEntity = player.drop(itemStack, false);

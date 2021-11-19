@@ -15,7 +15,7 @@ public class DispenseBehaviorShulkerBox extends DispenseBehaviorMaybe {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+    protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
         this.setSuccess(false);
         Item item = stack.getItem();
         if (item instanceof ItemBlock) {

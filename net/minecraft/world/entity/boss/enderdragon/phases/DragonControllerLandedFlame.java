@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityAreaEffectCloud;
 import net.minecraft.world.entity.boss.enderdragon.EntityEnderDragon;
 import net.minecraft.world.phys.Vec3D;
@@ -80,7 +80,7 @@ public class DragonControllerLandedFlame extends DragonControllerLandedAbstract 
             this.flame.setRadius(5.0F);
             this.flame.setDuration(200);
             this.flame.setParticle(Particles.DRAGON_BREATH);
-            this.flame.addEffect(new MobEffect(MobEffects.HARM));
+            this.flame.addEffect(new MobEffect(MobEffectList.HARM));
             this.dragon.level.addEntity(this.flame);
         }
 

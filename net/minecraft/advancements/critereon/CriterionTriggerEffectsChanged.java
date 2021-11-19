@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerEffectsChanged extends CriterionTriggerAbstract<CriterionTriggerEffectsChanged.TriggerInstance> {
+public class CriterionTriggerEffectsChanged extends CriterionTriggerAbstract<CriterionTriggerEffectsChanged.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("effects_changed");
 
     @Override
@@ -17,10 +17,10 @@ public class CriterionTriggerEffectsChanged extends CriterionTriggerAbstract<Cri
     }
 
     @Override
-    public CriterionTriggerEffectsChanged.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerEffectsChanged.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionMobEffect mobEffectsPredicate = CriterionConditionMobEffect.fromJson(jsonObject.get("effects"));
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "source", deserializationContext);
-        return new CriterionTriggerEffectsChanged.TriggerInstance(composite, mobEffectsPredicate, composite2);
+        return new CriterionTriggerEffectsChanged.CriterionInstanceTrigger(composite, mobEffectsPredicate, composite2);
     }
 
     public void trigger(EntityPlayer player, @Nullable Entity source) {
@@ -30,22 +30,22 @@ public class CriterionTriggerEffectsChanged extends CriterionTriggerAbstract<Cri
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionMobEffect effects;
         private final CriterionConditionEntity.Composite source;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionMobEffect effects, CriterionConditionEntity.Composite source) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionMobEffect effects, CriterionConditionEntity.Composite source) {
             super(CriterionTriggerEffectsChanged.ID, player);
             this.effects = effects;
             this.source = source;
         }
 
-        public static CriterionTriggerEffectsChanged.TriggerInstance hasEffects(CriterionConditionMobEffect effects) {
-            return new CriterionTriggerEffectsChanged.TriggerInstance(CriterionConditionEntity.Composite.ANY, effects, CriterionConditionEntity.Composite.ANY);
+        public static CriterionTriggerEffectsChanged.CriterionInstanceTrigger hasEffects(CriterionConditionMobEffect effects) {
+            return new CriterionTriggerEffectsChanged.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, effects, CriterionConditionEntity.Composite.ANY);
         }
 
-        public static CriterionTriggerEffectsChanged.TriggerInstance gotEffectsFrom(CriterionConditionEntity source) {
-            return new CriterionTriggerEffectsChanged.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionMobEffect.ANY, CriterionConditionEntity.Composite.wrap(source));
+        public static CriterionTriggerEffectsChanged.CriterionInstanceTrigger gotEffectsFrom(CriterionConditionEntity source) {
+            return new CriterionTriggerEffectsChanged.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionMobEffect.ANY, CriterionConditionEntity.Composite.wrap(source));
         }
 
         public boolean matches(EntityPlayer player, @Nullable LootTableInfo context) {

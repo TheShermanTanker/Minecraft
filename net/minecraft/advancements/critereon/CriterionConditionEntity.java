@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3D;
 import net.minecraft.world.scores.ScoreboardTeamBase;
 
 public class CriterionConditionEntity {
-    public static final CriterionConditionEntity ANY = new CriterionConditionEntity(CriterionConditionEntityType.ANY, CriterionConditionDistance.ANY, CriterionConditionLocation.ANY, CriterionConditionLocation.ANY, CriterionConditionMobEffect.ANY, CriterionConditionNBT.ANY, CriterionConditionEntityFlags.ANY, CriterionConditionEntityEquipment.ANY, CriterionConditionPlayer.ANY, CriterionConditionInOpenWater.ANY, LighthingBoltPredicate.ANY, (String)null, (MinecraftKey)null);
+    public static final CriterionConditionEntity ANY = new CriterionConditionEntity(CriterionConditionEntityType.ANY, CriterionConditionDistance.ANY, CriterionConditionLocation.ANY, CriterionConditionLocation.ANY, CriterionConditionMobEffect.ANY, CriterionConditionNBT.ANY, CriterionConditionEntityFlags.ANY, CriterionConditionEntityEquipment.ANY, CriterionConditionPlayer.ANY, CriterionConditionInOpenWater.ANY, CriterionConditionLightningStrike.ANY, (String)null, (MinecraftKey)null);
     private final CriterionConditionEntityType entityType;
     private final CriterionConditionDistance distanceToPlayer;
     private final CriterionConditionLocation location;
@@ -36,7 +36,7 @@ public class CriterionConditionEntity {
     private final CriterionConditionEntityEquipment equipment;
     private final CriterionConditionPlayer player;
     private final CriterionConditionInOpenWater fishingHook;
-    private final LighthingBoltPredicate lighthingBolt;
+    private final CriterionConditionLightningStrike lighthingBolt;
     private final CriterionConditionEntity vehicle;
     private final CriterionConditionEntity passenger;
     private final CriterionConditionEntity targetedEntity;
@@ -45,7 +45,7 @@ public class CriterionConditionEntity {
     @Nullable
     private final MinecraftKey catType;
 
-    private CriterionConditionEntity(CriterionConditionEntityType type, CriterionConditionDistance distance, CriterionConditionLocation location, CriterionConditionLocation steppingOn, CriterionConditionMobEffect effects, CriterionConditionNBT nbt, CriterionConditionEntityFlags flags, CriterionConditionEntityEquipment equipment, CriterionConditionPlayer player, CriterionConditionInOpenWater fishingHook, LighthingBoltPredicate lightningBolt, @Nullable String team, @Nullable MinecraftKey catType) {
+    private CriterionConditionEntity(CriterionConditionEntityType type, CriterionConditionDistance distance, CriterionConditionLocation location, CriterionConditionLocation steppingOn, CriterionConditionMobEffect effects, CriterionConditionNBT nbt, CriterionConditionEntityFlags flags, CriterionConditionEntityEquipment equipment, CriterionConditionPlayer player, CriterionConditionInOpenWater fishingHook, CriterionConditionLightningStrike lightningBolt, @Nullable String team, @Nullable MinecraftKey catType) {
         this.entityType = type;
         this.distanceToPlayer = distance;
         this.location = location;
@@ -64,7 +64,7 @@ public class CriterionConditionEntity {
         this.catType = catType;
     }
 
-    CriterionConditionEntity(CriterionConditionEntityType type, CriterionConditionDistance distance, CriterionConditionLocation location, CriterionConditionLocation steppingOn, CriterionConditionMobEffect effects, CriterionConditionNBT nbt, CriterionConditionEntityFlags flags, CriterionConditionEntityEquipment equipment, CriterionConditionPlayer player, CriterionConditionInOpenWater fishingHook, LighthingBoltPredicate lighthingBoltPredicate, CriterionConditionEntity vehicle, CriterionConditionEntity entityPredicate, CriterionConditionEntity targetedEntity, @Nullable String team, @Nullable MinecraftKey catType) {
+    CriterionConditionEntity(CriterionConditionEntityType type, CriterionConditionDistance distance, CriterionConditionLocation location, CriterionConditionLocation steppingOn, CriterionConditionMobEffect effects, CriterionConditionNBT nbt, CriterionConditionEntityFlags flags, CriterionConditionEntityEquipment equipment, CriterionConditionPlayer player, CriterionConditionInOpenWater fishingHook, CriterionConditionLightningStrike lighthingBoltPredicate, CriterionConditionEntity vehicle, CriterionConditionEntity entityPredicate, CriterionConditionEntity targetedEntity, @Nullable String team, @Nullable MinecraftKey catType) {
         this.entityType = type;
         this.distanceToPlayer = distance;
         this.location = location;
@@ -165,7 +165,7 @@ public class CriterionConditionEntity {
             CriterionConditionEntity entityPredicate = fromJson(jsonObject.get("vehicle"));
             CriterionConditionEntity entityPredicate2 = fromJson(jsonObject.get("passenger"));
             CriterionConditionEntity entityPredicate3 = fromJson(jsonObject.get("targeted_entity"));
-            LighthingBoltPredicate lighthingBoltPredicate = LighthingBoltPredicate.fromJson(jsonObject.get("lightning_bolt"));
+            CriterionConditionLightningStrike lighthingBoltPredicate = CriterionConditionLightningStrike.fromJson(jsonObject.get("lightning_bolt"));
             String string = ChatDeserializer.getAsString(jsonObject, "team", (String)null);
             MinecraftKey resourceLocation = jsonObject.has("catType") ? new MinecraftKey(ChatDeserializer.getAsString(jsonObject, "catType")) : null;
             return (new CriterionConditionEntity.Builder()).entityType(entityTypePredicate).distance(distancePredicate).located(locationPredicate).steppingOn(locationPredicate2).effects(mobEffectsPredicate).nbt(nbtPredicate).flags(entityFlagsPredicate).equipment(entityEquipmentPredicate).player(playerPredicate).fishingHook(fishingHookPredicate).lighthingBolt(lighthingBoltPredicate).team(string).vehicle(entityPredicate).passenger(entityPredicate2).targetedEntity(entityPredicate3).catType(resourceLocation).build();
@@ -217,7 +217,7 @@ public class CriterionConditionEntity {
         private CriterionConditionEntityEquipment equipment = CriterionConditionEntityEquipment.ANY;
         private CriterionConditionPlayer player = CriterionConditionPlayer.ANY;
         private CriterionConditionInOpenWater fishingHook = CriterionConditionInOpenWater.ANY;
-        private LighthingBoltPredicate lighthingBolt = LighthingBoltPredicate.ANY;
+        private CriterionConditionLightningStrike lighthingBolt = CriterionConditionLightningStrike.ANY;
         private CriterionConditionEntity vehicle = CriterionConditionEntity.ANY;
         private CriterionConditionEntity passenger = CriterionConditionEntity.ANY;
         private CriterionConditionEntity targetedEntity = CriterionConditionEntity.ANY;
@@ -293,7 +293,7 @@ public class CriterionConditionEntity {
             return this;
         }
 
-        public CriterionConditionEntity.Builder lighthingBolt(LighthingBoltPredicate lightningBolt) {
+        public CriterionConditionEntity.Builder lighthingBolt(CriterionConditionLightningStrike lightningBolt) {
             this.lighthingBolt = lightningBolt;
             return this;
         }

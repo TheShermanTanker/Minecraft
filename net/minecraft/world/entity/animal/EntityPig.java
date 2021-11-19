@@ -8,7 +8,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumDifficulty;
@@ -179,7 +179,7 @@ public class EntityPig extends EntityAnimal implements ISteerable, ISaddleable {
     }
 
     @Override
-    public void saddle(@Nullable SoundCategory sound) {
+    public void saddle(@Nullable EnumSoundCategory sound) {
         this.steering.setSaddle(true);
         if (sound != null) {
             this.level.playSound((EntityHuman)null, this, SoundEffects.PIG_SADDLE, sound, 0.5F, 1.0F);

@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.IRegistry;
 
 public class AttributeProvider {
-    private final Map<AttributeBase, AttributeModifiable> instances;
+    public final Map<AttributeBase, AttributeModifiable> instances;
 
     public AttributeProvider(Map<AttributeBase, AttributeModifiable> instances) {
         this.instances = ImmutableMap.copyOf(instances);

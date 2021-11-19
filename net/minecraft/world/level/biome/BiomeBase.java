@@ -24,8 +24,8 @@ import net.minecraft.data.RegistryGeneration;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.server.level.RegionLimitedWorldAccess;
-import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEffect;
+import net.minecraft.sounds.SoundTrack;
 import net.minecraft.util.INamable;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.ChunkCoordIntPair;
@@ -322,7 +322,7 @@ public final class BiomeBase {
         return this.specialEffects.getAmbientAdditionsSettings();
     }
 
-    public Optional<Music> getBackgroundMusic() {
+    public Optional<SoundTrack> getBackgroundMusic() {
         return this.specialEffects.getBackgroundMusic();
     }
 

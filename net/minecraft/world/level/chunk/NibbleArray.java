@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.util.VisibleForDebug;
 
-public class NibbleArray {
+public final class NibbleArray {
     public static final int LAYER_COUNT = 16;
     public static final int LAYER_SIZE = 128;
     public static final int SIZE = 2048;

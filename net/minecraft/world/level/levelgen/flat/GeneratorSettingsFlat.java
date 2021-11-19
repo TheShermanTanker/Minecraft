@@ -14,8 +14,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.SystemUtils;
 import net.minecraft.core.IRegistry;
-import net.minecraft.data.worldgen.BiomeDecoratorGroups;
-import net.minecraft.data.worldgen.StructureFeatures;
+import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.WorldGenStructureFeatures;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.BiomeSettingsGeneration;
@@ -49,22 +49,22 @@ public class GeneratorSettingsFlat {
         })).apply(instance, GeneratorSettingsFlat::new);
     }).comapFlatMap(GeneratorSettingsFlat::validateHeight, Function.identity()).stable();
     private static final Map<StructureGenerator<?>, StructureFeature<?, ?>> STRUCTURE_FEATURES = SystemUtils.make(Maps.newHashMap(), (hashMap) -> {
-        hashMap.put(StructureGenerator.MINESHAFT, StructureFeatures.MINESHAFT);
-        hashMap.put(StructureGenerator.VILLAGE, StructureFeatures.VILLAGE_PLAINS);
-        hashMap.put(StructureGenerator.STRONGHOLD, StructureFeatures.STRONGHOLD);
-        hashMap.put(StructureGenerator.SWAMP_HUT, StructureFeatures.SWAMP_HUT);
-        hashMap.put(StructureGenerator.DESERT_PYRAMID, StructureFeatures.DESERT_PYRAMID);
-        hashMap.put(StructureGenerator.JUNGLE_TEMPLE, StructureFeatures.JUNGLE_TEMPLE);
-        hashMap.put(StructureGenerator.IGLOO, StructureFeatures.IGLOO);
-        hashMap.put(StructureGenerator.OCEAN_RUIN, StructureFeatures.OCEAN_RUIN_COLD);
-        hashMap.put(StructureGenerator.SHIPWRECK, StructureFeatures.SHIPWRECK);
-        hashMap.put(StructureGenerator.OCEAN_MONUMENT, StructureFeatures.OCEAN_MONUMENT);
-        hashMap.put(StructureGenerator.END_CITY, StructureFeatures.END_CITY);
-        hashMap.put(StructureGenerator.WOODLAND_MANSION, StructureFeatures.WOODLAND_MANSION);
-        hashMap.put(StructureGenerator.NETHER_BRIDGE, StructureFeatures.NETHER_BRIDGE);
-        hashMap.put(StructureGenerator.PILLAGER_OUTPOST, StructureFeatures.PILLAGER_OUTPOST);
-        hashMap.put(StructureGenerator.RUINED_PORTAL, StructureFeatures.RUINED_PORTAL_STANDARD);
-        hashMap.put(StructureGenerator.BASTION_REMNANT, StructureFeatures.BASTION_REMNANT);
+        hashMap.put(StructureGenerator.MINESHAFT, WorldGenStructureFeatures.MINESHAFT);
+        hashMap.put(StructureGenerator.VILLAGE, WorldGenStructureFeatures.VILLAGE_PLAINS);
+        hashMap.put(StructureGenerator.STRONGHOLD, WorldGenStructureFeatures.STRONGHOLD);
+        hashMap.put(StructureGenerator.SWAMP_HUT, WorldGenStructureFeatures.SWAMP_HUT);
+        hashMap.put(StructureGenerator.DESERT_PYRAMID, WorldGenStructureFeatures.DESERT_PYRAMID);
+        hashMap.put(StructureGenerator.JUNGLE_TEMPLE, WorldGenStructureFeatures.JUNGLE_TEMPLE);
+        hashMap.put(StructureGenerator.IGLOO, WorldGenStructureFeatures.IGLOO);
+        hashMap.put(StructureGenerator.OCEAN_RUIN, WorldGenStructureFeatures.OCEAN_RUIN_COLD);
+        hashMap.put(StructureGenerator.SHIPWRECK, WorldGenStructureFeatures.SHIPWRECK);
+        hashMap.put(StructureGenerator.OCEAN_MONUMENT, WorldGenStructureFeatures.OCEAN_MONUMENT);
+        hashMap.put(StructureGenerator.END_CITY, WorldGenStructureFeatures.END_CITY);
+        hashMap.put(StructureGenerator.WOODLAND_MANSION, WorldGenStructureFeatures.WOODLAND_MANSION);
+        hashMap.put(StructureGenerator.NETHER_BRIDGE, WorldGenStructureFeatures.NETHER_BRIDGE);
+        hashMap.put(StructureGenerator.PILLAGER_OUTPOST, WorldGenStructureFeatures.PILLAGER_OUTPOST);
+        hashMap.put(StructureGenerator.RUINED_PORTAL, WorldGenStructureFeatures.RUINED_PORTAL_STANDARD);
+        hashMap.put(StructureGenerator.BASTION_REMNANT, WorldGenStructureFeatures.BASTION_REMNANT);
     });
     private final IRegistry<BiomeBase> biomes;
     private final StructureSettings structureSettings;
@@ -149,8 +149,8 @@ public class GeneratorSettingsFlat {
         BiomeSettingsGeneration biomeGenerationSettings = biome.getGenerationSettings();
         BiomeSettingsGeneration.Builder builder = (new BiomeSettingsGeneration.Builder()).surfaceBuilder(biomeGenerationSettings.getSurfaceBuilder());
         if (this.addLakes) {
-            builder.addFeature(WorldGenStage.Decoration.LAKES, BiomeDecoratorGroups.LAKE_WATER);
-            builder.addFeature(WorldGenStage.Decoration.LAKES, BiomeDecoratorGroups.LAKE_LAVA);
+            builder.addFeature(WorldGenStage.Decoration.LAKES, WorldGenBiomeDecoratorGroups.LAKE_WATER);
+            builder.addFeature(WorldGenStage.Decoration.LAKES, WorldGenBiomeDecoratorGroups.LAKE_LAVA);
         }
 
         for(Entry<StructureGenerator<?>, StructureSettingsFeature> entry : this.structureSettings.structureConfig().entrySet()) {

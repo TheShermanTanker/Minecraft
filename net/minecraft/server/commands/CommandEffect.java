@@ -13,7 +13,7 @@ import net.minecraft.commands.arguments.ArgumentEntity;
 import net.minecraft.commands.arguments.ArgumentMobEffect;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 
@@ -42,7 +42,7 @@ public class CommandEffect {
         }))))))));
     }
 
-    private static int giveEffect(CommandListenerWrapper source, Collection<? extends Entity> targets, MobEffectList effect, @Nullable Integer seconds, int amplifier, boolean showParticles) throws CommandSyntaxException {
+    private static int giveEffect(CommandListenerWrapper source, Collection<? extends Entity> targets, MobEffectBase effect, @Nullable Integer seconds, int amplifier, boolean showParticles) throws CommandSyntaxException {
         int i = 0;
         int j;
         if (seconds != null) {
@@ -101,7 +101,7 @@ public class CommandEffect {
         }
     }
 
-    private static int clearEffect(CommandListenerWrapper source, Collection<? extends Entity> targets, MobEffectList effect) throws CommandSyntaxException {
+    private static int clearEffect(CommandListenerWrapper source, Collection<? extends Entity> targets, MobEffectBase effect) throws CommandSyntaxException {
         int i = 0;
 
         for(Entity entity : targets) {

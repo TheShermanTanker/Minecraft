@@ -13,17 +13,17 @@ import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.protocol.game.PacketPlayOutStopSound;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 
 public class CommandStopSound {
     public static void register(CommandDispatcher<CommandListenerWrapper> dispatcher) {
         RequiredArgumentBuilder<CommandListenerWrapper, EntitySelector> requiredArgumentBuilder = net.minecraft.commands.CommandDispatcher.argument("targets", ArgumentEntity.players()).executes((context) -> {
-            return stopSound(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), (SoundCategory)null, (MinecraftKey)null);
+            return stopSound(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), (EnumSoundCategory)null, (MinecraftKey)null);
         }).then(net.minecraft.commands.CommandDispatcher.literal("*").then(net.minecraft.commands.CommandDispatcher.argument("sound", ArgumentMinecraftKeyRegistered.id()).suggests(CompletionProviders.AVAILABLE_SOUNDS).executes((context) -> {
-            return stopSound(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), (SoundCategory)null, ArgumentMinecraftKeyRegistered.getId(context, "sound"));
+            return stopSound(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), (EnumSoundCategory)null, ArgumentMinecraftKeyRegistered.getId(context, "sound"));
         })));
 
-        for(SoundCategory soundSource : SoundCategory.values()) {
+        for(EnumSoundCategory soundSource : EnumSoundCategory.values()) {
             requiredArgumentBuilder.then(net.minecraft.commands.CommandDispatcher.literal(soundSource.getName()).executes((context) -> {
                 return stopSound(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), soundSource, (MinecraftKey)null);
             }).then(net.minecraft.commands.CommandDispatcher.argument("sound", ArgumentMinecraftKeyRegistered.id()).suggests(CompletionProviders.AVAILABLE_SOUNDS).executes((context) -> {
@@ -36,7 +36,7 @@ public class CommandStopSound {
         }).then(requiredArgumentBuilder));
     }
 
-    private static int stopSound(CommandListenerWrapper source, Collection<EntityPlayer> targets, @Nullable SoundCategory category, @Nullable MinecraftKey sound) {
+    private static int stopSound(CommandListenerWrapper source, Collection<EntityPlayer> targets, @Nullable EnumSoundCategory category, @Nullable MinecraftKey sound) {
         PacketPlayOutStopSound clientboundStopSoundPacket = new PacketPlayOutStopSound(sound, category);
 
         for(EntityPlayer serverPlayer : targets) {

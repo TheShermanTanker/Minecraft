@@ -14,7 +14,7 @@ public abstract class DispenseBehaviorMaybe extends DispenseBehaviorItem {
     }
 
     @Override
-    protected void playSound(ISourceBlock pointer) {
+    protected void a(ISourceBlock pointer) {
         pointer.getWorld().triggerEffect(this.isSuccess() ? 1000 : 1001, pointer.getBlockPosition(), 0);
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.phys.Vec3D;
 
-public class CriterionTriggerNetherTravel extends CriterionTriggerAbstract<CriterionTriggerNetherTravel.TriggerInstance> {
+public class CriterionTriggerNetherTravel extends CriterionTriggerAbstract<CriterionTriggerNetherTravel.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("nether_travel");
 
     @Override
@@ -15,11 +15,11 @@ public class CriterionTriggerNetherTravel extends CriterionTriggerAbstract<Crite
     }
 
     @Override
-    public CriterionTriggerNetherTravel.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerNetherTravel.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionLocation locationPredicate = CriterionConditionLocation.fromJson(jsonObject.get("entered"));
         CriterionConditionLocation locationPredicate2 = CriterionConditionLocation.fromJson(jsonObject.get("exited"));
         CriterionConditionDistance distancePredicate = CriterionConditionDistance.fromJson(jsonObject.get("distance"));
-        return new CriterionTriggerNetherTravel.TriggerInstance(composite, locationPredicate, locationPredicate2, distancePredicate);
+        return new CriterionTriggerNetherTravel.CriterionInstanceTrigger(composite, locationPredicate, locationPredicate2, distancePredicate);
     }
 
     public void trigger(EntityPlayer player, Vec3D enteredPos) {
@@ -28,20 +28,20 @@ public class CriterionTriggerNetherTravel extends CriterionTriggerAbstract<Crite
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionLocation entered;
         private final CriterionConditionLocation exited;
         private final CriterionConditionDistance distance;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionLocation enteredPos, CriterionConditionLocation exitedPos, CriterionConditionDistance distance) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionLocation enteredPos, CriterionConditionLocation exitedPos, CriterionConditionDistance distance) {
             super(CriterionTriggerNetherTravel.ID, player);
             this.entered = enteredPos;
             this.exited = exitedPos;
             this.distance = distance;
         }
 
-        public static CriterionTriggerNetherTravel.TriggerInstance travelledThroughNether(CriterionConditionDistance distance) {
-            return new CriterionTriggerNetherTravel.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionLocation.ANY, CriterionConditionLocation.ANY, distance);
+        public static CriterionTriggerNetherTravel.CriterionInstanceTrigger travelledThroughNether(CriterionConditionDistance distance) {
+            return new CriterionTriggerNetherTravel.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionLocation.ANY, CriterionConditionLocation.ANY, distance);
         }
 
         public boolean matches(WorldServer world, Vec3D enteredPos, double exitedPosX, double exitedPosY, double exitedPosZ) {

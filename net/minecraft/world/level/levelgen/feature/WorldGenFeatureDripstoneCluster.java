@@ -9,7 +9,7 @@ import net.minecraft.core.EnumDirection;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.valueproviders.ClampedNormalFloat;
+import net.minecraft.util.valueproviders.FloatProviderClampedNormal;
 import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.IWorldReader;
@@ -178,6 +178,6 @@ public class WorldGenFeatureDripstoneCluster extends WorldGenerator<DripstoneClu
     }
 
     private static float randomBetweenBiased(Random random, float min, float max, float mean, float deviation) {
-        return ClampedNormalFloat.sample(random, mean, deviation, min, max);
+        return FloatProviderClampedNormal.sample(random, mean, deviation, min, max);
     }
 }

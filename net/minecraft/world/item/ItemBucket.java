@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
@@ -116,7 +116,7 @@ public class ItemBucket extends Item implements DispensibleContainerItem {
                 int i = pos.getX();
                 int j = pos.getY();
                 int k = pos.getZ();
-                world.playSound(player, pos, SoundEffects.FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
+                world.playSound(player, pos, SoundEffects.FIRE_EXTINGUISH, EnumSoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
 
                 for(int l = 0; l < 8; ++l) {
                     world.addParticle(Particles.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0D, 0.0D, 0.0D);
@@ -144,7 +144,7 @@ public class ItemBucket extends Item implements DispensibleContainerItem {
 
     protected void playEmptySound(@Nullable EntityHuman player, GeneratorAccess world, BlockPosition pos) {
         SoundEffect soundEvent = this.content.is(TagsFluid.LAVA) ? SoundEffects.BUCKET_EMPTY_LAVA : SoundEffects.BUCKET_EMPTY;
-        world.playSound(player, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.playSound(player, pos, soundEvent, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
         world.gameEvent(player, GameEvent.FLUID_PLACE, pos);
     }
 }

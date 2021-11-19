@@ -11,13 +11,13 @@ import net.minecraft.world.level.block.BlockDispenser;
 public class DispenseBehaviorItem implements IDispenseBehavior {
     @Override
     public final ItemStack dispense(ISourceBlock pointer, ItemStack stack) {
-        ItemStack itemStack = this.execute(pointer, stack);
-        this.playSound(pointer);
+        ItemStack itemStack = this.a(pointer, stack);
+        this.a(pointer);
         this.playAnimation(pointer, pointer.getBlockData().get(BlockDispenser.FACING));
         return itemStack;
     }
 
-    protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+    protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
         EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
         IPosition position = BlockDispenser.getDispensePosition(pointer);
         ItemStack itemStack = stack.cloneAndSubtract(1);
@@ -41,7 +41,7 @@ public class DispenseBehaviorItem implements IDispenseBehavior {
         world.addEntity(itemEntity);
     }
 
-    protected void playSound(ISourceBlock pointer) {
+    protected void a(ISourceBlock pointer) {
         pointer.getWorld().triggerEffect(1000, pointer.getBlockPosition(), 0);
     }
 

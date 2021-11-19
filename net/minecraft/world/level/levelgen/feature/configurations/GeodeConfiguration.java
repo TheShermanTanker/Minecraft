@@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
@@ -23,11 +23,11 @@ public class GeodeConfiguration implements WorldGenFeatureConfiguration {
             return geodeConfiguration.useAlternateLayer0Chance;
         }), Codec.BOOL.fieldOf("placements_require_layer0_alternate").orElse(true).forGetter((geodeConfiguration) -> {
             return geodeConfiguration.placementsRequireLayer0Alternate;
-        }), IntProvider.codec(1, 20).fieldOf("outer_wall_distance").orElse(UniformInt.of(4, 5)).forGetter((geodeConfiguration) -> {
+        }), IntProvider.codec(1, 20).fieldOf("outer_wall_distance").orElse(IntProviderUniform.of(4, 5)).forGetter((geodeConfiguration) -> {
             return geodeConfiguration.outerWallDistance;
-        }), IntProvider.codec(1, 20).fieldOf("distribution_points").orElse(UniformInt.of(3, 4)).forGetter((geodeConfiguration) -> {
+        }), IntProvider.codec(1, 20).fieldOf("distribution_points").orElse(IntProviderUniform.of(3, 4)).forGetter((geodeConfiguration) -> {
             return geodeConfiguration.distributionPoints;
-        }), IntProvider.codec(0, 10).fieldOf("point_offset").orElse(UniformInt.of(1, 2)).forGetter((geodeConfiguration) -> {
+        }), IntProvider.codec(0, 10).fieldOf("point_offset").orElse(IntProviderUniform.of(1, 2)).forGetter((geodeConfiguration) -> {
             return geodeConfiguration.pointOffset;
         }), Codec.INT.fieldOf("min_gen_offset").orElse(-16).forGetter((geodeConfiguration) -> {
             return geodeConfiguration.minGenOffset;

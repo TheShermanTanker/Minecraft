@@ -29,8 +29,8 @@ import net.minecraft.stats.StatisticList;
 import net.minecraft.stats.StatisticWrapper;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectList;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.AttributeBase;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
@@ -113,7 +113,7 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     public static final IRegistry<? extends IRegistry<?>> REGISTRY = WRITABLE_REGISTRY;
     public static final ResourceKey<IRegistry<SoundEffect>> SOUND_EVENT_REGISTRY = createRegistryKey("sound_event");
     public static final ResourceKey<IRegistry<FluidType>> FLUID_REGISTRY = createRegistryKey("fluid");
-    public static final ResourceKey<IRegistry<MobEffectList>> MOB_EFFECT_REGISTRY = createRegistryKey("mob_effect");
+    public static final ResourceKey<IRegistry<MobEffectBase>> MOB_EFFECT_REGISTRY = createRegistryKey("mob_effect");
     public static final ResourceKey<IRegistry<Block>> BLOCK_REGISTRY = createRegistryKey("block");
     public static final ResourceKey<IRegistry<Enchantment>> ENCHANTMENT_REGISTRY = createRegistryKey("enchantment");
     public static final ResourceKey<IRegistry<EntityTypes<?>>> ENTITY_TYPE_REGISTRY = createRegistryKey("entity_type");
@@ -158,8 +158,8 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     public static final RegistryBlocks<FluidType> FLUID = registerDefaulted(FLUID_REGISTRY, "empty", () -> {
         return FluidTypes.EMPTY;
     });
-    public static final IRegistry<MobEffectList> MOB_EFFECT = registerSimple(MOB_EFFECT_REGISTRY, () -> {
-        return MobEffects.LUCK;
+    public static final IRegistry<MobEffectBase> MOB_EFFECT = registerSimple(MOB_EFFECT_REGISTRY, () -> {
+        return MobEffectList.LUCK;
     });
     public static final RegistryBlocks<Block> BLOCK = registerDefaulted(BLOCK_REGISTRY, "air", () -> {
         return Blocks.AIR;

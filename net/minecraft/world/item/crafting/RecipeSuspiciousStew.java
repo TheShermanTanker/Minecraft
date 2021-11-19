@@ -2,7 +2,7 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.tags.TagsItem;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.inventory.InventoryCrafting;
 import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
@@ -61,7 +61,7 @@ public class RecipeSuspiciousStew extends IRecipeComplex {
         ItemStack itemStack3 = new ItemStack(Items.SUSPICIOUS_STEW, 1);
         if (itemStack.getItem() instanceof ItemBlock && ((ItemBlock)itemStack.getItem()).getBlock() instanceof BlockFlowers) {
             BlockFlowers flowerBlock = (BlockFlowers)((ItemBlock)itemStack.getItem()).getBlock();
-            MobEffectList mobEffect = flowerBlock.getSuspiciousStewEffect();
+            MobEffectBase mobEffect = flowerBlock.getSuspiciousStewEffect();
             ItemSuspiciousStew.saveMobEffect(itemStack3, mobEffect, flowerBlock.getEffectDuration());
         }
 

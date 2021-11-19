@@ -11,7 +11,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -174,7 +174,7 @@ public class EntityGoat extends EntityAnimal {
         } else {
             EnumInteractionResult interactionResult = super.mobInteract(player, hand);
             if (interactionResult.consumesAction() && this.isBreedItem(itemStack)) {
-                this.level.playSound((EntityHuman)null, this, this.getEatingSound(itemStack), SoundCategory.NEUTRAL, 1.0F, MathHelper.randomBetween(this.level.random, 0.8F, 1.2F));
+                this.level.playSound((EntityHuman)null, this, this.getEatingSound(itemStack), EnumSoundCategory.NEUTRAL, 1.0F, MathHelper.randomBetween(this.level.random, 0.8F, 1.2F));
             }
 
             return interactionResult;

@@ -10,7 +10,7 @@ import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsBlock;
@@ -117,7 +117,7 @@ public class BlockBeehive extends BlockTileEntity {
         if (i >= 5) {
             Item item = itemStack.getItem();
             if (itemStack.is(Items.SHEARS)) {
-                world.playSound(player, player.locX(), player.locY(), player.locZ(), SoundEffects.BEEHIVE_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                world.playSound(player, player.locX(), player.locY(), player.locZ(), SoundEffects.BEEHIVE_SHEAR, EnumSoundCategory.NEUTRAL, 1.0F, 1.0F);
                 dropHoneycomb(world, pos);
                 itemStack.damage(1, player, (playerx) -> {
                     playerx.broadcastItemBreak(hand);
@@ -126,7 +126,7 @@ public class BlockBeehive extends BlockTileEntity {
                 world.gameEvent(player, GameEvent.SHEAR, pos);
             } else if (itemStack.is(Items.GLASS_BOTTLE)) {
                 itemStack.subtract(1);
-                world.playSound(player, player.locX(), player.locY(), player.locZ(), SoundEffects.BOTTLE_FILL, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                world.playSound(player, player.locX(), player.locY(), player.locZ(), SoundEffects.BOTTLE_FILL, EnumSoundCategory.NEUTRAL, 1.0F, 1.0F);
                 if (itemStack.isEmpty()) {
                     player.setItemInHand(hand, new ItemStack(Items.HONEY_BOTTLE));
                 } else if (!player.getInventory().pickup(new ItemStack(Items.HONEY_BOTTLE))) {

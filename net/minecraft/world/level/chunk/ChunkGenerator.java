@@ -19,7 +19,7 @@ import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryCustom;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPosition;
-import net.minecraft.data.worldgen.StructureFeatures;
+import net.minecraft.data.worldgen.WorldGenStructureFeatures;
 import net.minecraft.network.protocol.game.PacketDebug;
 import net.minecraft.server.level.RegionLimitedWorldAccess;
 import net.minecraft.server.level.WorldServer;
@@ -239,7 +239,7 @@ public abstract class ChunkGenerator {
 
     public void createStructures(IRegistryCustom registryManager, StructureManager accessor, IChunkAccess chunk, DefinedStructureManager structureManager, long worldSeed) {
         BiomeBase biome = this.biomeSource.getPrimaryBiome(chunk.getPos());
-        this.createStructure(StructureFeatures.STRONGHOLD, registryManager, accessor, chunk, structureManager, worldSeed, biome);
+        this.createStructure(WorldGenStructureFeatures.STRONGHOLD, registryManager, accessor, chunk, structureManager, worldSeed, biome);
 
         for(Supplier<StructureFeature<?, ?>> supplier : biome.getGenerationSettings().structures()) {
             this.createStructure(supplier.get(), registryManager, accessor, chunk, structureManager, worldSeed, biome);

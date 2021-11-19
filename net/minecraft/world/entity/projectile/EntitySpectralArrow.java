@@ -3,7 +3,7 @@ package net.minecraft.world.entity.projectile;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +42,7 @@ public class EntitySpectralArrow extends EntityArrow {
     @Override
     protected void doPostHurtEffects(EntityLiving target) {
         super.doPostHurtEffects(target);
-        MobEffect mobEffectInstance = new MobEffect(MobEffects.GLOWING, this.duration, 0);
+        MobEffect mobEffectInstance = new MobEffect(MobEffectList.GLOWING, this.duration, 0);
         target.addEffect(mobEffectInstance, this.getEffectSource());
     }
 

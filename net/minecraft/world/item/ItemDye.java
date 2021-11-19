@@ -2,7 +2,7 @@ package net.minecraft.world.item;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -25,7 +25,7 @@ public class ItemDye extends Item {
         if (entity instanceof EntitySheep) {
             EntitySheep sheep = (EntitySheep)entity;
             if (sheep.isAlive() && !sheep.isSheared() && sheep.getColor() != this.dyeColor) {
-                sheep.level.playSound(user, sheep, SoundEffects.DYE_USE, SoundCategory.PLAYERS, 1.0F, 1.0F);
+                sheep.level.playSound(user, sheep, SoundEffects.DYE_USE, EnumSoundCategory.PLAYERS, 1.0F, 1.0F);
                 if (!user.level.isClientSide) {
                     sheep.setColor(this.dyeColor);
                     stack.subtract(1);

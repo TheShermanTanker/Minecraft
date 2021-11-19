@@ -10,7 +10,7 @@ import net.minecraft.commands.arguments.item.ArgumentItemStack;
 import net.minecraft.commands.arguments.item.ArgumentPredicateItemStack;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -51,7 +51,7 @@ public class CommandGive {
                             itemEntity2.makeFakeItem();
                         }
 
-                        serverPlayer.level.playSound((EntityHuman)null, serverPlayer.locX(), serverPlayer.locY(), serverPlayer.locZ(), SoundEffects.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                        serverPlayer.level.playSound((EntityHuman)null, serverPlayer.locX(), serverPlayer.locY(), serverPlayer.locZ(), SoundEffects.ITEM_PICKUP, EnumSoundCategory.PLAYERS, 0.2F, ((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
                         serverPlayer.containerMenu.broadcastChanges();
                     } else {
                         EntityItem itemEntity = serverPlayer.drop(itemStack, false);

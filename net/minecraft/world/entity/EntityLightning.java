@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.level.GameRules;
@@ -53,8 +53,8 @@ public class EntityLightning extends Entity {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.WEATHER;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.WEATHER;
     }
 
     @Nullable
@@ -80,8 +80,8 @@ public class EntityLightning extends Entity {
         super.tick();
         if (this.life == 2) {
             if (this.level.isClientSide()) {
-                this.level.playLocalSound(this.locX(), this.locY(), this.locZ(), SoundEffects.LIGHTNING_BOLT_THUNDER, SoundCategory.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F, false);
-                this.level.playLocalSound(this.locX(), this.locY(), this.locZ(), SoundEffects.LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F, false);
+                this.level.playLocalSound(this.locX(), this.locY(), this.locZ(), SoundEffects.LIGHTNING_BOLT_THUNDER, EnumSoundCategory.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F, false);
+                this.level.playLocalSound(this.locX(), this.locY(), this.locZ(), SoundEffects.LIGHTNING_BOLT_IMPACT, EnumSoundCategory.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F, false);
             } else {
                 EnumDifficulty difficulty = this.level.getDifficulty();
                 if (difficulty == EnumDifficulty.NORMAL || difficulty == EnumDifficulty.HARD) {

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -110,7 +110,7 @@ public class BlockRedstoneComparator extends BlockDiodeAbstract implements ITile
         } else {
             state = state.cycle(MODE);
             float f = state.get(MODE) == BlockPropertyComparatorMode.SUBTRACT ? 0.55F : 0.5F;
-            world.playSound(player, pos, SoundEffects.COMPARATOR_CLICK, SoundCategory.BLOCKS, 0.3F, f);
+            world.playSound(player, pos, SoundEffects.COMPARATOR_CLICK, EnumSoundCategory.BLOCKS, 0.3F, f);
             world.setTypeAndData(pos, state, 2);
             this.refreshOutputState(world, pos, state);
             return EnumInteractionResult.sidedSuccess(world.isClientSide);

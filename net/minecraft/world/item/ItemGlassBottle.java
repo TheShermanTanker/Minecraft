@@ -2,7 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsFluid;
@@ -33,7 +33,7 @@ public class ItemGlassBottle extends Item {
         if (!list.isEmpty()) {
             EntityAreaEffectCloud areaEffectCloud = list.get(0);
             areaEffectCloud.setRadius(areaEffectCloud.getRadius() - 0.5F);
-            world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.BOTTLE_FILL_DRAGONBREATH, EnumSoundCategory.NEUTRAL, 1.0F, 1.0F);
             world.gameEvent(user, GameEvent.FLUID_PICKUP, user.getChunkCoordinates());
             return InteractionResultWrapper.sidedSuccess(this.turnBottleIntoItem(itemStack, user, new ItemStack(Items.DRAGON_BREATH)), world.isClientSide());
         } else {
@@ -48,7 +48,7 @@ public class ItemGlassBottle extends Item {
                     }
 
                     if (world.getFluid(blockPos).is(TagsFluid.WATER)) {
-                        world.playSound(user, user.locX(), user.locY(), user.locZ(), SoundEffects.BOTTLE_FILL, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+                        world.playSound(user, user.locX(), user.locY(), user.locZ(), SoundEffects.BOTTLE_FILL, EnumSoundCategory.NEUTRAL, 1.0F, 1.0F);
                         world.gameEvent(user, GameEvent.FLUID_PICKUP, blockPos);
                         return InteractionResultWrapper.sidedSuccess(this.turnBottleIntoItem(itemStack, user, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER)), world.isClientSide());
                     }

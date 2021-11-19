@@ -16,7 +16,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.players.NameReferencingFileConverter;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -204,7 +204,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
     }
 
     @Override
-    public void saddle(@Nullable SoundCategory sound) {
+    public void saddle(@Nullable EnumSoundCategory sound) {
         this.inventory.setItem(0, new ItemStack(Items.SADDLE));
         if (sound != null) {
             this.level.playSound((EntityHuman)null, this, SoundEffects.HORSE_SADDLE, sound, 0.5F, 1.0F);

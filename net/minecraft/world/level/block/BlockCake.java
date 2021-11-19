@@ -2,7 +2,7 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsItem;
@@ -55,7 +55,7 @@ public class BlockCake extends Block {
                     itemStack.subtract(1);
                 }
 
-                world.playSound((EntityHuman)null, pos, SoundEffects.CAKE_ADD_CANDLE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.CAKE_ADD_CANDLE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 world.setTypeUpdate(pos, BlockCandleCake.byCandle(block));
                 world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
                 player.awardStat(StatisticList.ITEM_USED.get(item));

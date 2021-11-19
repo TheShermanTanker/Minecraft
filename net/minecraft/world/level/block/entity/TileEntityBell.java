@@ -4,13 +4,13 @@ import java.util.List;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsEntity;
 import net.minecraft.util.ColorUtil;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -66,7 +66,7 @@ public class TileEntityBell extends TileEntity {
 
         if (blockEntity.ticks >= 5 && blockEntity.resonationTicks == 0 && areRaidersNearby(pos, blockEntity.nearbyEntities)) {
             blockEntity.resonating = true;
-            world.playSound((EntityHuman)null, pos, SoundEffects.BELL_RESONATE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.BELL_RESONATE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
         }
 
         if (blockEntity.resonating) {
@@ -164,7 +164,7 @@ public class TileEntityBell extends TileEntity {
     }
 
     private static void glow(EntityLiving entity) {
-        entity.addEffect(new MobEffect(MobEffects.GLOWING, 60));
+        entity.addEffect(new MobEffect(MobEffectList.GLOWING, 60));
     }
 
     @FunctionalInterface

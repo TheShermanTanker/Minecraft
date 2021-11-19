@@ -2,7 +2,7 @@ package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -80,7 +80,7 @@ public class BlockTNT extends Block {
         if (!world.isClientSide) {
             EntityTNTPrimed primedTnt = new EntityTNTPrimed(world, (double)pos.getX() + 0.5D, (double)pos.getY(), (double)pos.getZ() + 0.5D, igniter);
             world.addEntity(primedTnt);
-            world.playSound((EntityHuman)null, primedTnt.locX(), primedTnt.locY(), primedTnt.locZ(), SoundEffects.TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, primedTnt.locX(), primedTnt.locY(), primedTnt.locZ(), SoundEffects.TNT_PRIMED, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             world.gameEvent(igniter, GameEvent.PRIME_FUSE, pos);
         }
     }

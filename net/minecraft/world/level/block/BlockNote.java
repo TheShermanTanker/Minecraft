@@ -3,7 +3,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -86,7 +86,7 @@ public class BlockNote extends Block {
     public boolean triggerEvent(IBlockData state, World world, BlockPosition pos, int type, int data) {
         int i = state.get(NOTE);
         float f = (float)Math.pow(2.0D, (double)(i - 12) / 12.0D);
-        world.playSound((EntityHuman)null, pos, state.get(INSTRUMENT).getSoundEvent(), SoundCategory.RECORDS, 3.0F, f);
+        world.playSound((EntityHuman)null, pos, state.get(INSTRUMENT).getSoundEvent(), EnumSoundCategory.RECORDS, 3.0F, f);
         world.addParticle(Particles.NOTE, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.2D, (double)pos.getZ() + 0.5D, (double)i / 24.0D, 0.0D, 0.0D);
         return true;
     }

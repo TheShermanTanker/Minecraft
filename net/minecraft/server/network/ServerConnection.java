@@ -106,7 +106,7 @@ public class ServerConnection {
                 @Override
                 protected void initChannel(Channel channel) {
                     NetworkManager connection = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
-                    connection.setPacketListener(new MemoryServerHandshakePacketListenerImpl(ServerConnection.this.server, connection));
+                    connection.setPacketListener(new HandshakeMemoryListener(ServerConnection.this.server, connection));
                     ServerConnection.this.connections.add(connection);
                     channel.pipeline().addLast("packet_handler", connection);
                 }

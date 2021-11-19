@@ -9,7 +9,7 @@ import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.chat.IChatMutableComponent;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
@@ -43,7 +43,7 @@ public class MobBucketItem extends ItemBucket {
 
     @Override
     protected void playEmptySound(@Nullable EntityHuman player, GeneratorAccess world, BlockPosition pos) {
-        world.playSound(player, pos, this.emptySound, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+        world.playSound(player, pos, this.emptySound, EnumSoundCategory.NEUTRAL, 1.0F, 1.0F);
     }
 
     private void spawn(WorldServer world, ItemStack stack, BlockPosition pos) {

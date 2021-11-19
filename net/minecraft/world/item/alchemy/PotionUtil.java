@@ -17,7 +17,7 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.chat.IChatMutableComponent;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.entity.ai.attributes.AttributeBase;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -161,7 +161,7 @@ public class PotionUtil {
         } else {
             for(MobEffect mobEffectInstance : list2) {
                 IChatMutableComponent mutableComponent = new ChatMessage(mobEffectInstance.getDescriptionId());
-                MobEffectList mobEffect = mobEffectInstance.getMobEffect();
+                MobEffectBase mobEffect = mobEffectInstance.getMobEffect();
                 Map<AttributeBase, AttributeModifier> map = mobEffect.getAttributeModifiers();
                 if (!map.isEmpty()) {
                     for(Entry<AttributeBase, AttributeModifier> entry : map.entrySet()) {

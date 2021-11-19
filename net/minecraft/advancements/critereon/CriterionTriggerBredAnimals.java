@@ -8,7 +8,7 @@ import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.animal.EntityAnimal;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerBredAnimals extends CriterionTriggerAbstract<CriterionTriggerBredAnimals.TriggerInstance> {
+public class CriterionTriggerBredAnimals extends CriterionTriggerAbstract<CriterionTriggerBredAnimals.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("bred_animals");
 
     @Override
@@ -17,11 +17,11 @@ public class CriterionTriggerBredAnimals extends CriterionTriggerAbstract<Criter
     }
 
     @Override
-    public CriterionTriggerBredAnimals.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerBredAnimals.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "parent", deserializationContext);
         CriterionConditionEntity.Composite composite3 = CriterionConditionEntity.Composite.fromJson(jsonObject, "partner", deserializationContext);
         CriterionConditionEntity.Composite composite4 = CriterionConditionEntity.Composite.fromJson(jsonObject, "child", deserializationContext);
-        return new CriterionTriggerBredAnimals.TriggerInstance(composite, composite2, composite3, composite4);
+        return new CriterionTriggerBredAnimals.CriterionInstanceTrigger(composite, composite2, composite3, composite4);
     }
 
     public void trigger(EntityPlayer player, EntityAnimal parent, EntityAnimal partner, @Nullable EntityAgeable child) {
@@ -33,28 +33,28 @@ public class CriterionTriggerBredAnimals extends CriterionTriggerAbstract<Criter
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionEntity.Composite parent;
         private final CriterionConditionEntity.Composite partner;
         private final CriterionConditionEntity.Composite child;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite parent, CriterionConditionEntity.Composite partner, CriterionConditionEntity.Composite child) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite parent, CriterionConditionEntity.Composite partner, CriterionConditionEntity.Composite child) {
             super(CriterionTriggerBredAnimals.ID, player);
             this.parent = parent;
             this.partner = partner;
             this.child = child;
         }
 
-        public static CriterionTriggerBredAnimals.TriggerInstance bredAnimals() {
-            return new CriterionTriggerBredAnimals.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY);
+        public static CriterionTriggerBredAnimals.CriterionInstanceTrigger bredAnimals() {
+            return new CriterionTriggerBredAnimals.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY);
         }
 
-        public static CriterionTriggerBredAnimals.TriggerInstance bredAnimals(CriterionConditionEntity.Builder child) {
-            return new CriterionTriggerBredAnimals.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.wrap(child.build()));
+        public static CriterionTriggerBredAnimals.CriterionInstanceTrigger bredAnimals(CriterionConditionEntity.Builder child) {
+            return new CriterionTriggerBredAnimals.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.wrap(child.build()));
         }
 
-        public static CriterionTriggerBredAnimals.TriggerInstance bredAnimals(CriterionConditionEntity parent, CriterionConditionEntity partner, CriterionConditionEntity child) {
-            return new CriterionTriggerBredAnimals.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.wrap(parent), CriterionConditionEntity.Composite.wrap(partner), CriterionConditionEntity.Composite.wrap(child));
+        public static CriterionTriggerBredAnimals.CriterionInstanceTrigger bredAnimals(CriterionConditionEntity parent, CriterionConditionEntity partner, CriterionConditionEntity child) {
+            return new CriterionTriggerBredAnimals.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.wrap(parent), CriterionConditionEntity.Composite.wrap(partner), CriterionConditionEntity.Composite.wrap(child));
         }
 
         public boolean matches(LootTableInfo parentContext, LootTableInfo partnerContext, @Nullable LootTableInfo childContext) {

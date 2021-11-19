@@ -2,7 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -52,6 +52,6 @@ public class ItemFireball extends Item {
 
     private void playSound(World world, BlockPosition pos) {
         Random random = world.getRandom();
-        world.playSound((EntityHuman)null, pos, SoundEffects.FIRECHARGE_USE, SoundCategory.BLOCKS, 1.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
+        world.playSound((EntityHuman)null, pos, SoundEffects.FIRECHARGE_USE, EnumSoundCategory.BLOCKS, 1.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
     }
 }

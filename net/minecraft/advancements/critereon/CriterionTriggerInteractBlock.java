@@ -8,7 +8,7 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.IBlockData;
 
-public class CriterionTriggerInteractBlock extends CriterionTriggerAbstract<CriterionTriggerInteractBlock.TriggerInstance> {
+public class CriterionTriggerInteractBlock extends CriterionTriggerAbstract<CriterionTriggerInteractBlock.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("item_used_on_block");
 
     @Override
@@ -17,10 +17,10 @@ public class CriterionTriggerInteractBlock extends CriterionTriggerAbstract<Crit
     }
 
     @Override
-    public CriterionTriggerInteractBlock.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerInteractBlock.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionLocation locationPredicate = CriterionConditionLocation.fromJson(jsonObject.get("location"));
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
-        return new CriterionTriggerInteractBlock.TriggerInstance(composite, locationPredicate, itemPredicate);
+        return new CriterionTriggerInteractBlock.CriterionInstanceTrigger(composite, locationPredicate, itemPredicate);
     }
 
     public void trigger(EntityPlayer player, BlockPosition pos, ItemStack stack) {
@@ -30,18 +30,18 @@ public class CriterionTriggerInteractBlock extends CriterionTriggerAbstract<Crit
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionLocation location;
         private final CriterionConditionItem item;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionLocation location, CriterionConditionItem item) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionLocation location, CriterionConditionItem item) {
             super(CriterionTriggerInteractBlock.ID, player);
             this.location = location;
             this.item = item;
         }
 
-        public static CriterionTriggerInteractBlock.TriggerInstance itemUsedOnBlock(CriterionConditionLocation.Builder location, CriterionConditionItem.Builder item) {
-            return new CriterionTriggerInteractBlock.TriggerInstance(CriterionConditionEntity.Composite.ANY, location.build(), item.build());
+        public static CriterionTriggerInteractBlock.CriterionInstanceTrigger itemUsedOnBlock(CriterionConditionLocation.Builder location, CriterionConditionItem.Builder item) {
+            return new CriterionTriggerInteractBlock.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, location.build(), item.build());
         }
 
         public boolean matches(IBlockData state, WorldServer world, BlockPosition pos, ItemStack stack) {

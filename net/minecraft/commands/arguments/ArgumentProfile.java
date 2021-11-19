@@ -53,7 +53,7 @@ public class ArgumentProfile implements ArgumentType<ArgumentProfile.Result> {
 
             String string = stringReader.getString().substring(i, stringReader.getCursor());
             return (commandSourceStack) -> {
-                Optional<GameProfile> optional = commandSourceStack.getServer().getUserCache().b(string);
+                Optional<GameProfile> optional = commandSourceStack.getServer().getUserCache().getProfile(string);
                 return Collections.singleton(optional.orElseThrow(ERROR_UNKNOWN_PLAYER::create));
             };
         }

@@ -6,7 +6,7 @@ import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.IInventory;
@@ -207,7 +207,7 @@ public class ContainerEnchantTable extends Container {
                     this.enchantSlots.update();
                     this.enchantmentSeed.set(player.getEnchantmentSeed());
                     this.slotsChanged(this.enchantSlots);
-                    world.playSound((EntityHuman)null, pos, SoundEffects.ENCHANTMENT_TABLE_USE, SoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.1F + 0.9F);
+                    world.playSound((EntityHuman)null, pos, SoundEffects.ENCHANTMENT_TABLE_USE, EnumSoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.1F + 0.9F);
                 }
 
             });

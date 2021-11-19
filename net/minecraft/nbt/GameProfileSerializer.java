@@ -500,11 +500,11 @@ public final class GameProfileSerializer {
     }
 
     public static IChatBaseComponent toPrettyComponent(NBTBase element) {
-        return (new TextComponentTagVisitor("", 0)).visit(element);
+        return (new TagVisitorTextComponent("", 0)).visit(element);
     }
 
     public static String structureToSnbt(NBTTagCompound compound) {
-        return (new SnbtPrinterTagVisitor()).visit(packStructureTemplate(compound));
+        return (new TagVisitorNBTPrinterSerialized()).visit(packStructureTemplate(compound));
     }
 
     public static NBTTagCompound snbtToStructure(String string) throws CommandSyntaxException {

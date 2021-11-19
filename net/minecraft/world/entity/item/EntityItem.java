@@ -13,7 +13,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.tags.TagsItem;
@@ -433,7 +433,7 @@ public class EntityItem extends Entity {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.AMBIENT;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.AMBIENT;
     }
 }

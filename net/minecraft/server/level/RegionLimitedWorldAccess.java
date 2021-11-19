@@ -15,7 +15,7 @@ import net.minecraft.core.SectionPosition;
 import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyDamageScaler;
@@ -383,7 +383,7 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     }
 
     @Override
-    public void playSound(@Nullable EntityHuman player, BlockPosition pos, SoundEffect sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(@Nullable EntityHuman player, BlockPosition pos, SoundEffect sound, EnumSoundCategory category, float volume, float pitch) {
     }
 
     @Override

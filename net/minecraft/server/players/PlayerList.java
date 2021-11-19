@@ -31,13 +31,13 @@ import net.minecraft.network.chat.ChatMessageType;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.chat.IChatMutableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacket;
-import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
 import net.minecraft.network.protocol.game.PacketPlayOutAbilities;
+import net.minecraft.network.protocol.game.PacketPlayOutBorder;
+import net.minecraft.network.protocol.game.PacketPlayOutBorderCenter;
+import net.minecraft.network.protocol.game.PacketPlayOutBorderLerpSize;
+import net.minecraft.network.protocol.game.PacketPlayOutBorderSize;
+import net.minecraft.network.protocol.game.PacketPlayOutBorderWarningDelay;
+import net.minecraft.network.protocol.game.PacketPlayOutBorderWarningDistance;
 import net.minecraft.network.protocol.game.PacketPlayOutCustomPayload;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityEffect;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityStatus;
@@ -62,10 +62,10 @@ import net.minecraft.server.ScoreboardServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.PlayerConnection;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
-import net.minecraft.stats.ServerStatisticManager;
 import net.minecraft.stats.StatisticList;
+import net.minecraft.stats.StatisticManagerServer;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.effect.MobEffect;
@@ -105,7 +105,7 @@ public abstract class PlayerList {
     private final IpBanList ipBans = new IpBanList(IPBANLIST_FILE);
     private final OpList ops = new OpList(OPLIST_FILE);
     private final WhiteList whitelist = new WhiteList(WHITELIST_FILE);
-    private final Map<UUID, ServerStatisticManager> stats = Maps.newHashMap();
+    private final Map<UUID, StatisticManagerServer> stats = Maps.newHashMap();
     private final Map<UUID, AdvancementDataPlayer> advancements = Maps.newHashMap();
     public final WorldNBTStorage playerIo;
     private boolean doWhiteList;
@@ -255,27 +255,27 @@ public abstract class PlayerList {
         world.getWorldBorder().addListener(new IWorldBorderListener() {
             @Override
             public void onBorderSizeSet(WorldBorder border, double size) {
-                PlayerList.this.sendAll(new ClientboundSetBorderSizePacket(border));
+                PlayerList.this.sendAll(new PacketPlayOutBorderSize(border));
             }
 
             @Override
             public void onBorderSizeLerping(WorldBorder border, double fromSize, double toSize, long time) {
-                PlayerList.this.sendAll(new ClientboundSetBorderLerpSizePacket(border));
+                PlayerList.this.sendAll(new PacketPlayOutBorderLerpSize(border));
             }
 
             @Override
             public void onBorderCenterSet(WorldBorder border, double centerX, double centerZ) {
-                PlayerList.this.sendAll(new ClientboundSetBorderCenterPacket(border));
+                PlayerList.this.sendAll(new PacketPlayOutBorderCenter(border));
             }
 
             @Override
             public void onBorderSetWarningTime(WorldBorder border, int warningTime) {
-                PlayerList.this.sendAll(new ClientboundSetBorderWarningDelayPacket(border));
+                PlayerList.this.sendAll(new PacketPlayOutBorderWarningDelay(border));
             }
 
             @Override
             public void onBorderSetWarningBlocks(WorldBorder border, int warningBlockDistance) {
-                PlayerList.this.sendAll(new ClientboundSetBorderWarningDistancePacket(border));
+                PlayerList.this.sendAll(new PacketPlayOutBorderWarningDistance(border));
             }
 
             @Override
@@ -305,7 +305,7 @@ public abstract class PlayerList {
 
     protected void savePlayerFile(EntityPlayer player) {
         this.playerIo.save(player);
-        ServerStatisticManager serverStatsCounter = this.stats.get(player.getUniqueID());
+        StatisticManagerServer serverStatsCounter = this.stats.get(player.getUniqueID());
         if (serverStatsCounter != null) {
             serverStatsCounter.save();
         }
@@ -459,7 +459,7 @@ public abstract class PlayerList {
         serverPlayer.syncInventory();
         serverPlayer.setHealth(serverPlayer.getHealth());
         if (bl2) {
-            serverPlayer.connection.sendPacket(new PacketPlayOutNamedSoundEffect(SoundEffects.RESPAWN_ANCHOR_DEPLETE, SoundCategory.BLOCKS, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 1.0F, 1.0F));
+            serverPlayer.connection.sendPacket(new PacketPlayOutNamedSoundEffect(SoundEffects.RESPAWN_ANCHOR_DEPLETE, EnumSoundCategory.BLOCKS, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 1.0F, 1.0F));
         }
 
         return serverPlayer;
@@ -638,7 +638,7 @@ public abstract class PlayerList {
 
     public void sendLevelInfo(EntityPlayer player, WorldServer world) {
         WorldBorder worldBorder = this.server.overworld().getWorldBorder();
-        player.connection.sendPacket(new ClientboundInitializeBorderPacket(worldBorder));
+        player.connection.sendPacket(new PacketPlayOutBorder(worldBorder));
         player.connection.sendPacket(new PacketPlayOutUpdateTime(world.getTime(), world.getDayTime(), world.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
         player.connection.sendPacket(new PacketPlayOutSpawnPosition(world.getSpawn(), world.getSharedSpawnAngle()));
         if (world.isRaining()) {
@@ -727,9 +727,9 @@ public abstract class PlayerList {
 
     }
 
-    public ServerStatisticManager getStatisticManager(EntityHuman player) {
+    public StatisticManagerServer getStatisticManager(EntityHuman player) {
         UUID uUID = player.getUniqueID();
-        ServerStatisticManager serverStatsCounter = uUID == null ? null : this.stats.get(uUID);
+        StatisticManagerServer serverStatsCounter = uUID == null ? null : this.stats.get(uUID);
         if (serverStatsCounter == null) {
             File file = this.server.getWorldPath(SavedFile.PLAYER_STATS_DIR).toFile();
             File file2 = new File(file, uUID + ".json");
@@ -741,7 +741,7 @@ public abstract class PlayerList {
                 }
             }
 
-            serverStatsCounter = new ServerStatisticManager(this.server, file2);
+            serverStatsCounter = new StatisticManagerServer(this.server, file2);
             this.stats.put(uUID, serverStatsCounter);
         }
 

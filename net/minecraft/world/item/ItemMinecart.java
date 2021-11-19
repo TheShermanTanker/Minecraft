@@ -21,7 +21,7 @@ public class ItemMinecart extends Item {
         private final DispenseBehaviorItem defaultDispenseItemBehavior = new DispenseBehaviorItem();
 
         @Override
-        public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+        public ItemStack a(ISourceBlock pointer, ItemStack stack) {
             EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
             World level = pointer.getWorld();
             double d = pointer.getX() + (double)direction.getAdjacentX() * 1.125D;
@@ -62,7 +62,7 @@ public class ItemMinecart extends Item {
         }
 
         @Override
-        protected void playSound(ISourceBlock pointer) {
+        protected void a(ISourceBlock pointer) {
             pointer.getWorld().triggerEffect(1000, pointer.getBlockPosition(), 0);
         }
     };

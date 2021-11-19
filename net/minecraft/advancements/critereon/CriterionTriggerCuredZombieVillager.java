@@ -7,7 +7,7 @@ import net.minecraft.world.entity.monster.EntityZombie;
 import net.minecraft.world.entity.npc.EntityVillager;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerCuredZombieVillager extends CriterionTriggerAbstract<CriterionTriggerCuredZombieVillager.TriggerInstance> {
+public class CriterionTriggerCuredZombieVillager extends CriterionTriggerAbstract<CriterionTriggerCuredZombieVillager.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("cured_zombie_villager");
 
     @Override
@@ -16,10 +16,10 @@ public class CriterionTriggerCuredZombieVillager extends CriterionTriggerAbstrac
     }
 
     @Override
-    public CriterionTriggerCuredZombieVillager.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerCuredZombieVillager.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "zombie", deserializationContext);
         CriterionConditionEntity.Composite composite3 = CriterionConditionEntity.Composite.fromJson(jsonObject, "villager", deserializationContext);
-        return new CriterionTriggerCuredZombieVillager.TriggerInstance(composite, composite2, composite3);
+        return new CriterionTriggerCuredZombieVillager.CriterionInstanceTrigger(composite, composite2, composite3);
     }
 
     public void trigger(EntityPlayer player, EntityZombie zombie, EntityVillager villager) {
@@ -30,18 +30,18 @@ public class CriterionTriggerCuredZombieVillager extends CriterionTriggerAbstrac
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionEntity.Composite zombie;
         private final CriterionConditionEntity.Composite villager;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite zombie, CriterionConditionEntity.Composite villager) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite zombie, CriterionConditionEntity.Composite villager) {
             super(CriterionTriggerCuredZombieVillager.ID, player);
             this.zombie = zombie;
             this.villager = villager;
         }
 
-        public static CriterionTriggerCuredZombieVillager.TriggerInstance curedZombieVillager() {
-            return new CriterionTriggerCuredZombieVillager.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY);
+        public static CriterionTriggerCuredZombieVillager.CriterionInstanceTrigger curedZombieVillager() {
+            return new CriterionTriggerCuredZombieVillager.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY);
         }
 
         public boolean matches(LootTableInfo zombieContext, LootTableInfo villagerContext) {

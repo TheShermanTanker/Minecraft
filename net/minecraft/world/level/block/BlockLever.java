@@ -4,7 +4,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.ParticleParamRedstone;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -89,7 +89,7 @@ public class BlockLever extends BlockAttachable {
         } else {
             IBlockData blockState2 = this.pull(state, world, pos);
             float f = blockState2.get(POWERED) ? 0.6F : 0.5F;
-            world.playSound((EntityHuman)null, pos, SoundEffects.LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, f);
+            world.playSound((EntityHuman)null, pos, SoundEffects.LEVER_CLICK, EnumSoundCategory.BLOCKS, 0.3F, f);
             world.gameEvent(player, blockState2.get(POWERED) ? GameEvent.BLOCK_SWITCH : GameEvent.BLOCK_UNSWITCH, pos);
             return EnumInteractionResult.CONSUME;
         }

@@ -40,7 +40,6 @@ import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddVibrationSignalPacket;
 import net.minecraft.network.protocol.game.PacketDebug;
 import net.minecraft.network.protocol.game.PacketPlayOutBlockAction;
 import net.minecraft.network.protocol.game.PacketPlayOutBlockBreakAnimation;
@@ -50,6 +49,7 @@ import net.minecraft.network.protocol.game.PacketPlayOutExplosion;
 import net.minecraft.network.protocol.game.PacketPlayOutGameStateChange;
 import net.minecraft.network.protocol.game.PacketPlayOutNamedSoundEffect;
 import net.minecraft.network.protocol.game.PacketPlayOutSpawnPosition;
+import net.minecraft.network.protocol.game.PacketPlayOutVibrationSignal;
 import net.minecraft.network.protocol.game.PacketPlayOutWorldEvent;
 import net.minecraft.network.protocol.game.PacketPlayOutWorldParticles;
 import net.minecraft.resources.ResourceKey;
@@ -57,7 +57,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ScoreboardServer;
 import net.minecraft.server.level.progress.WorldLoadListener;
 import net.minecraft.server.players.SleepStatus;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.tags.ITagRegistry;
 import net.minecraft.util.CSVWriter;
@@ -795,12 +795,12 @@ public class WorldServer extends World implements GeneratorAccessSeed {
     }
 
     @Override
-    public void playSound(@Nullable EntityHuman player, double x, double y, double z, SoundEffect sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(@Nullable EntityHuman player, double x, double y, double z, SoundEffect sound, EnumSoundCategory category, float volume, float pitch) {
         this.server.getPlayerList().sendPacketNearby(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, this.getDimensionKey(), new PacketPlayOutNamedSoundEffect(sound, category, x, y, z, volume, pitch));
     }
 
     @Override
-    public void playSound(@Nullable EntityHuman player, Entity entity, SoundEffect sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(@Nullable EntityHuman player, Entity entity, SoundEffect sound, EnumSoundCategory category, float volume, float pitch) {
         this.server.getPlayerList().sendPacketNearby(player, entity.locX(), entity.locY(), entity.locZ(), volume > 1.0F ? (double)(16.0F * volume) : 16.0D, this.getDimensionKey(), new PacketPlayOutEntitySound(sound, category, entity, volume, pitch));
     }
 
@@ -914,7 +914,7 @@ public class WorldServer extends World implements GeneratorAccessSeed {
 
     public void sendVibrationParticle(VibrationPath vibration) {
         BlockPosition blockPos = vibration.getOrigin();
-        ClientboundAddVibrationSignalPacket clientboundAddVibrationSignalPacket = new ClientboundAddVibrationSignalPacket(vibration);
+        PacketPlayOutVibrationSignal clientboundAddVibrationSignalPacket = new PacketPlayOutVibrationSignal(vibration);
         this.players.forEach((player) -> {
             this.sendParticles(player, false, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), clientboundAddVibrationSignalPacket);
         });

@@ -7,11 +7,11 @@ import java.util.function.Supplier;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryWritable;
 import net.minecraft.core.RegistryMaterials;
-import net.minecraft.data.worldgen.BiomeDecoratorGroups;
-import net.minecraft.data.worldgen.ProcessorLists;
-import net.minecraft.data.worldgen.StructureFeatures;
+import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
 import net.minecraft.data.worldgen.WorldGenCarvers;
 import net.minecraft.data.worldgen.WorldGenFeaturePieces;
+import net.minecraft.data.worldgen.WorldGenProcessorLists;
+import net.minecraft.data.worldgen.WorldGenStructureFeatures;
 import net.minecraft.data.worldgen.WorldGenSurfaceComposites;
 import net.minecraft.data.worldgen.biome.BiomeRegistry;
 import net.minecraft.resources.MinecraftKey;
@@ -39,13 +39,13 @@ public class RegistryGeneration {
         return WorldGenCarvers.CAVE;
     });
     public static final IRegistry<WorldGenFeatureConfigured<?, ?>> CONFIGURED_FEATURE = registerSimple(IRegistry.CONFIGURED_FEATURE_REGISTRY, () -> {
-        return BiomeDecoratorGroups.OAK;
+        return WorldGenBiomeDecoratorGroups.OAK;
     });
     public static final IRegistry<StructureFeature<?, ?>> CONFIGURED_STRUCTURE_FEATURE = registerSimple(IRegistry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, () -> {
-        return StructureFeatures.MINESHAFT;
+        return WorldGenStructureFeatures.MINESHAFT;
     });
     public static final IRegistry<ProcessorList> PROCESSOR_LIST = registerSimple(IRegistry.PROCESSOR_LIST_REGISTRY, () -> {
-        return ProcessorLists.ZOMBIE_PLAINS;
+        return WorldGenProcessorLists.ZOMBIE_PLAINS;
     });
     public static final IRegistry<WorldGenFeatureDefinedStructurePoolTemplate> TEMPLATE_POOL = registerSimple(IRegistry.TEMPLATE_POOL_REGISTRY, WorldGenFeaturePieces::bootstrap);
     public static final IRegistry<BiomeBase> BIOME = registerSimple(IRegistry.BIOME_REGISTRY, () -> {

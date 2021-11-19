@@ -5,7 +5,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 
-public class CriterionTriggerEntityHurtPlayer extends CriterionTriggerAbstract<CriterionTriggerEntityHurtPlayer.TriggerInstance> {
+public class CriterionTriggerEntityHurtPlayer extends CriterionTriggerAbstract<CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("entity_hurt_player");
 
     @Override
@@ -14,9 +14,9 @@ public class CriterionTriggerEntityHurtPlayer extends CriterionTriggerAbstract<C
     }
 
     @Override
-    public CriterionTriggerEntityHurtPlayer.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionDamage damagePredicate = CriterionConditionDamage.fromJson(jsonObject.get("damage"));
-        return new CriterionTriggerEntityHurtPlayer.TriggerInstance(composite, damagePredicate);
+        return new CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger(composite, damagePredicate);
     }
 
     public void trigger(EntityPlayer player, DamageSource source, float dealt, float taken, boolean blocked) {
@@ -25,24 +25,24 @@ public class CriterionTriggerEntityHurtPlayer extends CriterionTriggerAbstract<C
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionDamage damage;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionDamage damage) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionDamage damage) {
             super(CriterionTriggerEntityHurtPlayer.ID, player);
             this.damage = damage;
         }
 
-        public static CriterionTriggerEntityHurtPlayer.TriggerInstance entityHurtPlayer() {
-            return new CriterionTriggerEntityHurtPlayer.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionDamage.ANY);
+        public static CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger entityHurtPlayer() {
+            return new CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionDamage.ANY);
         }
 
-        public static CriterionTriggerEntityHurtPlayer.TriggerInstance entityHurtPlayer(CriterionConditionDamage predicate) {
-            return new CriterionTriggerEntityHurtPlayer.TriggerInstance(CriterionConditionEntity.Composite.ANY, predicate);
+        public static CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger entityHurtPlayer(CriterionConditionDamage predicate) {
+            return new CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, predicate);
         }
 
-        public static CriterionTriggerEntityHurtPlayer.TriggerInstance entityHurtPlayer(CriterionConditionDamage.Builder damageBuilder) {
-            return new CriterionTriggerEntityHurtPlayer.TriggerInstance(CriterionConditionEntity.Composite.ANY, damageBuilder.build());
+        public static CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger entityHurtPlayer(CriterionConditionDamage.Builder damageBuilder) {
+            return new CriterionTriggerEntityHurtPlayer.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, damageBuilder.build());
         }
 
         public boolean matches(EntityPlayer player, DamageSource source, float dealt, float taken, boolean blocked) {

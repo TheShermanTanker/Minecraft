@@ -6,7 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -141,7 +141,7 @@ public class EntitySnowman extends EntityGolem implements IShearable, IRangedEnt
     protected EnumInteractionResult mobInteract(EntityHuman player, EnumHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         if (itemStack.is(Items.SHEARS) && this.canShear()) {
-            this.shear(SoundCategory.PLAYERS);
+            this.shear(EnumSoundCategory.PLAYERS);
             this.gameEvent(GameEvent.SHEAR, player);
             if (!this.level.isClientSide) {
                 itemStack.damage(1, player, (playerx) -> {
@@ -156,7 +156,7 @@ public class EntitySnowman extends EntityGolem implements IShearable, IRangedEnt
     }
 
     @Override
-    public void shear(SoundCategory shearedSoundCategory) {
+    public void shear(EnumSoundCategory shearedSoundCategory) {
         this.level.playSound((EntityHuman)null, this, SoundEffects.SNOW_GOLEM_SHEAR, shearedSoundCategory, 1.0F, 1.0F);
         if (!this.level.isClientSide()) {
             this.setHasPumpkin(false);

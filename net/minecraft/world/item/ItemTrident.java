@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
@@ -74,7 +74,7 @@ public class ItemTrident extends Item implements ItemVanishable {
                             }
 
                             world.addEntity(thrownTrident);
-                            world.playSound((EntityHuman)null, thrownTrident, SoundEffects.TRIDENT_THROW, SoundCategory.PLAYERS, 1.0F, 1.0F);
+                            world.playSound((EntityHuman)null, thrownTrident, SoundEffects.TRIDENT_THROW, EnumSoundCategory.PLAYERS, 1.0F, 1.0F);
                             if (!player.getAbilities().instabuild) {
                                 player.getInventory().removeItem(stack);
                             }
@@ -109,7 +109,7 @@ public class ItemTrident extends Item implements ItemVanishable {
                             soundEvent = SoundEffects.TRIDENT_RIPTIDE_1;
                         }
 
-                        world.playSound((EntityHuman)null, player, soundEvent, SoundCategory.PLAYERS, 1.0F, 1.0F);
+                        world.playSound((EntityHuman)null, player, soundEvent, EnumSoundCategory.PLAYERS, 1.0F, 1.0F);
                     }
 
                 }

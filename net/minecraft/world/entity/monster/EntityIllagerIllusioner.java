@@ -9,7 +9,7 @@ import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -245,7 +245,7 @@ public class EntityIllagerIllusioner extends EntityIllagerWizard implements IRan
 
         @Override
         protected void performSpellCasting() {
-            EntityIllagerIllusioner.this.getGoalTarget().addEffect(new MobEffect(MobEffects.BLINDNESS, 400), EntityIllagerIllusioner.this);
+            EntityIllagerIllusioner.this.getGoalTarget().addEffect(new MobEffect(MobEffectList.BLINDNESS, 400), EntityIllagerIllusioner.this);
         }
 
         @Override
@@ -265,7 +265,7 @@ public class EntityIllagerIllusioner extends EntityIllagerWizard implements IRan
             if (!super.canUse()) {
                 return false;
             } else {
-                return !EntityIllagerIllusioner.this.hasEffect(MobEffects.INVISIBILITY);
+                return !EntityIllagerIllusioner.this.hasEffect(MobEffectList.INVISIBILITY);
             }
         }
 
@@ -281,7 +281,7 @@ public class EntityIllagerIllusioner extends EntityIllagerWizard implements IRan
 
         @Override
         protected void performSpellCasting() {
-            EntityIllagerIllusioner.this.addEffect(new MobEffect(MobEffects.INVISIBILITY, 1200));
+            EntityIllagerIllusioner.this.addEffect(new MobEffect(MobEffectList.INVISIBILITY, 1200));
         }
 
         @Nullable

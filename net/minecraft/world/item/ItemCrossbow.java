@@ -15,7 +15,7 @@ import net.minecraft.network.chat.ChatComponentText;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
@@ -88,7 +88,7 @@ public class ItemCrossbow extends ItemProjectileWeapon implements ItemVanishable
         float f = getPowerForTime(i, stack);
         if (f >= 1.0F && !isCharged(stack) && tryLoadProjectiles(user, stack)) {
             setCharged(stack, true);
-            SoundCategory soundSource = user instanceof EntityHuman ? SoundCategory.PLAYERS : SoundCategory.HOSTILE;
+            EnumSoundCategory soundSource = user instanceof EntityHuman ? EnumSoundCategory.PLAYERS : EnumSoundCategory.HOSTILE;
             world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.CROSSBOW_LOADING_END, soundSource, 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
         }
 
@@ -225,7 +225,7 @@ public class ItemCrossbow extends ItemProjectileWeapon implements ItemVanishable
                 e.broadcastItemBreak(hand);
             });
             world.addEntity(projectile2);
-            world.playSound((EntityHuman)null, shooter.locX(), shooter.locY(), shooter.locZ(), SoundEffects.CROSSBOW_SHOOT, SoundCategory.PLAYERS, 1.0F, soundPitch);
+            world.playSound((EntityHuman)null, shooter.locX(), shooter.locY(), shooter.locZ(), SoundEffects.CROSSBOW_SHOOT, EnumSoundCategory.PLAYERS, 1.0F, soundPitch);
         }
     }
 
@@ -304,12 +304,12 @@ public class ItemCrossbow extends ItemProjectileWeapon implements ItemVanishable
 
             if (f >= 0.2F && !this.startSoundPlayed) {
                 this.startSoundPlayed = true;
-                world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), soundEvent, SoundCategory.PLAYERS, 0.5F, 1.0F);
+                world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), soundEvent, EnumSoundCategory.PLAYERS, 0.5F, 1.0F);
             }
 
             if (f >= 0.5F && soundEvent2 != null && !this.midLoadSoundPlayed) {
                 this.midLoadSoundPlayed = true;
-                world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), soundEvent2, SoundCategory.PLAYERS, 0.5F, 1.0F);
+                world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), soundEvent2, EnumSoundCategory.PLAYERS, 0.5F, 1.0F);
             }
         }
 

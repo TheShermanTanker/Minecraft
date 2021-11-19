@@ -11,7 +11,7 @@ import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -307,8 +307,8 @@ public class EntityRabbit extends EntityAnimal {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return this.getRabbitType() == 99 ? SoundCategory.HOSTILE : SoundCategory.NEUTRAL;
+    public EnumSoundCategory getSoundCategory() {
+        return this.getRabbitType() == 99 ? EnumSoundCategory.HOSTILE : EnumSoundCategory.NEUTRAL;
     }
 
     private static boolean isTemptingItem(ItemStack stack) {

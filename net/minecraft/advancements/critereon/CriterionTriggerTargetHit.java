@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 import net.minecraft.world.phys.Vec3D;
 
-public class CriterionTriggerTargetHit extends CriterionTriggerAbstract<CriterionTriggerTargetHit.TriggerInstance> {
+public class CriterionTriggerTargetHit extends CriterionTriggerAbstract<CriterionTriggerTargetHit.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("target_hit");
 
     @Override
@@ -16,10 +16,10 @@ public class CriterionTriggerTargetHit extends CriterionTriggerAbstract<Criterio
     }
 
     @Override
-    public CriterionTriggerTargetHit.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerTargetHit.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("signal_strength"));
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "projectile", deserializationContext);
-        return new CriterionTriggerTargetHit.TriggerInstance(composite, ints, composite2);
+        return new CriterionTriggerTargetHit.CriterionInstanceTrigger(composite, ints, composite2);
     }
 
     public void trigger(EntityPlayer player, Entity projectile, Vec3D hitPos, int signalStrength) {
@@ -29,18 +29,18 @@ public class CriterionTriggerTargetHit extends CriterionTriggerAbstract<Criterio
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionValue.IntegerRange signalStrength;
         private final CriterionConditionEntity.Composite projectile;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionValue.IntegerRange signalStrength, CriterionConditionEntity.Composite projectile) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionValue.IntegerRange signalStrength, CriterionConditionEntity.Composite projectile) {
             super(CriterionTriggerTargetHit.ID, player);
             this.signalStrength = signalStrength;
             this.projectile = projectile;
         }
 
-        public static CriterionTriggerTargetHit.TriggerInstance targetHit(CriterionConditionValue.IntegerRange signalStrength, CriterionConditionEntity.Composite projectile) {
-            return new CriterionTriggerTargetHit.TriggerInstance(CriterionConditionEntity.Composite.ANY, signalStrength, projectile);
+        public static CriterionTriggerTargetHit.CriterionInstanceTrigger targetHit(CriterionConditionValue.IntegerRange signalStrength, CriterionConditionEntity.Composite projectile) {
+            return new CriterionTriggerTargetHit.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, signalStrength, projectile);
         }
 
         @Override

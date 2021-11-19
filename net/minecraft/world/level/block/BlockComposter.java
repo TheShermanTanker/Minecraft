@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -164,7 +164,7 @@ public class BlockComposter extends Block implements IInventoryHolder {
 
     public static void handleFill(World world, BlockPosition pos, boolean fill) {
         IBlockData blockState = world.getType(pos);
-        world.playLocalSound((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), fill ? SoundEffects.COMPOSTER_FILL_SUCCESS : SoundEffects.COMPOSTER_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+        world.playLocalSound((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), fill ? SoundEffects.COMPOSTER_FILL_SUCCESS : SoundEffects.COMPOSTER_FILL, EnumSoundCategory.BLOCKS, 1.0F, 1.0F, false);
         double d = blockState.getShape(world, pos).max(EnumDirection.EnumAxis.Y, 0.5D, 0.5D) + 0.03125D;
         double e = (double)0.13125F;
         double f = (double)0.7375F;
@@ -248,7 +248,7 @@ public class BlockComposter extends Block implements IInventoryHolder {
         }
 
         IBlockData blockState = empty(state, world, pos);
-        world.playSound((EntityHuman)null, pos, SoundEffects.COMPOSTER_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.playSound((EntityHuman)null, pos, SoundEffects.COMPOSTER_EMPTY, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
         return blockState;
     }
 
@@ -279,7 +279,7 @@ public class BlockComposter extends Block implements IInventoryHolder {
     public void tickAlways(IBlockData state, WorldServer world, BlockPosition pos, Random random) {
         if (state.get(LEVEL) == 7) {
             world.setTypeAndData(pos, state.cycle(LEVEL), 3);
-            world.playSound((EntityHuman)null, pos, SoundEffects.COMPOSTER_READY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.COMPOSTER_READY, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
         }
 
     }

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
@@ -50,7 +50,7 @@ public interface GeneratorAccess extends ICombinedAccess, IWorldTime {
     default void update(BlockPosition pos, Block block) {
     }
 
-    void playSound(@Nullable EntityHuman player, BlockPosition pos, SoundEffect sound, SoundCategory category, float volume, float pitch);
+    void playSound(@Nullable EntityHuman player, BlockPosition pos, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
 
     void addParticle(ParticleParam parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
 

@@ -11,7 +11,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.DifficultyDamageScaler;
@@ -19,7 +19,7 @@ import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityLiving;
@@ -237,7 +237,7 @@ public class EntityHoglin extends EntityAnimal implements IMonster, IOglin {
     private void finishConversion(WorldServer word) {
         EntityZoglin zoglin = this.convertTo(EntityTypes.ZOGLIN, true);
         if (zoglin != null) {
-            zoglin.addEffect(new MobEffect(MobEffects.CONFUSION, 200, 0));
+            zoglin.addEffect(new MobEffect(MobEffectList.CONFUSION, 200, 0));
         }
 
     }
@@ -316,8 +316,8 @@ public class EntityHoglin extends EntityAnimal implements IMonster, IOglin {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.HOSTILE;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.HOSTILE;
     }
 
     @Override

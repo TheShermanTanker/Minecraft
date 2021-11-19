@@ -14,7 +14,7 @@ import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -221,7 +221,7 @@ public class EntitySheep extends EntityAnimal implements IShearable {
         ItemStack itemStack = player.getItemInHand(hand);
         if (itemStack.is(Items.SHEARS)) {
             if (!this.level.isClientSide && this.canShear()) {
-                this.shear(SoundCategory.PLAYERS);
+                this.shear(EnumSoundCategory.PLAYERS);
                 this.gameEvent(GameEvent.SHEAR, player);
                 itemStack.damage(1, player, (playerx) -> {
                     playerx.broadcastItemBreak(hand);
@@ -236,7 +236,7 @@ public class EntitySheep extends EntityAnimal implements IShearable {
     }
 
     @Override
-    public void shear(SoundCategory shearedSoundCategory) {
+    public void shear(EnumSoundCategory shearedSoundCategory) {
         this.level.playSound((EntityHuman)null, this, SoundEffects.SHEEP_SHEAR, shearedSoundCategory, 1.0F, 1.0F);
         this.setSheared(true);
         int i = 1 + this.random.nextInt(3);

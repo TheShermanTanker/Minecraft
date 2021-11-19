@@ -9,22 +9,22 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.SharedConstants;
-import net.minecraft.data.advancements.AdvancementProvider;
-import net.minecraft.data.info.BlockListReport;
-import net.minecraft.data.info.CommandsReport;
-import net.minecraft.data.info.RegistryDumpReport;
-import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.models.ModelProvider;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.structures.DebugReportNBT;
-import net.minecraft.data.structures.SnbtToNbt;
+import net.minecraft.data.advancements.DebugReportProviderAdvancement;
+import net.minecraft.data.info.DebugReportProviderBlockList;
+import net.minecraft.data.info.DebugReportProviderCommands;
+import net.minecraft.data.info.DebugReportProviderRegistryDump;
+import net.minecraft.data.loot.DebugReportProviderLootTable;
+import net.minecraft.data.models.DebugReportProviderModel;
+import net.minecraft.data.recipes.DebugReportProviderRecipe;
+import net.minecraft.data.structures.DebugReportProviderNBT;
+import net.minecraft.data.structures.DebugReportProviderStructureToNBT;
 import net.minecraft.data.structures.StructureUpdater;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraft.data.tags.EntityTypeTagsProvider;
-import net.minecraft.data.tags.FluidTagsProvider;
-import net.minecraft.data.tags.GameEventTagsProvider;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.data.worldgen.biome.BiomeReport;
+import net.minecraft.data.tags.TagsProviderBlock;
+import net.minecraft.data.tags.TagsProviderEntityType;
+import net.minecraft.data.tags.TagsProviderFluid;
+import net.minecraft.data.tags.TagsProviderGameEvent;
+import net.minecraft.data.tags.TagsProviderItem;
+import net.minecraft.data.worldgen.biome.DebugReportProviderBiome;
 import net.minecraft.obfuscate.DontObfuscate;
 
 public class Main {
@@ -62,34 +62,34 @@ public class Main {
     public static DebugReportGenerator createStandardGenerator(Path output, Collection<Path> inputs, boolean includeClient, boolean includeServer, boolean includeDev, boolean includeReports, boolean validate) {
         DebugReportGenerator dataGenerator = new DebugReportGenerator(output, inputs);
         if (includeClient || includeServer) {
-            dataGenerator.addProvider((new SnbtToNbt(dataGenerator)).addFilter(new StructureUpdater()));
+            dataGenerator.addProvider((new DebugReportProviderStructureToNBT(dataGenerator)).addFilter(new StructureUpdater()));
         }
 
         if (includeClient) {
-            dataGenerator.addProvider(new ModelProvider(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderModel(dataGenerator));
         }
 
         if (includeServer) {
-            dataGenerator.addProvider(new FluidTagsProvider(dataGenerator));
-            BlockTagsProvider blockTagsProvider = new BlockTagsProvider(dataGenerator);
+            dataGenerator.addProvider(new TagsProviderFluid(dataGenerator));
+            TagsProviderBlock blockTagsProvider = new TagsProviderBlock(dataGenerator);
             dataGenerator.addProvider(blockTagsProvider);
-            dataGenerator.addProvider(new ItemTagsProvider(dataGenerator, blockTagsProvider));
-            dataGenerator.addProvider(new EntityTypeTagsProvider(dataGenerator));
-            dataGenerator.addProvider(new RecipeProvider(dataGenerator));
-            dataGenerator.addProvider(new AdvancementProvider(dataGenerator));
-            dataGenerator.addProvider(new LootTableProvider(dataGenerator));
-            dataGenerator.addProvider(new GameEventTagsProvider(dataGenerator));
+            dataGenerator.addProvider(new TagsProviderItem(dataGenerator, blockTagsProvider));
+            dataGenerator.addProvider(new TagsProviderEntityType(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderRecipe(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderAdvancement(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderLootTable(dataGenerator));
+            dataGenerator.addProvider(new TagsProviderGameEvent(dataGenerator));
         }
 
         if (includeDev) {
-            dataGenerator.addProvider(new DebugReportNBT(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderNBT(dataGenerator));
         }
 
         if (includeReports) {
-            dataGenerator.addProvider(new BlockListReport(dataGenerator));
-            dataGenerator.addProvider(new RegistryDumpReport(dataGenerator));
-            dataGenerator.addProvider(new CommandsReport(dataGenerator));
-            dataGenerator.addProvider(new BiomeReport(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderBlockList(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderRegistryDump(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderCommands(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderBiome(dataGenerator));
         }
 
         return dataGenerator;

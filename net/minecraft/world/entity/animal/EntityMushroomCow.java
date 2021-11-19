@@ -10,13 +10,13 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityLightning;
 import net.minecraft.world.entity.EntityTypes;
@@ -43,7 +43,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class EntityMushroomCow extends EntityCow implements IShearable {
     private static final DataWatcherObject<String> DATA_TYPE = DataWatcher.defineId(EntityMushroomCow.class, DataWatcherRegistry.STRING);
     private static final int MUTATE_CHANCE = 1024;
-    private MobEffectList effect;
+    private MobEffectBase effect;
     private int effectDuration;
     private UUID lastLightningBoltUUID;
 
@@ -105,7 +105,7 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
             this.playSound(soundEvent, 1.0F, 1.0F);
             return EnumInteractionResult.sidedSuccess(this.level.isClientSide);
         } else if (itemStack.is(Items.SHEARS) && this.canShear()) {
-            this.shear(SoundCategory.PLAYERS);
+            this.shear(EnumSoundCategory.PLAYERS);
             this.gameEvent(GameEvent.SHEAR, player);
             if (!this.level.isClientSide) {
                 itemStack.damage(1, player, (playerx) -> {
@@ -120,12 +120,12 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
                     this.level.addParticle(Particles.SMOKE, this.locX() + this.random.nextDouble() / 2.0D, this.getY(0.5D), this.locZ() + this.random.nextDouble() / 2.0D, 0.0D, this.random.nextDouble() / 5.0D, 0.0D);
                 }
             } else {
-                Optional<Pair<MobEffectList, Integer>> optional = this.getEffectFromItemStack(itemStack);
+                Optional<Pair<MobEffectBase, Integer>> optional = this.getEffectFromItemStack(itemStack);
                 if (!optional.isPresent()) {
                     return EnumInteractionResult.PASS;
                 }
 
-                Pair<MobEffectList, Integer> pair = optional.get();
+                Pair<MobEffectBase, Integer> pair = optional.get();
                 if (!player.getAbilities().instabuild) {
                     itemStack.subtract(1);
                 }
@@ -146,7 +146,7 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
     }
 
     @Override
-    public void shear(SoundCategory shearedSoundCategory) {
+    public void shear(EnumSoundCategory shearedSoundCategory) {
         this.level.playSound((EntityHuman)null, this, SoundEffects.MOOSHROOM_SHEAR, shearedSoundCategory, 1.0F, 1.0F);
         if (!this.level.isClientSide()) {
             ((WorldServer)this.level).sendParticles(Particles.EXPLOSION, this.locX(), this.getY(0.5D), this.locZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
@@ -184,7 +184,7 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
         super.saveData(nbt);
         nbt.setString("Type", this.getVariant().type);
         if (this.effect != null) {
-            nbt.setByte("EffectId", (byte)MobEffectList.getId(this.effect));
+            nbt.setByte("EffectId", (byte)MobEffectBase.getId(this.effect));
             nbt.setInt("EffectDuration", this.effectDuration);
         }
 
@@ -195,7 +195,7 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
         super.loadData(nbt);
         this.setVariant(EntityMushroomCow.Type.byType(nbt.getString("Type")));
         if (nbt.hasKeyOfType("EffectId", 1)) {
-            this.effect = MobEffectList.fromId(nbt.getByte("EffectId"));
+            this.effect = MobEffectBase.fromId(nbt.getByte("EffectId"));
         }
 
         if (nbt.hasKeyOfType("EffectDuration", 3)) {
@@ -204,7 +204,7 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
 
     }
 
-    private Optional<Pair<MobEffectList, Integer>> getEffectFromItemStack(ItemStack flower) {
+    private Optional<Pair<MobEffectBase, Integer>> getEffectFromItemStack(ItemStack flower) {
         Item item = flower.getItem();
         if (item instanceof ItemBlock) {
             Block block = ((ItemBlock)item).getBlock();

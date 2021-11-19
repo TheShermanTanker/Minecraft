@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerPlayerInteractedWithEntity extends CriterionTriggerAbstract<CriterionTriggerPlayerInteractedWithEntity.TriggerInstance> {
+public class CriterionTriggerPlayerInteractedWithEntity extends CriterionTriggerAbstract<CriterionTriggerPlayerInteractedWithEntity.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("player_interacted_with_entity");
 
     @Override
@@ -16,10 +16,10 @@ public class CriterionTriggerPlayerInteractedWithEntity extends CriterionTrigger
     }
 
     @Override
-    protected CriterionTriggerPlayerInteractedWithEntity.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    protected CriterionTriggerPlayerInteractedWithEntity.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "entity", deserializationContext);
-        return new CriterionTriggerPlayerInteractedWithEntity.TriggerInstance(composite, itemPredicate, composite2);
+        return new CriterionTriggerPlayerInteractedWithEntity.CriterionInstanceTrigger(composite, itemPredicate, composite2);
     }
 
     public void trigger(EntityPlayer player, ItemStack stack, Entity entity) {
@@ -29,18 +29,18 @@ public class CriterionTriggerPlayerInteractedWithEntity extends CriterionTrigger
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionItem item;
         private final CriterionConditionEntity.Composite entity;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionEntity.Composite entity) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionEntity.Composite entity) {
             super(CriterionTriggerPlayerInteractedWithEntity.ID, player);
             this.item = item;
             this.entity = entity;
         }
 
-        public static CriterionTriggerPlayerInteractedWithEntity.TriggerInstance itemUsedOnEntity(CriterionConditionEntity.Composite player, CriterionConditionItem.Builder itemBuilder, CriterionConditionEntity.Composite entity) {
-            return new CriterionTriggerPlayerInteractedWithEntity.TriggerInstance(player, itemBuilder.build(), entity);
+        public static CriterionTriggerPlayerInteractedWithEntity.CriterionInstanceTrigger itemUsedOnEntity(CriterionConditionEntity.Composite player, CriterionConditionItem.Builder itemBuilder, CriterionConditionEntity.Composite entity) {
+            return new CriterionTriggerPlayerInteractedWithEntity.CriterionInstanceTrigger(player, itemBuilder.build(), entity);
         }
 
         public boolean matches(ItemStack stack, LootTableInfo context) {

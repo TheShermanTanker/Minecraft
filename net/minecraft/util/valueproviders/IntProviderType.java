@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.IRegistry;
 
 public interface IntProviderType<P extends IntProvider> {
-    IntProviderType<ConstantInt> CONSTANT = register("constant", ConstantInt.CODEC);
-    IntProviderType<UniformInt> UNIFORM = register("uniform", UniformInt.CODEC);
-    IntProviderType<BiasedToBottomInt> BIASED_TO_BOTTOM = register("biased_to_bottom", BiasedToBottomInt.CODEC);
-    IntProviderType<ClampedInt> CLAMPED = register("clamped", ClampedInt.CODEC);
+    IntProviderType<IntProviderConstant> CONSTANT = register("constant", IntProviderConstant.CODEC);
+    IntProviderType<IntProviderUniform> UNIFORM = register("uniform", IntProviderUniform.CODEC);
+    IntProviderType<IntProviderBiasedToBottom> BIASED_TO_BOTTOM = register("biased_to_bottom", IntProviderBiasedToBottom.CODEC);
+    IntProviderType<IntProviderClamped> CLAMPED = register("clamped", IntProviderClamped.CODEC);
 
     Codec<P> codec();
 

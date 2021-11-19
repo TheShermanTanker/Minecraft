@@ -28,7 +28,7 @@ import net.minecraft.network.protocol.game.PacketPlayOutNamedSoundEffect;
 import net.minecraft.server.level.BossBattleServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.util.MathHelper;
@@ -36,7 +36,7 @@ import net.minecraft.world.BossBattle;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPositionTypes;
@@ -227,12 +227,12 @@ public class Raid {
     }
 
     public void absorbBadOmen(EntityHuman player) {
-        if (player.hasEffect(MobEffects.BAD_OMEN)) {
-            this.badOmenLevel += player.getEffect(MobEffects.BAD_OMEN).getAmplifier() + 1;
+        if (player.hasEffect(MobEffectList.BAD_OMEN)) {
+            this.badOmenLevel += player.getEffect(MobEffectList.BAD_OMEN).getAmplifier() + 1;
             this.badOmenLevel = MathHelper.clamp(this.badOmenLevel, 0, this.getMaxBadOmenLevel());
         }
 
-        player.removeEffect(MobEffects.BAD_OMEN);
+        player.removeEffect(MobEffectList.BAD_OMEN);
     }
 
     public void stop() {
@@ -358,7 +358,7 @@ public class Raid {
                             Entity entity = this.level.getEntity(uUID);
                             if (entity instanceof EntityLiving && !entity.isSpectator()) {
                                 EntityLiving livingEntity = (EntityLiving)entity;
-                                livingEntity.addEffect(new MobEffect(MobEffects.HERO_OF_THE_VILLAGE, 48000, this.badOmenLevel - 1, false, false, true));
+                                livingEntity.addEffect(new MobEffect(MobEffectList.HERO_OF_THE_VILLAGE, 48000, this.badOmenLevel - 1, false, false, true));
                                 if (livingEntity instanceof EntityPlayer) {
                                     EntityPlayer serverPlayer = (EntityPlayer)livingEntity;
                                     serverPlayer.awardStat(StatisticList.RAID_WIN);
@@ -481,7 +481,7 @@ public class Raid {
             double e = vec3.x + 13.0D / d * (vec32.x - vec3.x);
             double g = vec3.z + 13.0D / d * (vec32.z - vec3.z);
             if (d <= 64.0D || collection.contains(serverPlayer)) {
-                serverPlayer.connection.sendPacket(new PacketPlayOutNamedSoundEffect(SoundEffects.RAID_HORN, SoundCategory.NEUTRAL, e, serverPlayer.locY(), g, 64.0F, 1.0F));
+                serverPlayer.connection.sendPacket(new PacketPlayOutNamedSoundEffect(SoundEffects.RAID_HORN, EnumSoundCategory.NEUTRAL, e, serverPlayer.locY(), g, 64.0F, 1.0F));
             }
         }
 

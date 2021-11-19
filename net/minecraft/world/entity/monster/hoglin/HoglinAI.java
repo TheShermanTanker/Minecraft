@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.TimeRange;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
@@ -40,14 +40,14 @@ import net.minecraft.world.entity.schedule.Activity;
 public class HoglinAI {
     public static final int REPELLENT_DETECTION_RANGE_HORIZONTAL = 8;
     public static final int REPELLENT_DETECTION_RANGE_VERTICAL = 4;
-    private static final UniformInt RETREAT_DURATION = TimeRange.rangeOfSeconds(5, 20);
+    private static final IntProviderUniform RETREAT_DURATION = TimeRange.rangeOfSeconds(5, 20);
     private static final int ATTACK_DURATION = 200;
     private static final int DESIRED_DISTANCE_FROM_PIGLIN_WHEN_IDLING = 8;
     private static final int DESIRED_DISTANCE_FROM_PIGLIN_WHEN_RETREATING = 15;
     private static final int ATTACK_INTERVAL = 40;
     private static final int BABY_ATTACK_INTERVAL = 15;
     private static final int REPELLENT_PACIFY_TIME = 200;
-    private static final UniformInt ADULT_FOLLOW_RANGE = UniformInt.of(5, 16);
+    private static final IntProviderUniform ADULT_FOLLOW_RANGE = IntProviderUniform.of(5, 16);
     private static final float SPEED_MULTIPLIER_WHEN_AVOIDING_REPELLENT = 1.0F;
     private static final float SPEED_MULTIPLIER_WHEN_RETREATING = 1.3F;
     private static final float SPEED_MULTIPLIER_WHEN_MAKING_LOVE = 0.6F;
@@ -70,7 +70,7 @@ public class HoglinAI {
     }
 
     private static void initIdleActivity(BehaviorController<EntityHoglin> brain) {
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BehaviorPacify(MemoryModuleType.NEAREST_REPELLENT, 200), new BehaviorMakeLoveAnimal(EntityTypes.HOGLIN, 0.6F), BehaviorWalkAway.pos(MemoryModuleType.NEAREST_REPELLENT, 1.0F, 8, true), new BehaviorAttackTargetSet<EntityHoglin>(HoglinAI::findNearestValidAttackTarget), new BehaviorRunIf<EntityHoglin>(EntityHoglin::isAdult, BehaviorWalkAway.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, 0.4F, 8, false)), new BehaviorRunSometimes<EntityLiving>(new BehaviorLookTarget(8.0F), UniformInt.of(30, 60)), new BehaviorFollowAdult(ADULT_FOLLOW_RANGE, 0.6F), createIdleMovementBehaviors()));
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BehaviorPacify(MemoryModuleType.NEAREST_REPELLENT, 200), new BehaviorMakeLoveAnimal(EntityTypes.HOGLIN, 0.6F), BehaviorWalkAway.pos(MemoryModuleType.NEAREST_REPELLENT, 1.0F, 8, true), new BehaviorAttackTargetSet<EntityHoglin>(HoglinAI::findNearestValidAttackTarget), new BehaviorRunIf<EntityHoglin>(EntityHoglin::isAdult, BehaviorWalkAway.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, 0.4F, 8, false)), new BehaviorRunSometimes<EntityLiving>(new BehaviorLookTarget(8.0F), IntProviderUniform.of(30, 60)), new BehaviorFollowAdult(ADULT_FOLLOW_RANGE, 0.6F), createIdleMovementBehaviors()));
     }
 
     private static void initFightActivity(BehaviorController<EntityHoglin> brain) {
@@ -78,7 +78,7 @@ public class HoglinAI {
     }
 
     private static void initRetreatActivity(BehaviorController<EntityHoglin> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(BehaviorWalkAway.entity(MemoryModuleType.AVOID_TARGET, 1.3F, 15, false), createIdleMovementBehaviors(), new BehaviorRunSometimes<EntityLiving>(new BehaviorLookTarget(8.0F), UniformInt.of(30, 60)), new BehaviorRemoveMemory<EntityHoglin>(HoglinAI::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(BehaviorWalkAway.entity(MemoryModuleType.AVOID_TARGET, 1.3F, 15, false), createIdleMovementBehaviors(), new BehaviorRunSometimes<EntityLiving>(new BehaviorLookTarget(8.0F), IntProviderUniform.of(30, 60)), new BehaviorRemoveMemory<EntityHoglin>(HoglinAI::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
     }
 
     private static BehaviorGateSingle<EntityHoglin> createIdleMovementBehaviors() {

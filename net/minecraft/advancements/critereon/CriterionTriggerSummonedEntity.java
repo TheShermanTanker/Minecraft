@@ -6,7 +6,7 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerSummonedEntity extends CriterionTriggerAbstract<CriterionTriggerSummonedEntity.TriggerInstance> {
+public class CriterionTriggerSummonedEntity extends CriterionTriggerAbstract<CriterionTriggerSummonedEntity.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("summoned_entity");
 
     @Override
@@ -15,9 +15,9 @@ public class CriterionTriggerSummonedEntity extends CriterionTriggerAbstract<Cri
     }
 
     @Override
-    public CriterionTriggerSummonedEntity.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerSummonedEntity.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "entity", deserializationContext);
-        return new CriterionTriggerSummonedEntity.TriggerInstance(composite, composite2);
+        return new CriterionTriggerSummonedEntity.CriterionInstanceTrigger(composite, composite2);
     }
 
     public void trigger(EntityPlayer player, Entity entity) {
@@ -27,16 +27,16 @@ public class CriterionTriggerSummonedEntity extends CriterionTriggerAbstract<Cri
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionEntity.Composite entity;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite entity) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite entity) {
             super(CriterionTriggerSummonedEntity.ID, player);
             this.entity = entity;
         }
 
-        public static CriterionTriggerSummonedEntity.TriggerInstance summonedEntity(CriterionConditionEntity.Builder summonedEntityPredicateBuilder) {
-            return new CriterionTriggerSummonedEntity.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.wrap(summonedEntityPredicateBuilder.build()));
+        public static CriterionTriggerSummonedEntity.CriterionInstanceTrigger summonedEntity(CriterionConditionEntity.Builder summonedEntityPredicateBuilder) {
+            return new CriterionTriggerSummonedEntity.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.wrap(summonedEntityPredicateBuilder.build()));
         }
 
         public boolean matches(LootTableInfo summonedEntityContext) {

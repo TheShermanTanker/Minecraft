@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 
 public class MetricSampler {
     private final String name;
-    private final MetricCategory category;
+    private final EnumMetricCategory category;
     private final DoubleSupplier sampler;
     private final ByteBuf ticks;
     private final ByteBuf values;
@@ -22,7 +22,7 @@ public class MetricSampler {
     final MetricSampler.ThresholdTest thresholdTest;
     private double currentValue;
 
-    protected MetricSampler(String name, MetricCategory type, DoubleSupplier retriever, @Nullable Runnable startAction, @Nullable MetricSampler.ThresholdTest deviationChecker) {
+    protected MetricSampler(String name, EnumMetricCategory type, DoubleSupplier retriever, @Nullable Runnable startAction, @Nullable MetricSampler.ThresholdTest deviationChecker) {
         this.name = name;
         this.category = type;
         this.beforeTick = startAction;
@@ -33,15 +33,15 @@ public class MetricSampler {
         this.isRunning = true;
     }
 
-    public static MetricSampler create(String name, MetricCategory type, DoubleSupplier retriever) {
+    public static MetricSampler create(String name, EnumMetricCategory type, DoubleSupplier retriever) {
         return new MetricSampler(name, type, retriever, (Runnable)null, (MetricSampler.ThresholdTest)null);
     }
 
-    public static <T> MetricSampler create(String name, MetricCategory type, T context, ToDoubleFunction<T> retriever) {
+    public static <T> MetricSampler create(String name, EnumMetricCategory type, T context, ToDoubleFunction<T> retriever) {
         return builder(name, type, retriever, context).build();
     }
 
-    public static <T> MetricSampler.MetricSamplerBuilder<T> builder(String name, MetricCategory type, ToDoubleFunction<T> retriever, T context) {
+    public static <T> MetricSampler.MetricSamplerBuilder<T> builder(String name, EnumMetricCategory type, ToDoubleFunction<T> retriever, T context) {
         return new MetricSampler.MetricSamplerBuilder<>(name, type, retriever, context);
     }
 
@@ -84,7 +84,7 @@ public class MetricSampler {
         return this.name;
     }
 
-    public MetricCategory getCategory() {
+    public EnumMetricCategory getCategory() {
         return this.category;
     }
 
@@ -129,7 +129,7 @@ public class MetricSampler {
 
     public static class MetricSamplerBuilder<T> {
         private final String name;
-        private final MetricCategory category;
+        private final EnumMetricCategory category;
         private final DoubleSupplier sampler;
         private final T context;
         @Nullable
@@ -137,7 +137,7 @@ public class MetricSampler {
         @Nullable
         private MetricSampler.ThresholdTest thresholdTest;
 
-        public MetricSamplerBuilder(String name, MetricCategory type, ToDoubleFunction<T> timeFunction, T context) {
+        public MetricSamplerBuilder(String name, EnumMetricCategory type, ToDoubleFunction<T> timeFunction, T context) {
             this.name = name;
             this.category = type;
             this.sampler = () -> {

@@ -18,7 +18,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
@@ -142,17 +142,17 @@ public abstract class EntityRaider extends EntityMonsterPatrolling {
                 }
 
                 if (!itemStack.isEmpty() && ItemStack.matches(itemStack, Raid.getLeaderBannerInstance()) && player != null) {
-                    MobEffect mobEffectInstance = player.getEffect(MobEffects.BAD_OMEN);
+                    MobEffect mobEffectInstance = player.getEffect(MobEffectList.BAD_OMEN);
                     int i = 1;
                     if (mobEffectInstance != null) {
                         i += mobEffectInstance.getAmplifier();
-                        player.removeEffectNoUpdate(MobEffects.BAD_OMEN);
+                        player.removeEffectNoUpdate(MobEffectList.BAD_OMEN);
                     } else {
                         --i;
                     }
 
                     i = MathHelper.clamp(i, 0, 4);
-                    MobEffect mobEffectInstance2 = new MobEffect(MobEffects.BAD_OMEN, 120000, i, false, false, true);
+                    MobEffect mobEffectInstance2 = new MobEffect(MobEffectList.BAD_OMEN, 120000, i, false, false, true);
                     if (!this.level.getGameRules().getBoolean(GameRules.RULE_DISABLE_RAIDS)) {
                         player.addEffect(mobEffectInstance2);
                     }

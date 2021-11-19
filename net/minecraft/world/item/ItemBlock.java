@@ -11,7 +11,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.item.EntityItem;
@@ -80,7 +80,7 @@ public class ItemBlock extends Item {
                     }
 
                     SoundEffectType soundType = blockState2.getStepSound();
-                    level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+                    level.playSound(player, blockPos, this.getPlaceSound(blockState2), EnumSoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
                     level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
                     if (player == null || !player.getAbilities().instabuild) {
                         itemStack.subtract(1);

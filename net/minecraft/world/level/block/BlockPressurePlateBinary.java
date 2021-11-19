@@ -2,7 +2,7 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
@@ -40,9 +40,9 @@ public class BlockPressurePlateBinary extends BlockPressurePlateAbstract {
     @Override
     protected void playOnSound(GeneratorAccess world, BlockPosition pos) {
         if (this.material != Material.WOOD && this.material != Material.NETHER_WOOD) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.STONE_PRESSURE_PLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.6F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.STONE_PRESSURE_PLATE_CLICK_ON, EnumSoundCategory.BLOCKS, 0.3F, 0.6F);
         } else {
-            world.playSound((EntityHuman)null, pos, SoundEffects.WOODEN_PRESSURE_PLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.8F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.WOODEN_PRESSURE_PLATE_CLICK_ON, EnumSoundCategory.BLOCKS, 0.3F, 0.8F);
         }
 
     }
@@ -50,9 +50,9 @@ public class BlockPressurePlateBinary extends BlockPressurePlateAbstract {
     @Override
     protected void playOffSound(GeneratorAccess world, BlockPosition pos) {
         if (this.material != Material.WOOD && this.material != Material.NETHER_WOOD) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.STONE_PRESSURE_PLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.5F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.STONE_PRESSURE_PLATE_CLICK_OFF, EnumSoundCategory.BLOCKS, 0.3F, 0.5F);
         } else {
-            world.playSound((EntityHuman)null, pos, SoundEffects.WOODEN_PRESSURE_PLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.7F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.WOODEN_PRESSURE_PLATE_CLICK_OFF, EnumSoundCategory.BLOCKS, 0.3F, 0.7F);
         }
 
     }

@@ -2,7 +2,7 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentManager;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -10,13 +10,13 @@ import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
 
 public class BlockOre extends Block {
-    private final UniformInt xpRange;
+    private final IntProviderUniform xpRange;
 
     public BlockOre(BlockBase.Info settings) {
-        this(settings, UniformInt.of(0, 0));
+        this(settings, IntProviderUniform.of(0, 0));
     }
 
-    public BlockOre(BlockBase.Info settings, UniformInt experienceDropped) {
+    public BlockOre(BlockBase.Info settings, IntProviderUniform experienceDropped) {
         super(settings);
         this.xpRange = experienceDropped;
     }

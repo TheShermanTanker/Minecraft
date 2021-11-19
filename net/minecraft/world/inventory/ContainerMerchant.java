@@ -1,7 +1,7 @@
 package net.minecraft.world.inventory;
 
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.world.IInventory;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.MerchantWrapper;
@@ -150,7 +150,7 @@ public class ContainerMerchant extends Container {
     private void playTradeSound() {
         if (!this.trader.getWorld().isClientSide) {
             Entity entity = (Entity)this.trader;
-            this.trader.getWorld().playLocalSound(entity.locX(), entity.locY(), entity.locZ(), this.trader.getTradeSound(), SoundCategory.NEUTRAL, 1.0F, 1.0F, false);
+            this.trader.getWorld().playLocalSound(entity.locX(), entity.locY(), entity.locZ(), this.trader.getTradeSound(), EnumSoundCategory.NEUTRAL, 1.0F, 1.0F, false);
         }
 
     }

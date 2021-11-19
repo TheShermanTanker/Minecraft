@@ -6,7 +6,7 @@ import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
@@ -55,7 +55,7 @@ public class EntityZombieHusk extends EntityZombie {
         boolean bl = super.attackEntity(target);
         if (bl && this.getItemInMainHand().isEmpty() && target instanceof EntityLiving) {
             float f = this.level.getDamageScaler(this.getChunkCoordinates()).getEffectiveDifficulty();
-            ((EntityLiving)target).addEffect(new MobEffect(MobEffects.HUNGER, 140 * (int)f), this);
+            ((EntityLiving)target).addEffect(new MobEffect(MobEffectList.HUNGER, 140 * (int)f), this);
         }
 
         return bl;

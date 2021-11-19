@@ -21,7 +21,7 @@ public class Particles {
     public static final ParticleType DRIPPING_WATER = register("dripping_water", false);
     public static final ParticleType FALLING_WATER = register("falling_water", false);
     public static final Particle<ParticleParamRedstone> DUST;
-    public static final Particle<DustColorTransitionOptions> DUST_COLOR_TRANSITION;
+    public static final Particle<ParticleParamDustColorTransition> DUST_COLOR_TRANSITION;
     public static final ParticleType EFFECT = register("effect", false);
     public static final ParticleType ELDER_GUARDIAN = register("elder_guardian", true);
     public static final ParticleType ENCHANTED_HIT = register("enchanted_hit", false);
@@ -42,7 +42,7 @@ public class Particles {
     public static final ParticleType HEART = register("heart", false);
     public static final ParticleType INSTANT_EFFECT = register("instant_effect", false);
     public static final Particle<ParticleParamItem> ITEM = register("item", ParticleParamItem.DESERIALIZER, ParticleParamItem::codec);
-    public static final Particle<VibrationParticleOption> VIBRATION;
+    public static final Particle<ParticleParamVibration> VIBRATION;
     public static final ParticleType ITEM_SLIME = register("item_slime", false);
     public static final ParticleType ITEM_SNOWBALL = register("item_snowball", false);
     public static final ParticleType LARGE_SMOKE = register("large_smoke", false);
@@ -113,11 +113,11 @@ public class Particles {
         DUST = register("dust", ParticleParamRedstone.DESERIALIZER, (particleType) -> {
             return ParticleParamRedstone.CODEC;
         });
-        DUST_COLOR_TRANSITION = register("dust_color_transition", DustColorTransitionOptions.DESERIALIZER, (particleType) -> {
-            return DustColorTransitionOptions.CODEC;
+        DUST_COLOR_TRANSITION = register("dust_color_transition", ParticleParamDustColorTransition.DESERIALIZER, (particleType) -> {
+            return ParticleParamDustColorTransition.CODEC;
         });
-        VIBRATION = register("vibration", VibrationParticleOption.DESERIALIZER, (particleType) -> {
-            return VibrationParticleOption.CODEC;
+        VIBRATION = register("vibration", ParticleParamVibration.DESERIALIZER, (particleType) -> {
+            return ParticleParamVibration.CODEC;
         });
     }
 }

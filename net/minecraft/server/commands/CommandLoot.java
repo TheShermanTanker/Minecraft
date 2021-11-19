@@ -103,7 +103,7 @@ public class CommandLoot {
     private static IInventory getContainer(CommandListenerWrapper source, BlockPosition pos) throws CommandSyntaxException {
         TileEntity blockEntity = source.getWorld().getTileEntity(pos);
         if (!(blockEntity instanceof IInventory)) {
-            throw ItemCommands.ERROR_TARGET_NOT_A_CONTAINER.create(pos.getX(), pos.getY(), pos.getZ());
+            throw CommandItem.ERROR_TARGET_NOT_A_CONTAINER.create(pos.getX(), pos.getY(), pos.getZ());
         } else {
             return (IInventory)blockEntity;
         }
@@ -167,7 +167,7 @@ public class CommandLoot {
             messageSender.accept(list);
             return list.size();
         } else {
-            throw ItemCommands.ERROR_TARGET_INAPPLICABLE_SLOT.create(slot);
+            throw CommandItem.ERROR_TARGET_INAPPLICABLE_SLOT.create(slot);
         }
     }
 

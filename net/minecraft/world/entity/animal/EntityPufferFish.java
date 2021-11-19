@@ -12,7 +12,7 @@ import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
@@ -140,7 +140,7 @@ public class EntityPufferFish extends EntityFish {
     private void touch(EntityInsentient mob) {
         int i = this.getPuffState();
         if (mob.damageEntity(DamageSource.mobAttack(this), (float)(1 + i))) {
-            mob.addEffect(new MobEffect(MobEffects.POISON, 60 * i, 0), this);
+            mob.addEffect(new MobEffect(MobEffectList.POISON, 60 * i, 0), this);
             this.playSound(SoundEffects.PUFFER_FISH_STING, 1.0F, 1.0F);
         }
 
@@ -154,7 +154,7 @@ public class EntityPufferFish extends EntityFish {
                 ((EntityPlayer)player).connection.sendPacket(new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.PUFFER_FISH_STING, 0.0F));
             }
 
-            player.addEffect(new MobEffect(MobEffects.POISON, 60 * i, 0), this);
+            player.addEffect(new MobEffect(MobEffectList.POISON, 60 * i, 0), this);
         }
 
     }

@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionRegistry;
 import net.minecraft.world.level.IMaterial;
 
-public class CriterionTriggerInventoryChanged extends CriterionTriggerAbstract<CriterionTriggerInventoryChanged.TriggerInstance> {
+public class CriterionTriggerInventoryChanged extends CriterionTriggerAbstract<CriterionTriggerInventoryChanged.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("inventory_changed");
 
     @Override
@@ -24,13 +24,13 @@ public class CriterionTriggerInventoryChanged extends CriterionTriggerAbstract<C
     }
 
     @Override
-    public CriterionTriggerInventoryChanged.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerInventoryChanged.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         JsonObject jsonObject2 = ChatDeserializer.getAsJsonObject(jsonObject, "slots", new JsonObject());
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject2.get("occupied"));
         CriterionConditionValue.IntegerRange ints2 = CriterionConditionValue.IntegerRange.fromJson(jsonObject2.get("full"));
         CriterionConditionValue.IntegerRange ints3 = CriterionConditionValue.IntegerRange.fromJson(jsonObject2.get("empty"));
         CriterionConditionItem[] itemPredicates = CriterionConditionItem.fromJsonArray(jsonObject.get("items"));
-        return new CriterionTriggerInventoryChanged.TriggerInstance(composite, ints, ints2, ints3, itemPredicates);
+        return new CriterionTriggerInventoryChanged.CriterionInstanceTrigger(composite, ints, ints2, ints3, itemPredicates);
     }
 
     public void trigger(EntityPlayer player, PlayerInventory inventory, ItemStack stack) {
@@ -59,13 +59,13 @@ public class CriterionTriggerInventoryChanged extends CriterionTriggerAbstract<C
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionValue.IntegerRange slotsOccupied;
         private final CriterionConditionValue.IntegerRange slotsFull;
         private final CriterionConditionValue.IntegerRange slotsEmpty;
         private final CriterionConditionItem[] predicates;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionValue.IntegerRange occupied, CriterionConditionValue.IntegerRange full, CriterionConditionValue.IntegerRange empty, CriterionConditionItem[] items) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionValue.IntegerRange occupied, CriterionConditionValue.IntegerRange full, CriterionConditionValue.IntegerRange empty, CriterionConditionItem[] items) {
             super(CriterionTriggerInventoryChanged.ID, player);
             this.slotsOccupied = occupied;
             this.slotsFull = full;
@@ -73,11 +73,11 @@ public class CriterionTriggerInventoryChanged extends CriterionTriggerAbstract<C
             this.predicates = items;
         }
 
-        public static CriterionTriggerInventoryChanged.TriggerInstance hasItems(CriterionConditionItem... items) {
-            return new CriterionTriggerInventoryChanged.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionValue.IntegerRange.ANY, CriterionConditionValue.IntegerRange.ANY, CriterionConditionValue.IntegerRange.ANY, items);
+        public static CriterionTriggerInventoryChanged.CriterionInstanceTrigger hasItems(CriterionConditionItem... items) {
+            return new CriterionTriggerInventoryChanged.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionValue.IntegerRange.ANY, CriterionConditionValue.IntegerRange.ANY, CriterionConditionValue.IntegerRange.ANY, items);
         }
 
-        public static CriterionTriggerInventoryChanged.TriggerInstance hasItems(IMaterial... items) {
+        public static CriterionTriggerInventoryChanged.CriterionInstanceTrigger hasItems(IMaterial... items) {
             CriterionConditionItem[] itemPredicates = new CriterionConditionItem[items.length];
 
             for(int i = 0; i < items.length; ++i) {

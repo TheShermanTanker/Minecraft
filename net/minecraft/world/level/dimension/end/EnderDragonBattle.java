@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.data.worldgen.BiomeDecoratorGroups;
+import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
 import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -380,7 +380,7 @@ public class EnderDragonBattle {
 
     private void spawnNewGateway(BlockPosition pos) {
         this.level.triggerEffect(3000, pos, 0);
-        BiomeDecoratorGroups.END_GATEWAY_DELAYED.place(this.level, this.level.getChunkSource().getChunkGenerator(), new Random(), pos);
+        WorldGenBiomeDecoratorGroups.END_GATEWAY_DELAYED.place(this.level, this.level.getChunkSource().getChunkGenerator(), new Random(), pos);
     }
 
     public void generateExitPortal(boolean previouslyKilled) {

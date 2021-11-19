@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 
-public class CriterionTriggerTick extends CriterionTriggerAbstract<CriterionTriggerTick.TriggerInstance> {
+public class CriterionTriggerTick extends CriterionTriggerAbstract<CriterionTriggerTick.CriterionInstanceTrigger> {
     public static final MinecraftKey ID = new MinecraftKey("tick");
 
     @Override
@@ -13,8 +13,8 @@ public class CriterionTriggerTick extends CriterionTriggerAbstract<CriterionTrig
     }
 
     @Override
-    public CriterionTriggerTick.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
-        return new CriterionTriggerTick.TriggerInstance(composite);
+    public CriterionTriggerTick.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+        return new CriterionTriggerTick.CriterionInstanceTrigger(composite);
     }
 
     public void trigger(EntityPlayer player) {
@@ -23,8 +23,8 @@ public class CriterionTriggerTick extends CriterionTriggerAbstract<CriterionTrig
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
-        public TriggerInstance(CriterionConditionEntity.Composite player) {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player) {
             super(CriterionTriggerTick.ID, player);
         }
     }

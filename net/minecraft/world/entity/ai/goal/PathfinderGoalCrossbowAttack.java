@@ -2,7 +2,7 @@ package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
 import net.minecraft.util.TimeRange;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.monster.EntityMonster;
 import net.minecraft.world.entity.monster.ICrossbow;
@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class PathfinderGoalCrossbowAttack<T extends EntityMonster & IRangedEntity & ICrossbow> extends PathfinderGoal {
-    public static final UniformInt PATHFINDING_DELAY_RANGE = TimeRange.rangeOfSeconds(1, 2);
+    public static final IntProviderUniform PATHFINDING_DELAY_RANGE = TimeRange.rangeOfSeconds(1, 2);
     private final T mob;
     private PathfinderGoalCrossbowAttack.State crossbowState = PathfinderGoalCrossbowAttack.State.UNCHARGED;
     private final double speedModifier;

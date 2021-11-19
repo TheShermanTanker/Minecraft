@@ -12,11 +12,11 @@ import net.minecraft.network.chat.ChatComponentUtils;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.network.protocol.game.PacketPlayOutActionBarText;
+import net.minecraft.network.protocol.game.PacketPlayOutClearTitles;
+import net.minecraft.network.protocol.game.PacketPlayOutSubtitleText;
+import net.minecraft.network.protocol.game.PacketPlayOutTitleAnimations;
+import net.minecraft.network.protocol.game.PacketPlayOutTitleText;
 import net.minecraft.server.level.EntityPlayer;
 
 public class CommandTitle {
@@ -28,18 +28,18 @@ public class CommandTitle {
         })).then(net.minecraft.commands.CommandDispatcher.literal("reset").executes((context) -> {
             return resetTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"));
         })).then(net.minecraft.commands.CommandDispatcher.literal("title").then(net.minecraft.commands.CommandDispatcher.argument("title", ArgumentChatComponent.textComponent()).executes((context) -> {
-            return showTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentChatComponent.getComponent(context, "title"), "title", ClientboundSetTitleTextPacket::new);
+            return showTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentChatComponent.getComponent(context, "title"), "title", PacketPlayOutTitleText::new);
         }))).then(net.minecraft.commands.CommandDispatcher.literal("subtitle").then(net.minecraft.commands.CommandDispatcher.argument("title", ArgumentChatComponent.textComponent()).executes((context) -> {
-            return showTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentChatComponent.getComponent(context, "title"), "subtitle", ClientboundSetSubtitleTextPacket::new);
+            return showTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentChatComponent.getComponent(context, "title"), "subtitle", PacketPlayOutSubtitleText::new);
         }))).then(net.minecraft.commands.CommandDispatcher.literal("actionbar").then(net.minecraft.commands.CommandDispatcher.argument("title", ArgumentChatComponent.textComponent()).executes((context) -> {
-            return showTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentChatComponent.getComponent(context, "title"), "actionbar", ClientboundSetActionBarTextPacket::new);
+            return showTitle(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentChatComponent.getComponent(context, "title"), "actionbar", PacketPlayOutActionBarText::new);
         }))).then(net.minecraft.commands.CommandDispatcher.literal("times").then(net.minecraft.commands.CommandDispatcher.argument("fadeIn", IntegerArgumentType.integer(0)).then(net.minecraft.commands.CommandDispatcher.argument("stay", IntegerArgumentType.integer(0)).then(net.minecraft.commands.CommandDispatcher.argument("fadeOut", IntegerArgumentType.integer(0)).executes((context) -> {
             return setTimes(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), IntegerArgumentType.getInteger(context, "fadeIn"), IntegerArgumentType.getInteger(context, "stay"), IntegerArgumentType.getInteger(context, "fadeOut"));
         })))))));
     }
 
     private static int clearTitle(CommandListenerWrapper source, Collection<EntityPlayer> targets) {
-        ClientboundClearTitlesPacket clientboundClearTitlesPacket = new ClientboundClearTitlesPacket(false);
+        PacketPlayOutClearTitles clientboundClearTitlesPacket = new PacketPlayOutClearTitles(false);
 
         for(EntityPlayer serverPlayer : targets) {
             serverPlayer.connection.sendPacket(clientboundClearTitlesPacket);
@@ -55,7 +55,7 @@ public class CommandTitle {
     }
 
     private static int resetTitle(CommandListenerWrapper source, Collection<EntityPlayer> targets) {
-        ClientboundClearTitlesPacket clientboundClearTitlesPacket = new ClientboundClearTitlesPacket(true);
+        PacketPlayOutClearTitles clientboundClearTitlesPacket = new PacketPlayOutClearTitles(true);
 
         for(EntityPlayer serverPlayer : targets) {
             serverPlayer.connection.sendPacket(clientboundClearTitlesPacket);
@@ -85,7 +85,7 @@ public class CommandTitle {
     }
 
     private static int setTimes(CommandListenerWrapper source, Collection<EntityPlayer> targets, int fadeIn, int stay, int fadeOut) {
-        ClientboundSetTitlesAnimationPacket clientboundSetTitlesAnimationPacket = new ClientboundSetTitlesAnimationPacket(fadeIn, stay, fadeOut);
+        PacketPlayOutTitleAnimations clientboundSetTitlesAnimationPacket = new PacketPlayOutTitleAnimations(fadeIn, stay, fadeOut);
 
         for(EntityPlayer serverPlayer : targets) {
             serverPlayer.connection.sendPacket(clientboundSetTitlesAnimationPacket);

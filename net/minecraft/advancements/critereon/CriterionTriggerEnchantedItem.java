@@ -5,7 +5,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.item.ItemStack;
 
-public class CriterionTriggerEnchantedItem extends CriterionTriggerAbstract<CriterionTriggerEnchantedItem.TriggerInstance> {
+public class CriterionTriggerEnchantedItem extends CriterionTriggerAbstract<CriterionTriggerEnchantedItem.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("enchanted_item");
 
     @Override
@@ -14,10 +14,10 @@ public class CriterionTriggerEnchantedItem extends CriterionTriggerAbstract<Crit
     }
 
     @Override
-    public CriterionTriggerEnchantedItem.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerEnchantedItem.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("levels"));
-        return new CriterionTriggerEnchantedItem.TriggerInstance(composite, itemPredicate, ints);
+        return new CriterionTriggerEnchantedItem.CriterionInstanceTrigger(composite, itemPredicate, ints);
     }
 
     public void trigger(EntityPlayer player, ItemStack stack, int levels) {
@@ -26,18 +26,18 @@ public class CriterionTriggerEnchantedItem extends CriterionTriggerAbstract<Crit
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionItem item;
         private final CriterionConditionValue.IntegerRange levels;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionValue.IntegerRange levels) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionItem item, CriterionConditionValue.IntegerRange levels) {
             super(CriterionTriggerEnchantedItem.ID, player);
             this.item = item;
             this.levels = levels;
         }
 
-        public static CriterionTriggerEnchantedItem.TriggerInstance enchantedItem() {
-            return new CriterionTriggerEnchantedItem.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY, CriterionConditionValue.IntegerRange.ANY);
+        public static CriterionTriggerEnchantedItem.CriterionInstanceTrigger enchantedItem() {
+            return new CriterionTriggerEnchantedItem.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY, CriterionConditionValue.IntegerRange.ANY);
         }
 
         public boolean matches(ItemStack stack, int levels) {

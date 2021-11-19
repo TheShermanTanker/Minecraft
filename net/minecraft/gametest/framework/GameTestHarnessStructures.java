@@ -19,7 +19,7 @@ import net.minecraft.commands.arguments.blocks.ArgumentTileLocation;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
-import net.minecraft.data.structures.DebugReportNBT;
+import net.minecraft.data.structures.DebugReportProviderNBT;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -91,7 +91,7 @@ public class GameTestHarnessStructures {
                 String string = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                 NBTTagCompound compoundTag = GameProfileSerializer.snbtToStructure(string);
                 NBTTagCompound compoundTag2 = StructureUpdater.update(path.toString(), compoundTag);
-                DebugReportNBT.writeSnbt(path, GameProfileSerializer.structureToSnbt(compoundTag2));
+                DebugReportProviderNBT.writeSnbt(path, GameProfileSerializer.structureToSnbt(compoundTag2));
             } catch (IOException | CommandSyntaxException var4) {
                 LOGGER.error("Something went wrong upgrading: {}", path, var4);
             }

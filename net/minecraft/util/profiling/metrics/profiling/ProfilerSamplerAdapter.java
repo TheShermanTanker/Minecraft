@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import net.minecraft.util.TimeRange;
 import net.minecraft.util.profiling.GameProfilerFillerActive;
 import net.minecraft.util.profiling.MethodProfiler;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 
 public class ProfilerSamplerAdapter {
@@ -27,7 +27,7 @@ public class ProfilerSamplerAdapter {
         return set;
     }
 
-    private static MetricSampler samplerForProfilingPath(Supplier<GameProfilerFillerActive> profilerSupplier, String id, MetricCategory type) {
+    private static MetricSampler samplerForProfilingPath(Supplier<GameProfilerFillerActive> profilerSupplier, String id, EnumMetricCategory type) {
         return MetricSampler.create(id, type, () -> {
             MethodProfiler.PathEntry pathEntry = profilerSupplier.get().getEntry(id);
             return pathEntry == null ? 0.0D : (double)pathEntry.getMaxDuration() / (double)TimeRange.NANOSECONDS_PER_MILLISECOND;

@@ -22,7 +22,7 @@ public class StatisticWrapper<T> implements Iterable<Statistic<T>> {
         return this.map.containsKey(key);
     }
 
-    public Statistic<T> get(T key, Counter formatter) {
+    public Statistic<T> get(T key, ICounter formatter) {
         return this.map.computeIfAbsent(key, (object) -> {
             return new Statistic<>(this, object, formatter);
         });
@@ -38,7 +38,7 @@ public class StatisticWrapper<T> implements Iterable<Statistic<T>> {
     }
 
     public Statistic<T> get(T key) {
-        return this.get(key, Counter.DEFAULT);
+        return this.get(key, ICounter.DEFAULT);
     }
 
     public String getTranslationKey() {

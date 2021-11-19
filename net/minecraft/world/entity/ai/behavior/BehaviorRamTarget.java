@@ -7,12 +7,12 @@ import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityCreature;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.BehaviorController;
@@ -27,14 +27,14 @@ import net.minecraft.world.phys.Vec3D;
 public class BehaviorRamTarget<E extends EntityCreature> extends Behavior<E> {
     public static final int TIME_OUT_DURATION = 200;
     public static final float RAM_SPEED_FORCE_FACTOR = 1.65F;
-    private final Function<E, UniformInt> getTimeBetweenRams;
+    private final Function<E, IntProviderUniform> getTimeBetweenRams;
     private final PathfinderTargetCondition ramTargeting;
     private final float speed;
     private final ToDoubleFunction<E> getKnockbackForce;
     private Vec3D ramDirection;
     private final Function<E, SoundEffect> getImpactSound;
 
-    public BehaviorRamTarget(Function<E, UniformInt> cooldownRangeFactory, PathfinderTargetCondition targetPredicate, float speed, ToDoubleFunction<E> strengthMultiplierFactory, Function<E, SoundEffect> soundFactory) {
+    public BehaviorRamTarget(Function<E, IntProviderUniform> cooldownRangeFactory, PathfinderTargetCondition targetPredicate, float speed, ToDoubleFunction<E> strengthMultiplierFactory, Function<E, SoundEffect> soundFactory) {
         super(ImmutableMap.of(MemoryModuleType.RAM_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.RAM_TARGET, MemoryStatus.VALUE_PRESENT), 200);
         this.getTimeBetweenRams = cooldownRangeFactory;
         this.ramTargeting = targetPredicate;
@@ -70,14 +70,14 @@ public class BehaviorRamTarget<E extends EntityCreature> extends Behavior<E> {
         if (!list.isEmpty()) {
             EntityLiving livingEntity = list.get(0);
             livingEntity.damageEntity(DamageSource.mobAttack(pathfinderMob).setNoAggro(), (float)pathfinderMob.getAttributeValue(GenericAttributes.ATTACK_DAMAGE));
-            int i = pathfinderMob.hasEffect(MobEffects.MOVEMENT_SPEED) ? pathfinderMob.getEffect(MobEffects.MOVEMENT_SPEED).getAmplifier() + 1 : 0;
-            int j = pathfinderMob.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) ? pathfinderMob.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() + 1 : 0;
+            int i = pathfinderMob.hasEffect(MobEffectList.MOVEMENT_SPEED) ? pathfinderMob.getEffect(MobEffectList.MOVEMENT_SPEED).getAmplifier() + 1 : 0;
+            int j = pathfinderMob.hasEffect(MobEffectList.MOVEMENT_SLOWDOWN) ? pathfinderMob.getEffect(MobEffectList.MOVEMENT_SLOWDOWN).getAmplifier() + 1 : 0;
             float f = 0.25F * (float)(i - j);
             float g = MathHelper.clamp(pathfinderMob.getSpeed() * 1.65F, 0.2F, 3.0F) + f;
             float h = livingEntity.applyBlockingModifier(DamageSource.mobAttack(pathfinderMob)) ? 0.5F : 1.0F;
             livingEntity.knockback((double)(h * g) * this.getKnockbackForce.applyAsDouble(pathfinderMob), this.ramDirection.getX(), this.ramDirection.getZ());
             this.finishRam(serverLevel, pathfinderMob);
-            serverLevel.playSound((EntityHuman)null, pathfinderMob, this.getImpactSound.apply(pathfinderMob), SoundCategory.HOSTILE, 1.0F, 1.0F);
+            serverLevel.playSound((EntityHuman)null, pathfinderMob, this.getImpactSound.apply(pathfinderMob), EnumSoundCategory.HOSTILE, 1.0F, 1.0F);
         } else {
             Optional<MemoryTarget> optional = brain.getMemory(MemoryModuleType.WALK_TARGET);
             Optional<Vec3D> optional2 = brain.getMemory(MemoryModuleType.RAM_TARGET);

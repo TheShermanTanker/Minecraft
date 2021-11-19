@@ -248,7 +248,7 @@ public class NameReferencingFileConverter {
     @Nullable
     public static UUID convertMobOwnerIfNecessary(MinecraftServer server, String name) {
         if (!UtilColor.isNullOrEmpty(name) && name.length() <= 16) {
-            Optional<UUID> optional = server.getUserCache().b(name).map(GameProfile::getId);
+            Optional<UUID> optional = server.getUserCache().getProfile(name).map(GameProfile::getId);
             if (optional.isPresent()) {
                 return optional.get();
             } else if (!server.isEmbeddedServer() && server.getOnlineMode()) {

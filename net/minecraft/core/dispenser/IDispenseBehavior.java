@@ -10,7 +10,7 @@ import net.minecraft.core.IPosition;
 import net.minecraft.core.ISourceBlock;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
@@ -86,7 +86,7 @@ public interface IDispenseBehavior {
     static void bootStrap() {
         BlockDispenser.registerBehavior(Items.ARROW, new DispenseBehaviorProjectile() {
             @Override
-            protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+            protected IProjectile a(World world, IPosition position, ItemStack stack) {
                 EntityTippedArrow arrow = new EntityTippedArrow(world, position.getX(), position.getY(), position.getZ());
                 arrow.pickup = EntityArrow.PickupStatus.ALLOWED;
                 return arrow;
@@ -94,7 +94,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.TIPPED_ARROW, new DispenseBehaviorProjectile() {
             @Override
-            protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+            protected IProjectile a(World world, IPosition position, ItemStack stack) {
                 EntityTippedArrow arrow = new EntityTippedArrow(world, position.getX(), position.getY(), position.getZ());
                 arrow.setEffectsFromItem(stack);
                 arrow.pickup = EntityArrow.PickupStatus.ALLOWED;
@@ -103,7 +103,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.SPECTRAL_ARROW, new DispenseBehaviorProjectile() {
             @Override
-            protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+            protected IProjectile a(World world, IPosition position, ItemStack stack) {
                 EntityArrow abstractArrow = new EntitySpectralArrow(world, position.getX(), position.getY(), position.getZ());
                 abstractArrow.pickup = EntityArrow.PickupStatus.ALLOWED;
                 return abstractArrow;
@@ -111,7 +111,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.EGG, new DispenseBehaviorProjectile() {
             @Override
-            protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+            protected IProjectile a(World world, IPosition position, ItemStack stack) {
                 return SystemUtils.make(new EntityEgg(world, position.getX(), position.getY(), position.getZ()), (thrownEgg) -> {
                     thrownEgg.setItem(stack);
                 });
@@ -119,7 +119,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.SNOWBALL, new DispenseBehaviorProjectile() {
             @Override
-            protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+            protected IProjectile a(World world, IPosition position, ItemStack stack) {
                 return SystemUtils.make(new EntitySnowball(world, position.getX(), position.getY(), position.getZ()), (snowball) -> {
                     snowball.setItem(stack);
                 });
@@ -127,20 +127,20 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.EXPERIENCE_BOTTLE, new DispenseBehaviorProjectile() {
             @Override
-            protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+            protected IProjectile a(World world, IPosition position, ItemStack stack) {
                 return SystemUtils.make(new EntityThrownExpBottle(world, position.getX(), position.getY(), position.getZ()), (thrownExperienceBottle) -> {
                     thrownExperienceBottle.setItem(stack);
                 });
             }
 
             @Override
-            protected float getUncertainty() {
-                return super.getUncertainty() * 0.5F;
+            protected float a() {
+                return super.a() * 0.5F;
             }
 
             @Override
-            protected float getPower() {
-                return super.getPower() * 1.25F;
+            protected float b() {
+                return super.b() * 1.25F;
             }
         });
         BlockDispenser.registerBehavior(Items.SPLASH_POTION, new IDispenseBehavior() {
@@ -148,20 +148,20 @@ public interface IDispenseBehavior {
             public ItemStack dispense(ISourceBlock pointer, ItemStack stack) {
                 return (new DispenseBehaviorProjectile() {
                     @Override
-                    protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+                    protected IProjectile a(World world, IPosition position, ItemStack stack) {
                         return SystemUtils.make(new EntityPotion(world, position.getX(), position.getY(), position.getZ()), (thrownPotion) -> {
                             thrownPotion.setItem(stack);
                         });
                     }
 
                     @Override
-                    protected float getUncertainty() {
-                        return super.getUncertainty() * 0.5F;
+                    protected float a() {
+                        return super.a() * 0.5F;
                     }
 
                     @Override
-                    protected float getPower() {
-                        return super.getPower() * 1.25F;
+                    protected float b() {
+                        return super.b() * 1.25F;
                     }
                 }).dispense(pointer, stack);
             }
@@ -171,27 +171,27 @@ public interface IDispenseBehavior {
             public ItemStack dispense(ISourceBlock pointer, ItemStack stack) {
                 return (new DispenseBehaviorProjectile() {
                     @Override
-                    protected IProjectile getProjectile(World world, IPosition position, ItemStack stack) {
+                    protected IProjectile a(World world, IPosition position, ItemStack stack) {
                         return SystemUtils.make(new EntityPotion(world, position.getX(), position.getY(), position.getZ()), (thrownPotion) -> {
                             thrownPotion.setItem(stack);
                         });
                     }
 
                     @Override
-                    protected float getUncertainty() {
-                        return super.getUncertainty() * 0.5F;
+                    protected float a() {
+                        return super.a() * 0.5F;
                     }
 
                     @Override
-                    protected float getPower() {
-                        return super.getPower() * 1.25F;
+                    protected float b() {
+                        return super.b() * 1.25F;
                     }
                 }).dispense(pointer, stack);
             }
         });
         DispenseBehaviorItem defaultDispenseItemBehavior = new DispenseBehaviorItem() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
                 EntityTypes<?> entityType = ((ItemMonsterEgg)stack.getItem()).getType(stack.getTag());
 
@@ -214,7 +214,7 @@ public interface IDispenseBehavior {
 
         BlockDispenser.registerBehavior(Items.ARMOR_STAND, new DispenseBehaviorItem() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
                 BlockPosition blockPos = pointer.getBlockPosition().relative(direction);
                 World level = pointer.getWorld();
@@ -228,7 +228,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.SADDLE, new DispenseBehaviorMaybe() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
                 List<EntityLiving> list = pointer.getWorld().getEntitiesOfClass(EntityLiving.class, new AxisAlignedBB(blockPos), (entity) -> {
                     if (!(entity instanceof ISaddleable)) {
@@ -239,18 +239,18 @@ public interface IDispenseBehavior {
                     }
                 });
                 if (!list.isEmpty()) {
-                    ((ISaddleable)list.get(0)).saddle(SoundCategory.BLOCKS);
+                    ((ISaddleable)list.get(0)).saddle(EnumSoundCategory.BLOCKS);
                     stack.subtract(1);
                     this.setSuccess(true);
                     return stack;
                 } else {
-                    return super.execute(pointer, stack);
+                    return super.a(pointer, stack);
                 }
             }
         });
         DispenseBehaviorItem defaultDispenseItemBehavior2 = new DispenseBehaviorMaybe() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
 
                 for(EntityHorseAbstract abstractHorse : pointer.getWorld().getEntitiesOfClass(EntityHorseAbstract.class, new AxisAlignedBB(blockPos), (abstractHorsex) -> {
@@ -263,7 +263,7 @@ public interface IDispenseBehavior {
                     }
                 }
 
-                return super.execute(pointer, stack);
+                return super.a(pointer, stack);
             }
         };
         BlockDispenser.registerBehavior(Items.LEATHER_HORSE_ARMOR, defaultDispenseItemBehavior2);
@@ -288,7 +288,7 @@ public interface IDispenseBehavior {
         BlockDispenser.registerBehavior(Items.YELLOW_CARPET, defaultDispenseItemBehavior2);
         BlockDispenser.registerBehavior(Items.CHEST, new DispenseBehaviorMaybe() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
 
                 for(EntityHorseChestedAbstract abstractChestedHorse : pointer.getWorld().getEntitiesOfClass(EntityHorseChestedAbstract.class, new AxisAlignedBB(blockPos), (abstractChestedHorsex) -> {
@@ -301,12 +301,12 @@ public interface IDispenseBehavior {
                     }
                 }
 
-                return super.execute(pointer, stack);
+                return super.a(pointer, stack);
             }
         });
         BlockDispenser.registerBehavior(Items.FIREWORK_ROCKET, new DispenseBehaviorItem() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
                 EntityFireworks fireworkRocketEntity = new EntityFireworks(pointer.getWorld(), stack, pointer.getX(), pointer.getY(), pointer.getX(), true);
                 IDispenseBehavior.setEntityPokingOutOfBlock(pointer, fireworkRocketEntity, direction);
@@ -317,13 +317,13 @@ public interface IDispenseBehavior {
             }
 
             @Override
-            protected void playSound(ISourceBlock pointer) {
+            protected void a(ISourceBlock pointer) {
                 pointer.getWorld().triggerEffect(1004, pointer.getBlockPosition(), 0);
             }
         });
         BlockDispenser.registerBehavior(Items.FIRE_CHARGE, new DispenseBehaviorItem() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
                 IPosition position = BlockDispenser.getDispensePosition(pointer);
                 double d = position.getX() + (double)((float)direction.getAdjacentX() * 0.3F);
@@ -343,7 +343,7 @@ public interface IDispenseBehavior {
             }
 
             @Override
-            protected void playSound(ISourceBlock pointer) {
+            protected void a(ISourceBlock pointer) {
                 pointer.getWorld().triggerEffect(1018, pointer.getBlockPosition(), 0);
             }
         });
@@ -357,7 +357,7 @@ public interface IDispenseBehavior {
             private final DispenseBehaviorItem defaultDispenseItemBehavior = new DispenseBehaviorItem();
 
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem)stack.getItem();
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
                 World level = pointer.getWorld();
@@ -381,7 +381,7 @@ public interface IDispenseBehavior {
             private final DispenseBehaviorItem defaultDispenseItemBehavior = new DispenseBehaviorItem();
 
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 GeneratorAccess levelAccessor = pointer.getWorld();
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
                 IBlockData blockState = levelAccessor.getType(blockPos);
@@ -389,7 +389,7 @@ public interface IDispenseBehavior {
                 if (block instanceof IFluidSource) {
                     ItemStack itemStack = ((IFluidSource)block).removeFluid(levelAccessor, blockPos, blockState);
                     if (itemStack.isEmpty()) {
-                        return super.execute(pointer, stack);
+                        return super.a(pointer, stack);
                     } else {
                         levelAccessor.gameEvent((Entity)null, GameEvent.FLUID_PICKUP, blockPos);
                         Item item = itemStack.getItem();
@@ -405,13 +405,13 @@ public interface IDispenseBehavior {
                         }
                     }
                 } else {
-                    return super.execute(pointer, stack);
+                    return super.a(pointer, stack);
                 }
             }
         });
         BlockDispenser.registerBehavior(Items.FLINT_AND_STEEL, new DispenseBehaviorMaybe() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 World level = pointer.getWorld();
                 this.setSuccess(true);
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
@@ -441,7 +441,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Items.BONE_MEAL, new DispenseBehaviorMaybe() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 this.setSuccess(true);
                 World level = pointer.getWorld();
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
@@ -456,12 +456,12 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Blocks.TNT, new DispenseBehaviorItem() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 World level = pointer.getWorld();
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
                 EntityTNTPrimed primedTnt = new EntityTNTPrimed(level, (double)blockPos.getX() + 0.5D, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5D, (EntityLiving)null);
                 level.addEntity(primedTnt);
-                level.playSound((EntityHuman)null, primedTnt.locX(), primedTnt.locY(), primedTnt.locZ(), SoundEffects.TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                level.playSound((EntityHuman)null, primedTnt.locX(), primedTnt.locY(), primedTnt.locZ(), SoundEffects.TNT_PRIMED, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 level.gameEvent((Entity)null, GameEvent.ENTITY_PLACE, blockPos);
                 stack.subtract(1);
                 return stack;
@@ -469,7 +469,7 @@ public interface IDispenseBehavior {
         });
         IDispenseBehavior dispenseItemBehavior2 = new DispenseBehaviorMaybe() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 this.setSuccess(ItemArmor.dispenseArmor(pointer, stack));
                 return stack;
             }
@@ -481,7 +481,7 @@ public interface IDispenseBehavior {
         BlockDispenser.registerBehavior(Items.PLAYER_HEAD, dispenseItemBehavior2);
         BlockDispenser.registerBehavior(Items.WITHER_SKELETON_SKULL, new DispenseBehaviorMaybe() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 World level = pointer.getWorld();
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
                 BlockPosition blockPos = pointer.getBlockPosition().relative(direction);
@@ -504,7 +504,7 @@ public interface IDispenseBehavior {
         });
         BlockDispenser.registerBehavior(Blocks.CARVED_PUMPKIN, new DispenseBehaviorMaybe() {
             @Override
-            protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 World level = pointer.getWorld();
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
                 BlockPumpkinCarved carvedPumpkinBlock = (BlockPumpkinCarved)Blocks.CARVED_PUMPKIN;
@@ -532,7 +532,7 @@ public interface IDispenseBehavior {
         BlockDispenser.registerBehavior(Items.GLASS_BOTTLE.getItem(), new DispenseBehaviorMaybe() {
             private final DispenseBehaviorItem defaultDispenseItemBehavior = new DispenseBehaviorItem();
 
-            private ItemStack takeLiquid(ISourceBlock pointer, ItemStack emptyBottleStack, ItemStack filledBottleStack) {
+            private ItemStack a(ISourceBlock pointer, ItemStack emptyBottleStack, ItemStack filledBottleStack) {
                 emptyBottleStack.subtract(1);
                 if (emptyBottleStack.isEmpty()) {
                     pointer.getWorld().gameEvent((Entity)null, GameEvent.FLUID_PICKUP, pointer.getBlockPosition());
@@ -547,7 +547,7 @@ public interface IDispenseBehavior {
             }
 
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 this.setSuccess(false);
                 WorldServer serverLevel = pointer.getWorld();
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
@@ -557,18 +557,18 @@ public interface IDispenseBehavior {
                 }) && blockState.get(BlockBeehive.HONEY_LEVEL) >= 5) {
                     ((BlockBeehive)blockState.getBlock()).releaseBeesAndResetHoneyLevel(serverLevel, blockState, blockPos, (EntityHuman)null, TileEntityBeehive.ReleaseStatus.BEE_RELEASED);
                     this.setSuccess(true);
-                    return this.takeLiquid(pointer, stack, new ItemStack(Items.HONEY_BOTTLE));
+                    return this.a(pointer, stack, new ItemStack(Items.HONEY_BOTTLE));
                 } else if (serverLevel.getFluid(blockPos).is(TagsFluid.WATER)) {
                     this.setSuccess(true);
-                    return this.takeLiquid(pointer, stack, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER));
+                    return this.a(pointer, stack, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER));
                 } else {
-                    return super.execute(pointer, stack);
+                    return super.a(pointer, stack);
                 }
             }
         });
         BlockDispenser.registerBehavior(Items.GLOWSTONE, new DispenseBehaviorMaybe() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
                 BlockPosition blockPos = pointer.getBlockPosition().relative(direction);
                 World level = pointer.getWorld();
@@ -584,14 +584,14 @@ public interface IDispenseBehavior {
 
                     return stack;
                 } else {
-                    return super.execute(pointer, stack);
+                    return super.a(pointer, stack);
                 }
             }
         });
         BlockDispenser.registerBehavior(Items.SHEARS.getItem(), new DispenseBehaviorShears());
         BlockDispenser.registerBehavior(Items.HONEYCOMB, new DispenseBehaviorMaybe() {
             @Override
-            public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+            public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
                 World level = pointer.getWorld();
                 IBlockData blockState = level.getType(blockPos);
@@ -603,7 +603,7 @@ public interface IDispenseBehavior {
                     this.setSuccess(true);
                     return stack;
                 } else {
-                    return super.execute(pointer, stack);
+                    return super.a(pointer, stack);
                 }
             }
         });

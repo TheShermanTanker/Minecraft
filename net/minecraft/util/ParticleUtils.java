@@ -3,12 +3,12 @@ package net.minecraft.util;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.ParticleParam;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.level.World;
 import net.minecraft.world.phys.Vec3D;
 
 public class ParticleUtils {
-    public static void spawnParticlesOnBlockFaces(World world, BlockPosition pos, ParticleParam effect, UniformInt range) {
+    public static void spawnParticlesOnBlockFaces(World world, BlockPosition pos, ParticleParam effect, IntProviderUniform range) {
         for(EnumDirection direction : EnumDirection.values()) {
             int i = range.sample(world.random);
 
@@ -19,7 +19,7 @@ public class ParticleUtils {
 
     }
 
-    public static void spawnParticlesAlongAxis(EnumDirection.EnumAxis axis, World world, BlockPosition pos, double variance, ParticleParam effect, UniformInt range) {
+    public static void spawnParticlesAlongAxis(EnumDirection.EnumAxis axis, World world, BlockPosition pos, double variance, ParticleParam effect, IntProviderUniform range) {
         Vec3D vec3 = Vec3D.atCenterOf(pos);
         boolean bl = axis == EnumDirection.EnumAxis.X;
         boolean bl2 = axis == EnumDirection.EnumAxis.Y;

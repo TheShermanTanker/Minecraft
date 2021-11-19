@@ -9,13 +9,13 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.monster.IMonster;
@@ -107,7 +107,7 @@ public class TileEntityConduit extends TileEntity {
             boolean bl = updateShape(world, pos, list);
             if (bl != blockEntity.isActive) {
                 SoundEffect soundEvent = bl ? SoundEffects.CONDUIT_ACTIVATE : SoundEffects.CONDUIT_DEACTIVATE;
-                world.playSound((EntityHuman)null, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, pos, soundEvent, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             }
 
             blockEntity.isActive = bl;
@@ -120,12 +120,12 @@ public class TileEntityConduit extends TileEntity {
 
         if (blockEntity.isActive()) {
             if (l % 80L == 0L) {
-                world.playSound((EntityHuman)null, pos, SoundEffects.CONDUIT_AMBIENT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.CONDUIT_AMBIENT, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             }
 
             if (l > blockEntity.nextAmbientSoundActivation) {
                 blockEntity.nextAmbientSoundActivation = l + 60L + (long)world.getRandom().nextInt(40);
-                world.playSound((EntityHuman)null, pos, SoundEffects.CONDUIT_AMBIENT_SHORT, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.CONDUIT_AMBIENT_SHORT, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             }
         }
 
@@ -183,7 +183,7 @@ public class TileEntityConduit extends TileEntity {
         if (!list.isEmpty()) {
             for(EntityHuman player : list) {
                 if (pos.closerThan(player.getChunkCoordinates(), (double)j) && player.isInWaterOrRain()) {
-                    player.addEffect(new MobEffect(MobEffects.CONDUIT_POWER, 260, 0, true, true));
+                    player.addEffect(new MobEffect(MobEffectList.CONDUIT_POWER, 260, 0, true, true));
                 }
             }
 
@@ -210,7 +210,7 @@ public class TileEntityConduit extends TileEntity {
         }
 
         if (blockEntity.destroyTarget != null) {
-            world.playSound((EntityHuman)null, blockEntity.destroyTarget.locX(), blockEntity.destroyTarget.locY(), blockEntity.destroyTarget.locZ(), SoundEffects.CONDUIT_ATTACK_TARGET, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            world.playSound((EntityHuman)null, blockEntity.destroyTarget.locX(), blockEntity.destroyTarget.locY(), blockEntity.destroyTarget.locZ(), SoundEffects.CONDUIT_ATTACK_TARGET, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             blockEntity.destroyTarget.damageEntity(DamageSource.MAGIC, 4.0F);
         }
 

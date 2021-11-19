@@ -2,9 +2,9 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -13,10 +13,10 @@ import net.minecraft.world.entity.player.EntityHuman;
 
 public class LongJumpMidJump extends Behavior<EntityInsentient> {
     public static final int TIME_OUT_DURATION = 100;
-    private final UniformInt timeBetweenLongJumps;
+    private final IntProviderUniform timeBetweenLongJumps;
     private SoundEffect landingSound;
 
-    public LongJumpMidJump(UniformInt cooldownRange, SoundEffect soundEvent) {
+    public LongJumpMidJump(IntProviderUniform cooldownRange, SoundEffect soundEvent) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_PRESENT), 100);
         this.timeBetweenLongJumps = cooldownRange;
         this.landingSound = soundEvent;
@@ -37,7 +37,7 @@ public class LongJumpMidJump extends Behavior<EntityInsentient> {
     protected void stop(WorldServer world, EntityInsentient entity, long time) {
         if (entity.isOnGround()) {
             entity.setMot(entity.getMot().scale((double)0.1F));
-            world.playSound((EntityHuman)null, entity, this.landingSound, SoundCategory.NEUTRAL, 2.0F, 1.0F);
+            world.playSound((EntityHuman)null, entity, this.landingSound, EnumSoundCategory.NEUTRAL, 2.0F, 1.0F);
         }
 
         entity.setDiscardFriction(false);

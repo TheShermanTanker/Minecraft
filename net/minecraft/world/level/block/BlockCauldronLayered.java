@@ -3,7 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Map;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.cauldron.ICauldronBehavior;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.World;
@@ -30,7 +30,7 @@ public class BlockCauldronLayered extends BlockCauldronAbstract {
     };
     private final Predicate<BiomeBase.Precipitation> fillPredicate;
 
-    public BlockCauldronLayered(BlockBase.Info settings, Predicate<BiomeBase.Precipitation> precipitationPredicate, Map<Item, CauldronInteraction> behaviorMap) {
+    public BlockCauldronLayered(BlockBase.Info settings, Predicate<BiomeBase.Precipitation> precipitationPredicate, Map<Item, ICauldronBehavior> behaviorMap) {
         super(settings, behaviorMap);
         this.fillPredicate = precipitationPredicate;
         this.registerDefaultState(this.stateDefinition.getBlockData().set(LEVEL, Integer.valueOf(1)));

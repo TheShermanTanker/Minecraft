@@ -2,7 +2,7 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -29,7 +29,7 @@ public class BlockPumpkin extends BlockStemmed {
             if (!world.isClientSide) {
                 EnumDirection direction = hit.getDirection();
                 EnumDirection direction2 = direction.getAxis() == EnumDirection.EnumAxis.Y ? player.getDirection().opposite() : direction;
-                world.playSound((EntityHuman)null, pos, SoundEffects.PUMPKIN_CARVE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.PUMPKIN_CARVE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 world.setTypeAndData(pos, Blocks.CARVED_PUMPKIN.getBlockData().set(BlockPumpkinCarved.FACING, direction2), 11);
                 EntityItem itemEntity = new EntityItem(world, (double)pos.getX() + 0.5D + (double)direction2.getAdjacentX() * 0.65D, (double)pos.getY() + 0.1D, (double)pos.getZ() + 0.5D + (double)direction2.getAdjacentZ() * 0.65D, new ItemStack(Items.PUMPKIN_SEEDS, 4));
                 itemEntity.setMot(0.05D * (double)direction2.getAdjacentX() + world.random.nextDouble() * 0.02D, 0.05D, 0.05D * (double)direction2.getAdjacentZ() + world.random.nextDouble() * 0.02D);

@@ -27,7 +27,7 @@ import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAgeable;
 import net.minecraft.world.entity.EntityInsentient;
@@ -396,14 +396,14 @@ public class EntityAxolotl extends EntityAnimal implements LerpingModel, IBucket
     }
 
     public void applySupportingEffects(EntityHuman player) {
-        MobEffect mobEffectInstance = player.getEffect(MobEffects.REGENERATION);
+        MobEffect mobEffectInstance = player.getEffect(MobEffectList.REGENERATION);
         int i = mobEffectInstance != null ? mobEffectInstance.getDuration() : 0;
         if (i < 2400) {
             i = Math.min(2400, 100 + i);
-            player.addEffect(new MobEffect(MobEffects.REGENERATION, i, 0), this);
+            player.addEffect(new MobEffect(MobEffectList.REGENERATION, i, 0), this);
         }
 
-        player.removeEffect(MobEffects.DIG_SLOWDOWN);
+        player.removeEffect(MobEffectList.DIG_SLOWDOWN);
     }
 
     @Override

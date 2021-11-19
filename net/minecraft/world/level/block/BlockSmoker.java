@@ -4,7 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.ITileInventory;
@@ -50,7 +50,7 @@ public class BlockSmoker extends BlockFurnace {
             double e = (double)pos.getY();
             double f = (double)pos.getZ() + 0.5D;
             if (random.nextDouble() < 0.1D) {
-                world.playLocalSound(d, e, f, SoundEffects.SMOKER_SMOKE, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+                world.playLocalSound(d, e, f, SoundEffects.SMOKER_SMOKE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F, false);
             }
 
             world.addParticle(Particles.SMOKE, d, e + 1.1D, f, 0.0D, 0.0D, 0.0D);

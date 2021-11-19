@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.data.worldgen.ProcessorLists;
+import net.minecraft.data.worldgen.WorldGenProcessorLists;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
@@ -64,7 +64,7 @@ public class WorldGenFeatureDefinedStructurePoolSingle extends WorldGenFeatureDe
 
     public WorldGenFeatureDefinedStructurePoolSingle(DefinedStructure structure) {
         this(Either.right(structure), () -> {
-            return ProcessorLists.EMPTY;
+            return WorldGenProcessorLists.EMPTY;
         }, WorldGenFeatureDefinedStructurePoolTemplate.Matching.RIGID);
     }
 

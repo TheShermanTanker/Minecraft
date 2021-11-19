@@ -3,7 +3,7 @@ package net.minecraft.world.item;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.InteractionResultWrapper;
@@ -23,7 +23,7 @@ public class ItemLingeringPotion extends ItemPotionThrowable {
 
     @Override
     public InteractionResultWrapper<ItemStack> use(World world, EntityHuman user, EnumHand hand) {
-        world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.LINGERING_POTION_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+        world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.LINGERING_POTION_THROW, EnumSoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
         return super.use(world, user, hand);
     }
 }

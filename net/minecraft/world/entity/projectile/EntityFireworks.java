@@ -9,7 +9,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -137,7 +137,7 @@ public class EntityFireworks extends IProjectile implements ItemSupplier {
 
         this.updateRotation();
         if (this.life == 0 && !this.isSilent()) {
-            this.level.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), SoundEffects.FIREWORK_ROCKET_LAUNCH, SoundCategory.AMBIENT, 3.0F, 1.0F);
+            this.level.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), SoundEffects.FIREWORK_ROCKET_LAUNCH, EnumSoundCategory.AMBIENT, 3.0F, 1.0F);
         }
 
         ++this.life;

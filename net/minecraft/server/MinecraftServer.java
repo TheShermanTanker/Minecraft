@@ -61,7 +61,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryCustom;
 import net.minecraft.core.RegistryMaterials;
-import net.minecraft.data.worldgen.BiomeDecoratorGroups;
+import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
 import net.minecraft.gametest.framework.GameTestHarnessTicker;
 import net.minecraft.network.chat.ChatComponentText;
 import net.minecraft.network.chat.ChatMessage;
@@ -104,10 +104,10 @@ import net.minecraft.util.profiling.GameProfilerTick;
 import net.minecraft.util.profiling.MethodProfilerResults;
 import net.minecraft.util.profiling.MethodProfilerResultsEmpty;
 import net.minecraft.util.profiling.MethodProfilerResultsField;
-import net.minecraft.util.profiling.metrics.profiling.ActiveMetricsRecorder;
-import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
-import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
-import net.minecraft.util.profiling.metrics.profiling.ServerMetricsSamplersProvider;
+import net.minecraft.util.profiling.metrics.profiling.IMetricsRecorder;
+import net.minecraft.util.profiling.metrics.profiling.MetricSamplerProviderServer;
+import net.minecraft.util.profiling.metrics.profiling.MetricsRecorderActive;
+import net.minecraft.util.profiling.metrics.profiling.MetricsRecorderInactive;
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.IAsyncTaskHandlerReentrant;
 import net.minecraft.world.EnumDifficulty;
@@ -184,7 +184,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     public final WorldNBTStorage playerDataStorage;
     private final MojangStatisticsGenerator snooper = new MojangStatisticsGenerator("server", this, SystemUtils.getMonotonicMillis());
     private final List<Runnable> tickables = Lists.newArrayList();
-    private MetricsRecorder metricsRecorder = InactiveMetricsRecorder.INSTANCE;
+    private IMetricsRecorder metricsRecorder = MetricsRecorderInactive.INSTANCE;
     private GameProfilerFiller profiler = this.metricsRecorder.getProfiler();
     private Consumer<MethodProfilerResults> onMetricsRecordingStopped = (profileResults) -> {
         this.stopRecordingMetrics();
@@ -468,7 +468,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             }
 
             if (bonusChest) {
-                WorldGenFeatureConfigured<?, ?> configuredFeature = BiomeDecoratorGroups.BONUS_CHEST;
+                WorldGenFeatureConfigured<?, ?> configuredFeature = WorldGenBiomeDecoratorGroups.BONUS_CHEST;
                 configuredFeature.place(world, chunkGenerator, world.random, new BlockPosition(worldProperties.getXSpawn(), worldProperties.getYSpawn(), worldProperties.getZSpawn()));
             }
 
@@ -1643,7 +1643,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
 
     private void startMetricsRecordingTick() {
         if (this.willStartRecordingMetrics) {
-            this.metricsRecorder = ActiveMetricsRecorder.createStarted(new ServerMetricsSamplersProvider(SystemUtils.timeSource, this.isDedicatedServer()), SystemUtils.timeSource, SystemUtils.ioPool(), new MetricsPersister("server"), this.onMetricsRecordingStopped, (path) -> {
+            this.metricsRecorder = MetricsRecorderActive.createStarted(new MetricSamplerProviderServer(SystemUtils.timeSource, this.isDedicatedServer()), SystemUtils.timeSource, SystemUtils.ioPool(), new MetricsPersister("server"), this.onMetricsRecordingStopped, (path) -> {
                 this.executeSync(() -> {
                     this.saveDebugReport(path.resolve("server"));
                 });
@@ -1676,7 +1676,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     }
 
     public void stopRecordingMetrics() {
-        this.metricsRecorder = InactiveMetricsRecorder.INSTANCE;
+        this.metricsRecorder = MetricsRecorderInactive.INSTANCE;
     }
 
     public void finishRecordingMetrics() {

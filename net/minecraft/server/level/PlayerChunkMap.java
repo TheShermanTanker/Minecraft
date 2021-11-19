@@ -51,7 +51,7 @@ import net.minecraft.network.protocol.game.PacketPlayOutMapChunk;
 import net.minecraft.network.protocol.game.PacketPlayOutMount;
 import net.minecraft.network.protocol.game.PacketPlayOutViewCentre;
 import net.minecraft.server.level.progress.WorldLoadListener;
-import net.minecraft.server.network.ServerPlayerConnection;
+import net.minecraft.server.network.PlayerConnectionServer;
 import net.minecraft.util.CSVWriter;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.profiling.GameProfilerFiller;
@@ -1098,7 +1098,7 @@ public class PlayerChunkMap extends IChunkLoader implements PlayerChunk.PlayerPr
         final Entity entity;
         private final int range;
         SectionPosition lastSectionPos;
-        public final Set<ServerPlayerConnection> seenBy = Sets.newIdentityHashSet();
+        public final Set<PlayerConnectionServer> seenBy = Sets.newIdentityHashSet();
 
         public EntityTracker(Entity entity, int maxDistance, int tickInterval, boolean alwaysUpdateVelocity) {
             this.serverEntity = new EntityTrackerEntry(PlayerChunkMap.this.level, entity, tickInterval, alwaysUpdateVelocity, this::broadcast);
@@ -1122,7 +1122,7 @@ public class PlayerChunkMap extends IChunkLoader implements PlayerChunk.PlayerPr
         }
 
         public void broadcast(Packet<?> packet) {
-            for(ServerPlayerConnection serverPlayerConnection : this.seenBy) {
+            for(PlayerConnectionServer serverPlayerConnection : this.seenBy) {
                 serverPlayerConnection.sendPacket(packet);
             }
 
@@ -1137,7 +1137,7 @@ public class PlayerChunkMap extends IChunkLoader implements PlayerChunk.PlayerPr
         }
 
         public void broadcastRemoved() {
-            for(ServerPlayerConnection serverPlayerConnection : this.seenBy) {
+            for(PlayerConnectionServer serverPlayerConnection : this.seenBy) {
                 this.serverEntity.removePairing(serverPlayerConnection.getPlayer());
             }
 

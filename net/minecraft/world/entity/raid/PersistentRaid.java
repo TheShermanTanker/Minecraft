@@ -15,7 +15,7 @@ import net.minecraft.network.protocol.game.PacketPlayOutEntityStatus;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.stats.StatisticList;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.ai.village.poi.VillagePlace;
 import net.minecraft.world.entity.ai.village.poi.VillagePlaceRecord;
 import net.minecraft.world.entity.ai.village.poi.VillagePlaceType;
@@ -115,7 +115,7 @@ public class PersistentRaid extends PersistentBase {
                 } else if (raid.getBadOmenLevel() < raid.getMaxBadOmenLevel()) {
                     bl = true;
                 } else {
-                    player.removeEffect(MobEffects.BAD_OMEN);
+                    player.removeEffect(MobEffectList.BAD_OMEN);
                     player.connection.sendPacket(new PacketPlayOutEntityStatus(player, (byte)43));
                 }
 

@@ -7,7 +7,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
@@ -77,7 +77,7 @@ public class EntityWitherSkull extends EntityFireball {
                 }
 
                 if (i > 0) {
-                    ((EntityLiving)entity).addEffect(new MobEffect(MobEffects.WITHER, 20 * i, 1), this.getEffectSource());
+                    ((EntityLiving)entity).addEffect(new MobEffect(MobEffectList.WITHER, 20 * i, 1), this.getEffectSource());
                 }
             }
 

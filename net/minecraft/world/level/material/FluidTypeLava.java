@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsFluid;
@@ -51,11 +51,11 @@ public abstract class FluidTypeLava extends FluidTypeFlowing {
                 double e = (double)pos.getY() + 1.0D;
                 double f = (double)pos.getZ() + random.nextDouble();
                 world.addParticle(Particles.LAVA, d, e, f, 0.0D, 0.0D, 0.0D);
-                world.playLocalSound(d, e, f, SoundEffects.LAVA_POP, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.playLocalSound(d, e, f, SoundEffects.LAVA_POP, EnumSoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
 
             if (random.nextInt(200) == 0) {
-                world.playLocalSound((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), SoundEffects.LAVA_AMBIENT, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.playLocalSound((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), SoundEffects.LAVA_AMBIENT, EnumSoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
         }
 

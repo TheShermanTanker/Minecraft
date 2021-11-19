@@ -11,7 +11,7 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
@@ -139,7 +139,7 @@ public class EntityStrider extends EntityAnimal implements ISteerable, ISaddleab
     }
 
     @Override
-    public void saddle(@Nullable SoundCategory sound) {
+    public void saddle(@Nullable EnumSoundCategory sound) {
         this.steering.setSaddle(true);
         if (sound != null) {
             this.level.playSound((EntityHuman)null, this, SoundEffects.STRIDER_SADDLE, sound, 0.5F, 1.0F);
@@ -435,7 +435,7 @@ public class EntityStrider extends EntityAnimal implements ISteerable, ISaddleab
                 EntityInsentient mob = EntityTypes.ZOMBIFIED_PIGLIN.create(world.getLevel());
                 var7 = this.spawnJockey(world, difficulty, mob, new EntityZombie.GroupDataZombie(EntityZombie.getSpawnAsBabyOdds(this.random), false));
                 mob.setSlot(EnumItemSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
-                this.saddle((SoundCategory)null);
+                this.saddle((EnumSoundCategory)null);
             } else if (this.random.nextInt(10) == 0) {
                 EntityAgeable ageableMob = EntityTypes.STRIDER.create(world.getLevel());
                 ageableMob.setAgeRaw(-24000);

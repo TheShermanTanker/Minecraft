@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.world.damagesource.DamageSource;
@@ -52,7 +52,7 @@ public class BlockMagma extends Block {
     public void tick(IBlockData state, WorldServer world, BlockPosition pos, Random random) {
         BlockPosition blockPos = pos.above();
         if (world.getFluid(pos).is(TagsFluid.WATER)) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.FIRE_EXTINGUISH, EnumSoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
             world.sendParticles(Particles.LARGE_SMOKE, (double)blockPos.getX() + 0.5D, (double)blockPos.getY() + 0.25D, (double)blockPos.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
         }
 

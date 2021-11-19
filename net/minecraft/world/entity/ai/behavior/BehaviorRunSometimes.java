@@ -1,21 +1,21 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityLiving;
 
 public class BehaviorRunSometimes<E extends EntityLiving> extends Behavior<E> {
     private boolean resetTicks;
     private boolean wasRunning;
-    private final UniformInt interval;
+    private final IntProviderUniform interval;
     private final Behavior<? super E> wrappedBehavior;
     private int ticksUntilNextStart;
 
-    public BehaviorRunSometimes(Behavior<? super E> delegate, UniformInt timeRange) {
+    public BehaviorRunSometimes(Behavior<? super E> delegate, IntProviderUniform timeRange) {
         this(delegate, false, timeRange);
     }
 
-    public BehaviorRunSometimes(Behavior<? super E> delegate, boolean skipFirstRun, UniformInt timeRange) {
+    public BehaviorRunSometimes(Behavior<? super E> delegate, boolean skipFirstRun, IntProviderUniform timeRange) {
         super(delegate.entryCondition);
         this.wrappedBehavior = delegate;
         this.resetTicks = !skipFirstRun;

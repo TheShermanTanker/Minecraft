@@ -7,7 +7,7 @@ import net.minecraft.world.entity.npc.EntityVillagerAbstract;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 
-public class CriterionTriggerVillagerTrade extends CriterionTriggerAbstract<CriterionTriggerVillagerTrade.TriggerInstance> {
+public class CriterionTriggerVillagerTrade extends CriterionTriggerAbstract<CriterionTriggerVillagerTrade.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("villager_trade");
 
     @Override
@@ -16,10 +16,10 @@ public class CriterionTriggerVillagerTrade extends CriterionTriggerAbstract<Crit
     }
 
     @Override
-    public CriterionTriggerVillagerTrade.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerVillagerTrade.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionEntity.Composite composite2 = CriterionConditionEntity.Composite.fromJson(jsonObject, "villager", deserializationContext);
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
-        return new CriterionTriggerVillagerTrade.TriggerInstance(composite, composite2, itemPredicate);
+        return new CriterionTriggerVillagerTrade.CriterionInstanceTrigger(composite, composite2, itemPredicate);
     }
 
     public void trigger(EntityPlayer player, EntityVillagerAbstract merchant, ItemStack stack) {
@@ -29,18 +29,18 @@ public class CriterionTriggerVillagerTrade extends CriterionTriggerAbstract<Crit
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionEntity.Composite villager;
         private final CriterionConditionItem item;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite villager, CriterionConditionItem item) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionEntity.Composite villager, CriterionConditionItem item) {
             super(CriterionTriggerVillagerTrade.ID, player);
             this.villager = villager;
             this.item = item;
         }
 
-        public static CriterionTriggerVillagerTrade.TriggerInstance tradedWithVillager() {
-            return new CriterionTriggerVillagerTrade.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY);
+        public static CriterionTriggerVillagerTrade.CriterionInstanceTrigger tradedWithVillager() {
+            return new CriterionTriggerVillagerTrade.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY);
         }
 
         public boolean matches(LootTableInfo merchantContext, ItemStack stack) {

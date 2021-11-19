@@ -6,8 +6,8 @@ import net.minecraft.core.particles.Particles;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectList;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.level.IBlockAccess;
@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.VoxelShapeCollision;
 
 public class BlockWitherRose extends BlockFlowers {
-    public BlockWitherRose(MobEffectList effect, BlockBase.Info settings) {
+    public BlockWitherRose(MobEffectBase effect, BlockBase.Info settings) {
         super(effect, 8, settings);
     }
 
@@ -49,7 +49,7 @@ public class BlockWitherRose extends BlockFlowers {
             if (entity instanceof EntityLiving) {
                 EntityLiving livingEntity = (EntityLiving)entity;
                 if (!livingEntity.isInvulnerable(DamageSource.WITHER)) {
-                    livingEntity.addEffect(new MobEffect(MobEffects.WITHER, 40));
+                    livingEntity.addEffect(new MobEffect(MobEffectList.WITHER, 40));
                 }
             }
 

@@ -54,7 +54,7 @@ public class TileEntityTypes<T extends TileEntity> {
     public static final TileEntityTypes<TileEntityBeehive> BEEHIVE = register("beehive", TileEntityTypes.Builder.of(TileEntityBeehive::new, Blocks.BEE_NEST, Blocks.BEEHIVE));
     public static final TileEntityTypes<SculkSensorBlockEntity> SCULK_SENSOR = register("sculk_sensor", TileEntityTypes.Builder.of(SculkSensorBlockEntity::new, Blocks.SCULK_SENSOR));
     private final TileEntityTypes.BlockEntitySupplier<? extends T> factory;
-    private final Set<Block> validBlocks;
+    public final Set<Block> validBlocks;
     private final Type<?> dataType;
 
     @Nullable

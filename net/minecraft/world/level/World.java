@@ -24,7 +24,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.PlayerChunk;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.tags.ITagRegistry;
 import net.minecraft.util.MathHelper;
@@ -384,15 +384,15 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
     }
 
     @Override
-    public void playSound(@Nullable EntityHuman player, BlockPosition pos, SoundEffect sound, SoundCategory category, float volume, float pitch) {
+    public void playSound(@Nullable EntityHuman player, BlockPosition pos, SoundEffect sound, EnumSoundCategory category, float volume, float pitch) {
         this.playSound(player, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, sound, category, volume, pitch);
     }
 
-    public abstract void playSound(@Nullable EntityHuman player, double x, double y, double z, SoundEffect sound, SoundCategory category, float volume, float pitch);
+    public abstract void playSound(@Nullable EntityHuman player, double x, double y, double z, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
 
-    public abstract void playSound(@Nullable EntityHuman player, Entity entity, SoundEffect sound, SoundCategory category, float volume, float pitch);
+    public abstract void playSound(@Nullable EntityHuman player, Entity entity, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
 
-    public void playLocalSound(double x, double y, double z, SoundEffect sound, SoundCategory category, float volume, float pitch, boolean useDistance) {
+    public void playLocalSound(double x, double y, double z, SoundEffect sound, EnumSoundCategory category, float volume, float pitch, boolean useDistance) {
     }
 
     @Override

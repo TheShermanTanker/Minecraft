@@ -1,7 +1,7 @@
 package net.minecraft.world.item;
 
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -33,7 +33,7 @@ public class ItemChorusFruit extends Item {
 
                 if (user.randomTeleport(g, h, j, true)) {
                     SoundEffect soundEvent = user instanceof EntityFox ? SoundEffects.FOX_TELEPORT : SoundEffects.CHORUS_FRUIT_TELEPORT;
-                    world.playSound((EntityHuman)null, d, e, f, soundEvent, SoundCategory.PLAYERS, 1.0F, 1.0F);
+                    world.playSound((EntityHuman)null, d, e, f, soundEvent, EnumSoundCategory.PLAYERS, 1.0F, 1.0F);
                     user.playSound(soundEvent, 1.0F, 1.0F);
                     break;
                 }

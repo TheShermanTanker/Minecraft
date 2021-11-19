@@ -3,7 +3,7 @@ package net.minecraft.world.entity.animal.axolotl;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -29,6 +29,6 @@ public class PlayDead extends Behavior<EntityAxolotl> {
         BehaviorController<EntityAxolotl> brain = axolotl.getBehaviorController();
         brain.removeMemory(MemoryModuleType.WALK_TARGET);
         brain.removeMemory(MemoryModuleType.LOOK_TARGET);
-        axolotl.addEffect(new MobEffect(MobEffects.REGENERATION, 200, 0));
+        axolotl.addEffect(new MobEffect(MobEffectList.REGENERATION, 200, 0));
     }
 }

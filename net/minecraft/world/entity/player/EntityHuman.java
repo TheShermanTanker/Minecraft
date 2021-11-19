@@ -35,7 +35,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.Statistic;
@@ -50,8 +50,8 @@ import net.minecraft.world.IInventory;
 import net.minecraft.world.ITileInventory;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.effect.MobEffectUtil;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -294,7 +294,7 @@ public abstract class EntityHuman extends EntityLiving {
     private void turtleHelmetTick() {
         ItemStack itemStack = this.getEquipment(EnumItemSlot.HEAD);
         if (itemStack.is(Items.TURTLE_HELMET) && !this.isEyeInFluid(TagsFluid.WATER)) {
-            this.addEffect(new MobEffect(MobEffects.WATER_BREATHING, 200, 0, false, false, true));
+            this.addEffect(new MobEffect(MobEffectList.WATER_BREATHING, 200, 0, false, false, true));
         }
 
     }
@@ -408,12 +408,12 @@ public abstract class EntityHuman extends EntityLiving {
         this.level.playSound(this, this.locX(), this.locY(), this.locZ(), sound, this.getSoundCategory(), volume, pitch);
     }
 
-    public void playNotifySound(SoundEffect event, SoundCategory category, float volume, float pitch) {
+    public void playNotifySound(SoundEffect event, EnumSoundCategory category, float volume, float pitch) {
     }
 
     @Override
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.PLAYERS;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.PLAYERS;
     }
 
     @Override
@@ -685,9 +685,9 @@ public abstract class EntityHuman extends EntityLiving {
             f *= 1.0F + (float)(MobEffectUtil.getDigSpeedAmplification(this) + 1) * 0.2F;
         }
 
-        if (this.hasEffect(MobEffects.DIG_SLOWDOWN)) {
+        if (this.hasEffect(MobEffectList.DIG_SLOWDOWN)) {
             float g;
-            switch(this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
+            switch(this.getEffect(MobEffectList.DIG_SLOWDOWN).getAmplifier()) {
             case 0:
                 g = 0.3F;
                 break;
@@ -1087,7 +1087,7 @@ public abstract class EntityHuman extends EntityLiving {
                         bl2 = true;
                     }
 
-                    boolean bl3 = bl && this.fallDistance > 0.0F && !this.onGround && !this.isCurrentlyClimbing() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && target instanceof EntityLiving;
+                    boolean bl3 = bl && this.fallDistance > 0.0F && !this.onGround && !this.isCurrentlyClimbing() && !this.isInWater() && !this.hasEffect(MobEffectList.BLINDNESS) && !this.isPassenger() && target instanceof EntityLiving;
                     bl3 = bl3 && !this.isSprinting();
                     if (bl3) {
                         f *= 1.5F;
@@ -1505,7 +1505,7 @@ public abstract class EntityHuman extends EntityLiving {
     }
 
     public boolean tryToStartFallFlying() {
-        if (!this.onGround && !this.isGliding() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION)) {
+        if (!this.onGround && !this.isGliding() && !this.isInWater() && !this.hasEffect(MobEffectList.LEVITATION)) {
             ItemStack itemStack = this.getEquipment(EnumItemSlot.CHEST);
             if (itemStack.is(Items.ELYTRA) && ItemElytra.isFlyEnabled(itemStack)) {
                 this.startGliding();
@@ -1973,7 +1973,7 @@ public abstract class EntityHuman extends EntityLiving {
     public ItemStack eat(World world, ItemStack stack) {
         this.getFoodData().eat(stack.getItem(), stack);
         this.awardStat(StatisticList.ITEM_USED.get(stack.getItem()));
-        world.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), SoundEffects.PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+        world.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), SoundEffects.PLAYER_BURP, EnumSoundCategory.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
         if (this instanceof EntityPlayer) {
             CriterionTriggers.CONSUME_ITEM.trigger((EntityPlayer)this, stack);
         }

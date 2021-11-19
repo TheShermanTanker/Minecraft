@@ -7,7 +7,7 @@ public interface PacketListenerPlayOut extends PacketListener {
 
     void handleAddExperienceOrb(PacketPlayOutSpawnEntityExperienceOrb packet);
 
-    void handleAddVibrationSignal(ClientboundAddVibrationSignalPacket packet);
+    void handleAddVibrationSignal(PacketPlayOutVibrationSignal packet);
 
     void handleAddMob(PacketPlayOutSpawnEntityLiving packet);
 
@@ -79,7 +79,7 @@ public interface PacketListenerPlayOut extends PacketListener {
 
     void handleParticleEvent(PacketPlayOutWorldParticles packet);
 
-    void handlePing(ClientboundPingPacket packet);
+    void handlePing(PacketPlayOutPing packet);
 
     void handlePlayerAbilities(PacketPlayOutAbilities packet);
 
@@ -131,27 +131,27 @@ public interface PacketListenerPlayOut extends PacketListener {
 
     void handleUpdateTags(PacketPlayOutTags packet);
 
-    void handlePlayerCombatEnd(ClientboundPlayerCombatEndPacket packet);
+    void handlePlayerCombatEnd(PacketPlayOutCombatExit packet);
 
-    void handlePlayerCombatEnter(ClientboundPlayerCombatEnterPacket packet);
+    void handlePlayerCombatEnter(PacketPlayOutCombatEnter packet);
 
-    void handlePlayerCombatKill(ClientboundPlayerCombatKillPacket packet);
+    void handlePlayerCombatKill(PacketPlayOutCombatKill packet);
 
     void handleChangeDifficulty(PacketPlayOutServerDifficulty packet);
 
     void handleSetCamera(PacketPlayOutCamera packet);
 
-    void handleInitializeBorder(ClientboundInitializeBorderPacket packet);
+    void handleInitializeBorder(PacketPlayOutBorder packet);
 
-    void handleSetBorderLerpSize(ClientboundSetBorderLerpSizePacket packet);
+    void handleSetBorderLerpSize(PacketPlayOutBorderLerpSize packet);
 
-    void handleSetBorderSize(ClientboundSetBorderSizePacket packet);
+    void handleSetBorderSize(PacketPlayOutBorderSize packet);
 
-    void handleSetBorderWarningDelay(ClientboundSetBorderWarningDelayPacket packet);
+    void handleSetBorderWarningDelay(PacketPlayOutBorderWarningDelay packet);
 
-    void handleSetBorderWarningDistance(ClientboundSetBorderWarningDistancePacket packet);
+    void handleSetBorderWarningDistance(PacketPlayOutBorderWarningDistance packet);
 
-    void handleSetBorderCenter(ClientboundSetBorderCenterPacket packet);
+    void handleSetBorderCenter(PacketPlayOutBorderCenter packet);
 
     void handleTabListCustomisation(PacketPlayOutPlayerListHeaderFooter packet);
 
@@ -195,13 +195,13 @@ public interface PacketListenerPlayOut extends PacketListener {
 
     void handleBlockBreakAck(PacketPlayOutBlockBreak packet);
 
-    void setActionBarText(ClientboundSetActionBarTextPacket packet);
+    void setActionBarText(PacketPlayOutActionBarText packet);
 
-    void setSubtitleText(ClientboundSetSubtitleTextPacket packet);
+    void setSubtitleText(PacketPlayOutSubtitleText packet);
 
-    void setTitleText(ClientboundSetTitleTextPacket packet);
+    void setTitleText(PacketPlayOutTitleText packet);
 
-    void setTitlesAnimation(ClientboundSetTitlesAnimationPacket packet);
+    void setTitlesAnimation(PacketPlayOutTitleAnimations packet);
 
-    void handleTitlesClear(ClientboundClearTitlesPacket packet);
+    void handleTitlesClear(PacketPlayOutClearTitles packet);
 }

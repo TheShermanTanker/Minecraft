@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.ITileInventory;
@@ -51,7 +51,7 @@ public class BlockFurnaceFurace extends BlockFurnace {
             double e = (double)pos.getY();
             double f = (double)pos.getZ() + 0.5D;
             if (random.nextDouble() < 0.1D) {
-                world.playLocalSound(d, e, f, SoundEffects.FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
+                world.playLocalSound(d, e, f, SoundEffects.FURNACE_FIRE_CRACKLE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F, false);
             }
 
             EnumDirection direction = state.get(FACING);

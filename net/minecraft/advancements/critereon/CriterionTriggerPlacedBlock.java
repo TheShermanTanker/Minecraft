@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.IBlockData;
 
-public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<CriterionTriggerPlacedBlock.TriggerInstance> {
+public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<CriterionTriggerPlacedBlock.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("placed_block");
 
     @Override
@@ -22,7 +22,7 @@ public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<Criter
     }
 
     @Override
-    public CriterionTriggerPlacedBlock.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerPlacedBlock.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         Block block = deserializeBlock(jsonObject);
         CriterionTriggerProperties statePropertiesPredicate = CriterionTriggerProperties.fromJson(jsonObject.get("state"));
         if (block != null) {
@@ -33,7 +33,7 @@ public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<Criter
 
         CriterionConditionLocation locationPredicate = CriterionConditionLocation.fromJson(jsonObject.get("location"));
         CriterionConditionItem itemPredicate = CriterionConditionItem.fromJson(jsonObject.get("item"));
-        return new CriterionTriggerPlacedBlock.TriggerInstance(composite, block, statePropertiesPredicate, locationPredicate, itemPredicate);
+        return new CriterionTriggerPlacedBlock.CriterionInstanceTrigger(composite, block, statePropertiesPredicate, locationPredicate, itemPredicate);
     }
 
     @Nullable
@@ -55,13 +55,13 @@ public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<Criter
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final Block block;
         private final CriterionTriggerProperties state;
         private final CriterionConditionLocation location;
         private final CriterionConditionItem item;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, @Nullable Block block, CriterionTriggerProperties state, CriterionConditionLocation location, CriterionConditionItem item) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, @Nullable Block block, CriterionTriggerProperties state, CriterionConditionLocation location, CriterionConditionItem item) {
             super(CriterionTriggerPlacedBlock.ID, player);
             this.block = block;
             this.state = state;
@@ -69,8 +69,8 @@ public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<Criter
             this.item = item;
         }
 
-        public static CriterionTriggerPlacedBlock.TriggerInstance placedBlock(Block block) {
-            return new CriterionTriggerPlacedBlock.TriggerInstance(CriterionConditionEntity.Composite.ANY, block, CriterionTriggerProperties.ANY, CriterionConditionLocation.ANY, CriterionConditionItem.ANY);
+        public static CriterionTriggerPlacedBlock.CriterionInstanceTrigger placedBlock(Block block) {
+            return new CriterionTriggerPlacedBlock.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, block, CriterionTriggerProperties.ANY, CriterionConditionLocation.ANY, CriterionConditionItem.ANY);
         }
 
         public boolean matches(IBlockData state, BlockPosition pos, WorldServer world, ItemStack stack) {

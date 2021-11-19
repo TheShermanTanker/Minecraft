@@ -11,7 +11,7 @@ import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
@@ -508,7 +508,7 @@ public class EntityTurtle extends EntityAnimal {
                     this.turtle.setLayingEgg(true);
                 } else if (this.turtle.layEggCounter > 200) {
                     World level = this.turtle.level;
-                    level.playSound((EntityHuman)null, blockPos, SoundEffects.TURTLE_LAY_EGG, SoundCategory.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+                    level.playSound((EntityHuman)null, blockPos, SoundEffects.TURTLE_LAY_EGG, EnumSoundCategory.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
                     level.setTypeAndData(this.blockPos.above(), Blocks.TURTLE_EGG.getBlockData().set(BlockTurtleEgg.EGGS, Integer.valueOf(this.turtle.random.nextInt(4) + 1)), 3);
                     this.turtle.setHasEgg(false);
                     this.turtle.setLayingEgg(false);

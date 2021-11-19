@@ -9,7 +9,7 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.TimeRange;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -41,13 +41,13 @@ import net.minecraft.world.phys.AxisAlignedBB;
 public class EntityPigZombie extends EntityZombie implements IEntityAngerable {
     private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("49455A49-7EC5-45BA-B886-3B90B23A1718");
     private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.05D, AttributeModifier.Operation.ADDITION);
-    private static final UniformInt FIRST_ANGER_SOUND_DELAY = TimeRange.rangeOfSeconds(0, 1);
+    private static final IntProviderUniform FIRST_ANGER_SOUND_DELAY = TimeRange.rangeOfSeconds(0, 1);
     private int playFirstAngerSoundIn;
-    private static final UniformInt PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
+    private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
     private UUID persistentAngerTarget;
     private static final int ALERT_RANGE_Y = 10;
-    private static final UniformInt ALERT_INTERVAL = TimeRange.rangeOfSeconds(4, 6);
+    private static final IntProviderUniform ALERT_INTERVAL = TimeRange.rangeOfSeconds(4, 6);
     private int ticksUntilNextAlert;
 
     public EntityPigZombie(EntityTypes<? extends EntityPigZombie> type, World world) {

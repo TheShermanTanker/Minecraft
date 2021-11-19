@@ -17,7 +17,7 @@ import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.protocol.game.PacketPlayOutCustomSoundEffect;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.world.phys.Vec3D;
 
 public class CommandPlaySound {
@@ -26,7 +26,7 @@ public class CommandPlaySound {
     public static void register(CommandDispatcher<CommandListenerWrapper> dispatcher) {
         RequiredArgumentBuilder<CommandListenerWrapper, MinecraftKey> requiredArgumentBuilder = net.minecraft.commands.CommandDispatcher.argument("sound", ArgumentMinecraftKeyRegistered.id()).suggests(CompletionProviders.AVAILABLE_SOUNDS);
 
-        for(SoundCategory soundSource : SoundCategory.values()) {
+        for(EnumSoundCategory soundSource : EnumSoundCategory.values()) {
             requiredArgumentBuilder.then(source(soundSource));
         }
 
@@ -35,7 +35,7 @@ public class CommandPlaySound {
         }).then(requiredArgumentBuilder));
     }
 
-    private static LiteralArgumentBuilder<CommandListenerWrapper> source(SoundCategory category) {
+    private static LiteralArgumentBuilder<CommandListenerWrapper> source(EnumSoundCategory category) {
         return net.minecraft.commands.CommandDispatcher.literal(category.getName()).then(net.minecraft.commands.CommandDispatcher.argument("targets", ArgumentEntity.players()).executes((context) -> {
             return playSound(context.getSource(), ArgumentEntity.getPlayers(context, "targets"), ArgumentMinecraftKeyRegistered.getId(context, "sound"), category, context.getSource().getPosition(), 1.0F, 1.0F, 0.0F);
         }).then(net.minecraft.commands.CommandDispatcher.argument("pos", ArgumentVec3.vec3()).executes((context) -> {
@@ -49,7 +49,7 @@ public class CommandPlaySound {
         }))))));
     }
 
-    private static int playSound(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey sound, SoundCategory category, Vec3D pos, float volume, float pitch, float minVolume) throws CommandSyntaxException {
+    private static int playSound(CommandListenerWrapper source, Collection<EntityPlayer> targets, MinecraftKey sound, EnumSoundCategory category, Vec3D pos, float volume, float pitch, float minVolume) throws CommandSyntaxException {
         double d = Math.pow(volume > 1.0F ? (double)(volume * 16.0F) : 16.0D, 2.0D);
         int i = 0;
         Iterator var11 = targets.iterator();

@@ -14,15 +14,15 @@ import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.ChestLock;
 import net.minecraft.world.ITileInventory;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectList;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.player.PlayerInventory;
 import net.minecraft.world.inventory.Container;
@@ -39,8 +39,8 @@ import net.minecraft.world.phys.AxisAlignedBB;
 
 public class TileEntityBeacon extends TileEntity implements ITileInventory {
     private static final int MAX_LEVELS = 4;
-    public static final MobEffectList[][] BEACON_EFFECTS = new MobEffectList[][]{{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}};
-    private static final Set<MobEffectList> VALID_EFFECTS = Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
+    public static final MobEffectBase[][] BEACON_EFFECTS = new MobEffectBase[][]{{MobEffectList.MOVEMENT_SPEED, MobEffectList.DIG_SPEED}, {MobEffectList.DAMAGE_RESISTANCE, MobEffectList.JUMP}, {MobEffectList.DAMAGE_BOOST}, {MobEffectList.REGENERATION}};
+    private static final Set<MobEffectBase> VALID_EFFECTS = Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
     public static final int DATA_LEVELS = 0;
     public static final int DATA_PRIMARY = 1;
     public static final int DATA_SECONDARY = 2;
@@ -51,9 +51,9 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
     public int levels;
     private int lastCheckY;
     @Nullable
-    public MobEffectList primaryPower;
+    public MobEffectBase primaryPower;
     @Nullable
-    public MobEffectList secondaryPower;
+    public MobEffectBase secondaryPower;
     @Nullable
     public IChatBaseComponent name;
     public ChestLock lockKey = ChestLock.NO_LOCK;
@@ -64,9 +64,9 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
             case 0:
                 return TileEntityBeacon.this.levels;
             case 1:
-                return MobEffectList.getId(TileEntityBeacon.this.primaryPower);
+                return MobEffectBase.getId(TileEntityBeacon.this.primaryPower);
             case 2:
-                return MobEffectList.getId(TileEntityBeacon.this.secondaryPower);
+                return MobEffectBase.getId(TileEntityBeacon.this.secondaryPower);
             default:
                 return 0;
             }
@@ -213,7 +213,7 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
         super.setRemoved();
     }
 
-    private static void applyEffects(World world, BlockPosition pos, int beaconLevel, @Nullable MobEffectList primaryEffect, @Nullable MobEffectList secondaryEffect) {
+    private static void applyEffects(World world, BlockPosition pos, int beaconLevel, @Nullable MobEffectBase primaryEffect, @Nullable MobEffectBase secondaryEffect) {
         if (!world.isClientSide && primaryEffect != null) {
             double d = (double)(beaconLevel * 10 + 10);
             int i = 0;
@@ -239,7 +239,7 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
     }
 
     public static void playSound(World world, BlockPosition pos, SoundEffect sound) {
-        world.playSound((EntityHuman)null, pos, sound, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.playSound((EntityHuman)null, pos, sound, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
     }
 
     public List<TileEntityBeacon.BeaconColorTracker> getBeamSections() {
@@ -258,8 +258,8 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
     }
 
     @Nullable
-    static MobEffectList getValidEffectById(int id) {
-        MobEffectList mobEffect = MobEffectList.fromId(id);
+    static MobEffectBase getValidEffectById(int id) {
+        MobEffectBase mobEffect = MobEffectBase.fromId(id);
         return VALID_EFFECTS.contains(mobEffect) ? mobEffect : null;
     }
 
@@ -278,8 +278,8 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
     @Override
     public NBTTagCompound save(NBTTagCompound nbt) {
         super.save(nbt);
-        nbt.setInt("Primary", MobEffectList.getId(this.primaryPower));
-        nbt.setInt("Secondary", MobEffectList.getId(this.secondaryPower));
+        nbt.setInt("Primary", MobEffectBase.getId(this.primaryPower));
+        nbt.setInt("Secondary", MobEffectBase.getId(this.secondaryPower));
         nbt.setInt("Levels", this.levels);
         if (this.name != null) {
             nbt.setString("CustomName", IChatBaseComponent.ChatSerializer.toJson(this.name));

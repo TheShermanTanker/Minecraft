@@ -8,14 +8,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.SystemUtils;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
+import net.minecraft.util.profiling.metrics.IProfilerMeasured;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
-import net.minecraft.util.profiling.metrics.ProfilerMeasured;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ThreadedMailbox<T> implements ProfilerMeasured, Mailbox<T>, AutoCloseable, Runnable {
+public class ThreadedMailbox<T> implements IProfilerMeasured, Mailbox<T>, AutoCloseable, Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int CLOSED_BIT = 1;
     private static final int SCHEDULED_BIT = 2;
@@ -160,6 +160,6 @@ public class ThreadedMailbox<T> implements ProfilerMeasured, Mailbox<T>, AutoClo
 
     @Override
     public List<MetricSampler> profiledMetrics() {
-        return ImmutableList.of(MetricSampler.create(this.name + "-queue-size", MetricCategory.MAIL_BOXES, this::size));
+        return ImmutableList.of(MetricSampler.create(this.name + "-queue-size", EnumMetricCategory.MAIL_BOXES, this::size));
     }
 }

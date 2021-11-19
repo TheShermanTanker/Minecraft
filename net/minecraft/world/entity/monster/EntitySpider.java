@@ -13,8 +13,8 @@ import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectList;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntitySize;
@@ -132,7 +132,7 @@ public class EntitySpider extends EntityMonster {
 
     @Override
     public boolean canBeAffected(MobEffect effect) {
-        return effect.getMobEffect() == MobEffects.POISON ? false : super.canBeAffected(effect);
+        return effect.getMobEffect() == MobEffectList.POISON ? false : super.canBeAffected(effect);
     }
 
     public boolean isClimbing() {
@@ -169,7 +169,7 @@ public class EntitySpider extends EntityMonster {
         }
 
         if (entityData instanceof EntitySpider.GroupDataSpider) {
-            MobEffectList mobEffect = ((EntitySpider.GroupDataSpider)entityData).effect;
+            MobEffectBase mobEffect = ((EntitySpider.GroupDataSpider)entityData).effect;
             if (mobEffect != null) {
                 this.addEffect(new MobEffect(mobEffect, Integer.MAX_VALUE));
             }
@@ -184,18 +184,18 @@ public class EntitySpider extends EntityMonster {
     }
 
     public static class GroupDataSpider implements GroupDataEntity {
-        public MobEffectList effect;
+        public MobEffectBase effect;
 
         public void setRandomEffect(Random random) {
             int i = random.nextInt(5);
             if (i <= 1) {
-                this.effect = MobEffects.MOVEMENT_SPEED;
+                this.effect = MobEffectList.MOVEMENT_SPEED;
             } else if (i <= 2) {
-                this.effect = MobEffects.DAMAGE_BOOST;
+                this.effect = MobEffectList.DAMAGE_BOOST;
             } else if (i <= 3) {
-                this.effect = MobEffects.REGENERATION;
+                this.effect = MobEffectList.REGENERATION;
             } else if (i <= 4) {
-                this.effect = MobEffects.INVISIBILITY;
+                this.effect = MobEffectList.INVISIBILITY;
             }
 
         }

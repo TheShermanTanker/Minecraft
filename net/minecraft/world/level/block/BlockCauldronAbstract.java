@@ -3,7 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Map;
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.cauldron.ICauldronBehavior;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -32,9 +32,9 @@ public abstract class BlockCauldronAbstract extends Block {
     protected static final int FLOOR_LEVEL = 4;
     private static final VoxelShape INSIDE = box(2.0D, 4.0D, 2.0D, 14.0D, 16.0D, 14.0D);
     protected static final VoxelShape SHAPE = VoxelShapes.join(VoxelShapes.block(), VoxelShapes.or(box(0.0D, 0.0D, 4.0D, 16.0D, 3.0D, 12.0D), box(4.0D, 0.0D, 0.0D, 12.0D, 3.0D, 16.0D), box(2.0D, 0.0D, 2.0D, 14.0D, 3.0D, 14.0D), INSIDE), OperatorBoolean.ONLY_FIRST);
-    private final Map<Item, CauldronInteraction> interactions;
+    private final Map<Item, ICauldronBehavior> interactions;
 
-    public BlockCauldronAbstract(BlockBase.Info settings, Map<Item, CauldronInteraction> behaviorMap) {
+    public BlockCauldronAbstract(BlockBase.Info settings, Map<Item, ICauldronBehavior> behaviorMap) {
         super(settings);
         this.interactions = behaviorMap;
     }
@@ -50,7 +50,7 @@ public abstract class BlockCauldronAbstract extends Block {
     @Override
     public EnumInteractionResult interact(IBlockData state, World world, BlockPosition pos, EntityHuman player, EnumHand hand, MovingObjectPositionBlock hit) {
         ItemStack itemStack = player.getItemInHand(hand);
-        CauldronInteraction cauldronInteraction = this.interactions.get(itemStack.getItem());
+        ICauldronBehavior cauldronInteraction = this.interactions.get(itemStack.getItem());
         return cauldronInteraction.interact(state, world, pos, player, hand, itemStack);
     }
 

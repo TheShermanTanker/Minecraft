@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.InteractionResultWrapper;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.World;
@@ -29,7 +29,7 @@ public class ItemHoneyBottle extends Item {
         }
 
         if (!world.isClientSide) {
-            user.removeEffect(MobEffects.POISON);
+            user.removeEffect(MobEffectList.POISON);
         }
 
         if (stack.isEmpty()) {

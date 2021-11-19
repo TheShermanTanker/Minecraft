@@ -1,7 +1,7 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.cauldron.ICauldronBehavior;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.biome.BiomeBase;
@@ -16,7 +16,7 @@ public class BlockCauldron extends BlockCauldronAbstract {
     private static final float POWDER_SNOW_FILL_CHANCE = 0.1F;
 
     public BlockCauldron(BlockBase.Info settings) {
-        super(settings, CauldronInteraction.EMPTY);
+        super(settings, ICauldronBehavior.EMPTY);
     }
 
     @Override

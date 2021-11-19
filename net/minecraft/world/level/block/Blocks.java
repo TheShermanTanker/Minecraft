@@ -4,11 +4,11 @@ import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.IRegistry;
-import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.cauldron.ICauldronBehavior;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.data.worldgen.BiomeDecoratorGroups;
-import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.util.valueproviders.IntProviderUniform;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.EnumColor;
 import net.minecraft.world.item.Items;
@@ -73,9 +73,9 @@ public class Blocks {
     public static final Block DEEPSLATE_GOLD_ORE = register("deepslate_gold_ore", new BlockOre(BlockBase.Info.copy(GOLD_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE)));
     public static final Block IRON_ORE = register("iron_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F)));
     public static final Block DEEPSLATE_IRON_ORE = register("deepslate_iron_ore", new BlockOre(BlockBase.Info.copy(IRON_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE)));
-    public static final Block COAL_ORE = register("coal_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(0, 2)));
-    public static final Block DEEPSLATE_COAL_ORE = register("deepslate_coal_ore", new BlockOre(BlockBase.Info.copy(COAL_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), UniformInt.of(0, 2)));
-    public static final Block NETHER_GOLD_ORE = register("nether_gold_ore", new BlockOre(BlockBase.Info.of(Material.STONE, MaterialMapColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundEffectType.NETHER_GOLD_ORE), UniformInt.of(0, 1)));
+    public static final Block COAL_ORE = register("coal_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntProviderUniform.of(0, 2)));
+    public static final Block DEEPSLATE_COAL_ORE = register("deepslate_coal_ore", new BlockOre(BlockBase.Info.copy(COAL_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), IntProviderUniform.of(0, 2)));
+    public static final Block NETHER_GOLD_ORE = register("nether_gold_ore", new BlockOre(BlockBase.Info.of(Material.STONE, MaterialMapColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundEffectType.NETHER_GOLD_ORE), IntProviderUniform.of(0, 1)));
     public static final Block OAK_LOG = register("oak_log", log(MaterialMapColor.WOOD, MaterialMapColor.PODZOL));
     public static final Block SPRUCE_LOG = register("spruce_log", log(MaterialMapColor.PODZOL, MaterialMapColor.COLOR_BROWN));
     public static final Block BIRCH_LOG = register("birch_log", log(MaterialMapColor.SAND, MaterialMapColor.QUARTZ));
@@ -111,8 +111,8 @@ public class Blocks {
     public static final Block SPONGE = register("sponge", new BlockSponge(BlockBase.Info.of(Material.SPONGE).strength(0.6F).sound(SoundEffectType.GRASS)));
     public static final Block WET_SPONGE = register("wet_sponge", new BlockWetSponge(BlockBase.Info.of(Material.SPONGE).strength(0.6F).sound(SoundEffectType.GRASS)));
     public static final Block GLASS = register("glass", new BlockGlass(BlockBase.Info.of(Material.GLASS).strength(0.3F).sound(SoundEffectType.GLASS).noOcclusion().isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)));
-    public static final Block LAPIS_ORE = register("lapis_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(2, 5)));
-    public static final Block DEEPSLATE_LAPIS_ORE = register("deepslate_lapis_ore", new BlockOre(BlockBase.Info.copy(LAPIS_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), UniformInt.of(2, 5)));
+    public static final Block LAPIS_ORE = register("lapis_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntProviderUniform.of(2, 5)));
+    public static final Block DEEPSLATE_LAPIS_ORE = register("deepslate_lapis_ore", new BlockOre(BlockBase.Info.copy(LAPIS_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), IntProviderUniform.of(2, 5)));
     public static final Block LAPIS_BLOCK = register("lapis_block", new Block(BlockBase.Info.of(Material.METAL, MaterialMapColor.LAPIS).requiresCorrectToolForDrops().strength(3.0F, 3.0F)));
     public static final Block DISPENSER = register("dispenser", new BlockDispenser(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F)));
     public static final Block SANDSTONE = register("sandstone", new Block(BlockBase.Info.of(Material.STONE, MaterialMapColor.SAND).requiresCorrectToolForDrops().strength(0.8F)));
@@ -163,26 +163,26 @@ public class Blocks {
     public static final Block RED_WOOL = register("red_wool", new Block(BlockBase.Info.of(Material.WOOL, MaterialMapColor.COLOR_RED).strength(0.8F).sound(SoundEffectType.WOOL)));
     public static final Block BLACK_WOOL = register("black_wool", new Block(BlockBase.Info.of(Material.WOOL, MaterialMapColor.COLOR_BLACK).strength(0.8F).sound(SoundEffectType.WOOL)));
     public static final Block MOVING_PISTON = register("moving_piston", new BlockPistonMoving(BlockBase.Info.of(Material.PISTON).strength(-1.0F).dynamicShape().noDrops().noOcclusion().isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)));
-    public static final Block DANDELION = register("dandelion", new BlockFlowers(MobEffects.SATURATION, 7, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block POPPY = register("poppy", new BlockFlowers(MobEffects.NIGHT_VISION, 5, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block BLUE_ORCHID = register("blue_orchid", new BlockFlowers(MobEffects.SATURATION, 7, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block ALLIUM = register("allium", new BlockFlowers(MobEffects.FIRE_RESISTANCE, 4, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block AZURE_BLUET = register("azure_bluet", new BlockFlowers(MobEffects.BLINDNESS, 8, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block RED_TULIP = register("red_tulip", new BlockFlowers(MobEffects.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block ORANGE_TULIP = register("orange_tulip", new BlockFlowers(MobEffects.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block WHITE_TULIP = register("white_tulip", new BlockFlowers(MobEffects.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block PINK_TULIP = register("pink_tulip", new BlockFlowers(MobEffects.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block OXEYE_DAISY = register("oxeye_daisy", new BlockFlowers(MobEffects.REGENERATION, 8, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block CORNFLOWER = register("cornflower", new BlockFlowers(MobEffects.JUMP, 6, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block WITHER_ROSE = register("wither_rose", new BlockWitherRose(MobEffects.WITHER, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
-    public static final Block LILY_OF_THE_VALLEY = register("lily_of_the_valley", new BlockFlowers(MobEffects.POISON, 12, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block DANDELION = register("dandelion", new BlockFlowers(MobEffectList.SATURATION, 7, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block POPPY = register("poppy", new BlockFlowers(MobEffectList.NIGHT_VISION, 5, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block BLUE_ORCHID = register("blue_orchid", new BlockFlowers(MobEffectList.SATURATION, 7, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block ALLIUM = register("allium", new BlockFlowers(MobEffectList.FIRE_RESISTANCE, 4, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block AZURE_BLUET = register("azure_bluet", new BlockFlowers(MobEffectList.BLINDNESS, 8, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block RED_TULIP = register("red_tulip", new BlockFlowers(MobEffectList.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block ORANGE_TULIP = register("orange_tulip", new BlockFlowers(MobEffectList.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block WHITE_TULIP = register("white_tulip", new BlockFlowers(MobEffectList.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block PINK_TULIP = register("pink_tulip", new BlockFlowers(MobEffectList.WEAKNESS, 9, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block OXEYE_DAISY = register("oxeye_daisy", new BlockFlowers(MobEffectList.REGENERATION, 8, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block CORNFLOWER = register("cornflower", new BlockFlowers(MobEffectList.JUMP, 6, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block WITHER_ROSE = register("wither_rose", new BlockWitherRose(MobEffectList.WITHER, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
+    public static final Block LILY_OF_THE_VALLEY = register("lily_of_the_valley", new BlockFlowers(MobEffectList.POISON, 12, BlockBase.Info.of(Material.PLANT).noCollission().instabreak().sound(SoundEffectType.GRASS)));
     public static final Block BROWN_MUSHROOM = register("brown_mushroom", new BlockMushroom(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_BROWN).noCollission().randomTicks().instabreak().sound(SoundEffectType.GRASS).lightLevel((state) -> {
         return 1;
     }).hasPostProcess(Blocks::always), () -> {
-        return BiomeDecoratorGroups.HUGE_BROWN_MUSHROOM;
+        return WorldGenBiomeDecoratorGroups.HUGE_BROWN_MUSHROOM;
     }));
     public static final Block RED_MUSHROOM = register("red_mushroom", new BlockMushroom(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_RED).noCollission().randomTicks().instabreak().sound(SoundEffectType.GRASS).hasPostProcess(Blocks::always), () -> {
-        return BiomeDecoratorGroups.HUGE_RED_MUSHROOM;
+        return WorldGenBiomeDecoratorGroups.HUGE_RED_MUSHROOM;
     }));
     public static final Block GOLD_BLOCK = register("gold_block", new Block(BlockBase.Info.of(Material.METAL, MaterialMapColor.GOLD).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundEffectType.METAL)));
     public static final Block IRON_BLOCK = register("iron_block", new Block(BlockBase.Info.of(Material.METAL, MaterialMapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundEffectType.METAL)));
@@ -209,8 +209,8 @@ public class Blocks {
         return TileEntityTypes.CHEST;
     }));
     public static final Block REDSTONE_WIRE = register("redstone_wire", new BlockRedstoneWire(BlockBase.Info.of(Material.DECORATION).noCollission().instabreak()));
-    public static final Block DIAMOND_ORE = register("diamond_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(3, 7)));
-    public static final Block DEEPSLATE_DIAMOND_ORE = register("deepslate_diamond_ore", new BlockOre(BlockBase.Info.copy(DIAMOND_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), UniformInt.of(3, 7)));
+    public static final Block DIAMOND_ORE = register("diamond_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntProviderUniform.of(3, 7)));
+    public static final Block DEEPSLATE_DIAMOND_ORE = register("deepslate_diamond_ore", new BlockOre(BlockBase.Info.copy(DIAMOND_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), IntProviderUniform.of(3, 7)));
     public static final Block DIAMOND_BLOCK = register("diamond_block", new Block(BlockBase.Info.of(Material.METAL, MaterialMapColor.DIAMOND).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundEffectType.METAL)));
     public static final Block CRAFTING_TABLE = register("crafting_table", new BlockWorkbench(BlockBase.Info.of(Material.WOOD).strength(2.5F).sound(SoundEffectType.WOOD)));
     public static final Block WHEAT = register("wheat", new BlockCrops(BlockBase.Info.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundEffectType.CROP)));
@@ -347,11 +347,11 @@ public class Blocks {
         return 1;
     }).noOcclusion()));
     public static final Block CAULDRON = register("cauldron", new BlockCauldron(BlockBase.Info.of(Material.METAL, MaterialMapColor.STONE).requiresCorrectToolForDrops().strength(2.0F).noOcclusion()));
-    public static final Block WATER_CAULDRON = register("water_cauldron", new BlockCauldronLayered(BlockBase.Info.copy(CAULDRON), BlockCauldronLayered.RAIN, CauldronInteraction.WATER));
+    public static final Block WATER_CAULDRON = register("water_cauldron", new BlockCauldronLayered(BlockBase.Info.copy(CAULDRON), BlockCauldronLayered.RAIN, ICauldronBehavior.WATER));
     public static final Block LAVA_CAULDRON = register("lava_cauldron", new BlockCauldronLava(BlockBase.Info.copy(CAULDRON).lightLevel((state) -> {
         return 15;
     })));
-    public static final Block POWDER_SNOW_CAULDRON = register("powder_snow_cauldron", new BlockCauldronPowderSnow(BlockBase.Info.copy(CAULDRON), BlockCauldronLayered.SNOW, CauldronInteraction.POWDER_SNOW));
+    public static final Block POWDER_SNOW_CAULDRON = register("powder_snow_cauldron", new BlockCauldronPowderSnow(BlockBase.Info.copy(CAULDRON), BlockCauldronLayered.SNOW, ICauldronBehavior.POWDER_SNOW));
     public static final Block END_PORTAL = register("end_portal", new BlockEnderPortal(BlockBase.Info.of(Material.PORTAL, MaterialMapColor.COLOR_BLACK).noCollission().lightLevel((state) -> {
         return 15;
     }).strength(-1.0F, 3600000.0F).noDrops()));
@@ -365,8 +365,8 @@ public class Blocks {
     public static final Block REDSTONE_LAMP = register("redstone_lamp", new BlockRedstoneLamp(BlockBase.Info.of(Material.BUILDABLE_GLASS).lightLevel(litBlockEmission(15)).strength(0.3F).sound(SoundEffectType.GLASS).isValidSpawn(Blocks::always)));
     public static final Block COCOA = register("cocoa", new BlockCocoa(BlockBase.Info.of(Material.PLANT).randomTicks().strength(0.2F, 3.0F).sound(SoundEffectType.WOOD).noOcclusion()));
     public static final Block SANDSTONE_STAIRS = register("sandstone_stairs", new BlockStairs(SANDSTONE.getBlockData(), BlockBase.Info.copy(SANDSTONE)));
-    public static final Block EMERALD_ORE = register("emerald_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(3, 7)));
-    public static final Block DEEPSLATE_EMERALD_ORE = register("deepslate_emerald_ore", new BlockOre(BlockBase.Info.copy(EMERALD_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), UniformInt.of(3, 7)));
+    public static final Block EMERALD_ORE = register("emerald_ore", new BlockOre(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), IntProviderUniform.of(3, 7)));
+    public static final Block DEEPSLATE_EMERALD_ORE = register("deepslate_emerald_ore", new BlockOre(BlockBase.Info.copy(EMERALD_ORE).color(MaterialMapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundEffectType.DEEPSLATE), IntProviderUniform.of(3, 7)));
     public static final Block ENDER_CHEST = register("ender_chest", new BlockEnderChest(BlockBase.Info.of(Material.STONE).requiresCorrectToolForDrops().strength(22.5F, 600.0F).lightLevel((state) -> {
         return 7;
     })));
@@ -436,7 +436,7 @@ public class Blocks {
     public static final Block COMPARATOR = register("comparator", new BlockRedstoneComparator(BlockBase.Info.of(Material.DECORATION).instabreak().sound(SoundEffectType.WOOD)));
     public static final Block DAYLIGHT_DETECTOR = register("daylight_detector", new BlockDaylightDetector(BlockBase.Info.of(Material.WOOD).strength(0.2F).sound(SoundEffectType.WOOD)));
     public static final Block REDSTONE_BLOCK = register("redstone_block", new BlockPowered(BlockBase.Info.of(Material.METAL, MaterialMapColor.FIRE).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundEffectType.METAL).isRedstoneConductor(Blocks::never)));
-    public static final Block NETHER_QUARTZ_ORE = register("nether_quartz_ore", new BlockOre(BlockBase.Info.of(Material.STONE, MaterialMapColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundEffectType.NETHER_ORE), UniformInt.of(2, 5)));
+    public static final Block NETHER_QUARTZ_ORE = register("nether_quartz_ore", new BlockOre(BlockBase.Info.of(Material.STONE, MaterialMapColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundEffectType.NETHER_ORE), IntProviderUniform.of(2, 5)));
     public static final Block HOPPER = register("hopper", new BlockHopper(BlockBase.Info.of(Material.METAL, MaterialMapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 4.8F).sound(SoundEffectType.METAL).noOcclusion()));
     public static final Block QUARTZ_BLOCK = register("quartz_block", new Block(BlockBase.Info.of(Material.STONE, MaterialMapColor.QUARTZ).requiresCorrectToolForDrops().strength(0.8F)));
     public static final Block CHISELED_QUARTZ_BLOCK = register("chiseled_quartz_block", new Block(BlockBase.Info.of(Material.STONE, MaterialMapColor.QUARTZ).requiresCorrectToolForDrops().strength(0.8F)));
@@ -811,7 +811,7 @@ public class Blocks {
     public static final Block STRIPPED_WARPED_HYPHAE = register("stripped_warped_hyphae", new BlockRotatable(BlockBase.Info.of(Material.NETHER_WOOD, MaterialMapColor.WARPED_HYPHAE).strength(2.0F).sound(SoundEffectType.STEM)));
     public static final Block WARPED_NYLIUM = register("warped_nylium", new BlockNylium(BlockBase.Info.of(Material.STONE, MaterialMapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(0.4F).sound(SoundEffectType.NYLIUM).randomTicks()));
     public static final Block WARPED_FUNGUS = register("warped_fungus", new BlockFungi(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_CYAN).instabreak().noCollission().sound(SoundEffectType.FUNGUS), () -> {
-        return BiomeDecoratorGroups.WARPED_FUNGI_PLANTED;
+        return WorldGenBiomeDecoratorGroups.WARPED_FUNGI_PLANTED;
     }));
     public static final Block WARPED_WART_BLOCK = register("warped_wart_block", new Block(BlockBase.Info.of(Material.GRASS, MaterialMapColor.WARPED_WART_BLOCK).strength(1.0F).sound(SoundEffectType.WART_BLOCK)));
     public static final Block WARPED_ROOTS = register("warped_roots", new BlockRoots(BlockBase.Info.of(Material.REPLACEABLE_FIREPROOF_PLANT, MaterialMapColor.COLOR_CYAN).noCollission().instabreak().sound(SoundEffectType.ROOTS)));
@@ -822,7 +822,7 @@ public class Blocks {
     public static final Block STRIPPED_CRIMSON_HYPHAE = register("stripped_crimson_hyphae", new BlockRotatable(BlockBase.Info.of(Material.NETHER_WOOD, MaterialMapColor.CRIMSON_HYPHAE).strength(2.0F).sound(SoundEffectType.STEM)));
     public static final Block CRIMSON_NYLIUM = register("crimson_nylium", new BlockNylium(BlockBase.Info.of(Material.STONE, MaterialMapColor.CRIMSON_NYLIUM).requiresCorrectToolForDrops().strength(0.4F).sound(SoundEffectType.NYLIUM).randomTicks()));
     public static final Block CRIMSON_FUNGUS = register("crimson_fungus", new BlockFungi(BlockBase.Info.of(Material.PLANT, MaterialMapColor.NETHER).instabreak().noCollission().sound(SoundEffectType.FUNGUS), () -> {
-        return BiomeDecoratorGroups.CRIMSON_FUNGI_PLANTED;
+        return WorldGenBiomeDecoratorGroups.CRIMSON_FUNGI_PLANTED;
     }));
     public static final Block SHROOMLIGHT = register("shroomlight", new Block(BlockBase.Info.of(Material.GRASS, MaterialMapColor.COLOR_RED).strength(1.0F).sound(SoundEffectType.SHROOMLIGHT).lightLevel((blockStatex) -> {
         return 15;

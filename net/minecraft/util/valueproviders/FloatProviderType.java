@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.IRegistry;
 
 public interface FloatProviderType<P extends FloatProvider> {
-    FloatProviderType<ConstantFloat> CONSTANT = register("constant", ConstantFloat.CODEC);
-    FloatProviderType<UniformFloat> UNIFORM = register("uniform", UniformFloat.CODEC);
-    FloatProviderType<ClampedNormalFloat> CLAMPED_NORMAL = register("clamped_normal", ClampedNormalFloat.CODEC);
-    FloatProviderType<TrapezoidFloat> TRAPEZOID = register("trapezoid", TrapezoidFloat.CODEC);
+    FloatProviderType<FloatProviderConstant> CONSTANT = register("constant", FloatProviderConstant.CODEC);
+    FloatProviderType<FloatProviderUniform> UNIFORM = register("uniform", FloatProviderUniform.CODEC);
+    FloatProviderType<FloatProviderClampedNormal> CLAMPED_NORMAL = register("clamped_normal", FloatProviderClampedNormal.CODEC);
+    FloatProviderType<FloatProviderTrapezoid> TRAPEZOID = register("trapezoid", FloatProviderTrapezoid.CODEC);
 
     Codec<P> codec();
 

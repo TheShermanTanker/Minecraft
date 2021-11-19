@@ -4,7 +4,7 @@ import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -86,16 +86,16 @@ public abstract class BlockSign extends BlockTileEntity implements IBlockWaterlo
                     if (bl4) {
                         boolean bl6;
                         if (bl2) {
-                            world.playSound((EntityHuman)null, pos, SoundEffects.GLOW_INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                            world.playSound((EntityHuman)null, pos, SoundEffects.GLOW_INK_SAC_USE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                             bl6 = signBlockEntity.setHasGlowingText(true);
                             if (player instanceof EntityPlayer) {
                                 CriterionTriggers.ITEM_USED_ON_BLOCK.trigger((EntityPlayer)player, pos, itemStack);
                             }
                         } else if (bl3) {
-                            world.playSound((EntityHuman)null, pos, SoundEffects.INK_SAC_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                            world.playSound((EntityHuman)null, pos, SoundEffects.INK_SAC_USE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                             bl6 = signBlockEntity.setHasGlowingText(false);
                         } else {
-                            world.playSound((EntityHuman)null, pos, SoundEffects.DYE_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                            world.playSound((EntityHuman)null, pos, SoundEffects.DYE_USE, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                             bl6 = signBlockEntity.setColor(((ItemDye)item).getDyeColor());
                         }
 

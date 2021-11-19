@@ -10,7 +10,7 @@ import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
@@ -192,7 +192,7 @@ public class BlockDripleafBig extends BlockFacingHorizontal implements IBlockFra
 
     private static void playTiltSound(World world, BlockPosition pos, SoundEffect soundEvent) {
         float f = MathHelper.randomBetween(world.random, 0.8F, 1.2F);
-        world.playSound((EntityHuman)null, pos, soundEvent, SoundCategory.BLOCKS, 1.0F, f);
+        world.playSound((EntityHuman)null, pos, soundEvent, EnumSoundCategory.BLOCKS, 1.0F, f);
     }
 
     private static boolean canEntityTilt(BlockPosition pos, Entity entity) {

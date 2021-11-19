@@ -5,7 +5,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.phys.Vec3D;
 
-public class CriterionTriggerLevitation extends CriterionTriggerAbstract<CriterionTriggerLevitation.TriggerInstance> {
+public class CriterionTriggerLevitation extends CriterionTriggerAbstract<CriterionTriggerLevitation.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("levitation");
 
     @Override
@@ -14,10 +14,10 @@ public class CriterionTriggerLevitation extends CriterionTriggerAbstract<Criteri
     }
 
     @Override
-    public CriterionTriggerLevitation.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerLevitation.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         CriterionConditionDistance distancePredicate = CriterionConditionDistance.fromJson(jsonObject.get("distance"));
         CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromJson(jsonObject.get("duration"));
-        return new CriterionTriggerLevitation.TriggerInstance(composite, distancePredicate, ints);
+        return new CriterionTriggerLevitation.CriterionInstanceTrigger(composite, distancePredicate, ints);
     }
 
     public void trigger(EntityPlayer player, Vec3D startPos, int duration) {
@@ -26,18 +26,18 @@ public class CriterionTriggerLevitation extends CriterionTriggerAbstract<Criteri
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionDistance distance;
         private final CriterionConditionValue.IntegerRange duration;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionDistance distance, CriterionConditionValue.IntegerRange duration) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionDistance distance, CriterionConditionValue.IntegerRange duration) {
             super(CriterionTriggerLevitation.ID, player);
             this.distance = distance;
             this.duration = duration;
         }
 
-        public static CriterionTriggerLevitation.TriggerInstance levitated(CriterionConditionDistance distance) {
-            return new CriterionTriggerLevitation.TriggerInstance(CriterionConditionEntity.Composite.ANY, distance, CriterionConditionValue.IntegerRange.ANY);
+        public static CriterionTriggerLevitation.CriterionInstanceTrigger levitated(CriterionConditionDistance distance) {
+            return new CriterionTriggerLevitation.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, distance, CriterionConditionValue.IntegerRange.ANY);
         }
 
         public boolean matches(EntityPlayer player, Vec3D startPos, int duration) {

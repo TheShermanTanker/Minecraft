@@ -67,7 +67,7 @@ import net.minecraft.world.phys.shapes.VoxelShapes;
 public abstract class BlockBase {
     protected static final EnumDirection[] UPDATE_SHAPE_ORDER = new EnumDirection[]{EnumDirection.WEST, EnumDirection.EAST, EnumDirection.NORTH, EnumDirection.SOUTH, EnumDirection.DOWN, EnumDirection.UP};
     protected final Material material;
-    protected final boolean hasCollision;
+    public final boolean hasCollision;
     protected final float explosionResistance;
     protected final boolean isRandomlyTicking;
     protected final SoundEffectType soundType;

@@ -1,7 +1,7 @@
 package net.minecraft.world.item;
 
 import java.util.function.Predicate;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -68,7 +68,7 @@ public class ItemBow extends ItemProjectileWeapon implements ItemVanishable {
                         world.addEntity(abstractArrow);
                     }
 
-                    world.playSound((EntityHuman)null, player.locX(), player.locY(), player.locZ(), SoundEffects.ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) + f * 0.5F);
+                    world.playSound((EntityHuman)null, player.locX(), player.locY(), player.locZ(), SoundEffects.ARROW_SHOOT, EnumSoundCategory.PLAYERS, 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) + f * 0.5F);
                     if (!bl2 && !player.getAbilities().instabuild) {
                         itemStack.subtract(1);
                         if (itemStack.isEmpty()) {

@@ -124,7 +124,7 @@ public class UserCache {
         return this.operationCount.incrementAndGet();
     }
 
-    public Optional<GameProfile> b(String name) {
+    public Optional<GameProfile> getProfile(String name) {
         String string = name.toLowerCase(Locale.ROOT);
         UserCache.UserCacheEntry gameProfileInfo = this.profilesByName.get(string);
         boolean bl = false;
@@ -165,7 +165,7 @@ public class UserCache {
                 }, this.executor));
             } else {
                 this.requests.put(username, CompletableFuture.supplyAsync(() -> {
-                    return this.b(username);
+                    return this.getProfile(username);
                 }, SystemUtils.backgroundExecutor()).whenCompleteAsync((profile, throwable) -> {
                     this.requests.remove(username);
                 }, this.executor).whenCompleteAsync((profile, throwable) -> {

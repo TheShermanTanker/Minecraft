@@ -3,21 +3,21 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.core.IRegistry;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import org.apache.commons.lang3.Validate;
 
 public class PacketPlayOutNamedSoundEffect implements Packet<PacketListenerPlayOut> {
     public static final float LOCATION_ACCURACY = 8.0F;
     private final SoundEffect sound;
-    private final SoundCategory source;
+    private final EnumSoundCategory source;
     private final int x;
     private final int y;
     private final int z;
     private final float volume;
     private final float pitch;
 
-    public PacketPlayOutNamedSoundEffect(SoundEffect sound, SoundCategory category, double x, double y, double z, float volume, float pitch) {
+    public PacketPlayOutNamedSoundEffect(SoundEffect sound, EnumSoundCategory category, double x, double y, double z, float volume, float pitch) {
         Validate.notNull(sound, "sound");
         this.sound = sound;
         this.source = category;
@@ -30,7 +30,7 @@ public class PacketPlayOutNamedSoundEffect implements Packet<PacketListenerPlayO
 
     public PacketPlayOutNamedSoundEffect(PacketDataSerializer buf) {
         this.sound = IRegistry.SOUND_EVENT.fromId(buf.readVarInt());
-        this.source = buf.readEnum(SoundCategory.class);
+        this.source = buf.readEnum(EnumSoundCategory.class);
         this.x = buf.readInt();
         this.y = buf.readInt();
         this.z = buf.readInt();
@@ -53,7 +53,7 @@ public class PacketPlayOutNamedSoundEffect implements Packet<PacketListenerPlayO
         return this.sound;
     }
 
-    public SoundCategory getSource() {
+    public EnumSoundCategory getSource() {
         return this.source;
     }
 

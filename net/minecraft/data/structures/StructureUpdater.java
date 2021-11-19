@@ -8,7 +8,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStruct
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class StructureUpdater implements SnbtToNbt.Filter {
+public class StructureUpdater implements DebugReportProviderStructureToNBT.Filter {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override

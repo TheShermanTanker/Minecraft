@@ -1,7 +1,7 @@
 package net.minecraft.util.profiling;
 
 import java.util.function.Supplier;
-import net.minecraft.util.profiling.metrics.MetricCategory;
+import net.minecraft.util.profiling.metrics.EnumMetricCategory;
 
 public interface GameProfilerFiller {
     String ROOT = "root";
@@ -20,7 +20,7 @@ public interface GameProfilerFiller {
 
     void popPush(Supplier<String> locationGetter);
 
-    void markForCharting(MetricCategory type);
+    void markForCharting(EnumMetricCategory type);
 
     void incrementCounter(String marker);
 
@@ -56,7 +56,7 @@ public interface GameProfilerFiller {
                 }
 
                 @Override
-                public void markForCharting(MetricCategory type) {
+                public void markForCharting(EnumMetricCategory type) {
                     a.markForCharting(type);
                     b.markForCharting(type);
                 }

@@ -111,7 +111,7 @@ public class EntityDrowned extends EntityZombie implements IRangedEntity {
     }
 
     @Override
-    protected boolean supportsBreakDoorGoal() {
+    public boolean supportsBreakDoorGoal() {
         return false;
     }
 

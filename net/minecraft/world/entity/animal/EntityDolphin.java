@@ -26,7 +26,7 @@ import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityPose;
@@ -505,7 +505,7 @@ public class EntityDolphin extends EntityWaterAnimal {
 
         @Override
         public void start() {
-            this.player.addEffect(new MobEffect(MobEffects.DOLPHINS_GRACE, 100), this.dolphin);
+            this.player.addEffect(new MobEffect(MobEffectList.DOLPHINS_GRACE, 100), this.dolphin);
         }
 
         @Override
@@ -524,7 +524,7 @@ public class EntityDolphin extends EntityWaterAnimal {
             }
 
             if (this.player.isSwimming() && this.player.level.random.nextInt(6) == 0) {
-                this.player.addEffect(new MobEffect(MobEffects.DOLPHINS_GRACE, 100), this.dolphin);
+                this.player.addEffect(new MobEffect(MobEffectList.DOLPHINS_GRACE, 100), this.dolphin);
             }
 
         }

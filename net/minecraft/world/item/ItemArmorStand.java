@@ -6,7 +6,7 @@ import net.minecraft.core.EnumDirection;
 import net.minecraft.core.Vector3f;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumInteractionResult;
@@ -53,7 +53,7 @@ public class ItemArmorStand extends Item {
                     armorStand.setPositionRotation(armorStand.locX(), armorStand.locY(), armorStand.locZ(), f, 0.0F);
                     this.randomizePose(armorStand, level.random);
                     serverLevel.addAllEntities(armorStand);
-                    level.playSound((EntityHuman)null, armorStand.locX(), armorStand.locY(), armorStand.locZ(), SoundEffects.ARMOR_STAND_PLACE, SoundCategory.BLOCKS, 0.75F, 0.8F);
+                    level.playSound((EntityHuman)null, armorStand.locX(), armorStand.locY(), armorStand.locZ(), SoundEffects.ARMOR_STAND_PLACE, EnumSoundCategory.BLOCKS, 0.75F, 0.8F);
                     level.gameEvent(context.getEntity(), GameEvent.ENTITY_PLACE, armorStand);
                 }
 

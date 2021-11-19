@@ -7,11 +7,11 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.scores.criteria.IScoreboardCriteria;
 
 public class Statistic<T> extends IScoreboardCriteria {
-    private final Counter formatter;
+    private final ICounter formatter;
     private final T value;
     private final StatisticWrapper<T> type;
 
-    protected Statistic(StatisticWrapper<T> type, T value, Counter formatter) {
+    protected Statistic(StatisticWrapper<T> type, T value, ICounter formatter) {
         super(buildName(type, value));
         this.type = type;
         this.formatter = formatter;

@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
-import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEffect;
+import net.minecraft.sounds.SoundTrack;
 import net.minecraft.util.INamable;
 
 public class BiomeFog {
@@ -35,7 +35,7 @@ public class BiomeFog {
             return biomeSpecialEffects.ambientMoodSettings;
         }), CaveSound.CODEC.optionalFieldOf("additions_sound").forGetter((biomeSpecialEffects) -> {
             return biomeSpecialEffects.ambientAdditionsSettings;
-        }), Music.CODEC.optionalFieldOf("music").forGetter((biomeSpecialEffects) -> {
+        }), SoundTrack.CODEC.optionalFieldOf("music").forGetter((biomeSpecialEffects) -> {
             return biomeSpecialEffects.backgroundMusic;
         })).apply(instance, BiomeFog::new);
     });
@@ -50,9 +50,9 @@ public class BiomeFog {
     private final Optional<SoundEffect> ambientLoopSoundEvent;
     private final Optional<CaveSoundSettings> ambientMoodSettings;
     private final Optional<CaveSound> ambientAdditionsSettings;
-    private final Optional<Music> backgroundMusic;
+    private final Optional<SoundTrack> backgroundMusic;
 
-    BiomeFog(int fogColor, int waterColor, int waterFogColor, int skyColor, Optional<Integer> foliageColor, Optional<Integer> grassColor, BiomeFog.GrassColor grassColorModifier, Optional<BiomeParticles> particleConfig, Optional<SoundEffect> loopSound, Optional<CaveSoundSettings> moodSound, Optional<CaveSound> additionsSound, Optional<Music> music) {
+    BiomeFog(int fogColor, int waterColor, int waterFogColor, int skyColor, Optional<Integer> foliageColor, Optional<Integer> grassColor, BiomeFog.GrassColor grassColorModifier, Optional<BiomeParticles> particleConfig, Optional<SoundEffect> loopSound, Optional<CaveSoundSettings> moodSound, Optional<CaveSound> additionsSound, Optional<SoundTrack> music) {
         this.fogColor = fogColor;
         this.waterColor = waterColor;
         this.waterFogColor = waterFogColor;
@@ -111,7 +111,7 @@ public class BiomeFog {
         return this.ambientAdditionsSettings;
     }
 
-    public Optional<Music> getBackgroundMusic() {
+    public Optional<SoundTrack> getBackgroundMusic() {
         return this.backgroundMusic;
     }
 
@@ -127,7 +127,7 @@ public class BiomeFog {
         private Optional<SoundEffect> ambientLoopSoundEvent = Optional.empty();
         private Optional<CaveSoundSettings> ambientMoodSettings = Optional.empty();
         private Optional<CaveSound> ambientAdditionsSettings = Optional.empty();
-        private Optional<Music> backgroundMusic = Optional.empty();
+        private Optional<SoundTrack> backgroundMusic = Optional.empty();
 
         public BiomeFog.Builder fogColor(int fogColor) {
             this.fogColor = OptionalInt.of(fogColor);
@@ -184,7 +184,7 @@ public class BiomeFog {
             return this;
         }
 
-        public BiomeFog.Builder backgroundMusic(Music music) {
+        public BiomeFog.Builder backgroundMusic(SoundTrack music) {
             this.backgroundMusic = Optional.of(music);
             return this;
         }

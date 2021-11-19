@@ -5,8 +5,8 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.stats.ServerStatisticManager;
 import net.minecraft.stats.StatisticList;
+import net.minecraft.stats.StatisticManagerServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.entity.EntityTypes;
@@ -47,7 +47,7 @@ public class MobSpawnerPhantom implements MobSpawner {
                             if (!world.getDimensionManager().hasSkyLight() || blockPos.getY() >= world.getSeaLevel() && world.canSeeSky(blockPos)) {
                                 DifficultyDamageScaler difficultyInstance = world.getDamageScaler(blockPos);
                                 if (difficultyInstance.isHarderThan(random.nextFloat() * 3.0F)) {
-                                    ServerStatisticManager serverStatsCounter = ((EntityPlayer)player).getStatisticManager();
+                                    StatisticManagerServer serverStatsCounter = ((EntityPlayer)player).getStatisticManager();
                                     int j = MathHelper.clamp(serverStatsCounter.getStatisticValue(StatisticList.CUSTOM.get(StatisticList.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
                                     int k = 24000;
                                     if (random.nextInt(j) >= 72000) {

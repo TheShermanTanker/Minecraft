@@ -18,7 +18,7 @@ public class DispenseBehaviorBoat extends DispenseBehaviorItem {
     }
 
     @Override
-    public ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+    public ItemStack a(ISourceBlock pointer, ItemStack stack) {
         EnumDirection direction = pointer.getBlockData().get(BlockDispenser.FACING);
         World level = pointer.getWorld();
         double d = pointer.getX() + (double)((float)direction.getAdjacentX() * 1.125F);
@@ -45,7 +45,7 @@ public class DispenseBehaviorBoat extends DispenseBehaviorItem {
     }
 
     @Override
-    protected void playSound(ISourceBlock pointer) {
+    protected void a(ISourceBlock pointer) {
         pointer.getWorld().triggerEffect(1000, pointer.getBlockPosition(), 0);
     }
 }

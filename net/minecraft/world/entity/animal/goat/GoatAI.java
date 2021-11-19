@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.sounds.SoundEffects;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
@@ -35,19 +35,19 @@ import net.minecraft.world.item.crafting.RecipeItemStack;
 public class GoatAI {
     public static final int RAM_PREPARE_TIME = 20;
     public static final int RAM_MAX_DISTANCE = 7;
-    private static final UniformInt ADULT_FOLLOW_RANGE = UniformInt.of(5, 16);
+    private static final IntProviderUniform ADULT_FOLLOW_RANGE = IntProviderUniform.of(5, 16);
     private static final float SPEED_MULTIPLIER_WHEN_MAKING_LOVE = 1.0F;
     private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
     private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_ADULT = 1.25F;
     private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
     private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0F;
     private static final float SPEED_MULTIPLIER_WHEN_PREPARING_TO_RAM = 1.25F;
-    private static final UniformInt TIME_BETWEEN_LONG_JUMPS = UniformInt.of(600, 1200);
+    private static final IntProviderUniform TIME_BETWEEN_LONG_JUMPS = IntProviderUniform.of(600, 1200);
     public static final int MAX_LONG_JUMP_HEIGHT = 5;
     public static final int MAX_LONG_JUMP_WIDTH = 5;
     public static final float MAX_JUMP_VELOCITY = 1.5F;
-    private static final UniformInt TIME_BETWEEN_RAMS = UniformInt.of(600, 6000);
-    private static final UniformInt TIME_BETWEEN_RAMS_SCREAMER = UniformInt.of(100, 300);
+    private static final IntProviderUniform TIME_BETWEEN_RAMS = IntProviderUniform.of(600, 6000);
+    private static final IntProviderUniform TIME_BETWEEN_RAMS_SCREAMER = IntProviderUniform.of(100, 300);
     private static final PathfinderTargetCondition RAM_TARGET_CONDITIONS = PathfinderTargetCondition.forCombat().selector((livingEntity) -> {
         return !livingEntity.getEntityType().equals(EntityTypes.GOAT) && livingEntity.level.getWorldBorder().isWithinBounds(livingEntity.getBoundingBox());
     });
@@ -77,7 +77,7 @@ public class GoatAI {
     }
 
     private static void initIdleActivity(BehaviorController<EntityGoat> brain) {
-        brain.addActivityWithConditions(Activity.IDLE, ImmutableList.of(Pair.of(0, new BehaviorRunSometimes<>(new BehaviorLookTarget(EntityTypes.PLAYER, 6.0F), UniformInt.of(30, 60))), Pair.of(0, new BehaviorMakeLoveAnimal(EntityTypes.GOAT, 1.0F)), Pair.of(1, new FollowTemptation((livingEntity) -> {
+        brain.addActivityWithConditions(Activity.IDLE, ImmutableList.of(Pair.of(0, new BehaviorRunSometimes<>(new BehaviorLookTarget(EntityTypes.PLAYER, 6.0F), IntProviderUniform.of(30, 60))), Pair.of(0, new BehaviorMakeLoveAnimal(EntityTypes.GOAT, 1.0F)), Pair.of(1, new FollowTemptation((livingEntity) -> {
             return 1.25F;
         })), Pair.of(2, new BehaviorFollowAdult<>(ADULT_FOLLOW_RANGE, 1.25F)), Pair.of(3, new BehaviorGateSingle<>(ImmutableList.of(Pair.of(new BehaviorStrollRandomUnconstrained(1.0F), 2), Pair.of(new BehaviorLookWalk(1.0F, 3), 2), Pair.of(new BehaviorNop(30, 60), 1))))), ImmutableSet.of(Pair.of(MemoryModuleType.RAM_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT)));
     }

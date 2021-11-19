@@ -3,7 +3,7 @@ package net.minecraft.world.effect;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.attributes.AttributeMapBase;
 
-public class MobEffectAbsorption extends MobEffectList {
+public class MobEffectAbsorption extends MobEffectBase {
     protected MobEffectAbsorption(MobEffectInfo type, int color) {
         super(type, color);
     }

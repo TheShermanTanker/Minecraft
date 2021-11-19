@@ -8,8 +8,8 @@ import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.effect.MobEffectList;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
@@ -61,7 +61,7 @@ public class EntityGuardianElder extends EntityGuardian {
         super.mobTick();
         int i = 1200;
         if ((this.tickCount + this.getId()) % 1200 == 0) {
-            MobEffectList mobEffect = MobEffects.DIG_SLOWDOWN;
+            MobEffectBase mobEffect = MobEffectList.DIG_SLOWDOWN;
             List<EntityPlayer> list = ((WorldServer)this.level).getPlayers((player) -> {
                 return this.distanceToSqr(player) < 2500.0D && player.gameMode.isSurvival();
             });

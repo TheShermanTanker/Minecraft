@@ -10,7 +10,7 @@ import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.IBlockData;
 
-public class CriterionTriggerEnterBlock extends CriterionTriggerAbstract<CriterionTriggerEnterBlock.TriggerInstance> {
+public class CriterionTriggerEnterBlock extends CriterionTriggerAbstract<CriterionTriggerEnterBlock.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("enter_block");
 
     @Override
@@ -19,7 +19,7 @@ public class CriterionTriggerEnterBlock extends CriterionTriggerAbstract<Criteri
     }
 
     @Override
-    public CriterionTriggerEnterBlock.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerEnterBlock.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         Block block = deserializeBlock(jsonObject);
         CriterionTriggerProperties statePropertiesPredicate = CriterionTriggerProperties.fromJson(jsonObject.get("state"));
         if (block != null) {
@@ -28,7 +28,7 @@ public class CriterionTriggerEnterBlock extends CriterionTriggerAbstract<Criteri
             });
         }
 
-        return new CriterionTriggerEnterBlock.TriggerInstance(composite, block, statePropertiesPredicate);
+        return new CriterionTriggerEnterBlock.CriterionInstanceTrigger(composite, block, statePropertiesPredicate);
     }
 
     @Nullable
@@ -49,18 +49,18 @@ public class CriterionTriggerEnterBlock extends CriterionTriggerAbstract<Criteri
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final Block block;
         private final CriterionTriggerProperties state;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, @Nullable Block block, CriterionTriggerProperties state) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, @Nullable Block block, CriterionTriggerProperties state) {
             super(CriterionTriggerEnterBlock.ID, player);
             this.block = block;
             this.state = state;
         }
 
-        public static CriterionTriggerEnterBlock.TriggerInstance entersBlock(Block block) {
-            return new CriterionTriggerEnterBlock.TriggerInstance(CriterionConditionEntity.Composite.ANY, block, CriterionTriggerProperties.ANY);
+        public static CriterionTriggerEnterBlock.CriterionInstanceTrigger entersBlock(Block block) {
+            return new CriterionTriggerEnterBlock.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, block, CriterionTriggerProperties.ANY);
         }
 
         @Override

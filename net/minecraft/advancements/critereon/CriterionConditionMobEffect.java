@@ -13,15 +13,15 @@ import net.minecraft.core.IRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 
 public class CriterionConditionMobEffect {
     public static final CriterionConditionMobEffect ANY = new CriterionConditionMobEffect(Collections.emptyMap());
-    private final Map<MobEffectList, CriterionConditionMobEffect.MobEffectInstancePredicate> effects;
+    private final Map<MobEffectBase, CriterionConditionMobEffect.MobEffectInstancePredicate> effects;
 
-    public CriterionConditionMobEffect(Map<MobEffectList, CriterionConditionMobEffect.MobEffectInstancePredicate> effects) {
+    public CriterionConditionMobEffect(Map<MobEffectBase, CriterionConditionMobEffect.MobEffectInstancePredicate> effects) {
         this.effects = effects;
     }
 
@@ -29,12 +29,12 @@ public class CriterionConditionMobEffect {
         return new CriterionConditionMobEffect(Maps.newLinkedHashMap());
     }
 
-    public CriterionConditionMobEffect and(MobEffectList statusEffect) {
+    public CriterionConditionMobEffect and(MobEffectBase statusEffect) {
         this.effects.put(statusEffect, new CriterionConditionMobEffect.MobEffectInstancePredicate());
         return this;
     }
 
-    public CriterionConditionMobEffect and(MobEffectList statusEffect, CriterionConditionMobEffect.MobEffectInstancePredicate data) {
+    public CriterionConditionMobEffect and(MobEffectBase statusEffect, CriterionConditionMobEffect.MobEffectInstancePredicate data) {
         this.effects.put(statusEffect, data);
         return this;
     }
@@ -51,11 +51,11 @@ public class CriterionConditionMobEffect {
         return this == ANY ? true : this.matches(livingEntity.getActiveEffectsMap());
     }
 
-    public boolean matches(Map<MobEffectList, MobEffect> effects) {
+    public boolean matches(Map<MobEffectBase, MobEffect> effects) {
         if (this == ANY) {
             return true;
         } else {
-            for(Entry<MobEffectList, CriterionConditionMobEffect.MobEffectInstancePredicate> entry : this.effects.entrySet()) {
+            for(Entry<MobEffectBase, CriterionConditionMobEffect.MobEffectInstancePredicate> entry : this.effects.entrySet()) {
                 MobEffect mobEffectInstance = effects.get(entry.getKey());
                 if (!entry.getValue().matches(mobEffectInstance)) {
                     return false;
@@ -69,11 +69,11 @@ public class CriterionConditionMobEffect {
     public static CriterionConditionMobEffect fromJson(@Nullable JsonElement json) {
         if (json != null && !json.isJsonNull()) {
             JsonObject jsonObject = ChatDeserializer.convertToJsonObject(json, "effects");
-            Map<MobEffectList, CriterionConditionMobEffect.MobEffectInstancePredicate> map = Maps.newLinkedHashMap();
+            Map<MobEffectBase, CriterionConditionMobEffect.MobEffectInstancePredicate> map = Maps.newLinkedHashMap();
 
             for(Entry<String, JsonElement> entry : jsonObject.entrySet()) {
                 MinecraftKey resourceLocation = new MinecraftKey(entry.getKey());
-                MobEffectList mobEffect = IRegistry.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> {
+                MobEffectBase mobEffect = IRegistry.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> {
                     return new JsonSyntaxException("Unknown effect '" + resourceLocation + "'");
                 });
                 CriterionConditionMobEffect.MobEffectInstancePredicate mobEffectInstancePredicate = CriterionConditionMobEffect.MobEffectInstancePredicate.fromJson(ChatDeserializer.convertToJsonObject(entry.getValue(), entry.getKey()));
@@ -92,7 +92,7 @@ public class CriterionConditionMobEffect {
         } else {
             JsonObject jsonObject = new JsonObject();
 
-            for(Entry<MobEffectList, CriterionConditionMobEffect.MobEffectInstancePredicate> entry : this.effects.entrySet()) {
+            for(Entry<MobEffectBase, CriterionConditionMobEffect.MobEffectInstancePredicate> entry : this.effects.entrySet()) {
                 jsonObject.add(IRegistry.MOB_EFFECT.getKey(entry.getKey()).toString(), entry.getValue().serializeToJson());
             }
 

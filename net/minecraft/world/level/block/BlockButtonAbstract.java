@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -113,7 +113,7 @@ public abstract class BlockButtonAbstract extends BlockAttachable {
     }
 
     protected void playSound(@Nullable EntityHuman player, GeneratorAccess world, BlockPosition pos, boolean powered) {
-        world.playSound(powered ? player : null, pos, this.getSound(powered), SoundCategory.BLOCKS, 0.3F, powered ? 0.6F : 0.5F);
+        world.playSound(powered ? player : null, pos, this.getSound(powered), EnumSoundCategory.BLOCKS, 0.3F, powered ? 0.6F : 0.5F);
     }
 
     protected abstract SoundEffect getSound(boolean powered);

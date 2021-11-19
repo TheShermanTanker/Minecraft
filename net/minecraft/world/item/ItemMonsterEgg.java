@@ -34,7 +34,7 @@ import net.minecraft.world.phys.MovingObjectPositionBlock;
 import net.minecraft.world.phys.Vec3D;
 
 public class ItemMonsterEgg extends Item {
-    private static final Map<EntityTypes<? extends EntityInsentient>, ItemMonsterEgg> BY_ID = Maps.newIdentityHashMap();
+    public static final Map<EntityTypes<? extends EntityInsentient>, ItemMonsterEgg> BY_ID = Maps.newIdentityHashMap();
     private final int backgroundColor;
     private final int highlightColor;
     private final EntityTypes<?> defaultType;

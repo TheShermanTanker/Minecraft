@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.entity.Entity;
@@ -108,13 +108,13 @@ public class BlockBubbleColumn extends Block implements IFluidSource {
         if (state.get(DRAG_DOWN)) {
             world.addAlwaysVisibleParticle(Particles.CURRENT_DOWN, d + 0.5D, e + 0.8D, f, 0.0D, 0.0D, 0.0D);
             if (random.nextInt(200) == 0) {
-                world.playLocalSound(d, e, f, SoundEffects.BUBBLE_COLUMN_WHIRLPOOL_AMBIENT, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.playLocalSound(d, e, f, SoundEffects.BUBBLE_COLUMN_WHIRLPOOL_AMBIENT, EnumSoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
         } else {
             world.addAlwaysVisibleParticle(Particles.BUBBLE_COLUMN_UP, d + 0.5D, e, f + 0.5D, 0.0D, 0.04D, 0.0D);
             world.addAlwaysVisibleParticle(Particles.BUBBLE_COLUMN_UP, d + (double)random.nextFloat(), e + (double)random.nextFloat(), f + (double)random.nextFloat(), 0.0D, 0.04D, 0.0D);
             if (random.nextInt(200) == 0) {
-                world.playLocalSound(d, e, f, SoundEffects.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+                world.playLocalSound(d, e, f, SoundEffects.BUBBLE_COLUMN_UPWARDS_AMBIENT, EnumSoundCategory.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
             }
         }
 

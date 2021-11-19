@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionRegistry;
 import net.minecraft.world.level.IMaterial;
 
-public class CriterionTriggerConsumeItem extends CriterionTriggerAbstract<CriterionTriggerConsumeItem.TriggerInstance> {
+public class CriterionTriggerConsumeItem extends CriterionTriggerAbstract<CriterionTriggerConsumeItem.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("consume_item");
 
     @Override
@@ -19,8 +19,8 @@ public class CriterionTriggerConsumeItem extends CriterionTriggerAbstract<Criter
     }
 
     @Override
-    public CriterionTriggerConsumeItem.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
-        return new CriterionTriggerConsumeItem.TriggerInstance(composite, CriterionConditionItem.fromJson(jsonObject.get("item")));
+    public CriterionTriggerConsumeItem.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+        return new CriterionTriggerConsumeItem.CriterionInstanceTrigger(composite, CriterionConditionItem.fromJson(jsonObject.get("item")));
     }
 
     public void trigger(EntityPlayer player, ItemStack stack) {
@@ -29,24 +29,24 @@ public class CriterionTriggerConsumeItem extends CriterionTriggerAbstract<Criter
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final CriterionConditionItem item;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, CriterionConditionItem item) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, CriterionConditionItem item) {
             super(CriterionTriggerConsumeItem.ID, player);
             this.item = item;
         }
 
-        public static CriterionTriggerConsumeItem.TriggerInstance usedItem() {
-            return new CriterionTriggerConsumeItem.TriggerInstance(CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY);
+        public static CriterionTriggerConsumeItem.CriterionInstanceTrigger usedItem() {
+            return new CriterionTriggerConsumeItem.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY);
         }
 
-        public static CriterionTriggerConsumeItem.TriggerInstance usedItem(CriterionConditionItem predicate) {
-            return new CriterionTriggerConsumeItem.TriggerInstance(CriterionConditionEntity.Composite.ANY, predicate);
+        public static CriterionTriggerConsumeItem.CriterionInstanceTrigger usedItem(CriterionConditionItem predicate) {
+            return new CriterionTriggerConsumeItem.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, predicate);
         }
 
-        public static CriterionTriggerConsumeItem.TriggerInstance usedItem(IMaterial item) {
-            return new CriterionTriggerConsumeItem.TriggerInstance(CriterionConditionEntity.Composite.ANY, new CriterionConditionItem((Tag<Item>)null, ImmutableSet.of(item.getItem()), CriterionConditionValue.IntegerRange.ANY, CriterionConditionValue.IntegerRange.ANY, CriterionConditionEnchantments.NONE, CriterionConditionEnchantments.NONE, (PotionRegistry)null, CriterionConditionNBT.ANY));
+        public static CriterionTriggerConsumeItem.CriterionInstanceTrigger usedItem(IMaterial item) {
+            return new CriterionTriggerConsumeItem.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, new CriterionConditionItem((Tag<Item>)null, ImmutableSet.of(item.getItem()), CriterionConditionValue.IntegerRange.ANY, CriterionConditionValue.IntegerRange.ANY, CriterionConditionEnchantments.NONE, CriterionConditionEnchantments.NONE, (PotionRegistry)null, CriterionConditionNBT.ANY));
         }
 
         public boolean matches(ItemStack stack) {

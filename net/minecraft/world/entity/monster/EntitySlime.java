@@ -20,7 +20,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -474,7 +474,7 @@ public class EntitySlime extends EntityInsentient implements IMonster {
 
         @Override
         public boolean canUse() {
-            return this.slime.getGoalTarget() == null && (this.slime.onGround || this.slime.isInWater() || this.slime.isInLava() || this.slime.hasEffect(MobEffects.LEVITATION)) && this.slime.getControllerMove() instanceof EntitySlime.ControllerMoveSlime;
+            return this.slime.getGoalTarget() == null && (this.slime.onGround || this.slime.isInWater() || this.slime.isInLava() || this.slime.hasEffect(MobEffectList.LEVITATION)) && this.slime.getControllerMove() instanceof EntitySlime.ControllerMoveSlime;
         }
 
         @Override

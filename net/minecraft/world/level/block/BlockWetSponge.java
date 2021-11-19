@@ -4,7 +4,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.World;
@@ -21,7 +21,7 @@ public class BlockWetSponge extends Block {
         if (world.getDimensionManager().isNether()) {
             world.setTypeAndData(pos, Blocks.SPONGE.getBlockData(), 3);
             world.triggerEffect(2009, pos, 0);
-            world.playSound((EntityHuman)null, pos, SoundEffects.FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1.0F, (1.0F + world.getRandom().nextFloat() * 0.2F) * 0.7F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.FIRE_EXTINGUISH, EnumSoundCategory.BLOCKS, 1.0F, (1.0F + world.getRandom().nextFloat() * 0.2F) * 0.7F);
         }
 
     }

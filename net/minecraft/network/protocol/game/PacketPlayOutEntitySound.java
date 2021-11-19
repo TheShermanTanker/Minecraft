@@ -3,19 +3,19 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.core.IRegistry;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.Validate;
 
 public class PacketPlayOutEntitySound implements Packet<PacketListenerPlayOut> {
     private final SoundEffect sound;
-    private final SoundCategory source;
+    private final EnumSoundCategory source;
     private final int id;
     private final float volume;
     private final float pitch;
 
-    public PacketPlayOutEntitySound(SoundEffect sound, SoundCategory category, Entity entity, float volume, float pitch) {
+    public PacketPlayOutEntitySound(SoundEffect sound, EnumSoundCategory category, Entity entity, float volume, float pitch) {
         Validate.notNull(sound, "sound");
         this.sound = sound;
         this.source = category;
@@ -26,7 +26,7 @@ public class PacketPlayOutEntitySound implements Packet<PacketListenerPlayOut> {
 
     public PacketPlayOutEntitySound(PacketDataSerializer buf) {
         this.sound = IRegistry.SOUND_EVENT.fromId(buf.readVarInt());
-        this.source = buf.readEnum(SoundCategory.class);
+        this.source = buf.readEnum(EnumSoundCategory.class);
         this.id = buf.readVarInt();
         this.volume = buf.readFloat();
         this.pitch = buf.readFloat();
@@ -45,7 +45,7 @@ public class PacketPlayOutEntitySound implements Packet<PacketListenerPlayOut> {
         return this.sound;
     }
 
-    public SoundCategory getSource() {
+    public EnumSoundCategory getSource() {
         return this.source;
     }
 

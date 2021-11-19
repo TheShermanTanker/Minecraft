@@ -5,7 +5,7 @@ import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAreaEffectCloud;
 import net.minecraft.world.entity.EntityLiving;
@@ -41,7 +41,7 @@ public class EntityDragonFireball extends EntityFireball {
                 areaEffectCloud.setRadius(3.0F);
                 areaEffectCloud.setDuration(600);
                 areaEffectCloud.setRadiusPerTick((7.0F - areaEffectCloud.getRadius()) / (float)areaEffectCloud.getDuration());
-                areaEffectCloud.addEffect(new MobEffect(MobEffects.HARM, 1, 1));
+                areaEffectCloud.addEffect(new MobEffect(MobEffectList.HARM, 1, 1));
                 if (!list.isEmpty()) {
                     for(EntityLiving livingEntity : list) {
                         double d = this.distanceToSqr(livingEntity);

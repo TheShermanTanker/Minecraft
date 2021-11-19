@@ -1,6 +1,6 @@
 package net.minecraft.world.item;
 
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.world.EnumHand;
@@ -27,10 +27,10 @@ public class ItemFishingRod extends Item implements ItemVanishable {
                 });
             }
 
-            world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.FISHING_BOBBER_RETRIEVE, SoundCategory.NEUTRAL, 1.0F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+            world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.FISHING_BOBBER_RETRIEVE, EnumSoundCategory.NEUTRAL, 1.0F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
             world.gameEvent(user, GameEvent.FISHING_ROD_REEL_IN, user);
         } else {
-            world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.FISHING_BOBBER_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+            world.playSound((EntityHuman)null, user.locX(), user.locY(), user.locZ(), SoundEffects.FISHING_BOBBER_THROW, EnumSoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
             if (!world.isClientSide) {
                 int j = EnchantmentManager.getFishingSpeedBonus(itemStack);
                 int k = EnchantmentManager.getFishingLuckBonus(itemStack);

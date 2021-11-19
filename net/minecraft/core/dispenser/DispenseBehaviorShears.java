@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.ISourceBlock;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.entity.Entity;
@@ -23,7 +23,7 @@ import net.minecraft.world.phys.AxisAlignedBB;
 
 public class DispenseBehaviorShears extends DispenseBehaviorMaybe {
     @Override
-    protected ItemStack execute(ISourceBlock pointer, ItemStack stack) {
+    protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
         World level = pointer.getWorld();
         if (!level.isClientSide()) {
             BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
@@ -41,7 +41,7 @@ public class DispenseBehaviorShears extends DispenseBehaviorMaybe {
         if (blockState.is(TagsBlock.BEEHIVES)) {
             int i = blockState.get(BlockBeehive.HONEY_LEVEL);
             if (i >= 5) {
-                world.playSound((EntityHuman)null, pos, SoundEffects.BEEHIVE_SHEAR, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.BEEHIVE_SHEAR, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
                 BlockBeehive.dropHoneycomb(world, pos);
                 ((BlockBeehive)blockState.getBlock()).releaseBeesAndResetHoneyLevel(world, blockState, pos, (EntityHuman)null, TileEntityBeehive.ReleaseStatus.BEE_RELEASED);
                 world.gameEvent((Entity)null, GameEvent.SHEAR, pos);
@@ -57,7 +57,7 @@ public class DispenseBehaviorShears extends DispenseBehaviorMaybe {
             if (livingEntity instanceof IShearable) {
                 IShearable shearable = (IShearable)livingEntity;
                 if (shearable.canShear()) {
-                    shearable.shear(SoundCategory.BLOCKS);
+                    shearable.shear(EnumSoundCategory.BLOCKS);
                     world.gameEvent((Entity)null, GameEvent.SHEAR, pos);
                     return true;
                 }

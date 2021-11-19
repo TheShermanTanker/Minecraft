@@ -4,7 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -59,7 +59,7 @@ public abstract class BlockCandleAbstract extends Block {
         if (f < 0.3F) {
             world.addParticle(Particles.SMOKE, vec3d.x, vec3d.y, vec3d.z, 0.0D, 0.0D, 0.0D);
             if (f < 0.17F) {
-                world.playLocalSound(vec3d.x + 0.5D, vec3d.y + 0.5D, vec3d.z + 0.5D, SoundEffects.CANDLE_AMBIENT, SoundCategory.BLOCKS, 1.0F + random.nextFloat(), random.nextFloat() * 0.7F + 0.3F, false);
+                world.playLocalSound(vec3d.x + 0.5D, vec3d.y + 0.5D, vec3d.z + 0.5D, SoundEffects.CANDLE_AMBIENT, EnumSoundCategory.BLOCKS, 1.0F + random.nextFloat(), random.nextFloat() * 0.7F + 0.3F, false);
             }
         }
 
@@ -74,7 +74,7 @@ public abstract class BlockCandleAbstract extends Block {
             });
         }
 
-        world.playSound((EntityHuman)null, pos, SoundEffects.CANDLE_EXTINGUISH, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.playSound((EntityHuman)null, pos, SoundEffects.CANDLE_EXTINGUISH, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
         world.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
     }
 

@@ -27,7 +27,7 @@ public interface PacketListenerPlayIn extends PacketListener {
 
     void handleMovePlayer(PacketPlayInFlying packet);
 
-    void handlePong(ServerboundPongPacket packet);
+    void handlePong(PacketPlayInPong packet);
 
     void handlePlayerAbilities(PacketPlayInAbilities packet);
 

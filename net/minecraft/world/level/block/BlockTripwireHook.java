@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -176,16 +176,16 @@ public class BlockTripwireHook extends Block {
 
     private void playSound(World world, BlockPosition pos, boolean attached, boolean on, boolean detached, boolean off) {
         if (on && !off) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_CLICK_ON, SoundCategory.BLOCKS, 0.4F, 0.6F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_CLICK_ON, EnumSoundCategory.BLOCKS, 0.4F, 0.6F);
             world.gameEvent(GameEvent.BLOCK_PRESS, pos);
         } else if (!on && off) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_CLICK_OFF, SoundCategory.BLOCKS, 0.4F, 0.5F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_CLICK_OFF, EnumSoundCategory.BLOCKS, 0.4F, 0.5F);
             world.gameEvent(GameEvent.BLOCK_UNPRESS, pos);
         } else if (attached && !detached) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_ATTACH, SoundCategory.BLOCKS, 0.4F, 0.7F);
+            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_ATTACH, EnumSoundCategory.BLOCKS, 0.4F, 0.7F);
             world.gameEvent(GameEvent.BLOCK_ATTACH, pos);
         } else if (!attached && detached) {
-            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_DETACH, SoundCategory.BLOCKS, 0.4F, 1.2F / (world.random.nextFloat() * 0.2F + 0.9F));
+            world.playSound((EntityHuman)null, pos, SoundEffects.TRIPWIRE_DETACH, EnumSoundCategory.BLOCKS, 0.4F, 1.2F / (world.random.nextFloat() * 0.2F + 0.9F));
             world.gameEvent(GameEvent.BLOCK_DETACH, pos);
         }
 

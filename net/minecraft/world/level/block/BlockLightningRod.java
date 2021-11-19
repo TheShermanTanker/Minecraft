@@ -6,10 +6,10 @@ import net.minecraft.core.EnumDirection;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.util.ParticleUtils;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLightning;
 import net.minecraft.world.entity.EntityTypes;
@@ -94,7 +94,7 @@ public class BlockLightningRod extends BlockRod implements IBlockWaterlogged {
     @Override
     public void animateTick(IBlockData state, World world, BlockPosition pos, Random random) {
         if (world.isThundering() && (long)world.random.nextInt(200) <= world.getTime() % 200L && pos.getY() == world.getHeight(HeightMap.Type.WORLD_SURFACE, pos.getX(), pos.getZ()) - 1) {
-            ParticleUtils.spawnParticlesAlongAxis(state.get(FACING).getAxis(), world, pos, 0.125D, Particles.ELECTRIC_SPARK, UniformInt.of(1, 2));
+            ParticleUtils.spawnParticlesAlongAxis(state.get(FACING).getAxis(), world, pos, 0.125D, Particles.ELECTRIC_SPARK, IntProviderUniform.of(1, 2));
         }
     }
 
@@ -129,7 +129,7 @@ public class BlockLightningRod extends BlockRod implements IBlockWaterlogged {
                 Entity entity = projectile.getShooter();
                 lightningBolt.setCause(entity instanceof EntityPlayer ? (EntityPlayer)entity : null);
                 world.addEntity(lightningBolt);
-                world.playSound((EntityHuman)null, blockPos, SoundEffects.TRIDENT_THUNDER, SoundCategory.WEATHER, 5.0F, 1.0F);
+                world.playSound((EntityHuman)null, blockPos, SoundEffects.TRIDENT_THUNDER, EnumSoundCategory.WEATHER, 5.0F, 1.0F);
             }
         }
 

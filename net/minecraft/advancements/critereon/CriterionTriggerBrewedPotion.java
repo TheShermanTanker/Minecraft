@@ -9,7 +9,7 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.item.alchemy.PotionRegistry;
 
-public class CriterionTriggerBrewedPotion extends CriterionTriggerAbstract<CriterionTriggerBrewedPotion.TriggerInstance> {
+public class CriterionTriggerBrewedPotion extends CriterionTriggerAbstract<CriterionTriggerBrewedPotion.CriterionInstanceTrigger> {
     static final MinecraftKey ID = new MinecraftKey("brewed_potion");
 
     @Override
@@ -18,7 +18,7 @@ public class CriterionTriggerBrewedPotion extends CriterionTriggerAbstract<Crite
     }
 
     @Override
-    public CriterionTriggerBrewedPotion.TriggerInstance createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
+    public CriterionTriggerBrewedPotion.CriterionInstanceTrigger createInstance(JsonObject jsonObject, CriterionConditionEntity.Composite composite, LootDeserializationContext deserializationContext) {
         PotionRegistry potion = null;
         if (jsonObject.has("potion")) {
             MinecraftKey resourceLocation = new MinecraftKey(ChatDeserializer.getAsString(jsonObject, "potion"));
@@ -27,7 +27,7 @@ public class CriterionTriggerBrewedPotion extends CriterionTriggerAbstract<Crite
             });
         }
 
-        return new CriterionTriggerBrewedPotion.TriggerInstance(composite, potion);
+        return new CriterionTriggerBrewedPotion.CriterionInstanceTrigger(composite, potion);
     }
 
     public void trigger(EntityPlayer player, PotionRegistry potion) {
@@ -36,16 +36,16 @@ public class CriterionTriggerBrewedPotion extends CriterionTriggerAbstract<Crite
         });
     }
 
-    public static class TriggerInstance extends CriterionInstanceAbstract {
+    public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
         private final PotionRegistry potion;
 
-        public TriggerInstance(CriterionConditionEntity.Composite player, @Nullable PotionRegistry potion) {
+        public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, @Nullable PotionRegistry potion) {
             super(CriterionTriggerBrewedPotion.ID, player);
             this.potion = potion;
         }
 
-        public static CriterionTriggerBrewedPotion.TriggerInstance brewedPotion() {
-            return new CriterionTriggerBrewedPotion.TriggerInstance(CriterionConditionEntity.Composite.ANY, (PotionRegistry)null);
+        public static CriterionTriggerBrewedPotion.CriterionInstanceTrigger brewedPotion() {
+            return new CriterionTriggerBrewedPotion.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, (PotionRegistry)null);
         }
 
         public boolean matches(PotionRegistry potion) {

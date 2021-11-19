@@ -3,7 +3,7 @@ package net.minecraft.world.item;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -31,7 +31,7 @@ public class ItemFlintAndSteel extends Item {
         if (!BlockCampfire.canLight(blockState) && !BlockCandle.canLight(blockState) && !BlockCandleCake.canLight(blockState)) {
             BlockPosition blockPos2 = blockPos.relative(context.getClickedFace());
             if (BlockFireAbstract.canBePlacedAt(level, blockPos2, context.getHorizontalDirection())) {
-                level.playSound(player, blockPos2, SoundEffects.FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+                level.playSound(player, blockPos2, SoundEffects.FLINTANDSTEEL_USE, EnumSoundCategory.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
                 IBlockData blockState2 = BlockFireAbstract.getState(level, blockPos2);
                 level.setTypeAndData(blockPos2, blockState2, 11);
                 level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
@@ -48,7 +48,7 @@ public class ItemFlintAndSteel extends Item {
                 return EnumInteractionResult.FAIL;
             }
         } else {
-            level.playSound(player, blockPos, SoundEffects.FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
+            level.playSound(player, blockPos, SoundEffects.FLINTANDSTEEL_USE, EnumSoundCategory.BLOCKS, 1.0F, level.getRandom().nextFloat() * 0.4F + 0.8F);
             level.setTypeAndData(blockPos, blockState.set(BlockProperties.LIT, Boolean.valueOf(true)), 11);
             level.gameEvent(player, GameEvent.BLOCK_PLACE, blockPos);
             if (player != null) {

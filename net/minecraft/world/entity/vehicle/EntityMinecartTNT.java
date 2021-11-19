@@ -3,7 +3,7 @@ package net.minecraft.world.entity.vehicle;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.damagesource.DamageSource;
@@ -137,7 +137,7 @@ public class EntityMinecartTNT extends EntityMinecartAbstract {
         if (!this.level.isClientSide) {
             this.level.broadcastEntityEffect(this, (byte)10);
             if (!this.isSilent()) {
-                this.level.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), SoundEffects.TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                this.level.playSound((EntityHuman)null, this.locX(), this.locY(), this.locZ(), SoundEffects.TNT_PRIMED, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
             }
         }
 

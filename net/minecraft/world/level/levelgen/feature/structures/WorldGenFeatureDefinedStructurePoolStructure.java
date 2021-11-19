@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
-import net.minecraft.data.worldgen.ProcessorLists;
+import net.minecraft.data.worldgen.WorldGenProcessorLists;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.GeneratorAccessSeed;
@@ -77,7 +77,7 @@ public abstract class WorldGenFeatureDefinedStructurePoolStructure {
     public static Function<WorldGenFeatureDefinedStructurePoolTemplate.Matching, WorldGenFeatureDefinedStructurePoolLegacySingle> legacy(String id) {
         return (projection) -> {
             return new WorldGenFeatureDefinedStructurePoolLegacySingle(Either.left(new MinecraftKey(id)), () -> {
-                return ProcessorLists.EMPTY;
+                return WorldGenProcessorLists.EMPTY;
             }, projection);
         };
     }
@@ -93,7 +93,7 @@ public abstract class WorldGenFeatureDefinedStructurePoolStructure {
     public static Function<WorldGenFeatureDefinedStructurePoolTemplate.Matching, WorldGenFeatureDefinedStructurePoolSingle> single(String id) {
         return (projection) -> {
             return new WorldGenFeatureDefinedStructurePoolSingle(Either.left(new MinecraftKey(id)), () -> {
-                return ProcessorLists.EMPTY;
+                return WorldGenProcessorLists.EMPTY;
             }, projection);
         };
     }

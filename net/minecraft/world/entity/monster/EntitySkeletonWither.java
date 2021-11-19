@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
@@ -101,7 +101,7 @@ public class EntitySkeletonWither extends EntitySkeletonAbstract {
             return false;
         } else {
             if (target instanceof EntityLiving) {
-                ((EntityLiving)target).addEffect(new MobEffect(MobEffects.WITHER, 200), this);
+                ((EntityLiving)target).addEffect(new MobEffect(MobEffectList.WITHER, 200), this);
             }
 
             return true;
@@ -117,6 +117,6 @@ public class EntitySkeletonWither extends EntitySkeletonAbstract {
 
     @Override
     public boolean canBeAffected(MobEffect effect) {
-        return effect.getMobEffect() == MobEffects.WITHER ? false : super.canBeAffected(effect);
+        return effect.getMobEffect() == MobEffectList.WITHER ? false : super.canBeAffected(effect);
     }
 }

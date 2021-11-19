@@ -9,7 +9,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAreaEffectCloud;
 import net.minecraft.world.entity.EntityLiving;
@@ -139,7 +139,7 @@ public class EntityPotion extends EntityProjectileThrowable implements ItemSuppl
                         }
 
                         for(MobEffect mobEffectInstance : statusEffects) {
-                            MobEffectList mobEffect = mobEffectInstance.getMobEffect();
+                            MobEffectBase mobEffect = mobEffectInstance.getMobEffect();
                             if (mobEffect.isInstant()) {
                                 mobEffect.applyInstantEffect(this, this.getShooter(), livingEntity, mobEffectInstance.getAmplifier(), e);
                             } else {

@@ -4,7 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.entity.Entity;
@@ -67,7 +67,7 @@ public class BlockTurtleEgg extends Block {
     }
 
     private void decreaseEggs(World world, BlockPosition pos, IBlockData state) {
-        world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_BREAK, SoundCategory.BLOCKS, 0.7F, 0.9F + world.random.nextFloat() * 0.2F);
+        world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_BREAK, EnumSoundCategory.BLOCKS, 0.7F, 0.9F + world.random.nextFloat() * 0.2F);
         int i = state.get(EGGS);
         if (i <= 1) {
             world.destroyBlock(pos, false);
@@ -83,10 +83,10 @@ public class BlockTurtleEgg extends Block {
         if (this.shouldUpdateHatchLevel(world) && onSand(world, pos)) {
             int i = state.get(HATCH);
             if (i < 2) {
-                world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_CRACK, SoundCategory.BLOCKS, 0.7F, 0.9F + random.nextFloat() * 0.2F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_CRACK, EnumSoundCategory.BLOCKS, 0.7F, 0.9F + random.nextFloat() * 0.2F);
                 world.setTypeAndData(pos, state.set(HATCH, Integer.valueOf(i + 1)), 2);
             } else {
-                world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_HATCH, SoundCategory.BLOCKS, 0.7F, 0.9F + random.nextFloat() * 0.2F);
+                world.playSound((EntityHuman)null, pos, SoundEffects.TURTLE_EGG_HATCH, EnumSoundCategory.BLOCKS, 0.7F, 0.9F + random.nextFloat() * 0.2F);
                 world.removeBlock(pos, false);
 
                 for(int j = 0; j < state.get(EGGS); ++j) {

@@ -8,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.world.phys.Vec3D;
 
-public class ParticleParamRedstone extends DustParticleOptionsBase {
+public class ParticleParamRedstone extends ParticleParamDust {
     public static final Vector3fa REDSTONE_PARTICLE_COLOR = new Vector3fa(Vec3D.fromRGB24(16711680));
     public static final ParticleParamRedstone REDSTONE = new ParticleParamRedstone(REDSTONE_PARTICLE_COLOR, 1.0F);
     public static final Codec<ParticleParamRedstone> CODEC = RecordCodecBuilder.create((instance) -> {
@@ -21,7 +21,7 @@ public class ParticleParamRedstone extends DustParticleOptionsBase {
     public static final ParticleParam.Deserializer<ParticleParamRedstone> DESERIALIZER = new ParticleParam.Deserializer<ParticleParamRedstone>() {
         @Override
         public ParticleParamRedstone fromCommand(Particle<ParticleParamRedstone> particleType, StringReader stringReader) throws CommandSyntaxException {
-            Vector3fa vector3f = DustParticleOptionsBase.readVector3f(stringReader);
+            Vector3fa vector3f = ParticleParamDust.readVector3f(stringReader);
             stringReader.expect(' ');
             float f = stringReader.readFloat();
             return new ParticleParamRedstone(vector3f, f);
@@ -29,7 +29,7 @@ public class ParticleParamRedstone extends DustParticleOptionsBase {
 
         @Override
         public ParticleParamRedstone fromNetwork(Particle<ParticleParamRedstone> particleType, PacketDataSerializer friendlyByteBuf) {
-            return new ParticleParamRedstone(DustParticleOptionsBase.readVector3f(friendlyByteBuf), friendlyByteBuf.readFloat());
+            return new ParticleParamRedstone(ParticleParamDust.readVector3f(friendlyByteBuf), friendlyByteBuf.readFloat());
         }
     };
 

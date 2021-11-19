@@ -51,7 +51,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.sounds.SoundCategory;
+import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.Tag;
@@ -2711,8 +2711,8 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
         return EnumPistonReaction.NORMAL;
     }
 
-    public SoundCategory getSoundCategory() {
-        return SoundCategory.NEUTRAL;
+    public EnumSoundCategory getSoundCategory() {
+        return EnumSoundCategory.NEUTRAL;
     }
 
     public int getMaxFireTicks() {

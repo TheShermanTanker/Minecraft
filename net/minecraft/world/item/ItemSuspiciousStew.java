@@ -3,7 +3,7 @@ package net.minecraft.world.item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectList;
+import net.minecraft.world.effect.MobEffectBase;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.World;
@@ -17,11 +17,11 @@ public class ItemSuspiciousStew extends Item {
         super(settings);
     }
 
-    public static void saveMobEffect(ItemStack stew, MobEffectList effect, int duration) {
+    public static void saveMobEffect(ItemStack stew, MobEffectBase effect, int duration) {
         NBTTagCompound compoundTag = stew.getOrCreateTag();
         NBTTagList listTag = compoundTag.getList("Effects", 9);
         NBTTagCompound compoundTag2 = new NBTTagCompound();
-        compoundTag2.setByte("EffectId", (byte)MobEffectList.getId(effect));
+        compoundTag2.setByte("EffectId", (byte)MobEffectBase.getId(effect));
         compoundTag2.setInt("EffectDuration", duration);
         listTag.add(compoundTag2);
         compoundTag.set("Effects", listTag);
@@ -41,7 +41,7 @@ public class ItemSuspiciousStew extends Item {
                     j = compoundTag2.getInt("EffectDuration");
                 }
 
-                MobEffectList mobEffect = MobEffectList.fromId(compoundTag2.getByte("EffectId"));
+                MobEffectBase mobEffect = MobEffectBase.fromId(compoundTag2.getByte("EffectId"));
                 if (mobEffect != null) {
                     user.addEffect(new MobEffect(mobEffect, j));
                 }
