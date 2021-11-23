@@ -37,7 +37,7 @@ public abstract class IAsyncTaskHandler<R extends Runnable> implements IProfiler
 
     protected abstract Thread getThread();
 
-    protected boolean isNotMainThread() {
+    protected boolean scheduleExecutables() {
         return !this.isMainThread();
     }
 
@@ -51,7 +51,7 @@ public abstract class IAsyncTaskHandler<R extends Runnable> implements IProfiler
     }
 
     public <V> CompletableFuture<V> submit(Supplier<V> task) {
-        return this.isNotMainThread() ? CompletableFuture.supplyAsync(task, this) : CompletableFuture.completedFuture(task.get());
+        return this.scheduleExecutables() ? CompletableFuture.supplyAsync(task, this) : CompletableFuture.completedFuture(task.get());
     }
 
     private CompletableFuture<Void> executeFuture(Runnable runnable) {
@@ -62,7 +62,7 @@ public abstract class IAsyncTaskHandler<R extends Runnable> implements IProfiler
     }
 
     public CompletableFuture<Void> submit(Runnable task) {
-        if (this.isNotMainThread()) {
+        if (this.scheduleExecutables()) {
             return this.executeFuture(task);
         } else {
             task.run();
@@ -87,7 +87,7 @@ public abstract class IAsyncTaskHandler<R extends Runnable> implements IProfiler
 
     @Override
     public void execute(Runnable runnable) {
-        if (this.isNotMainThread()) {
+        if (this.scheduleExecutables()) {
             this.tell(this.postToMainThread(runnable));
         } else {
             runnable.run();

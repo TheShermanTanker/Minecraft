@@ -1280,8 +1280,8 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     }
 
     @Override
-    public boolean isNotMainThread() {
-        return super.isNotMainThread() && !this.isStopped();
+    public boolean scheduleExecutables() {
+        return super.scheduleExecutables() && !this.isStopped();
     }
 
     @Override

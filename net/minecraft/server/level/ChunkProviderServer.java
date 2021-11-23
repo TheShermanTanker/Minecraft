@@ -496,7 +496,7 @@ public class ChunkProviderServer extends IChunkProvider {
         }
 
         @Override
-        protected boolean isNotMainThread() {
+        protected boolean scheduleExecutables() {
             return true;
         }
 

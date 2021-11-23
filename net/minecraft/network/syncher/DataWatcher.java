@@ -190,7 +190,7 @@ public class DataWatcher {
         } else {
             buf.writeByte(entityDataAccessor.getId());
             buf.writeVarInt(i);
-            entityDataAccessor.getSerializer().write(buf, entry.getValue());
+            entityDataAccessor.getSerializer().a(buf, entry.getValue());
         }
     }
 
@@ -293,7 +293,7 @@ public class DataWatcher {
         }
 
         public DataWatcher.Item<T> copy() {
-            return new DataWatcher.Item<>(this.accessor, this.accessor.getSerializer().copy(this.value));
+            return new DataWatcher.Item<>(this.accessor, this.accessor.getSerializer().a(this.value));
         }
     }
 }

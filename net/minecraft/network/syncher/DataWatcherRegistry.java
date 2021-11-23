@@ -24,7 +24,7 @@ public class DataWatcherRegistry {
     private static final RegistryID<DataWatcherSerializer<?>> SERIALIZERS = new RegistryID<>(16);
     public static final DataWatcherSerializer<Byte> BYTE = new DataWatcherSerializer<Byte>() {
         @Override
-        public void write(PacketDataSerializer buf, Byte value) {
+        public void a(PacketDataSerializer buf, Byte value) {
             buf.writeByte(value);
         }
 
@@ -34,7 +34,7 @@ public class DataWatcherRegistry {
         }
 
         @Override
-        public Byte copy(Byte value) {
+        public Byte a(Byte value) {
             return value;
         }
     };

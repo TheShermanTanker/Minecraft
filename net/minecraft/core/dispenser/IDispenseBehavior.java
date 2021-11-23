@@ -532,7 +532,7 @@ public interface IDispenseBehavior {
         BlockDispenser.registerBehavior(Items.GLASS_BOTTLE.getItem(), new DispenseBehaviorMaybe() {
             private final DispenseBehaviorItem defaultDispenseItemBehavior = new DispenseBehaviorItem();
 
-            private ItemStack a(ISourceBlock pointer, ItemStack emptyBottleStack, ItemStack filledBottleStack) {
+            private ItemStack takeLiquid(ISourceBlock pointer, ItemStack emptyBottleStack, ItemStack filledBottleStack) {
                 emptyBottleStack.subtract(1);
                 if (emptyBottleStack.isEmpty()) {
                     pointer.getWorld().gameEvent((Entity)null, GameEvent.FLUID_PICKUP, pointer.getBlockPosition());
@@ -557,10 +557,10 @@ public interface IDispenseBehavior {
                 }) && blockState.get(BlockBeehive.HONEY_LEVEL) >= 5) {
                     ((BlockBeehive)blockState.getBlock()).releaseBeesAndResetHoneyLevel(serverLevel, blockState, blockPos, (EntityHuman)null, TileEntityBeehive.ReleaseStatus.BEE_RELEASED);
                     this.setSuccess(true);
-                    return this.a(pointer, stack, new ItemStack(Items.HONEY_BOTTLE));
+                    return this.takeLiquid(pointer, stack, new ItemStack(Items.HONEY_BOTTLE));
                 } else if (serverLevel.getFluid(blockPos).is(TagsFluid.WATER)) {
                     this.setSuccess(true);
-                    return this.a(pointer, stack, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER));
+                    return this.takeLiquid(pointer, stack, PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER));
                 } else {
                     return super.a(pointer, stack);
                 }

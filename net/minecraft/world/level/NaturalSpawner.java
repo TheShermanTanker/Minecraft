@@ -51,7 +51,7 @@ public final class NaturalSpawner {
     public static final int SPAWN_DISTANCE_CHUNK = 8;
     public static final int SPAWN_DISTANCE_BLOCK = 128;
     static final int MAGIC_NUMBER = (int)Math.pow(17.0D, 2.0D);
-    private static final EnumCreatureType[] SPAWNING_CATEGORIES = Stream.of(EnumCreatureType.values()).filter((spawnGroup) -> {
+    public static final EnumCreatureType[] SPAWNING_CATEGORIES = Stream.of(EnumCreatureType.values()).filter((spawnGroup) -> {
         return spawnGroup != EnumCreatureType.MISC;
     }).toArray((i) -> {
         return new EnumCreatureType[i];

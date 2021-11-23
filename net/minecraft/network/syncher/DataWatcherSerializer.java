@@ -3,7 +3,7 @@ package net.minecraft.network.syncher;
 import net.minecraft.network.PacketDataSerializer;
 
 public interface DataWatcherSerializer<T> {
-    void write(PacketDataSerializer buf, T value);
+    void a(PacketDataSerializer buf, T value);
 
     T read(PacketDataSerializer buf);
 
@@ -11,5 +11,5 @@ public interface DataWatcherSerializer<T> {
         return new DataWatcherObject<>(i, this);
     }
 
-    T copy(T value);
+    T a(T value);
 }

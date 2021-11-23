@@ -8,8 +8,8 @@ public abstract class IAsyncTaskHandlerReentrant<R extends Runnable> extends IAs
     }
 
     @Override
-    public boolean isNotMainThread() {
-        return this.isEntered() || super.isNotMainThread();
+    public boolean scheduleExecutables() {
+        return this.isEntered() || super.scheduleExecutables();
     }
 
     protected boolean isEntered() {
