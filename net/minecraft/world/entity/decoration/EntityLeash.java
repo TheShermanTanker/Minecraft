@@ -143,8 +143,8 @@ public class EntityLeash extends EntityHanging {
     }
 
     @Override
-    public Vec3D getRopeHoldPosition(float f) {
-        return this.getPosition(f).add(0.0D, 0.2D, 0.0D);
+    public Vec3D getRopeHoldPosition(float delta) {
+        return this.getPosition(delta).add(0.0D, 0.2D, 0.0D);
     }
 
     @Override

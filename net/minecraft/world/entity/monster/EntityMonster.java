@@ -12,6 +12,7 @@ import net.minecraft.world.entity.EntityCreature;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
+import net.minecraft.world.entity.LivingEntity$Fallsounds;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -76,8 +77,8 @@ public abstract class EntityMonster extends EntityCreature implements IMonster {
     }
 
     @Override
-    protected SoundEffect getSoundFall(int distance) {
-        return distance > 4 ? SoundEffects.HOSTILE_BIG_FALL : SoundEffects.HOSTILE_SMALL_FALL;
+    public LivingEntity$Fallsounds getFallSounds() {
+        return new LivingEntity$Fallsounds(SoundEffects.HOSTILE_SMALL_FALL, SoundEffects.HOSTILE_BIG_FALL);
     }
 
     @Override
@@ -87,6 +88,8 @@ public abstract class EntityMonster extends EntityCreature implements IMonster {
 
     public static boolean isDarkEnoughToSpawn(WorldAccess world, BlockPosition pos, Random random) {
         if (world.getBrightness(EnumSkyBlock.SKY, pos) > random.nextInt(32)) {
+            return false;
+        } else if (world.getBrightness(EnumSkyBlock.BLOCK, pos) > 0) {
             return false;
         } else {
             int i = world.getLevel().isThundering() ? world.getMaxLocalRawBrightness(pos, 10) : world.getLightLevel(pos);

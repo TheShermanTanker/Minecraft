@@ -3,28 +3,26 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.IRegistryCustom;
+import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.IWorldHeightAccess;
-import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.WorldChunkManager;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
-import net.minecraft.world.level.levelgen.SeededRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureEmptyConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.WorldGenEndCityPieces;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 
 public class WorldGenEndCity extends StructureGenerator<WorldGenFeatureEmptyConfiguration> {
     private static final int RANDOM_SALT = 10387313;
 
-    public WorldGenEndCity(Codec<WorldGenFeatureEmptyConfiguration> codec) {
-        super(codec);
+    public WorldGenEndCity(Codec<WorldGenFeatureEmptyConfiguration> configCodec) {
+        super(configCodec, WorldGenEndCity::pieceGeneratorSupplier);
     }
 
     @Override
@@ -32,18 +30,8 @@ public class WorldGenEndCity extends StructureGenerator<WorldGenFeatureEmptyConf
         return false;
     }
 
-    @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, WorldChunkManager biomeSource, long worldSeed, SeededRandom random, ChunkCoordIntPair pos, BiomeBase biome, ChunkCoordIntPair chunkPos, WorldGenFeatureEmptyConfiguration config, IWorldHeightAccess world) {
-        return getYPositionForFeature(pos, chunkGenerator, world) >= 60;
-    }
-
-    @Override
-    public StructureGenerator.StructureStartFactory<WorldGenFeatureEmptyConfiguration> getStartFactory() {
-        return WorldGenEndCity.EndCityStart::new;
-    }
-
-    static int getYPositionForFeature(ChunkCoordIntPair chunkPos, ChunkGenerator chunkGenerator, IWorldHeightAccess levelHeightAccessor) {
-        Random random = new Random((long)(chunkPos.x + chunkPos.z * 10387313));
+    private static int getYPositionForFeature(ChunkCoordIntPair pos, ChunkGenerator chunkGenerator, IWorldHeightAccess world) {
+        Random random = new Random((long)(pos.x + pos.z * 10387313));
         EnumBlockRotation rotation = EnumBlockRotation.getRandom(random);
         int i = 5;
         int j = 5;
@@ -56,30 +44,27 @@ public class WorldGenEndCity extends StructureGenerator<WorldGenFeatureEmptyConf
             j = -5;
         }
 
-        int k = chunkPos.getBlockX(7);
-        int l = chunkPos.getBlockZ(7);
-        int m = chunkGenerator.getFirstOccupiedHeight(k, l, HeightMap.Type.WORLD_SURFACE_WG, levelHeightAccessor);
-        int n = chunkGenerator.getFirstOccupiedHeight(k, l + j, HeightMap.Type.WORLD_SURFACE_WG, levelHeightAccessor);
-        int o = chunkGenerator.getFirstOccupiedHeight(k + i, l, HeightMap.Type.WORLD_SURFACE_WG, levelHeightAccessor);
-        int p = chunkGenerator.getFirstOccupiedHeight(k + i, l + j, HeightMap.Type.WORLD_SURFACE_WG, levelHeightAccessor);
+        int k = pos.getBlockX(7);
+        int l = pos.getBlockZ(7);
+        int m = chunkGenerator.getFirstOccupiedHeight(k, l, HeightMap.Type.WORLD_SURFACE_WG, world);
+        int n = chunkGenerator.getFirstOccupiedHeight(k, l + j, HeightMap.Type.WORLD_SURFACE_WG, world);
+        int o = chunkGenerator.getFirstOccupiedHeight(k + i, l, HeightMap.Type.WORLD_SURFACE_WG, world);
+        int p = chunkGenerator.getFirstOccupiedHeight(k + i, l + j, HeightMap.Type.WORLD_SURFACE_WG, world);
         return Math.min(Math.min(m, n), Math.min(o, p));
     }
 
-    public static class EndCityStart extends StructureStart<WorldGenFeatureEmptyConfiguration> {
-        public EndCityStart(StructureGenerator<WorldGenFeatureEmptyConfiguration> feature, ChunkCoordIntPair pos, int references, long seed) {
-            super(feature, pos, references, seed);
-        }
-
-        @Override
-        public void generatePieces(IRegistryCustom registryManager, ChunkGenerator chunkGenerator, DefinedStructureManager manager, ChunkCoordIntPair pos, BiomeBase biome, WorldGenFeatureEmptyConfiguration config, IWorldHeightAccess world) {
-            EnumBlockRotation rotation = EnumBlockRotation.getRandom(this.random);
-            int i = WorldGenEndCity.getYPositionForFeature(pos, chunkGenerator, world);
-            if (i >= 60) {
-                BlockPosition blockPos = pos.getMiddleBlockPosition(i);
+    private static Optional<PieceGenerator<WorldGenFeatureEmptyConfiguration>> pieceGeneratorSupplier(PieceGeneratorSupplier.Context<WorldGenFeatureEmptyConfiguration> context) {
+        int i = getYPositionForFeature(context.chunkPos(), context.chunkGenerator(), context.heightAccessor());
+        if (i < 60) {
+            return Optional.empty();
+        } else {
+            BlockPosition blockPos = context.chunkPos().getMiddleBlockPosition(i);
+            return !context.validBiome().test(context.chunkGenerator().getBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ()))) ? Optional.empty() : Optional.of((structurePiecesBuilder, contextx) -> {
+                EnumBlockRotation rotation = EnumBlockRotation.getRandom(contextx.random());
                 List<StructurePiece> list = Lists.newArrayList();
-                WorldGenEndCityPieces.startHouseTower(manager, blockPos, rotation, list, this.random);
-                list.forEach(this::addPiece);
-            }
+                WorldGenEndCityPieces.startHouseTower(contextx.structureManager(), blockPos, rotation, list, contextx.random());
+                list.forEach(structurePiecesBuilder::addPiece);
+            });
         }
     }
 }

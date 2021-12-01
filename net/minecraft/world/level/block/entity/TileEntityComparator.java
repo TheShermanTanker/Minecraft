@@ -12,10 +12,9 @@ public class TileEntityComparator extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setInt("OutputSignal", this.output);
-        return nbt;
     }
 
     @Override

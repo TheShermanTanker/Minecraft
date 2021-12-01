@@ -13,7 +13,6 @@ public class DataConverterSchemaV2551 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         schema.registerType(false, DataConverterTypes.WORLD_GEN_SETTINGS, () -> {

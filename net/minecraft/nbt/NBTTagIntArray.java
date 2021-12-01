@@ -9,7 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 public class NBTTagIntArray extends NBTList<NBTTagInt> {
     private static final int SELF_SIZE_IN_BITS = 192;
-    public static final NBTTagType<NBTTagIntArray> TYPE = new NBTTagType<NBTTagIntArray>() {
+    public static final NBTTagType<NBTTagIntArray> TYPE = new TagType$VariableSize<NBTTagIntArray>() {
         @Override
         public NBTTagIntArray load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(192L);
@@ -22,6 +22,23 @@ public class NBTTagIntArray extends NBTList<NBTTagInt> {
             }
 
             return new NBTTagIntArray(is);
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            int i = input.readInt();
+            int[] is = new int[i];
+
+            for(int j = 0; j < i; ++j) {
+                is[j] = input.readInt();
+            }
+
+            return visitor.visit(is);
+        }
+
+        @Override
+        public void skip(DataInput input) throws IOException {
+            input.skipBytes(input.readInt() * 4);
         }
 
         @Override
@@ -167,5 +184,10 @@ public class NBTTagIntArray extends NBTList<NBTTagInt> {
     @Override
     public void clear() {
         this.data = new int[0];
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visit(this.data);
     }
 }

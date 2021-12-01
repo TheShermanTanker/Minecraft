@@ -11,10 +11,12 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.InteractionResultWrapper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -45,12 +47,16 @@ public class BundleItem extends Item {
         } else {
             ItemStack itemStack = slot.getItem();
             if (itemStack.isEmpty()) {
+                this.playRemoveOneSound(player);
                 removeOne(stack).ifPresent((removedStack) -> {
                     add(stack, slot.safeInsert(removedStack));
                 });
             } else if (itemStack.getItem().canFitInsideContainerItems()) {
                 int i = (64 - getContentWeight(stack)) / getWeight(itemStack);
-                add(stack, slot.safeTake(itemStack.getCount(), i, player));
+                int j = add(stack, slot.safeTake(itemStack.getCount(), i, player));
+                if (j > 0) {
+                    this.playInsertSound(player);
+                }
             }
 
             return true;
@@ -61,9 +67,16 @@ public class BundleItem extends Item {
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, EntityHuman player, SlotAccess cursorStackReference) {
         if (clickType == ClickAction.SECONDARY && slot.allowModification(player)) {
             if (otherStack.isEmpty()) {
-                removeOne(stack).ifPresent(cursorStackReference::set);
+                removeOne(stack).ifPresent((itemStack) -> {
+                    this.playRemoveOneSound(player);
+                    cursorStackReference.set(itemStack);
+                });
             } else {
-                otherStack.subtract(add(stack, otherStack));
+                int i = add(stack, otherStack);
+                if (i > 0) {
+                    this.playInsertSound(player);
+                    otherStack.subtract(i);
+                }
             }
 
             return true;
@@ -76,6 +89,7 @@ public class BundleItem extends Item {
     public InteractionResultWrapper<ItemStack> use(World world, EntityHuman user, EnumHand hand) {
         ItemStack itemStack = user.getItemInHand(hand);
         if (dropContents(itemStack, user)) {
+            this.playDropContentsSound(user);
             user.awardStat(StatisticList.ITEM_USED.get(this));
             return InteractionResultWrapper.sidedSuccess(itemStack, world.isClientSide());
         } else {
@@ -146,7 +160,7 @@ public class BundleItem extends Item {
             return 4 + getContentWeight(stack);
         } else {
             if ((stack.is(Items.BEEHIVE) || stack.is(Items.BEE_NEST)) && stack.hasTag()) {
-                NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+                NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
                 if (compoundTag != null && !compoundTag.getList("Bees", 10).isEmpty()) {
                     return 64;
                 }
@@ -229,5 +243,17 @@ public class BundleItem extends Item {
     @Override
     public void onDestroyed(EntityItem entity) {
         ItemLiquidUtil.onContainerDestroyed(entity, getContents(entity.getItemStack()));
+    }
+
+    private void playRemoveOneSound(Entity entity) {
+        entity.playSound(SoundEffects.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.getLevel().getRandom().nextFloat() * 0.4F);
+    }
+
+    private void playInsertSound(Entity entity) {
+        entity.playSound(SoundEffects.BUNDLE_INSERT, 0.8F, 0.8F + entity.getLevel().getRandom().nextFloat() * 0.4F);
+    }
+
+    private void playDropContentsSound(Entity entity) {
+        entity.playSound(SoundEffects.BUNDLE_DROP_CONTENTS, 0.8F, 0.8F + entity.getLevel().getRandom().nextFloat() * 0.4F);
     }
 }

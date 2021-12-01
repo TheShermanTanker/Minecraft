@@ -8,6 +8,8 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.phys.Vec3D;
 
 public abstract class EntityCreature extends EntityInsentient {
+    protected static final float DEFAULT_WALK_TARGET_VALUE = 0.0F;
+
     protected EntityCreature(EntityTypes<? extends EntityCreature> type, World world) {
         super(type, world);
     }

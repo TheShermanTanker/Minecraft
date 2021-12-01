@@ -439,7 +439,7 @@ public class EntitySlime extends EntityInsentient implements IMonster {
 
         @Override
         public void start() {
-            this.growTiredTimer = 300;
+            this.growTiredTimer = reducedTickDelay(300);
             super.start();
         }
 
@@ -456,8 +456,17 @@ public class EntitySlime extends EntityInsentient implements IMonster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
-            this.slime.lookAt(this.slime.getGoalTarget(), 10.0F, 10.0F);
+            EntityLiving livingEntity = this.slime.getGoalTarget();
+            if (livingEntity != null) {
+                this.slime.lookAt(livingEntity, 10.0F, 10.0F);
+            }
+
             ((EntitySlime.ControllerMoveSlime)this.slime.getControllerMove()).setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
         }
     }
@@ -480,7 +489,7 @@ public class EntitySlime extends EntityInsentient implements IMonster {
         @Override
         public void tick() {
             if (--this.nextRandomizeTime <= 0) {
-                this.nextRandomizeTime = 40 + this.slime.getRandom().nextInt(60);
+                this.nextRandomizeTime = this.adjustedTickDelay(40 + this.slime.getRandom().nextInt(60));
                 this.chosenDegrees = (float)this.slime.getRandom().nextInt(360);
             }
 
@@ -500,6 +509,11 @@ public class EntitySlime extends EntityInsentient implements IMonster {
         @Override
         public boolean canUse() {
             return (this.slime.isInWater() || this.slime.isInLava()) && this.slime.getControllerMove() instanceof EntitySlime.ControllerMoveSlime;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
         }
 
         @Override

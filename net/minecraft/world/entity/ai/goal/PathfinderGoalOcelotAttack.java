@@ -3,17 +3,14 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
-import net.minecraft.world.level.IBlockAccess;
 
 public class PathfinderGoalOcelotAttack extends PathfinderGoal {
-    private final IBlockAccess level;
     private final EntityInsentient mob;
     private EntityLiving target;
     private int attackTime;
 
     public PathfinderGoalOcelotAttack(EntityInsentient mob) {
         this.mob = mob;
-        this.level = mob.level;
         this.setFlags(EnumSet.of(PathfinderGoal.Type.MOVE, PathfinderGoal.Type.LOOK));
     }
 
@@ -43,6 +40,11 @@ public class PathfinderGoalOcelotAttack extends PathfinderGoal {
     public void stop() {
         this.target = null;
         this.mob.getNavigation().stop();
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     @Override

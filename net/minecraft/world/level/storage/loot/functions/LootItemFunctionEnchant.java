@@ -33,9 +33,9 @@ public class LootItemFunctionEnchant extends LootItemFunctionConditional {
     private static final Logger LOGGER = LogManager.getLogger();
     final List<Enchantment> enchantments;
 
-    LootItemFunctionEnchant(LootItemCondition[] conditions, Collection<Enchantment> collection) {
+    LootItemFunctionEnchant(LootItemCondition[] conditions, Collection<Enchantment> enchantments) {
         super(conditions);
-        this.enchantments = ImmutableList.copyOf(collection);
+        this.enchantments = ImmutableList.copyOf(enchantments);
     }
 
     @Override

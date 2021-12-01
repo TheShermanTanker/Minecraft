@@ -44,7 +44,7 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
     }
 
     @Override
-    public int runUpdates(int i, boolean bl, boolean bl2) {
+    public int runUpdates(int i, boolean doSkylight, boolean skipEdgeLightPropagation) {
         throw (UnsupportedOperationException)SystemUtils.pauseInIde(new UnsupportedOperationException("Ran automatically on a different thread!"));
     }
 
@@ -96,20 +96,20 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
     }
 
     @Override
-    public void enableLightSources(ChunkCoordIntPair chunkPos, boolean bl) {
-        this.addTask(chunkPos.x, chunkPos.z, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.name(() -> {
-            super.enableLightSources(chunkPos, bl);
+    public void enableLightSources(ChunkCoordIntPair pos, boolean retainData) {
+        this.addTask(pos.x, pos.z, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.name(() -> {
+            super.enableLightSources(pos, retainData);
         }, () -> {
-            return "enableLight " + chunkPos + " " + bl;
+            return "enableLight " + pos + " " + retainData;
         }));
     }
 
     @Override
-    public void queueSectionData(EnumSkyBlock lightType, SectionPosition pos, @Nullable NibbleArray nibbles, boolean bl) {
+    public void queueSectionData(EnumSkyBlock lightType, SectionPosition pos, @Nullable NibbleArray nibbles, boolean nonEdge) {
         this.addTask(pos.x(), pos.z(), () -> {
             return 0;
         }, LightEngineThreaded.Update.PRE_UPDATE, SystemUtils.name(() -> {
-            super.queueSectionData(lightType, pos, nibbles, bl);
+            super.queueSectionData(lightType, pos, nibbles, nonEdge);
         }, () -> {
             return "queueData " + pos;
         }));
@@ -148,7 +148,7 @@ public class LightEngineThreaded extends LightEngine implements AutoCloseable {
 
             for(int i = 0; i < chunk.getSectionsCount(); ++i) {
                 ChunkSection levelChunkSection = levelChunkSections[i];
-                if (!ChunkSection.isEmpty(levelChunkSection)) {
+                if (!levelChunkSection.hasOnlyAir()) {
                     int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
                     super.updateSectionStatus(SectionPosition.of(chunkPos, j), false);
                 }

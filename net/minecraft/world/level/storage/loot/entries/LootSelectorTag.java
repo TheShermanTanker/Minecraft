@@ -20,10 +20,10 @@ public class LootSelectorTag extends LootSelectorEntry {
     final Tag<Item> tag;
     final boolean expand;
 
-    LootSelectorTag(Tag<Item> tag, boolean bl, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
+    LootSelectorTag(Tag<Item> name, boolean expand, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
         super(weight, quality, conditions, functions);
-        this.tag = tag;
-        this.expand = bl;
+        this.tag = name;
+        this.expand = expand;
     }
 
     @Override

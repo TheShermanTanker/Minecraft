@@ -91,6 +91,11 @@ public abstract class PathfinderGoalDoorInteract extends PathfinderGoal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         float f = (float)((double)this.doorPos.getX() + 0.5D - this.mob.locX());
         float g = (float)((double)this.doorPos.getZ() + 0.5D - this.mob.locZ());

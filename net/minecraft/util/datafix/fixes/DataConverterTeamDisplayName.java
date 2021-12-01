@@ -17,7 +17,6 @@ public class DataConverterTeamDisplayName extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<Pair<String, Dynamic<?>>> type = DSL.named(DataConverterTypes.TEAM.typeName(), DSL.remainderType());
         if (!Objects.equals(type, this.getInputSchema().getType(DataConverterTypes.TEAM))) {

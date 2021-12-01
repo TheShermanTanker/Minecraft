@@ -35,28 +35,27 @@ public class TileEntitySkull extends TileEntity {
         super(TileEntityTypes.SKULL, pos, state);
     }
 
-    public static void setProfileCache(UserCache value) {
-        profileCache = value;
-    }
-
-    public static void setSessionService(MinecraftSessionService value) {
-        sessionService = value;
-    }
-
-    public static void setMainThreadExecutor(Executor executor) {
+    public static void setup(UserCache userCache, MinecraftSessionService sessionService, Executor executor) {
+        profileCache = userCache;
+        TileEntitySkull.sessionService = sessionService;
         mainThreadExecutor = executor;
     }
 
+    public static void clear() {
+        profileCache = null;
+        sessionService = null;
+        mainThreadExecutor = null;
+    }
+
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (this.owner != null) {
             NBTTagCompound compoundTag = new NBTTagCompound();
             GameProfileSerializer.serialize(compoundTag, this.owner);
             nbt.set("SkullOwner", compoundTag);
         }
 
-        return nbt;
     }
 
     @Override
@@ -92,15 +91,14 @@ public class TileEntitySkull extends TileEntity {
         return this.owner;
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 4, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     public void setGameProfile(@Nullable GameProfile owner) {

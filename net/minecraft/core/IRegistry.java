@@ -1,7 +1,6 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -27,6 +26,7 @@ import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
 import net.minecraft.stats.StatisticWrapper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.world.effect.MobEffectBase;
@@ -64,6 +64,8 @@ import net.minecraft.world.level.dimension.WorldDimension;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSourceType;
 import net.minecraft.world.level.levelgen.GeneratorSettingBase;
+import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
 import net.minecraft.world.level.levelgen.carver.WorldGenCarverAbstract;
 import net.minecraft.world.level.levelgen.carver.WorldGenCarverWrapper;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -71,7 +73,6 @@ import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
 import net.minecraft.world.level.levelgen.feature.WorldGenerator;
-import net.minecraft.world.level.levelgen.feature.blockplacers.WorldGenBlockPlacers;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.WorldGenFoilagePlacers;
 import net.minecraft.world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProviders;
@@ -80,13 +81,13 @@ import net.minecraft.world.level.levelgen.feature.structures.WorldGenFeatureDefi
 import net.minecraft.world.level.levelgen.feature.treedecorators.WorldGenFeatureTrees;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacers;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
-import net.minecraft.world.level.levelgen.placement.WorldGenDecorator;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureStructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorList;
-import net.minecraft.world.level.levelgen.surfacebuilders.WorldGenSurface;
-import net.minecraft.world.level.levelgen.surfacebuilders.WorldGenSurfaceComposite;
+import net.minecraft.world.level.levelgen.synth.NormalNoise$NoiseParameters;
 import net.minecraft.world.level.material.FluidType;
 import net.minecraft.world.level.material.FluidTypes;
 import net.minecraft.world.level.storage.loot.entries.LootEntries;
@@ -105,7 +106,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
+public abstract class IRegistry<T> implements Keyable, Registry<T> {
     protected static final Logger LOGGER = LogManager.getLogger();
     private static final Map<MinecraftKey, Supplier<?>> LOADERS = Maps.newLinkedHashMap();
     public static final MinecraftKey ROOT_REGISTRY_NAME = new MinecraftKey("root");
@@ -266,18 +267,19 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     public static final IRegistry<HeightProviderType<?>> HEIGHT_PROVIDER_TYPES = registerSimple(HEIGHT_PROVIDER_TYPE_REGISTRY, () -> {
         return HeightProviderType.CONSTANT;
     });
+    public static final ResourceKey<IRegistry<BlockPredicateType<?>>> BLOCK_PREDICATE_TYPE_REGISTRY = createRegistryKey("block_predicate_type");
+    public static final IRegistry<BlockPredicateType<?>> BLOCK_PREDICATE_TYPES = registerSimple(BLOCK_PREDICATE_TYPE_REGISTRY, () -> {
+        return BlockPredicateType.NOT;
+    });
     public static final ResourceKey<IRegistry<GeneratorSettingBase>> NOISE_GENERATOR_SETTINGS_REGISTRY = createRegistryKey("worldgen/noise_settings");
-    public static final ResourceKey<IRegistry<WorldGenSurfaceComposite<?>>> CONFIGURED_SURFACE_BUILDER_REGISTRY = createRegistryKey("worldgen/configured_surface_builder");
     public static final ResourceKey<IRegistry<WorldGenCarverWrapper<?>>> CONFIGURED_CARVER_REGISTRY = createRegistryKey("worldgen/configured_carver");
     public static final ResourceKey<IRegistry<WorldGenFeatureConfigured<?, ?>>> CONFIGURED_FEATURE_REGISTRY = createRegistryKey("worldgen/configured_feature");
+    public static final ResourceKey<IRegistry<PlacedFeature>> PLACED_FEATURE_REGISTRY = createRegistryKey("worldgen/placed_feature");
     public static final ResourceKey<IRegistry<StructureFeature<?, ?>>> CONFIGURED_STRUCTURE_FEATURE_REGISTRY = createRegistryKey("worldgen/configured_structure_feature");
     public static final ResourceKey<IRegistry<ProcessorList>> PROCESSOR_LIST_REGISTRY = createRegistryKey("worldgen/processor_list");
     public static final ResourceKey<IRegistry<WorldGenFeatureDefinedStructurePoolTemplate>> TEMPLATE_POOL_REGISTRY = createRegistryKey("worldgen/template_pool");
     public static final ResourceKey<IRegistry<BiomeBase>> BIOME_REGISTRY = createRegistryKey("worldgen/biome");
-    public static final ResourceKey<IRegistry<WorldGenSurface<?>>> SURFACE_BUILDER_REGISTRY = createRegistryKey("worldgen/surface_builder");
-    public static final IRegistry<WorldGenSurface<?>> SURFACE_BUILDER = registerSimple(SURFACE_BUILDER_REGISTRY, () -> {
-        return WorldGenSurface.DEFAULT;
-    });
+    public static final ResourceKey<IRegistry<NormalNoise$NoiseParameters>> NOISE_REGISTRY = createRegistryKey("worldgen/noise");
     public static final ResourceKey<IRegistry<WorldGenCarverAbstract<?>>> CARVER_REGISTRY = createRegistryKey("worldgen/carver");
     public static final IRegistry<WorldGenCarverAbstract<?>> CARVER = registerSimple(CARVER_REGISTRY, () -> {
         return WorldGenCarverAbstract.CAVE;
@@ -294,25 +296,23 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     public static final IRegistry<WorldGenFeatureStructurePieceType> STRUCTURE_PIECE = registerSimple(STRUCTURE_PIECE_REGISTRY, () -> {
         return WorldGenFeatureStructurePieceType.MINE_SHAFT_ROOM;
     });
-    public static final ResourceKey<IRegistry<WorldGenDecorator<?>>> DECORATOR_REGISTRY = createRegistryKey("worldgen/decorator");
-    public static final IRegistry<WorldGenDecorator<?>> DECORATOR = registerSimple(DECORATOR_REGISTRY, () -> {
-        return WorldGenDecorator.NOPE;
+    public static final ResourceKey<IRegistry<PlacementModifierType<?>>> PLACEMENT_MODIFIER_REGISTRY = createRegistryKey("worldgen/placement_modifier_type");
+    public static final IRegistry<PlacementModifierType<?>> PLACEMENT_MODIFIERS = registerSimple(PLACEMENT_MODIFIER_REGISTRY, () -> {
+        return PlacementModifierType.COUNT;
     });
     public static final ResourceKey<IRegistry<WorldGenFeatureStateProviders<?>>> BLOCK_STATE_PROVIDER_TYPE_REGISTRY = createRegistryKey("worldgen/block_state_provider_type");
-    public static final ResourceKey<IRegistry<WorldGenBlockPlacers<?>>> BLOCK_PLACER_TYPE_REGISTRY = createRegistryKey("worldgen/block_placer_type");
     public static final ResourceKey<IRegistry<WorldGenFoilagePlacers<?>>> FOLIAGE_PLACER_TYPE_REGISTRY = createRegistryKey("worldgen/foliage_placer_type");
     public static final ResourceKey<IRegistry<TrunkPlacers<?>>> TRUNK_PLACER_TYPE_REGISTRY = createRegistryKey("worldgen/trunk_placer_type");
     public static final ResourceKey<IRegistry<WorldGenFeatureTrees<?>>> TREE_DECORATOR_TYPE_REGISTRY = createRegistryKey("worldgen/tree_decorator_type");
     public static final ResourceKey<IRegistry<FeatureSizeType<?>>> FEATURE_SIZE_TYPE_REGISTRY = createRegistryKey("worldgen/feature_size_type");
     public static final ResourceKey<IRegistry<Codec<? extends WorldChunkManager>>> BIOME_SOURCE_REGISTRY = createRegistryKey("worldgen/biome_source");
     public static final ResourceKey<IRegistry<Codec<? extends ChunkGenerator>>> CHUNK_GENERATOR_REGISTRY = createRegistryKey("worldgen/chunk_generator");
+    public static final ResourceKey<IRegistry<Codec<? extends SurfaceRules.ConditionSource>>> CONDITION_REGISTRY = createRegistryKey("worldgen/material_condition");
+    public static final ResourceKey<IRegistry<Codec<? extends SurfaceRules.RuleSource>>> RULE_REGISTRY = createRegistryKey("worldgen/material_rule");
     public static final ResourceKey<IRegistry<DefinedStructureStructureProcessorType<?>>> STRUCTURE_PROCESSOR_REGISTRY = createRegistryKey("worldgen/structure_processor");
     public static final ResourceKey<IRegistry<WorldGenFeatureDefinedStructurePools<?>>> STRUCTURE_POOL_ELEMENT_REGISTRY = createRegistryKey("worldgen/structure_pool_element");
     public static final IRegistry<WorldGenFeatureStateProviders<?>> BLOCKSTATE_PROVIDER_TYPES = registerSimple(BLOCK_STATE_PROVIDER_TYPE_REGISTRY, () -> {
         return WorldGenFeatureStateProviders.SIMPLE_STATE_PROVIDER;
-    });
-    public static final IRegistry<WorldGenBlockPlacers<?>> BLOCK_PLACER_TYPES = registerSimple(BLOCK_PLACER_TYPE_REGISTRY, () -> {
-        return WorldGenBlockPlacers.SIMPLE_BLOCK_PLACER;
     });
     public static final IRegistry<WorldGenFoilagePlacers<?>> FOLIAGE_PLACER_TYPES = registerSimple(FOLIAGE_PLACER_TYPE_REGISTRY, () -> {
         return WorldGenFoilagePlacers.BLOB_FOLIAGE_PLACER;
@@ -332,6 +332,8 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     public static final IRegistry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = registerSimple(CHUNK_GENERATOR_REGISTRY, Lifecycle.stable(), () -> {
         return ChunkGenerator.CODEC;
     });
+    public static final IRegistry<Codec<? extends SurfaceRules.ConditionSource>> CONDITION = registerSimple(CONDITION_REGISTRY, SurfaceRules.ConditionSource::bootstrap);
+    public static final IRegistry<Codec<? extends SurfaceRules.RuleSource>> RULE = registerSimple(RULE_REGISTRY, SurfaceRules.RuleSource::bootstrap);
     public static final IRegistry<DefinedStructureStructureProcessorType<?>> STRUCTURE_PROCESSOR = registerSimple(STRUCTURE_PROCESSOR_REGISTRY, () -> {
         return DefinedStructureStructureProcessorType.BLOCK_IGNORE;
     });
@@ -394,35 +396,33 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
         return this.key;
     }
 
+    public Lifecycle lifecycle() {
+        return this.lifecycle;
+    }
+
     @Override
     public String toString() {
         return "Registry[" + this.key + " (" + this.lifecycle + ")]";
     }
 
-    @Override
-    public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> dynamicOps, U object) {
-        return dynamicOps.compressMaps() ? dynamicOps.getNumberValue(object).flatMap((number) -> {
-            T object = this.fromId(number.intValue());
-            return object == null ? DataResult.error("Unknown registry id: " + number) : DataResult.success(object, this.lifecycle(object));
-        }).map((objectx) -> {
-            return Pair.of((T)objectx, dynamicOps.empty());
-        }) : MinecraftKey.CODEC.decode(dynamicOps, object).flatMap((pair) -> {
-            T object = this.get(pair.getFirst());
-            return object == null ? DataResult.error("Unknown registry key: " + pair.getFirst()) : DataResult.success(Pair.of(object, pair.getSecond()), this.lifecycle(object));
+    public Codec<T> byNameCodec() {
+        Codec<T> codec = MinecraftKey.CODEC.flatXmap((resourceLocation) -> {
+            return Optional.ofNullable(this.get(resourceLocation)).map(DataResult::success).orElseGet(() -> {
+                return DataResult.error("Unknown registry key in " + this.key + ": " + resourceLocation);
+            });
+        }, (object) -> {
+            return this.getResourceKey(object).map(ResourceKey::location).map(DataResult::success).orElseGet(() -> {
+                return DataResult.error("Unknown registry element in " + this.key + ":" + object);
+            });
+        });
+        Codec<T> codec2 = ExtraCodecs.idResolverCodec((object) -> {
+            return this.getResourceKey(object).isPresent() ? this.getId(object) : -1;
+        }, this::fromId, -1);
+        return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, (object) -> {
+            return this.lifecycle;
         });
     }
 
-    @Override
-    public <U> DataResult<U> encode(T object, DynamicOps<U> dynamicOps, U object2) {
-        MinecraftKey resourceLocation = this.getKey(object);
-        if (resourceLocation == null) {
-            return DataResult.error("Unknown registry element " + object);
-        } else {
-            return dynamicOps.compressMaps() ? dynamicOps.mergeToPrimitive(object2, dynamicOps.createInt(this.getId(object))).setLifecycle(this.lifecycle) : dynamicOps.mergeToPrimitive(object2, dynamicOps.createString(resourceLocation.toString())).setLifecycle(this.lifecycle);
-        }
-    }
-
-    @Override
     public <U> Stream<U> keys(DynamicOps<U> dynamicOps) {
         return this.keySet().stream().map((resourceLocation) -> {
             return dynamicOps.createString(resourceLocation.toString());
@@ -443,7 +443,7 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     @Nullable
     public abstract T get(@Nullable MinecraftKey id);
 
-    protected abstract Lifecycle lifecycle(T entry);
+    public abstract Lifecycle lifecycle(T entry);
 
     public abstract Lifecycle elementsLifecycle();
 
@@ -458,7 +458,7 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     public T getOrThrow(ResourceKey<T> key) {
         T object = this.get(key);
         if (object == null) {
-            throw new IllegalStateException("Missing: " + key);
+            throw new IllegalStateException("Missing key in " + this.key + ": " + key);
         } else {
             return object;
         }
@@ -484,7 +484,11 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
     }
 
     public static <V, T extends V> T register(IRegistry<V> registry, MinecraftKey id, T entry) {
-        return ((IRegistryWritable)registry).register(ResourceKey.create(registry.key, id), entry, Lifecycle.stable());
+        return register(registry, ResourceKey.create(registry.key, id), entry);
+    }
+
+    public static <V, T extends V> T register(IRegistry<V> registry, ResourceKey<V> key, T entry) {
+        return ((IRegistryWritable)registry).register(key, entry, Lifecycle.stable());
     }
 
     public static <V, T extends V> T registerMapping(IRegistry<V> registry, int rawId, String id, T entry) {
@@ -493,9 +497,9 @@ public abstract class IRegistry<T> implements Codec<T>, Keyable, Registry<T> {
 
     static {
         RegistryGeneration.bootstrap();
-        LOADERS.forEach((resourceLocation, supplier) -> {
-            if (supplier.get() == null) {
-                LOGGER.error("Unable to bootstrap registry '{}'", (Object)resourceLocation);
+        LOADERS.forEach((id, defaultEntry) -> {
+            if (defaultEntry.get() == null) {
+                LOGGER.error("Unable to bootstrap registry '{}'", (Object)id);
             }
 
         });

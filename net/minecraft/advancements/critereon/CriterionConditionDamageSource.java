@@ -12,13 +12,21 @@ import net.minecraft.world.phys.Vec3D;
 
 public class CriterionConditionDamageSource {
     public static final CriterionConditionDamageSource ANY = CriterionConditionDamageSource.Builder.damageType().build();
+    @Nullable
     private final Boolean isProjectile;
+    @Nullable
     private final Boolean isExplosion;
+    @Nullable
     private final Boolean bypassesArmor;
+    @Nullable
     private final Boolean bypassesInvulnerability;
+    @Nullable
     private final Boolean bypassesMagic;
+    @Nullable
     private final Boolean isFire;
+    @Nullable
     private final Boolean isMagic;
+    @Nullable
     private final Boolean isLightning;
     private final CriterionConditionEntity directEntity;
     private final CriterionConditionEntity sourceEntity;
@@ -117,13 +125,21 @@ public class CriterionConditionDamageSource {
     }
 
     public static class Builder {
+        @Nullable
         private Boolean isProjectile;
+        @Nullable
         private Boolean isExplosion;
+        @Nullable
         private Boolean bypassesArmor;
+        @Nullable
         private Boolean bypassesInvulnerability;
+        @Nullable
         private Boolean bypassesMagic;
+        @Nullable
         private Boolean isFire;
+        @Nullable
         private Boolean isMagic;
+        @Nullable
         private Boolean isLightning;
         private CriterionConditionEntity directEntity = CriterionConditionEntity.ANY;
         private CriterionConditionEntity sourceEntity = CriterionConditionEntity.ANY;

@@ -26,30 +26,24 @@ public class BiomeSettingsMobs {
     public static final Logger LOGGER = LogManager.getLogger();
     private static final float DEFAULT_CREATURE_SPAWN_PROBABILITY = 0.1F;
     public static final WeightedRandomList<BiomeSettingsMobs.SpawnerData> EMPTY_MOB_LIST = WeightedRandomList.create();
-    public static final BiomeSettingsMobs EMPTY = new BiomeSettingsMobs(0.1F, Stream.of(EnumCreatureType.values()).collect(ImmutableMap.toImmutableMap((mobCategory) -> {
-        return mobCategory;
-    }, (mobCategory) -> {
-        return EMPTY_MOB_LIST;
-    })), ImmutableMap.of(), false);
+    public static final BiomeSettingsMobs EMPTY = (new BiomeSettingsMobs.Builder()).build();
     public static final MapCodec<BiomeSettingsMobs> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
         return instance.group(Codec.floatRange(0.0F, 0.9999999F).optionalFieldOf("creature_spawn_probability", 0.1F).forGetter((mobSpawnSettings) -> {
             return mobSpawnSettings.creatureGenerationProbability;
         }), Codec.simpleMap(EnumCreatureType.CODEC, WeightedRandomList.codec(BiomeSettingsMobs.SpawnerData.CODEC).promotePartial(SystemUtils.prefix("Spawn data: ", LOGGER::error)), INamable.keys(EnumCreatureType.values())).fieldOf("spawners").forGetter((mobSpawnSettings) -> {
             return mobSpawnSettings.spawners;
-        }), Codec.simpleMap(IRegistry.ENTITY_TYPE, BiomeSettingsMobs.MobSpawnCost.CODEC, IRegistry.ENTITY_TYPE).fieldOf("spawn_costs").forGetter((mobSpawnSettings) -> {
+        }), Codec.simpleMap(IRegistry.ENTITY_TYPE.byNameCodec(), BiomeSettingsMobs.MobSpawnCost.CODEC, IRegistry.ENTITY_TYPE).fieldOf("spawn_costs").forGetter((mobSpawnSettings) -> {
             return mobSpawnSettings.mobSpawnCosts;
-        }), Codec.BOOL.fieldOf("player_spawn_friendly").orElse(false).forGetter(BiomeSettingsMobs::playerSpawnFriendly)).apply(instance, BiomeSettingsMobs::new);
+        })).apply(instance, BiomeSettingsMobs::new);
     });
     private final float creatureGenerationProbability;
     private final Map<EnumCreatureType, WeightedRandomList<BiomeSettingsMobs.SpawnerData>> spawners;
     private final Map<EntityTypes<?>, BiomeSettingsMobs.MobSpawnCost> mobSpawnCosts;
-    private final boolean playerSpawnFriendly;
 
-    BiomeSettingsMobs(float creatureSpawnProbability, Map<EnumCreatureType, WeightedRandomList<BiomeSettingsMobs.SpawnerData>> spawners, Map<EntityTypes<?>, BiomeSettingsMobs.MobSpawnCost> spawnCosts, boolean playerSpawnFriendly) {
+    BiomeSettingsMobs(float creatureSpawnProbability, Map<EnumCreatureType, WeightedRandomList<BiomeSettingsMobs.SpawnerData>> spawners, Map<EntityTypes<?>, BiomeSettingsMobs.MobSpawnCost> spawnCosts) {
         this.creatureGenerationProbability = creatureSpawnProbability;
         this.spawners = ImmutableMap.copyOf(spawners);
         this.mobSpawnCosts = ImmutableMap.copyOf(spawnCosts);
-        this.playerSpawnFriendly = playerSpawnFriendly;
     }
 
     public WeightedRandomList<BiomeSettingsMobs.SpawnerData> getMobs(EnumCreatureType spawnGroup) {
@@ -65,10 +59,6 @@ public class BiomeSettingsMobs {
         return this.creatureGenerationProbability;
     }
 
-    public boolean playerSpawnFriendly() {
-        return this.playerSpawnFriendly;
-    }
-
     public static class Builder {
         private final Map<EnumCreatureType, List<BiomeSettingsMobs.SpawnerData>> spawners = Stream.of(EnumCreatureType.values()).collect(ImmutableMap.toImmutableMap((mobCategory) -> {
             return mobCategory;
@@ -77,7 +67,6 @@ public class BiomeSettingsMobs {
         }));
         private final Map<EntityTypes<?>, BiomeSettingsMobs.MobSpawnCost> mobSpawnCosts = Maps.newLinkedHashMap();
         private float creatureGenerationProbability = 0.1F;
-        private boolean playerCanSpawn;
 
         public BiomeSettingsMobs.Builder addSpawn(EnumCreatureType spawnGroup, BiomeSettingsMobs.SpawnerData spawnEntry) {
             this.spawners.get(spawnGroup).add(spawnEntry);
@@ -94,15 +83,10 @@ public class BiomeSettingsMobs {
             return this;
         }
 
-        public BiomeSettingsMobs.Builder setPlayerCanSpawn() {
-            this.playerCanSpawn = true;
-            return this;
-        }
-
         public BiomeSettingsMobs build() {
             return new BiomeSettingsMobs(this.creatureGenerationProbability, this.spawners.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, (entry) -> {
                 return WeightedRandomList.create(entry.getValue());
-            })), ImmutableMap.copyOf(this.mobSpawnCosts), this.playerCanSpawn);
+            })), ImmutableMap.copyOf(this.mobSpawnCosts));
         }
     }
 
@@ -133,7 +117,7 @@ public class BiomeSettingsMobs {
 
     public static class SpawnerData extends WeightedEntry.IntrusiveBase {
         public static final Codec<BiomeSettingsMobs.SpawnerData> CODEC = RecordCodecBuilder.create((instance) -> {
-            return instance.group(IRegistry.ENTITY_TYPE.fieldOf("type").forGetter((spawnerData) -> {
+            return instance.group(IRegistry.ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter((spawnerData) -> {
                 return spawnerData.type;
             }), Weight.CODEC.fieldOf("weight").forGetter(WeightedEntry.IntrusiveBase::getWeight), Codec.INT.fieldOf("minCount").forGetter((spawnerData) -> {
                 return spawnerData.minCount;

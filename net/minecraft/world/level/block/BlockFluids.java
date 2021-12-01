@@ -103,7 +103,7 @@ public class BlockFluids extends Block implements IFluidSource {
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         if (this.shouldSpreadLiquid(world, pos, state)) {
-            world.getFluidTickList().scheduleTick(pos, state.getFluid().getType(), this.fluid.getTickDelay(world));
+            world.scheduleTick(pos, state.getFluid().getType(), this.fluid.getTickDelay(world));
         }
 
     }
@@ -111,7 +111,7 @@ public class BlockFluids extends Block implements IFluidSource {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.getFluid().isSource() || neighborState.getFluid().isSource()) {
-            world.getFluidTickList().scheduleTick(pos, state.getFluid().getType(), this.fluid.getTickDelay(world));
+            world.scheduleTick(pos, state.getFluid().getType(), this.fluid.getTickDelay(world));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -120,7 +120,7 @@ public class BlockFluids extends Block implements IFluidSource {
     @Override
     public void doPhysics(IBlockData state, World world, BlockPosition pos, Block block, BlockPosition fromPos, boolean notify) {
         if (this.shouldSpreadLiquid(world, pos, state)) {
-            world.getFluidTickList().scheduleTick(pos, state.getFluid().getType(), this.fluid.getTickDelay(world));
+            world.scheduleTick(pos, state.getFluid().getType(), this.fluid.getTickDelay(world));
         }
 
     }

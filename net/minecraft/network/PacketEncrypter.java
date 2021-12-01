@@ -12,7 +12,6 @@ public class PacketEncrypter extends MessageToByteEncoder<ByteBuf> {
         this.cipher = new PacketEncryptionHandler(cipher);
     }
 
-    @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) throws Exception {
         this.cipher.encipher(byteBuf, byteBuf2);
     }

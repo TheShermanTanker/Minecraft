@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.IBlockState;
 
 public class IBlockData extends BlockBase.BlockData {
-    public static final Codec<IBlockData> CODEC = codec(IRegistry.BLOCK, Block::getBlockData).stable();
+    public static final Codec<IBlockData> CODEC = codec(IRegistry.BLOCK.byNameCodec(), Block::getBlockData).stable();
 
     public IBlockData(Block block, ImmutableMap<IBlockState<?>, Comparable<?>> propertyMap, MapCodec<IBlockData> codec) {
         super(block, propertyMap, codec);

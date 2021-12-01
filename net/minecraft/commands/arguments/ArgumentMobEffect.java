@@ -19,19 +19,18 @@ import net.minecraft.world.effect.MobEffectBase;
 
 public class ArgumentMobEffect implements ArgumentType<MobEffectBase> {
     private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_EFFECT = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("effect.effectNotFound", object);
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_EFFECT = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("effect.effectNotFound", id);
     });
 
     public static ArgumentMobEffect effect() {
         return new ArgumentMobEffect();
     }
 
-    public static MobEffectBase getEffect(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, MobEffectBase.class);
+    public static MobEffectBase getEffect(CommandContext<CommandListenerWrapper> context, String name) {
+        return context.getArgument(name, MobEffectBase.class);
     }
 
-    @Override
     public MobEffectBase parse(StringReader stringReader) throws CommandSyntaxException {
         MinecraftKey resourceLocation = MinecraftKey.read(stringReader);
         return IRegistry.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> {
@@ -39,12 +38,10 @@ public class ArgumentMobEffect implements ArgumentType<MobEffectBase> {
         });
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggestResource(IRegistry.MOB_EFFECT.keySet(), suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

@@ -14,7 +14,6 @@ public class DataConverterHeightmapRenaming extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.CHUNK);
         OpticFinder<?> opticFinder = type.findField("Level");

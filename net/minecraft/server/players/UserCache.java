@@ -82,12 +82,10 @@ public class UserCache {
     private static Optional<GameProfile> lookupGameProfile(GameProfileRepository repository, String name) {
         final AtomicReference<GameProfile> atomicReference = new AtomicReference<>();
         ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
-            @Override
             public void onProfileLookupSucceeded(GameProfile gameProfile) {
                 atomicReference.set(gameProfile);
             }
 
-            @Override
             public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
                 atomicReference.set((GameProfile)null);
             }
@@ -188,6 +186,10 @@ public class UserCache {
 
     public void setExecutor(Executor executor) {
         this.executor = executor;
+    }
+
+    public void clearExecutor() {
+        this.executor = null;
     }
 
     private static DateFormat createDateFormat() {

@@ -201,12 +201,11 @@ public class TileEntityBrewingStand extends TileEntityContainer implements IWorl
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setShort("BrewTime", (short)this.brewTime);
         ContainerUtil.saveAllItems(nbt, this.items);
         nbt.setByte("Fuel", (byte)this.fuel);
-        return nbt;
     }
 
     @Override

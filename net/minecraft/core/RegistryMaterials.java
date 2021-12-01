@@ -37,32 +37,25 @@ import org.apache.logging.log4j.Logger;
 public class RegistryMaterials<T> extends IRegistryWritable<T> {
     protected static final Logger LOGGER = LogManager.getLogger();
     private final ObjectList<T> byId = new ObjectArrayList<>(256);
-    private final Object2IntMap<T> toId = new Object2IntOpenCustomHashMap<>(SystemUtils.identityStrategy());
-    private final BiMap<MinecraftKey, T> storage;
-    private final BiMap<ResourceKey<T>, T> keyStorage;
-    private final Map<T, Lifecycle> lifecycles;
+    private final Object2IntMap<T> toId = SystemUtils.make(new Object2IntOpenCustomHashMap<>(SystemUtils.identityStrategy()), (object2IntOpenCustomHashMap) -> {
+        object2IntOpenCustomHashMap.defaultReturnValue(-1);
+    });
+    private final BiMap<MinecraftKey, T> storage = HashBiMap.create();
+    private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
+    private final Map<T, Lifecycle> lifecycles = Maps.newIdentityHashMap();
     private Lifecycle elementsLifecycle;
+    @Nullable
     protected Object[] randomCache;
     private int nextId;
 
     public RegistryMaterials(ResourceKey<? extends IRegistry<T>> key, Lifecycle lifecycle) {
         super(key, lifecycle);
-        this.toId.defaultReturnValue(-1);
-        this.storage = HashBiMap.create();
-        this.keyStorage = HashBiMap.create();
-        this.lifecycles = Maps.newIdentityHashMap();
         this.elementsLifecycle = lifecycle;
     }
 
     public static <T> MapCodec<RegistryMaterials.RegistryEntry<T>> withNameAndId(ResourceKey<? extends IRegistry<T>> key, MapCodec<T> entryCodec) {
         return RecordCodecBuilder.mapCodec((instance) -> {
-            return instance.group(MinecraftKey.CODEC.xmap(ResourceKey.elementKey(key), ResourceKey::location).fieldOf("name").forGetter((registryEntry) -> {
-                return registryEntry.key;
-            }), Codec.INT.fieldOf("id").forGetter((registryEntry) -> {
-                return registryEntry.id;
-            }), entryCodec.forGetter((registryEntry) -> {
-                return registryEntry.value;
-            })).apply(instance, RegistryMaterials.RegistryEntry::new);
+            return instance.group(MinecraftKey.CODEC.xmap(ResourceKey.elementKey(key), ResourceKey::location).fieldOf("name").forGetter(RegistryMaterials.RegistryEntry::key), Codec.INT.fieldOf("id").forGetter(RegistryMaterials.RegistryEntry::id), entryCodec.forGetter(RegistryMaterials.RegistryEntry::value)).apply(instance, RegistryMaterials.RegistryEntry::new);
         });
     }
 
@@ -79,11 +72,11 @@ public class RegistryMaterials<T> extends IRegistryWritable<T> {
         this.toId.put((T)entry, rawId);
         this.randomCache = null;
         if (checkDuplicateKeys && this.keyStorage.containsKey(key)) {
-            LOGGER.debug("Adding duplicate key '{}' to registry", (Object)key);
+            SystemUtils.logAndPauseIfInIde("Adding duplicate key '" + key + "' to registry");
         }
 
         if (this.storage.containsValue(entry)) {
-            LOGGER.error("Adding duplicate value '{}' to registry", entry);
+            SystemUtils.logAndPauseIfInIde("Adding duplicate value '" + entry + "' to registry");
         }
 
         this.storage.put(key.location(), (T)entry);
@@ -152,6 +145,11 @@ public class RegistryMaterials<T> extends IRegistryWritable<T> {
     }
 
     @Override
+    public int size() {
+        return this.storage.size();
+    }
+
+    @Override
     public Lifecycle lifecycle(T entry) {
         return this.lifecycles.get(entry);
     }
@@ -196,7 +194,9 @@ public class RegistryMaterials<T> extends IRegistryWritable<T> {
                 return (T)null;
             }
 
-            this.randomCache = collection.toArray(new Object[collection.size()]);
+            this.randomCache = collection.toArray((i) -> {
+                return new Object[i];
+            });
         }
 
         return SystemUtils.getRandom((T[])this.randomCache, random);
@@ -217,7 +217,7 @@ public class RegistryMaterials<T> extends IRegistryWritable<T> {
             RegistryMaterials<T> mappedRegistry = new RegistryMaterials<>(key, lifecycle);
 
             for(RegistryMaterials.RegistryEntry<T> registryEntry : list) {
-                mappedRegistry.registerMapping(registryEntry.id, registryEntry.key, registryEntry.value, lifecycle);
+                mappedRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
             }
 
             return mappedRegistry;
@@ -248,15 +248,23 @@ public class RegistryMaterials<T> extends IRegistryWritable<T> {
         });
     }
 
-    public static class RegistryEntry<T> {
-        public final ResourceKey<T> key;
-        public final int id;
-        public final T value;
-
-        public RegistryEntry(ResourceKey<T> key, int rawId, T entry) {
+    static record RegistryEntry<T>(ResourceKey<T> key, int id, T value) {
+        RegistryEntry(ResourceKey<T> key, int rawId, T entry) {
             this.key = key;
             this.id = rawId;
             this.value = entry;
+        }
+
+        public ResourceKey<T> key() {
+            return this.key;
+        }
+
+        public int id() {
+            return this.id;
+        }
+
+        public T value() {
+            return this.value;
         }
     }
 }

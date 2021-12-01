@@ -49,7 +49,7 @@ public class CrashReport {
 
     public void getDetails(StringBuilder crashReportBuilder) {
         if ((this.uncategorizedStackTrace == null || this.uncategorizedStackTrace.length <= 0) && !this.details.isEmpty()) {
-            this.uncategorizedStackTrace = ArrayUtils.subarray(this.details.get(0).getStacktrace(), 0, 1);
+            this.uncategorizedStackTrace = ArrayUtils.subarray((StackTraceElement[])this.details.get(0).getStacktrace(), 0, 1);
         }
 
         if (this.uncategorizedStackTrace != null && this.uncategorizedStackTrace.length > 0) {
@@ -186,10 +186,7 @@ public class CrashReport {
             }
 
             this.trackingStackTrace = crashReportCategory.validateStackTrace(stackTraceElement, stackTraceElement2);
-            if (i > 0 && !this.details.isEmpty()) {
-                CrashReportSystemDetails crashReportCategory2 = this.details.get(this.details.size() - 1);
-                crashReportCategory2.trimStacktrace(i);
-            } else if (stackTraceElements != null && stackTraceElements.length >= i && 0 <= j && j < stackTraceElements.length) {
+            if (stackTraceElements != null && stackTraceElements.length >= i && 0 <= j && j < stackTraceElements.length) {
                 this.uncategorizedStackTrace = new StackTraceElement[j];
                 System.arraycopy(stackTraceElements, 0, this.uncategorizedStackTrace, 0, this.uncategorizedStackTrace.length);
             } else {

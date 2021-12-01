@@ -112,6 +112,8 @@ public class StructureBoundingBox {
         }
     }
 
+    /** @deprecated */
+    @Deprecated
     public StructureBoundingBox encapsulate(StructureBoundingBox box) {
         this.minX = Math.min(this.minX, box.minX);
         this.minY = Math.min(this.minY, box.minY);
@@ -122,6 +124,8 @@ public class StructureBoundingBox {
         return this;
     }
 
+    /** @deprecated */
+    @Deprecated
     public StructureBoundingBox encapsulate(BlockPosition pos) {
         this.minX = Math.min(this.minX, pos.getX());
         this.minY = Math.min(this.minY, pos.getY());
@@ -132,16 +136,8 @@ public class StructureBoundingBox {
         return this;
     }
 
-    public StructureBoundingBox inflate(int offset) {
-        this.minX -= offset;
-        this.minY -= offset;
-        this.minZ -= offset;
-        this.maxX += offset;
-        this.maxY += offset;
-        this.maxZ += offset;
-        return this;
-    }
-
+    /** @deprecated */
+    @Deprecated
     public StructureBoundingBox move(int dx, int dy, int dz) {
         this.minX += dx;
         this.minY += dy;
@@ -152,12 +148,18 @@ public class StructureBoundingBox {
         return this;
     }
 
+    /** @deprecated */
+    @Deprecated
     public StructureBoundingBox move(BaseBlockPosition vec) {
         return this.move(vec.getX(), vec.getY(), vec.getZ());
     }
 
     public StructureBoundingBox moved(int x, int y, int z) {
         return new StructureBoundingBox(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
+    }
+
+    public StructureBoundingBox inflatedBy(int offset) {
+        return new StructureBoundingBox(this.minX() - offset, this.minY() - offset, this.minZ() - offset, this.maxX() + offset, this.maxY() + offset, this.maxZ() + offset);
     }
 
     public boolean isInside(BaseBlockPosition vec) {

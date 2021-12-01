@@ -190,9 +190,12 @@ public class TileEntityShulkerBox extends TileEntityLootable implements IWorldIn
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
-        return this.saveToTag(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
+        if (!this.trySaveLootTable(nbt)) {
+            ContainerUtil.saveAllItems(nbt, this.itemStacks, false);
+        }
+
     }
 
     public void loadFromTag(NBTTagCompound nbt) {
@@ -201,14 +204,6 @@ public class TileEntityShulkerBox extends TileEntityLootable implements IWorldIn
             ContainerUtil.loadAllItems(nbt, this.itemStacks);
         }
 
-    }
-
-    public NBTTagCompound saveToTag(NBTTagCompound nbt) {
-        if (!this.trySaveLootTable(nbt)) {
-            ContainerUtil.saveAllItems(nbt, this.itemStacks, false);
-        }
-
-        return nbt;
     }
 
     @Override

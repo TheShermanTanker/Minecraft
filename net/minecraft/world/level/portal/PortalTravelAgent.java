@@ -39,40 +39,42 @@ public class PortalTravelAgent {
         this.level = world;
     }
 
-    public Optional<BlockUtil.Rectangle> findPortal(BlockPosition destPos, boolean destIsNether) {
+    public Optional<BlockUtil.Rectangle> findPortalAround(BlockPosition pos, boolean destIsNether, WorldBorder worldBorder) {
         VillagePlace poiManager = this.level.getPoiManager();
         int i = destIsNether ? 16 : 128;
-        poiManager.ensureLoadedAndValid(this.level, destPos, i);
+        poiManager.ensureLoadedAndValid(this.level, pos, i);
         Optional<VillagePlaceRecord> optional = poiManager.getInSquare((poiType) -> {
             return poiType == VillagePlaceType.NETHER_PORTAL;
-        }, destPos, i, VillagePlace.Occupancy.ANY).sorted(Comparator.comparingDouble((poiRecord) -> {
-            return poiRecord.getPos().distSqr(destPos);
-        }).thenComparingInt((poiRecord) -> {
-            return poiRecord.getPos().getY();
-        })).filter((poiRecord) -> {
-            return this.level.getType(poiRecord.getPos()).hasProperty(BlockProperties.HORIZONTAL_AXIS);
+        }, pos, i, VillagePlace.Occupancy.ANY).filter((poi) -> {
+            return worldBorder.isWithinBounds(poi.getPos());
+        }).sorted(Comparator.comparingDouble((poi) -> {
+            return poi.getPos().distSqr(pos);
+        }).thenComparingInt((poi) -> {
+            return poi.getPos().getY();
+        })).filter((poi) -> {
+            return this.level.getType(poi.getPos()).hasProperty(BlockProperties.HORIZONTAL_AXIS);
         }).findFirst();
-        return optional.map((poiRecord) -> {
-            BlockPosition blockPos = poiRecord.getPos();
+        return optional.map((poi) -> {
+            BlockPosition blockPos = poi.getPos();
             this.level.getChunkSource().addTicket(TicketType.PORTAL, new ChunkCoordIntPair(blockPos), 3, blockPos);
             IBlockData blockState = this.level.getType(blockPos);
-            return BlockUtil.getLargestRectangleAround(blockPos, blockState.get(BlockProperties.HORIZONTAL_AXIS), 21, EnumDirection.EnumAxis.Y, 21, (blockPosx) -> {
-                return this.level.getType(blockPosx) == blockState;
+            return BlockUtil.getLargestRectangleAround(blockPos, blockState.get(BlockProperties.HORIZONTAL_AXIS), 21, EnumDirection.EnumAxis.Y, 21, (pos) -> {
+                return this.level.getType(pos) == blockState;
             });
         });
     }
 
-    public Optional<BlockUtil.Rectangle> createPortal(BlockPosition blockPos, EnumDirection.EnumAxis axis) {
+    public Optional<BlockUtil.Rectangle> createPortal(BlockPosition pos, EnumDirection.EnumAxis axis) {
         EnumDirection direction = EnumDirection.get(EnumDirection.EnumAxisDirection.POSITIVE, axis);
         double d = -1.0D;
-        BlockPosition blockPos2 = null;
+        BlockPosition blockPos = null;
         double e = -1.0D;
-        BlockPosition blockPos3 = null;
+        BlockPosition blockPos2 = null;
         WorldBorder worldBorder = this.level.getWorldBorder();
         int i = Math.min(this.level.getMaxBuildHeight(), this.level.getMinBuildHeight() + this.level.getLogicalHeight()) - 1;
-        BlockPosition.MutableBlockPosition mutableBlockPos = blockPos.mutable();
+        BlockPosition.MutableBlockPosition mutableBlockPos = pos.mutable();
 
-        for(BlockPosition.MutableBlockPosition mutableBlockPos2 : BlockPosition.spiralAround(blockPos, 16, EnumDirection.EAST, EnumDirection.SOUTH)) {
+        for(BlockPosition.MutableBlockPosition mutableBlockPos2 : BlockPosition.spiralAround(pos, 16, EnumDirection.EAST, EnumDirection.SOUTH)) {
             int j = Math.min(i, this.level.getHeight(HeightMap.Type.MOTION_BLOCKING, mutableBlockPos2.getX(), mutableBlockPos2.getZ()));
             int k = 1;
             if (worldBorder.isWithinBounds(mutableBlockPos2) && worldBorder.isWithinBounds(mutableBlockPos2.move(direction, 1))) {
@@ -90,15 +92,15 @@ public class PortalTravelAgent {
                             if (n <= 0 || n >= 3) {
                                 mutableBlockPos2.setY(l);
                                 if (this.canHostFrame(mutableBlockPos2, mutableBlockPos, direction, 0)) {
-                                    double f = blockPos.distSqr(mutableBlockPos2);
+                                    double f = pos.distSqr(mutableBlockPos2);
                                     if (this.canHostFrame(mutableBlockPos2, mutableBlockPos, direction, -1) && this.canHostFrame(mutableBlockPos2, mutableBlockPos, direction, 1) && (d == -1.0D || d > f)) {
                                         d = f;
-                                        blockPos2 = mutableBlockPos2.immutableCopy();
+                                        blockPos = mutableBlockPos2.immutableCopy();
                                     }
 
                                     if (d == -1.0D && (e == -1.0D || e > f)) {
                                         e = f;
-                                        blockPos3 = mutableBlockPos2.immutableCopy();
+                                        blockPos2 = mutableBlockPos2.immutableCopy();
                                     }
                                 }
                             }
@@ -109,7 +111,7 @@ public class PortalTravelAgent {
         }
 
         if (d == -1.0D && e != -1.0D) {
-            blockPos2 = blockPos3;
+            blockPos = blockPos2;
             d = e;
         }
 
@@ -120,9 +122,9 @@ public class PortalTravelAgent {
                 return Optional.empty();
             }
 
-            blockPos2 = (new BlockPosition(blockPos.getX(), MathHelper.clamp(blockPos.getY(), o, p), blockPos.getZ())).immutableCopy();
+            blockPos = (new BlockPosition(pos.getX(), MathHelper.clamp(pos.getY(), o, p), pos.getZ())).immutableCopy();
             EnumDirection direction2 = direction.getClockWise();
-            if (!worldBorder.isWithinBounds(blockPos2)) {
+            if (!worldBorder.isWithinBounds(blockPos)) {
                 return Optional.empty();
             }
 
@@ -130,7 +132,7 @@ public class PortalTravelAgent {
                 for(int r = 0; r < 2; ++r) {
                     for(int s = -1; s < 3; ++s) {
                         IBlockData blockState = s < 0 ? Blocks.OBSIDIAN.getBlockData() : Blocks.AIR.getBlockData();
-                        mutableBlockPos.setWithOffset(blockPos2, r * direction.getAdjacentX() + q * direction2.getAdjacentX(), s, r * direction.getAdjacentZ() + q * direction2.getAdjacentZ());
+                        mutableBlockPos.setWithOffset(blockPos, r * direction.getAdjacentX() + q * direction2.getAdjacentX(), s, r * direction.getAdjacentZ() + q * direction2.getAdjacentZ());
                         this.level.setTypeUpdate(mutableBlockPos, blockState);
                     }
                 }
@@ -140,7 +142,7 @@ public class PortalTravelAgent {
         for(int t = -1; t < 3; ++t) {
             for(int u = -1; u < 4; ++u) {
                 if (t == -1 || t == 2 || u == -1 || u == 3) {
-                    mutableBlockPos.setWithOffset(blockPos2, t * direction.getAdjacentX(), u, t * direction.getAdjacentZ());
+                    mutableBlockPos.setWithOffset(blockPos, t * direction.getAdjacentX(), u, t * direction.getAdjacentZ());
                     this.level.setTypeAndData(mutableBlockPos, Blocks.OBSIDIAN.getBlockData(), 3);
                 }
             }
@@ -150,12 +152,12 @@ public class PortalTravelAgent {
 
         for(int v = 0; v < 2; ++v) {
             for(int w = 0; w < 3; ++w) {
-                mutableBlockPos.setWithOffset(blockPos2, v * direction.getAdjacentX(), w, v * direction.getAdjacentZ());
+                mutableBlockPos.setWithOffset(blockPos, v * direction.getAdjacentX(), w, v * direction.getAdjacentZ());
                 this.level.setTypeAndData(mutableBlockPos, blockState2, 18);
             }
         }
 
-        return Optional.of(new BlockUtil.Rectangle(blockPos2.immutableCopy(), 2, 3));
+        return Optional.of(new BlockUtil.Rectangle(blockPos.immutableCopy(), 2, 3));
     }
 
     private boolean canHostFrame(BlockPosition pos, BlockPosition.MutableBlockPosition temp, EnumDirection portalDirection, int distanceOrthogonalToPortal) {

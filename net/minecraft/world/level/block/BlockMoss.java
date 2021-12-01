@@ -2,14 +2,12 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.WorldGenerator;
 
 public class BlockMoss extends Block implements IBlockFragilePlantElement {
     public BlockMoss(BlockBase.Info settings) {
@@ -28,6 +26,6 @@ public class BlockMoss extends Block implements IBlockFragilePlantElement {
 
     @Override
     public void performBonemeal(WorldServer world, Random random, BlockPosition pos, IBlockData state) {
-        WorldGenerator.VEGETATION_PATCH.generate(new FeaturePlaceContext<>(world, world.getChunkSource().getChunkGenerator(), random, pos.above(), WorldGenBiomeDecoratorGroups.MOSS_PATCH_BONEMEAL.config()));
+        CaveFeatures.MOSS_PATCH_BONEMEAL.place(world, world.getChunkSource().getChunkGenerator(), random, pos.above());
     }
 }

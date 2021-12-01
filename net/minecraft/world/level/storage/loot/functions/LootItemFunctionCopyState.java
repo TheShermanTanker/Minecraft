@@ -25,10 +25,10 @@ public class LootItemFunctionCopyState extends LootItemFunctionConditional {
     final Block block;
     final Set<IBlockState<?>> properties;
 
-    LootItemFunctionCopyState(LootItemCondition[] conditions, Block block, Set<IBlockState<?>> set) {
+    LootItemFunctionCopyState(LootItemCondition[] conditions, Block block, Set<IBlockState<?>> properties) {
         super(conditions);
         this.block = block;
-        this.properties = set;
+        this.properties = properties;
     }
 
     @Override

@@ -12,8 +12,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.item.EnumColor;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.EnumBannerPatternType;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -21,15 +23,19 @@ public class SetBannerPatternFunction extends LootItemFunctionConditional {
     final List<Pair<EnumBannerPatternType, EnumColor>> patterns;
     final boolean append;
 
-    SetBannerPatternFunction(LootItemCondition[] conditions, List<Pair<EnumBannerPatternType, EnumColor>> list, boolean bl) {
-        super(conditions);
-        this.patterns = list;
-        this.append = bl;
+    SetBannerPatternFunction(LootItemCondition[] condiitons, List<Pair<EnumBannerPatternType, EnumColor>> patterns, boolean append) {
+        super(condiitons);
+        this.patterns = patterns;
+        this.append = append;
     }
 
     @Override
     protected ItemStack run(ItemStack stack, LootTableInfo context) {
-        NBTTagCompound compoundTag = stack.getOrCreateTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
+        if (compoundTag == null) {
+            compoundTag = new NBTTagCompound();
+        }
+
         EnumBannerPatternType.Builder builder = new EnumBannerPatternType.Builder();
         this.patterns.forEach(builder::addPattern);
         NBTTagList listTag = builder.toListTag();
@@ -42,6 +48,7 @@ public class SetBannerPatternFunction extends LootItemFunctionConditional {
         }
 
         compoundTag.set("Patterns", listTag2);
+        ItemBlock.setBlockEntityData(stack, TileEntityTypes.BANNER, compoundTag);
         return stack;
     }
 
@@ -50,16 +57,16 @@ public class SetBannerPatternFunction extends LootItemFunctionConditional {
         return LootItemFunctions.SET_BANNER_PATTERN;
     }
 
-    public static SetBannerPatternFunction.Builder setBannerPattern(boolean bl) {
-        return new SetBannerPatternFunction.Builder(bl);
+    public static SetBannerPatternFunction.Builder setBannerPattern(boolean append) {
+        return new SetBannerPatternFunction.Builder(append);
     }
 
     public static class Builder extends LootItemFunctionConditional.Builder<SetBannerPatternFunction.Builder> {
         private final ImmutableList.Builder<Pair<EnumBannerPatternType, EnumColor>> patterns = ImmutableList.builder();
         private final boolean append;
 
-        Builder(boolean bl) {
-            this.append = bl;
+        Builder(boolean append) {
+            this.append = append;
         }
 
         @Override

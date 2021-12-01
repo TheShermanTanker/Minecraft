@@ -39,7 +39,6 @@ public class DataConverterWorldGenSettingsBuilding extends DataFix {
         super(outputSchema, true);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("WorldGenSettings building", this.getInputSchema().getType(DataConverterTypes.WORLD_GEN_SETTINGS), (typed) -> {
             return typed.update(DSL.remainderFinder(), DataConverterWorldGenSettingsBuilding::fix);

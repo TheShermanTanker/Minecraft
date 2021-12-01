@@ -17,6 +17,7 @@ public class Advancements {
     public final Map<MinecraftKey, Advancement> advancements = Maps.newHashMap();
     private final Set<Advancement> roots = Sets.newLinkedHashSet();
     private final Set<Advancement> tasks = Sets.newLinkedHashSet();
+    @Nullable
     private Advancements.Listener listener;
 
     private void remove(Advancement advancement) {

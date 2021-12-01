@@ -122,10 +122,10 @@ public class GameTestHarnessHelper {
         return this.spawnWithNoFreeWill(type, new Vec3D((double)x, (double)y, (double)z));
     }
 
-    public GameTestHarnessSequence walkTo(EntityInsentient entity, BlockPosition pos, float f) {
+    public GameTestHarnessSequence walkTo(EntityInsentient entity, BlockPosition pos, float speed) {
         return this.startSequence().thenExecuteAfter(2, () -> {
             PathEntity path = entity.getNavigation().createPath(this.absolutePos(pos), 0);
-            entity.getNavigation().moveTo(path, (double)f);
+            entity.getNavigation().moveTo(path, (double)speed);
         });
     }
 
@@ -134,8 +134,8 @@ public class GameTestHarnessHelper {
     }
 
     public void pressButton(BlockPosition pos) {
-        this.assertBlockState(pos, (blockStatex) -> {
-            return blockStatex.is(TagsBlock.BUTTONS);
+        this.assertBlockState(pos, (state) -> {
+            return state.is(TagsBlock.BUTTONS);
         }, () -> {
             return "Expected button";
         });
@@ -270,8 +270,8 @@ public class GameTestHarnessHelper {
     }
 
     public <T extends Comparable<T>> void assertBlockProperty(BlockPosition pos, IBlockState<T> property, Predicate<T> predicate, String errorMessage) {
-        this.assertBlockState(pos, (blockState) -> {
-            return predicate.test(blockState.get(property));
+        this.assertBlockState(pos, (state) -> {
+            return predicate.test(state.get(property));
         }, () -> {
             return errorMessage;
         });
@@ -318,8 +318,8 @@ public class GameTestHarnessHelper {
     public void assertEntityInstancePresent(Entity entity, BlockPosition pos) {
         BlockPosition blockPos = this.absolutePos(pos);
         List<? extends Entity> list = this.getLevel().getEntities(entity.getEntityType(), new AxisAlignedBB(blockPos), Entity::isAlive);
-        list.stream().filter((entity2) -> {
-            return entity2 == entity;
+        list.stream().filter((e) -> {
+            return e == entity;
         }).findFirst().orElseThrow(() -> {
             return new GameTestHarnessAssertionPosition("Expected " + entity.getEntityType().toShortString(), blockPos, pos, this.testInfo.getTick());
         });
@@ -450,34 +450,34 @@ public class GameTestHarnessHelper {
 
     }
 
-    public void assertAtTickTimeContainerContains(long l, BlockPosition blockPos, Item item) {
-        this.runAtTickTime(l, () -> {
-            this.assertContainerContains(blockPos, item);
+    public void assertAtTickTimeContainerContains(long delay, BlockPosition pos, Item item) {
+        this.runAtTickTime(delay, () -> {
+            this.assertContainerContains(pos, item);
         });
     }
 
-    public void assertAtTickTimeContainerEmpty(long l, BlockPosition blockPos) {
-        this.runAtTickTime(l, () -> {
-            this.assertContainerEmpty(blockPos);
+    public void assertAtTickTimeContainerEmpty(long delay, BlockPosition pos) {
+        this.runAtTickTime(delay, () -> {
+            this.assertContainerEmpty(pos);
         });
     }
 
-    public <E extends Entity, T> void succeedWhenEntityData(BlockPosition blockPos, EntityTypes<E> entityType, Function<E, T> function, T object) {
+    public <E extends Entity, T> void succeedWhenEntityData(BlockPosition pos, EntityTypes<E> type, Function<E, T> entityDataGetter, T data) {
         this.succeedWhen(() -> {
-            this.assertEntityData(blockPos, entityType, function, object);
+            this.assertEntityData(pos, type, entityDataGetter, data);
         });
     }
 
-    public <E extends Entity> void assertEntityProperty(E entity, Predicate<E> predicate, String string) {
+    public <E extends Entity> void assertEntityProperty(E entity, Predicate<E> predicate, String testName) {
         if (!predicate.test(entity)) {
-            throw new GameTestHarnessAssertion("Entity " + entity + " failed " + string + " test");
+            throw new GameTestHarnessAssertion("Entity " + entity + " failed " + testName + " test");
         }
     }
 
-    public <E extends Entity, T> void assertEntityProperty(E entity, Function<E, T> function, String string, T object) {
-        T object2 = function.apply(entity);
-        if (!object2.equals(object)) {
-            throw new GameTestHarnessAssertion("Entity " + entity + " value " + string + "=" + object2 + " is not equal to expected " + object);
+    public <E extends Entity, T> void assertEntityProperty(E entity, Function<E, T> propertyGetter, String propertyName, T expectedValue) {
+        T object = propertyGetter.apply(entity);
+        if (!object.equals(expectedValue)) {
+            throw new GameTestHarnessAssertion("Entity " + entity + " value " + propertyName + "=" + object + " is not equal to expected " + expectedValue);
         }
     }
 
@@ -554,15 +554,15 @@ public class GameTestHarnessHelper {
         throw new GameTestHarnessAssertion(message);
     }
 
-    public void failIf(Runnable runnable) {
-        this.testInfo.createSequence().thenWaitUntil(runnable).thenFail(() -> {
+    public void failIf(Runnable task) {
+        this.testInfo.createSequence().thenWaitUntil(task).thenFail(() -> {
             return new GameTestHarnessAssertion("Fail conditions met");
         });
     }
 
-    public void failIfEver(Runnable runnable) {
-        LongStream.range(this.testInfo.getTick(), (long)this.testInfo.getTimeoutTicks()).forEach((l) -> {
-            this.testInfo.setRunAtTickTime(l, runnable::run);
+    public void failIfEver(Runnable task) {
+        LongStream.range(this.testInfo.getTick(), (long)this.testInfo.getTimeoutTicks()).forEach((tick) -> {
+            this.testInfo.setRunAtTickTime(tick, task::run);
         });
     }
 
@@ -601,14 +601,14 @@ public class GameTestHarnessHelper {
         return aABB.move(BlockPosition.ZERO.subtract(this.absolutePos(BlockPosition.ZERO)));
     }
 
-    public void forEveryBlockInStructure(Consumer<BlockPosition> consumer) {
+    public void forEveryBlockInStructure(Consumer<BlockPosition> posConsumer) {
         AxisAlignedBB aABB = this.getRelativeBounds();
-        BlockPosition.MutableBlockPosition.betweenClosedStream(aABB.move(0.0D, 1.0D, 0.0D)).forEach(consumer);
+        BlockPosition.MutableBlockPosition.betweenClosedStream(aABB.move(0.0D, 1.0D, 0.0D)).forEach(posConsumer);
     }
 
     public void onEachTick(Runnable runnable) {
-        LongStream.range(this.testInfo.getTick(), (long)this.testInfo.getTimeoutTicks()).forEach((l) -> {
-            this.testInfo.setRunAtTickTime(l, runnable::run);
+        LongStream.range(this.testInfo.getTick(), (long)this.testInfo.getTimeoutTicks()).forEach((tick) -> {
+            this.testInfo.setRunAtTickTime(tick, runnable::run);
         });
     }
 }

@@ -33,6 +33,7 @@ import net.minecraft.world.entity.ai.goal.PathfinderGoalPanic;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomLookaround;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStrollLand;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalTame;
+import net.minecraft.world.entity.ai.goal.PathfinderGoalTempt;
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalHurtByTarget;
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackableTarget;
 import net.minecraft.world.entity.animal.EntityAnimal;
@@ -118,10 +119,11 @@ public class EntityLlama extends EntityHorseChestedAbstract implements IRangedEn
         this.goalSelector.addGoal(3, new PathfinderGoalArrowAttack(this, 1.25D, 40, 20.0F));
         this.goalSelector.addGoal(3, new PathfinderGoalPanic(this, 1.2D));
         this.goalSelector.addGoal(4, new PathfinderGoalBreed(this, 1.0D));
-        this.goalSelector.addGoal(5, new PathfinderGoalFollowParent(this, 1.0D));
-        this.goalSelector.addGoal(6, new PathfinderGoalRandomStrollLand(this, 0.7D));
-        this.goalSelector.addGoal(7, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 6.0F));
-        this.goalSelector.addGoal(8, new PathfinderGoalRandomLookaround(this));
+        this.goalSelector.addGoal(5, new PathfinderGoalTempt(this, 1.25D, RecipeItemStack.of(Items.HAY_BLOCK), false));
+        this.goalSelector.addGoal(6, new PathfinderGoalFollowParent(this, 1.0D));
+        this.goalSelector.addGoal(7, new PathfinderGoalRandomStrollLand(this, 0.7D));
+        this.goalSelector.addGoal(8, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 6.0F));
+        this.goalSelector.addGoal(9, new PathfinderGoalRandomLookaround(this));
         this.targetSelector.addGoal(1, new EntityLlama.LlamaHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new EntityLlama.LlamaAttackWolfGoal(this));
     }
@@ -163,7 +165,7 @@ public class EntityLlama extends EntityHorseChestedAbstract implements IRangedEn
 
     @Override
     public double getPassengersRidingOffset() {
-        return (double)this.getHeight() * 0.67D;
+        return (double)this.getHeight() * 0.6D;
     }
 
     @Override

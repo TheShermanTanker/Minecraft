@@ -12,7 +12,6 @@ public class DataConverterSchemaV106 extends Schema {
         super(versionKey, parent);
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         schema.registerType(true, DataConverterTypes.UNTAGGED_SPAWNER, () -> {

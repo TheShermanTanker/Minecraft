@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockActionContext;
 import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.IWorldReader;
-import net.minecraft.world.level.TickListPriority;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.state.BlockBase;
@@ -18,6 +17,7 @@ import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.block.state.properties.BlockStateBoolean;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.VoxelShapeCollision;
+import net.minecraft.world.ticks.TickPriority;
 
 public abstract class BlockDiodeAbstract extends BlockFacingHorizontal {
     protected static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D);
@@ -47,7 +47,7 @@ public abstract class BlockDiodeAbstract extends BlockFacingHorizontal {
             } else if (!bl) {
                 world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(true)), 2);
                 if (!bl2) {
-                    world.getBlockTicks().scheduleTick(pos, this, this.getDelay(state), TickListPriority.VERY_HIGH);
+                    world.scheduleTick(pos, this, this.getDelay(state), TickPriority.VERY_HIGH);
                 }
             }
 
@@ -88,15 +88,15 @@ public abstract class BlockDiodeAbstract extends BlockFacingHorizontal {
         if (!this.isLocked(world, pos, state)) {
             boolean bl = state.get(POWERED);
             boolean bl2 = this.shouldTurnOn(world, pos, state);
-            if (bl != bl2 && !world.getBlockTickList().willTickThisTick(pos, this)) {
-                TickListPriority tickPriority = TickListPriority.HIGH;
+            if (bl != bl2 && !world.getBlockTicks().willTickThisTick(pos, this)) {
+                TickPriority tickPriority = TickPriority.HIGH;
                 if (this.shouldPrioritize(world, pos, state)) {
-                    tickPriority = TickListPriority.EXTREMELY_HIGH;
+                    tickPriority = TickPriority.EXTREMELY_HIGH;
                 } else if (bl) {
-                    tickPriority = TickListPriority.VERY_HIGH;
+                    tickPriority = TickPriority.VERY_HIGH;
                 }
 
-                world.getBlockTickList().scheduleTick(pos, this, this.getDelay(state), tickPriority);
+                world.scheduleTick(pos, this, this.getDelay(state), tickPriority);
             }
 
         }
@@ -155,7 +155,7 @@ public abstract class BlockDiodeAbstract extends BlockFacingHorizontal {
     @Override
     public void postPlace(World world, BlockPosition pos, IBlockData state, EntityLiving placer, ItemStack itemStack) {
         if (this.shouldTurnOn(world, pos, state)) {
-            world.getBlockTickList().scheduleTick(pos, this, 1);
+            world.scheduleTick(pos, this, 1);
         }
 
     }

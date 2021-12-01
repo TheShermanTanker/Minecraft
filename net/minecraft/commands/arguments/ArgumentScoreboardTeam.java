@@ -18,8 +18,8 @@ import net.minecraft.world.scores.ScoreboardTeam;
 
 public class ArgumentScoreboardTeam implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "123");
-    private static final DynamicCommandExceptionType ERROR_TEAM_NOT_FOUND = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("team.notFound", object);
+    private static final DynamicCommandExceptionType ERROR_TEAM_NOT_FOUND = new DynamicCommandExceptionType((name) -> {
+        return new ChatMessage("team.notFound", name);
     });
 
     public static ArgumentScoreboardTeam team() {
@@ -37,17 +37,14 @@ public class ArgumentScoreboardTeam implements ArgumentType<String> {
         }
     }
 
-    @Override
     public String parse(StringReader stringReader) throws CommandSyntaxException {
         return stringReader.readUnquotedString();
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return commandContext.getSource() instanceof ICompletionProvider ? ICompletionProvider.suggest(((ICompletionProvider)commandContext.getSource()).getAllTeams(), suggestionsBuilder) : Suggestions.empty();
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

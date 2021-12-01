@@ -137,7 +137,6 @@ public class DataConverterSchemaV704 extends Schema {
         return ImmutableMap.copyOf(map);
     });
     protected static final HookFunction ADD_NAMES = new HookFunction() {
-        @Override
         public <T> T apply(DynamicOps<T> dynamicOps, T object) {
             return DataConverterSchemaV99.addNames(new Dynamic<>(dynamicOps, object), DataConverterSchemaV704.ITEM_TO_BLOCKENTITY, "ArmorStand");
         }
@@ -153,12 +152,10 @@ public class DataConverterSchemaV704 extends Schema {
         });
     }
 
-    @Override
     public Type<?> getChoiceType(TypeReference typeReference, String string) {
         return Objects.equals(typeReference.typeName(), DataConverterTypes.BLOCK_ENTITY.typeName()) ? super.getChoiceType(typeReference, DataConverterSchemaNamed.ensureNamespaced(string)) : super.getChoiceType(typeReference, string);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = Maps.newHashMap();
         registerInventory(schema, map, "minecraft:furnace");
@@ -193,7 +190,6 @@ public class DataConverterSchemaV704 extends Schema {
         return map;
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         schema.registerType(false, DataConverterTypes.BLOCK_ENTITY, () -> {

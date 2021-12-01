@@ -18,10 +18,10 @@ public class ScoreboardValue implements NumberProvider {
     final String score;
     final float scale;
 
-    ScoreboardValue(ScoreboardNameProvider scoreboardNameProvider, String string, float f) {
-        this.target = scoreboardNameProvider;
-        this.score = string;
-        this.scale = f;
+    ScoreboardValue(ScoreboardNameProvider target, String score, float scale) {
+        this.target = target;
+        this.score = score;
+        this.scale = scale;
     }
 
     @Override

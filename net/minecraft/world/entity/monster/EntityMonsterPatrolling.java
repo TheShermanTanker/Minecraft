@@ -23,6 +23,7 @@ import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.phys.Vec3D;
 
 public abstract class EntityMonsterPatrolling extends EntityMonster {
+    @Nullable
     private BlockPosition patrolTarget;
     private boolean patrolLeader;
     private boolean patrolling;

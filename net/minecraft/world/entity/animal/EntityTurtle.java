@@ -178,7 +178,7 @@ public class EntityTurtle extends EntityAnimal {
     }
 
     public static boolean checkTurtleSpawnRules(EntityTypes<EntityTurtle> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return pos.getY() < world.getSeaLevel() + 4 && BlockTurtleEgg.onSand(world, pos) && world.getLightLevel(pos, 0) > 8;
+        return pos.getY() < world.getSeaLevel() + 4 && BlockTurtleEgg.onSand(world, pos) && isBrightEnoughToSpawn(world, pos);
     }
 
     @Override
@@ -392,7 +392,7 @@ public class EntityTurtle extends EntityAnimal {
                 return false;
             } else if (this.turtle.hasEgg()) {
                 return true;
-            } else if (this.turtle.getRandom().nextInt(700) != 0) {
+            } else if (this.turtle.getRandom().nextInt(reducedTickDelay(700)) != 0) {
                 return false;
             } else {
                 return !this.turtle.getHomePos().closerThan(this.turtle.getPositionVector(), 64.0D);
@@ -413,7 +413,7 @@ public class EntityTurtle extends EntityAnimal {
 
         @Override
         public boolean canContinueToUse() {
-            return !this.turtle.getHomePos().closerThan(this.turtle.getPositionVector(), 7.0D) && !this.stuck && this.closeToHomeTryTicks <= 600;
+            return !this.turtle.getHomePos().closerThan(this.turtle.getPositionVector(), 7.0D) && !this.stuck && this.closeToHomeTryTicks <= this.adjustedTickDelay(600);
         }
 
         @Override
@@ -450,9 +450,9 @@ public class EntityTurtle extends EntityAnimal {
         private static final int GIVE_UP_TICKS = 1200;
         private final EntityTurtle turtle;
 
-        TurtleGoToWaterGoal(EntityTurtle mob, double d) {
-            super(mob, mob.isBaby() ? 2.0D : d, 24);
-            this.turtle = mob;
+        TurtleGoToWaterGoal(EntityTurtle turtle, double speed) {
+            super(turtle, turtle.isBaby() ? 2.0D : speed, 24);
+            this.turtle = turtle;
             this.verticalSearchStart = -1;
         }
 
@@ -506,7 +506,7 @@ public class EntityTurtle extends EntityAnimal {
             if (!this.turtle.isInWater() && this.isReachedTarget()) {
                 if (this.turtle.layEggCounter < 1) {
                     this.turtle.setLayingEgg(true);
-                } else if (this.turtle.layEggCounter > 200) {
+                } else if (this.turtle.layEggCounter > this.adjustedTickDelay(200)) {
                     World level = this.turtle.level;
                     level.playSound((EntityHuman)null, blockPos, SoundEffects.TURTLE_LAY_EGG, EnumSoundCategory.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
                     level.setTypeAndData(this.blockPos.above(), Blocks.TURTLE_EGG.getBlockData().set(BlockTurtleEgg.EGGS, Integer.valueOf(this.turtle.random.nextInt(4) + 1)), 3);
@@ -583,7 +583,7 @@ public class EntityTurtle extends EntityAnimal {
             if (this.mob.getLastDamager() == null && !this.mob.isBurning()) {
                 return false;
             } else {
-                BlockPosition blockPos = this.lookForWater(this.mob.level, this.mob, 7, 4);
+                BlockPosition blockPos = this.lookForWater(this.mob.level, this.mob, 7);
                 if (blockPos != null) {
                     this.posX = (double)blockPos.getX();
                     this.posY = (double)blockPos.getY();
@@ -609,8 +609,6 @@ public class EntityTurtle extends EntityAnimal {
         @Override
         protected Pathfinder createPathFinder(int range) {
             this.nodeEvaluator = new PathfinderAmphibious(true);
-            this.nodeEvaluator.setCanOpenDoors(false);
-            this.nodeEvaluator.setCanPassDoors(false);
             return new Pathfinder(this.nodeEvaluator, range);
         }
 
@@ -630,9 +628,9 @@ public class EntityTurtle extends EntityAnimal {
     static class TurtleRandomStrollGoal extends PathfinderGoalRandomStroll {
         private final EntityTurtle turtle;
 
-        TurtleRandomStrollGoal(EntityTurtle mob, double speed, int chance) {
-            super(mob, speed, chance);
-            this.turtle = mob;
+        TurtleRandomStrollGoal(EntityTurtle turtle, double speed, int chance) {
+            super(turtle, speed, chance);
+            this.turtle = turtle;
         }
 
         @Override

@@ -29,7 +29,7 @@ public class TileEntityPiston extends TileEntity {
     private static final int TICKS_TO_EXTEND = 2;
     private static final double PUSH_OFFSET = 0.01D;
     public static final double TICK_MOVEMENT = 0.51D;
-    private IBlockData movedState;
+    private IBlockData movedState = Blocks.AIR.getBlockData();
     private EnumDirection direction;
     private boolean extending;
     private boolean isSourcePiston;
@@ -55,7 +55,7 @@ public class TileEntityPiston extends TileEntity {
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     public boolean isExtending() {
@@ -278,7 +278,7 @@ public class TileEntityPiston extends TileEntity {
             } else {
                 world.removeTileEntity(pos);
                 blockEntity.setRemoved();
-                if (blockEntity.movedState != null && world.getType(pos).is(Blocks.MOVING_PISTON)) {
+                if (world.getType(pos).is(Blocks.MOVING_PISTON)) {
                     IBlockData blockState = Block.updateFromNeighbourShapes(blockEntity.movedState, world, pos);
                     if (blockState.isAir()) {
                         world.setTypeAndData(pos, blockEntity.movedState, 84);
@@ -318,19 +318,18 @@ public class TileEntityPiston extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.set("blockState", GameProfileSerializer.writeBlockState(this.movedState));
         nbt.setInt("facing", this.direction.get3DDataValue());
         nbt.setFloat("progress", this.progressO);
         nbt.setBoolean("extending", this.extending);
         nbt.setBoolean("source", this.isSourcePiston);
-        return nbt;
     }
 
     public VoxelShape getCollisionShape(IBlockAccess world, BlockPosition pos) {
         VoxelShape voxelShape;
-        if (!this.extending && this.isSourcePiston) {
+        if (!this.extending && this.isSourcePiston && this.movedState.getBlock() instanceof BlockPiston) {
             voxelShape = this.movedState.set(BlockPiston.EXTENDED, Boolean.valueOf(true)).getCollisionShape(world, pos);
         } else {
             voxelShape = VoxelShapes.empty();

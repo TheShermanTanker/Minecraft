@@ -189,8 +189,8 @@ public class CommandAdvancement {
 
         private final String key;
 
-        Action(String string2) {
-            this.key = "commands.advancement." + string2;
+        Action(String name) {
+            this.key = "commands.advancement." + name;
         }
 
         public int perform(EntityPlayer player, Iterable<Advancement> advancements) {

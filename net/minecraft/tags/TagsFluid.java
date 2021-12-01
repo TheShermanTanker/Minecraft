@@ -24,6 +24,7 @@ public final class TagsFluid {
         return HELPER.getAllTags();
     }
 
+    /** @deprecated */
     @Deprecated
     public static List<Tag<FluidType>> getStaticTags() {
         return KNOWN_TAGS;

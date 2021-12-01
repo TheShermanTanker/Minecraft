@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.EntityCreature;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
@@ -8,6 +9,7 @@ import net.minecraft.world.phys.Vec3D;
 
 public class PathfinderGoalMoveTowardsTarget extends PathfinderGoal {
     private final EntityCreature mob;
+    @Nullable
     private EntityLiving target;
     private double wantedX;
     private double wantedY;

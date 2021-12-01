@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 
 public class RegistryID<K> implements Registry<K> {
-    public static final int NOT_FOUND = -1;
+    private static final int NOT_FOUND = -1;
     private static final Object EMPTY_SLOT = null;
     private static final float LOADFACTOR = 0.8F;
     private K[] keys;
@@ -17,11 +17,22 @@ public class RegistryID<K> implements Registry<K> {
     private int nextId;
     private int size;
 
-    public RegistryID(int size) {
-        size = (int)((float)size / 0.8F);
+    private RegistryID(int size) {
         this.keys = (K[])(new Object[size]);
         this.values = new int[size];
         this.byId = (K[])(new Object[size]);
+    }
+
+    private RegistryID(K[] objects, int[] is, K[] objects2, int i, int j) {
+        this.keys = objects;
+        this.values = is;
+        this.byId = objects2;
+        this.nextId = i;
+        this.size = j;
+    }
+
+    public static <A> RegistryID<A> create(int expectedSize) {
+        return new RegistryID<>((int)((float)expectedSize / 0.8F));
     }
 
     @Override
@@ -64,18 +75,19 @@ public class RegistryID<K> implements Registry<K> {
     private void grow(int newSize) {
         K[] objects = this.keys;
         int[] is = this.values;
-        this.keys = (K[])(new Object[newSize]);
-        this.values = new int[newSize];
-        this.byId = (K[])(new Object[newSize]);
-        this.nextId = 0;
-        this.size = 0;
+        RegistryID<K> crudeIncrementalIntIdentityHashBiMap = new RegistryID<>(newSize);
 
         for(int i = 0; i < objects.length; ++i) {
             if (objects[i] != null) {
-                this.addMapping(objects[i], is[i]);
+                crudeIncrementalIntIdentityHashBiMap.addMapping(objects[i], is[i]);
             }
         }
 
+        this.keys = crudeIncrementalIntIdentityHashBiMap.keys;
+        this.values = crudeIncrementalIntIdentityHashBiMap.values;
+        this.byId = crudeIncrementalIntIdentityHashBiMap.byId;
+        this.nextId = crudeIncrementalIntIdentityHashBiMap.nextId;
+        this.size = crudeIncrementalIntIdentityHashBiMap.size;
     }
 
     public void addMapping(K value, int id) {
@@ -155,7 +167,12 @@ public class RegistryID<K> implements Registry<K> {
         this.size = 0;
     }
 
+    @Override
     public int size() {
         return this.size;
+    }
+
+    public RegistryID<K> copy() {
+        return new RegistryID<>((K[])((Object[])this.keys.clone()), (int[])this.values.clone(), (K[])((Object[])this.byId.clone()), this.nextId, this.size);
     }
 }

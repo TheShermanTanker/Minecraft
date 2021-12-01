@@ -1,7 +1,7 @@
 package net.minecraft.server.level;
 
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.shorts.ShortArraySet;
+import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.BitSet;
 import java.util.List;
@@ -11,7 +11,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
@@ -20,7 +19,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketPlayOutBlockChange;
 import net.minecraft.network.protocol.game.PacketPlayOutLightUpdate;
 import net.minecraft.network.protocol.game.PacketPlayOutMultiBlockChange;
-import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
 import net.minecraft.util.DebugBuffer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.ChunkCoordIntPair;
@@ -148,7 +146,7 @@ public class PlayerChunk {
             int i = this.levelHeightAccessor.getSectionIndex(pos.getY());
             if (this.changedBlocksPerSection[i] == null) {
                 this.hasChangedSections = true;
-                this.changedBlocksPerSection[i] = new ShortArraySet();
+                this.changedBlocksPerSection[i] = new ShortOpenHashSet();
             }
 
             this.changedBlocksPerSection[i].add(SectionPosition.sectionRelativePos(pos));
@@ -200,7 +198,7 @@ public class PlayerChunk {
                         this.broadcast(new PacketPlayOutBlockChange(blockPos, blockState), false);
                         this.broadcastBlockEntityIfNeeded(level, blockPos, blockState);
                     } else {
-                        ChunkSection levelChunkSection = chunk.getSections()[k];
+                        ChunkSection levelChunkSection = chunk.getSection(k);
                         PacketPlayOutMultiBlockChange clientboundSectionBlocksUpdatePacket = new PacketPlayOutMultiBlockChange(sectionPos, shortSet, levelChunkSection, this.resendLight);
                         this.broadcast(clientboundSectionBlocksUpdatePacket, false);
                         clientboundSectionBlocksUpdatePacket.runUpdates((pos, state) -> {
@@ -226,9 +224,9 @@ public class PlayerChunk {
     private void broadcastBlockEntity(World world, BlockPosition pos) {
         TileEntity blockEntity = world.getTileEntity(pos);
         if (blockEntity != null) {
-            PacketPlayOutTileEntityData clientboundBlockEntityDataPacket = blockEntity.getUpdatePacket();
-            if (clientboundBlockEntityDataPacket != null) {
-                this.broadcast(clientboundBlockEntityDataPacket, false);
+            Packet<?> packet = blockEntity.getUpdatePacket();
+            if (packet != null) {
+                this.broadcast(packet, false);
             }
         }
 
@@ -259,6 +257,16 @@ public class PlayerChunk {
         } else {
             return completableFuture == null ? UNLOADED_CHUNK_FUTURE : completableFuture;
         }
+    }
+
+    protected void addSaveDependency(String thenDesc, CompletableFuture<?> then) {
+        if (this.chunkToSaveHistory != null) {
+            this.chunkToSaveHistory.push(new PlayerChunk.ChunkSaveDebug(Thread.currentThread(), then, thenDesc));
+        }
+
+        this.chunkToSave = this.chunkToSave.thenCombine(then, (chunkAccess, object) -> {
+            return chunkAccess;
+        });
     }
 
     private void updateChunkToSave(CompletableFuture<? extends Either<? extends IChunkAccess, PlayerChunk.Failure>> then, String thenDesc) {
@@ -351,11 +359,8 @@ public class PlayerChunk {
         }
 
         if (bl3 && !bl4) {
-            CompletableFuture<Either<Chunk, PlayerChunk.Failure>> completableFuture2 = this.fullChunkFuture;
+            this.fullChunkFuture.complete(UNLOADED_LEVEL_CHUNK);
             this.fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
-            this.updateChunkToSave(completableFuture2.thenApply((either) -> {
-                return either.ifLeft(chunkStorage::packTicks);
-            }), "unfull");
         }
 
         boolean bl5 = fullChunkStatus.isAtLeast(PlayerChunk.State.TICKING);
@@ -428,10 +433,10 @@ public class PlayerChunk {
 
     static final class ChunkSaveDebug {
         private final Thread thread;
-        private final CompletableFuture<? extends Either<? extends IChunkAccess, PlayerChunk.Failure>> future;
+        private final CompletableFuture<?> future;
         private final String source;
 
-        ChunkSaveDebug(Thread thread, CompletableFuture<? extends Either<? extends IChunkAccess, PlayerChunk.Failure>> action, String actionDesc) {
+        ChunkSaveDebug(Thread thread, CompletableFuture<?> action, String actionDesc) {
             this.thread = thread;
             this.future = action;
             this.source = actionDesc;
@@ -453,7 +458,7 @@ public class PlayerChunk {
     }
 
     public interface PlayerProvider {
-        Stream<EntityPlayer> getPlayers(ChunkCoordIntPair chunkPos, boolean onlyOnWatchDistanceEdge);
+        List<EntityPlayer> getPlayers(ChunkCoordIntPair chunkPos, boolean onlyOnWatchDistanceEdge);
     }
 
     public static enum State {

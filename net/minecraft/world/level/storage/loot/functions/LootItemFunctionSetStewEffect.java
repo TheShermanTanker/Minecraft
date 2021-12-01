@@ -30,9 +30,9 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 public class LootItemFunctionSetStewEffect extends LootItemFunctionConditional {
     final Map<MobEffectBase, NumberProvider> effectDurationMap;
 
-    LootItemFunctionSetStewEffect(LootItemCondition[] conditions, Map<MobEffectBase, NumberProvider> map) {
+    LootItemFunctionSetStewEffect(LootItemCondition[] conditions, Map<MobEffectBase, NumberProvider> effects) {
         super(conditions);
-        this.effectDurationMap = ImmutableMap.copyOf(map);
+        this.effectDurationMap = ImmutableMap.copyOf(effects);
     }
 
     @Override

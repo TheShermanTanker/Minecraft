@@ -51,8 +51,8 @@ public class BehaviorWalkHome extends Behavior<EntityLiving> {
         this.lastUpdate = world.getTime() + (long)world.getRandom().nextInt(20);
         EntityCreature pathfinderMob = (EntityCreature)entity;
         VillagePlace poiManager = world.getPoiManager();
-        Predicate<BlockPosition> predicate = (blockPosx) -> {
-            long l = blockPosx.asLong();
+        Predicate<BlockPosition> predicate = (pos) -> {
+            long l = pos.asLong();
             if (this.batchCache.containsKey(l)) {
                 return false;
             } else if (++this.triedCount >= 5) {

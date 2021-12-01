@@ -9,7 +9,6 @@ import io.netty.handler.codec.MessageToByteEncoder;
 public class PacketPrepender extends MessageToByteEncoder<ByteBuf> {
     private static final int MAX_BYTES = 3;
 
-    @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
         int i = byteBuf.readableBytes();
         int j = PacketDataSerializer.getVarIntSize(i);

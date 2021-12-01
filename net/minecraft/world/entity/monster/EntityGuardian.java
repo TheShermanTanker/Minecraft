@@ -53,9 +53,11 @@ public class EntityGuardian extends EntityMonster {
     private float clientSideTailAnimationSpeed;
     private float clientSideSpikesAnimation;
     private float clientSideSpikesAnimationO;
+    @Nullable
     private EntityLiving clientSideCachedAttackTarget;
     private int clientSideAttackTime;
     private boolean clientSideTouchedGround;
+    @Nullable
     public PathfinderGoalRandomStroll randomStrollGoal;
 
     public EntityGuardian(EntityTypes<? extends EntityGuardian> type, World world) {
@@ -120,7 +122,7 @@ public class EntityGuardian extends EntityMonster {
         return 80;
     }
 
-    void setActiveAttackTarget(int entityId) {
+    public void setActiveAttackTarget(int entityId) {
         this.entityData.set(DATA_ID_ATTACK_TARGET, entityId);
     }
 
@@ -301,7 +303,7 @@ public class EntityGuardian extends EntityMonster {
     }
 
     public static boolean checkGuardianSpawnRules(EntityTypes<? extends EntityGuardian> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return (random.nextInt(20) == 0 || !world.canSeeSkyFromBelowWater(pos)) && world.getDifficulty() != EnumDifficulty.PEACEFUL && (spawnReason == EnumMobSpawn.SPAWNER || world.getFluid(pos).is(TagsFluid.WATER));
+        return (random.nextInt(20) == 0 || !world.canSeeSkyFromBelowWater(pos)) && world.getDifficulty() != EnumDifficulty.PEACEFUL && (spawnReason == EnumMobSpawn.SPAWNER || world.getFluid(pos).is(TagsFluid.WATER)) && world.getFluid(pos.below()).is(TagsFluid.WATER);
     }
 
     @Override
@@ -374,7 +376,7 @@ public class EntityGuardian extends EntityMonster {
                 double r = lookControl.getWantedX();
                 double s = lookControl.getWantedY();
                 double t = lookControl.getWantedZ();
-                if (!lookControl.isHasWanted()) {
+                if (!lookControl.isLookingAtTarget()) {
                     r = o;
                     s = p;
                     t = q;
@@ -421,14 +423,18 @@ public class EntityGuardian extends EntityMonster {
 
         @Override
         public boolean canContinueToUse() {
-            return super.canContinueToUse() && (this.elder || this.guardian.distanceToSqr(this.guardian.getGoalTarget()) > 9.0D);
+            return super.canContinueToUse() && (this.elder || this.guardian.getGoalTarget() != null && this.guardian.distanceToSqr(this.guardian.getGoalTarget()) > 9.0D);
         }
 
         @Override
         public void start() {
             this.attackTime = -10;
             this.guardian.getNavigation().stop();
-            this.guardian.getControllerLook().setLookAt(this.guardian.getGoalTarget(), 90.0F, 90.0F);
+            EntityLiving livingEntity = this.guardian.getGoalTarget();
+            if (livingEntity != null) {
+                this.guardian.getControllerLook().setLookAt(livingEntity, 90.0F, 90.0F);
+            }
+
             this.guardian.hasImpulse = true;
         }
 
@@ -440,35 +446,42 @@ public class EntityGuardian extends EntityMonster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             EntityLiving livingEntity = this.guardian.getGoalTarget();
-            this.guardian.getNavigation().stop();
-            this.guardian.getControllerLook().setLookAt(livingEntity, 90.0F, 90.0F);
-            if (!this.guardian.hasLineOfSight(livingEntity)) {
-                this.guardian.setGoalTarget((EntityLiving)null);
-            } else {
-                ++this.attackTime;
-                if (this.attackTime == 0) {
-                    this.guardian.setActiveAttackTarget(this.guardian.getGoalTarget().getId());
-                    if (!this.guardian.isSilent()) {
-                        this.guardian.level.broadcastEntityEffect(this.guardian, (byte)21);
-                    }
-                } else if (this.attackTime >= this.guardian.getAttackDuration()) {
-                    float f = 1.0F;
-                    if (this.guardian.level.getDifficulty() == EnumDifficulty.HARD) {
-                        f += 2.0F;
-                    }
-
-                    if (this.elder) {
-                        f += 2.0F;
-                    }
-
-                    livingEntity.damageEntity(DamageSource.indirectMagic(this.guardian, this.guardian), f);
-                    livingEntity.damageEntity(DamageSource.mobAttack(this.guardian), (float)this.guardian.getAttributeValue(GenericAttributes.ATTACK_DAMAGE));
+            if (livingEntity != null) {
+                this.guardian.getNavigation().stop();
+                this.guardian.getControllerLook().setLookAt(livingEntity, 90.0F, 90.0F);
+                if (!this.guardian.hasLineOfSight(livingEntity)) {
                     this.guardian.setGoalTarget((EntityLiving)null);
-                }
+                } else {
+                    ++this.attackTime;
+                    if (this.attackTime == 0) {
+                        this.guardian.setActiveAttackTarget(livingEntity.getId());
+                        if (!this.guardian.isSilent()) {
+                            this.guardian.level.broadcastEntityEffect(this.guardian, (byte)21);
+                        }
+                    } else if (this.attackTime >= this.guardian.getAttackDuration()) {
+                        float f = 1.0F;
+                        if (this.guardian.level.getDifficulty() == EnumDifficulty.HARD) {
+                            f += 2.0F;
+                        }
 
-                super.tick();
+                        if (this.elder) {
+                            f += 2.0F;
+                        }
+
+                        livingEntity.damageEntity(DamageSource.indirectMagic(this.guardian, this.guardian), f);
+                        livingEntity.damageEntity(DamageSource.mobAttack(this.guardian), (float)this.guardian.getAttributeValue(GenericAttributes.ATTACK_DAMAGE));
+                        this.guardian.setGoalTarget((EntityLiving)null);
+                    }
+
+                    super.tick();
+                }
             }
         }
     }

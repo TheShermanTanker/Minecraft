@@ -63,7 +63,6 @@ public class BehaviorController<E extends EntityLiving> {
     public static <E extends EntityLiving> Codec<BehaviorController<E>> codec(Collection<? extends MemoryModuleType<?>> memoryModules, Collection<? extends SensorType<? extends Sensor<? super E>>> sensors) {
         final MutableObject<Codec<BehaviorController<E>>> mutableObject = new MutableObject<>();
         mutableObject.setValue((new MapCodec<BehaviorController<E>>() {
-            @Override
             public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
                 return memoryModules.stream().flatMap((memoryModuleType) -> {
                     return SystemUtils.toStream(memoryModuleType.getSerializer().map((codec) -> {
@@ -74,11 +73,10 @@ public class BehaviorController<E extends EntityLiving> {
                 });
             }
 
-            @Override
             public <T> DataResult<BehaviorController<E>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
                 MutableObject<DataResult<Builder<BehaviorController.MemoryValue<?>>>> mutableObject = new MutableObject<>(DataResult.success(ImmutableList.builder()));
                 mapLike.entries().forEach((pair) -> {
-                    DataResult<MemoryModuleType<?>> dataResult = IRegistry.MEMORY_MODULE_TYPE.parse(dynamicOps, pair.getFirst());
+                    DataResult<MemoryModuleType<?>> dataResult = IRegistry.MEMORY_MODULE_TYPE.byNameCodec().parse(dynamicOps, pair.getFirst());
                     DataResult<? extends BehaviorController.MemoryValue<?>> dataResult2 = dataResult.flatMap((memoryModuleType) -> {
                         return this.captureRead(memoryModuleType, dynamicOps, (T)pair.getSecond());
                     });
@@ -98,7 +96,6 @@ public class BehaviorController<E extends EntityLiving> {
                 });
             }
 
-            @Override
             public <T> RecordBuilder<T> encode(BehaviorController<E> brain, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
                 brain.memories().forEach((memoryValue) -> {
                     memoryValue.serialize(dynamicOps, recordBuilder);
@@ -182,6 +179,7 @@ public class BehaviorController<E extends EntityLiving> {
         return optional.map(ExpirableMemory::getTimeToLive).orElse(0L);
     }
 
+    /** @deprecated */
     @Deprecated
     @VisibleForDebug
     public Map<MemoryModuleType<?>, Optional<? extends ExpirableMemory<?>>> getMemories() {
@@ -215,12 +213,14 @@ public class BehaviorController<E extends EntityLiving> {
         this.coreActivities = coreActivities;
     }
 
+    /** @deprecated */
     @Deprecated
     @VisibleForDebug
     public Set<Activity> getActiveActivities() {
         return this.activeActivities;
     }
 
+    /** @deprecated */
     @Deprecated
     @VisibleForDebug
     public List<Behavior<? super E>> getRunningBehaviors() {
@@ -480,7 +480,7 @@ public class BehaviorController<E extends EntityLiving> {
         public <T> void serialize(DynamicOps<T> ops, RecordBuilder<T> builder) {
             this.type.getSerializer().ifPresent((codec) -> {
                 this.value.ifPresent((expirableValue) -> {
-                    builder.add(IRegistry.MEMORY_MODULE_TYPE.encodeStart(ops, this.type), codec.encodeStart(ops, expirableValue));
+                    builder.add(IRegistry.MEMORY_MODULE_TYPE.byNameCodec().encodeStart(ops, this.type), codec.encodeStart(ops, expirableValue));
                 });
             });
         }

@@ -11,7 +11,9 @@ public class ShapeDetectorBlock {
     private final IWorldReader level;
     private final BlockPosition pos;
     private final boolean loadChunks;
+    @Nullable
     private IBlockData state;
+    @Nullable
     private TileEntity entity;
     private boolean cachedEntity;
 
@@ -48,8 +50,8 @@ public class ShapeDetectorBlock {
     }
 
     public static Predicate<ShapeDetectorBlock> hasState(Predicate<IBlockData> state) {
-        return (blockInWorld) -> {
-            return blockInWorld != null && state.test(blockInWorld.getState());
+        return (pos) -> {
+            return pos != null && state.test(pos.getState());
         };
     }
 }

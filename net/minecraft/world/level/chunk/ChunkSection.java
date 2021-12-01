@@ -1,9 +1,13 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import net.minecraft.nbt.GameProfileSerializer;
+import net.minecraft.core.IRegistry;
+import net.minecraft.core.QuartPos;
 import net.minecraft.network.PacketDataSerializer;
+import net.minecraft.world.level.biome.BiomeBase;
+import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
@@ -13,23 +17,25 @@ public class ChunkSection {
     public static final int SECTION_WIDTH = 16;
     public static final int SECTION_HEIGHT = 16;
     public static final int SECTION_SIZE = 4096;
-    public static final DataPalette<IBlockData> GLOBAL_BLOCKSTATE_PALETTE = new DataPaletteGlobal<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.getBlockData());
+    public static final int BIOME_CONTAINER_BITS = 2;
     private final int bottomBlockY;
     private short nonEmptyBlockCount;
     private short tickingBlockCount;
     private short tickingFluidCount;
-    private final DataPaletteBlock<IBlockData> states;
+    public final DataPaletteBlock<IBlockData> states;
+    private final DataPaletteBlock<BiomeBase> biomes;
 
-    public ChunkSection(int yOffset) {
-        this(yOffset, (short)0, (short)0, (short)0);
+    public ChunkSection(int chunkPos, DataPaletteBlock<IBlockData> blockStateContainer, DataPaletteBlock<BiomeBase> biomeContainer) {
+        this.bottomBlockY = getBottomBlockY(chunkPos);
+        this.states = blockStateContainer;
+        this.biomes = biomeContainer;
+        this.recalcBlockCounts();
     }
 
-    public ChunkSection(int yOffset, short nonEmptyBlockCount, short randomTickableBlockCount, short nonEmptyFluidCount) {
-        this.bottomBlockY = getBottomBlockY(yOffset);
-        this.nonEmptyBlockCount = nonEmptyBlockCount;
-        this.tickingBlockCount = randomTickableBlockCount;
-        this.tickingFluidCount = nonEmptyFluidCount;
-        this.states = new DataPaletteBlock<>(GLOBAL_BLOCKSTATE_PALETTE, Block.BLOCK_STATE_REGISTRY, GameProfileSerializer::readBlockState, GameProfileSerializer::writeBlockState, Blocks.AIR.getBlockData());
+    public ChunkSection(int chunkPos, IRegistry<BiomeBase> biomeRegistry) {
+        this.bottomBlockY = getBottomBlockY(chunkPos);
+        this.states = new DataPaletteBlock<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.getBlockData(), PalettedContainer$Strategy.SECTION_STATES);
+        this.biomes = new DataPaletteBlock<>(biomeRegistry, biomeRegistry.getOrThrow(Biomes.PLAINS), PalettedContainer$Strategy.SECTION_BIOMES);
     }
 
     public static int getBottomBlockY(int chunkPos) {
@@ -91,12 +97,8 @@ public class ChunkSection {
         return blockState;
     }
 
-    public boolean isEmpty() {
+    public boolean hasOnlyAir() {
         return this.nonEmptyBlockCount == 0;
-    }
-
-    public static boolean isEmpty(@Nullable ChunkSection section) {
-        return section == Chunk.EMPTY_SECTION || section.isEmpty();
     }
 
     public boolean isRandomlyTicking() {
@@ -142,21 +144,52 @@ public class ChunkSection {
         return this.states;
     }
 
+    public DataPaletteBlock<BiomeBase> getBiomes() {
+        return this.biomes;
+    }
+
     public void read(PacketDataSerializer buf) {
         this.nonEmptyBlockCount = buf.readShort();
         this.states.read(buf);
+        this.biomes.read(buf);
     }
 
     public void write(PacketDataSerializer buf) {
         buf.writeShort(this.nonEmptyBlockCount);
         this.states.write(buf);
+        this.biomes.write(buf);
     }
 
     public int getSerializedSize() {
-        return 2 + this.states.getSerializedSize();
+        return 2 + this.states.getSerializedSize() + this.biomes.getSerializedSize();
     }
 
     public boolean maybeHas(Predicate<IBlockData> predicate) {
         return this.states.contains(predicate);
+    }
+
+    public BiomeBase getNoiseBiome(int x, int y, int z) {
+        return this.biomes.get(x, y, z);
+    }
+
+    public void fillBiomesFromNoise(BiomeResolver biomeSupplier, Climate.Sampler sampler, int x, int z) {
+        DataPaletteBlock<BiomeBase> palettedContainer = this.getBiomes();
+        palettedContainer.acquire();
+
+        try {
+            int i = QuartPos.fromBlock(this.getYPosition());
+            int j = 4;
+
+            for(int k = 0; k < 4; ++k) {
+                for(int l = 0; l < 4; ++l) {
+                    for(int m = 0; m < 4; ++m) {
+                        palettedContainer.getAndSetUnchecked(k, l, m, biomeSupplier.getNoiseBiome(x + k, i + l, z + m, sampler));
+                    }
+                }
+            }
+        } finally {
+            palettedContainer.release();
+        }
+
     }
 }

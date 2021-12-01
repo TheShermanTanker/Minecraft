@@ -18,7 +18,6 @@ public class DataConverterSchemaV808 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
         registerInventory(schema, map, "minecraft:shulker_box");

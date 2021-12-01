@@ -12,61 +12,30 @@ import net.minecraft.world.level.EnumGamemode;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.dimension.DimensionManager;
 
-public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
-    private static final int HARDCORE_FLAG = 8;
-    private final int playerId;
-    private final long seed;
-    private final boolean hardcore;
-    private final EnumGamemode gameType;
-    @Nullable
-    private final EnumGamemode previousGameType;
-    private final Set<ResourceKey<World>> levels;
-    private final IRegistryCustom.Dimension registryHolder;
-    private final DimensionManager dimensionType;
-    private final ResourceKey<World> dimension;
-    private final int maxPlayers;
-    private final int chunkRadius;
-    private final boolean reducedDebugInfo;
-    private final boolean showDeathScreen;
-    private final boolean isDebug;
-    private final boolean isFlat;
-
-    public PacketPlayOutLogin(int playerEntityId, EnumGamemode gameMode, @Nullable EnumGamemode previousGameMode, long sha256Seed, boolean hardcore, Set<ResourceKey<World>> dimensionIds, IRegistryCustom.Dimension registryManager, DimensionManager dimensionType, ResourceKey<World> dimensionId, int maxPlayers, int chunkLoadDistance, boolean reducedDebugInfo, boolean showDeathScreen, boolean debugWorld, boolean flatWorld) {
-        this.playerId = playerEntityId;
-        this.levels = dimensionIds;
-        this.registryHolder = registryManager;
-        this.dimensionType = dimensionType;
-        this.dimension = dimensionId;
-        this.seed = sha256Seed;
-        this.gameType = gameMode;
-        this.previousGameType = previousGameMode;
-        this.maxPlayers = maxPlayers;
-        this.hardcore = hardcore;
-        this.chunkRadius = chunkLoadDistance;
-        this.reducedDebugInfo = reducedDebugInfo;
-        this.showDeathScreen = showDeathScreen;
-        this.isDebug = debugWorld;
-        this.isFlat = flatWorld;
+public record PacketPlayOutLogin(int playerId, boolean hardcore, EnumGamemode gameType, @Nullable EnumGamemode previousGameType, Set<ResourceKey<World>> levels, IRegistryCustom.Dimension registryHolder, DimensionManager dimensionType, ResourceKey<World> dimension, long seed, int maxPlayers, int chunkRadius, int simulationDistance, boolean reducedDebugInfo, boolean showDeathScreen, boolean isDebug, boolean isFlat) implements Packet<PacketListenerPlayOut> {
+    public PacketPlayOutLogin(PacketDataSerializer buf) {
+        this(buf.readInt(), buf.readBoolean(), EnumGamemode.getById(buf.readByte()), EnumGamemode.byNullableId(buf.readByte()), buf.readCollection(Sets::newHashSetWithExpectedSize, (b) -> {
+            return ResourceKey.create(IRegistry.DIMENSION_REGISTRY, b.readResourceLocation());
+        }), buf.readWithCodec(IRegistryCustom.Dimension.NETWORK_CODEC), buf.readWithCodec(DimensionManager.CODEC).get(), ResourceKey.create(IRegistry.DIMENSION_REGISTRY, buf.readResourceLocation()), buf.readLong(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean());
     }
 
-    public PacketPlayOutLogin(PacketDataSerializer buf) {
-        this.playerId = buf.readInt();
-        this.hardcore = buf.readBoolean();
-        this.gameType = EnumGamemode.getById(buf.readByte());
-        this.previousGameType = EnumGamemode.byNullableId(buf.readByte());
-        this.levels = buf.readCollection(Sets::newHashSetWithExpectedSize, (b) -> {
-            return ResourceKey.create(IRegistry.DIMENSION_REGISTRY, b.readResourceLocation());
-        });
-        this.registryHolder = buf.readWithCodec(IRegistryCustom.Dimension.NETWORK_CODEC);
-        this.dimensionType = buf.readWithCodec(DimensionManager.CODEC).get();
-        this.dimension = ResourceKey.create(IRegistry.DIMENSION_REGISTRY, buf.readResourceLocation());
-        this.seed = buf.readLong();
-        this.maxPlayers = buf.readVarInt();
-        this.chunkRadius = buf.readVarInt();
-        this.reducedDebugInfo = buf.readBoolean();
-        this.showDeathScreen = buf.readBoolean();
-        this.isDebug = buf.readBoolean();
-        this.isFlat = buf.readBoolean();
+    public PacketPlayOutLogin(int playerEntityId, boolean bl, EnumGamemode previousGameMode, @Nullable EnumGamemode gameType, Set<ResourceKey<World>> set, IRegistryCustom.Dimension registryHolder, DimensionManager dimensionType, ResourceKey<World> resourceKey, long l, int maxPlayers, int chunkLoadDistance, int i, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+        this.playerId = playerEntityId;
+        this.hardcore = bl;
+        this.gameType = previousGameMode;
+        this.previousGameType = gameType;
+        this.levels = set;
+        this.registryHolder = registryHolder;
+        this.dimensionType = dimensionType;
+        this.dimension = resourceKey;
+        this.seed = l;
+        this.maxPlayers = maxPlayers;
+        this.chunkRadius = chunkLoadDistance;
+        this.simulationDistance = i;
+        this.reducedDebugInfo = bl2;
+        this.showDeathScreen = bl3;
+        this.isDebug = bl4;
+        this.isFlat = bl5;
     }
 
     @Override
@@ -86,6 +55,7 @@ public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
         buf.writeLong(this.seed);
         buf.writeVarInt(this.maxPlayers);
         buf.writeVarInt(this.chunkRadius);
+        buf.writeVarInt(this.simulationDistance);
         buf.writeBoolean(this.reducedDebugInfo);
         buf.writeBoolean(this.showDeathScreen);
         buf.writeBoolean(this.isDebug);
@@ -97,24 +67,20 @@ public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
         listener.handleLogin(this);
     }
 
-    public int getPlayerId() {
+    public int playerId() {
         return this.playerId;
     }
 
-    public long getSeed() {
-        return this.seed;
-    }
-
-    public boolean isHardcore() {
+    public boolean hardcore() {
         return this.hardcore;
     }
 
-    public EnumGamemode getGameType() {
+    public EnumGamemode gameType() {
         return this.gameType;
     }
 
     @Nullable
-    public EnumGamemode getPreviousGameType() {
+    public EnumGamemode previousGameType() {
         return this.previousGameType;
     }
 
@@ -122,31 +88,39 @@ public class PacketPlayOutLogin implements Packet<PacketListenerPlayOut> {
         return this.levels;
     }
 
-    public IRegistryCustom registryAccess() {
+    public IRegistryCustom.Dimension registryHolder() {
         return this.registryHolder;
     }
 
-    public DimensionManager getDimensionType() {
+    public DimensionManager dimensionType() {
         return this.dimensionType;
     }
 
-    public ResourceKey<World> getDimension() {
+    public ResourceKey<World> dimension() {
         return this.dimension;
     }
 
-    public int getMaxPlayers() {
+    public long seed() {
+        return this.seed;
+    }
+
+    public int maxPlayers() {
         return this.maxPlayers;
     }
 
-    public int getChunkRadius() {
+    public int chunkRadius() {
         return this.chunkRadius;
     }
 
-    public boolean isReducedDebugInfo() {
+    public int simulationDistance() {
+        return this.simulationDistance;
+    }
+
+    public boolean reducedDebugInfo() {
         return this.reducedDebugInfo;
     }
 
-    public boolean shouldShowDeathScreen() {
+    public boolean showDeathScreen() {
         return this.showDeathScreen;
     }
 

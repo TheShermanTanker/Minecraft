@@ -17,7 +17,6 @@ public class DataConverterItemLoreComponentize extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.ITEM_STACK);
         OpticFinder<?> opticFinder = type.findField("tag");

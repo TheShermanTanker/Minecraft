@@ -45,6 +45,7 @@ public class EntityPigZombie extends EntityZombie implements IEntityAngerable {
     private int playFirstAngerSoundIn;
     private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
+    @Nullable
     private UUID persistentAngerTarget;
     private static final int ALERT_RANGE_Y = 10;
     private static final IntProviderUniform ALERT_INTERVAL = TimeRange.rangeOfSeconds(4, 6);
@@ -228,6 +229,7 @@ public class EntityPigZombie extends EntityZombie implements IEntityAngerable {
         this.getAttributeInstance(GenericAttributes.SPAWN_REINFORCEMENTS_CHANCE).setValue(0.0D);
     }
 
+    @Nullable
     @Override
     public UUID getAngerTarget() {
         return this.persistentAngerTarget;

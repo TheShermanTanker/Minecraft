@@ -89,34 +89,38 @@ public class WorldGenFeatureDripstoneCluster extends WorldGenerator<DripstoneClu
                 if (optionalInt3.isPresent() && bl3 && !this.isLava(world, pos.atY(optionalInt3.getAsInt()))) {
                     int o = config.dripstoneBlockLayerThickness.sample(random);
                     this.replaceBlocksWithDripstoneBlocks(world, pos.atY(optionalInt3.getAsInt()), o, EnumDirection.DOWN);
-                    p = Math.max(0, m + MathHelper.randomBetweenInclusive(random, -config.maxStalagmiteStalactiteHeightDiff, config.maxStalagmiteStalactiteHeightDiff));
+                    if (optionalInt.isPresent()) {
+                        p = Math.max(0, m + MathHelper.randomBetweenInclusive(random, -config.maxStalagmiteStalactiteHeightDiff, config.maxStalagmiteStalactiteHeightDiff));
+                    } else {
+                        p = this.getDripstoneHeight(random, localX, localZ, density, height, config);
+                    }
                 } else {
                     p = 0;
                 }
 
+                int z;
                 int y;
-                int x;
                 if (optionalInt.isPresent() && optionalInt3.isPresent() && optionalInt.getAsInt() - m <= optionalInt3.getAsInt() + p) {
-                    int r = optionalInt3.getAsInt();
-                    int s = optionalInt.getAsInt();
-                    int t = Math.max(s - m, r + 1);
-                    int u = Math.min(r + p, s - 1);
-                    int v = MathHelper.randomBetweenInclusive(random, t, u + 1);
-                    int w = v - 1;
-                    x = s - v;
-                    y = w - r;
+                    int s = optionalInt3.getAsInt();
+                    int t = optionalInt.getAsInt();
+                    int u = Math.max(t - m, s + 1);
+                    int v = Math.min(s + p, t - 1);
+                    int w = MathHelper.randomBetweenInclusive(random, u, v + 1);
+                    int x = w - 1;
+                    y = t - w;
+                    z = x - s;
                 } else {
-                    x = m;
-                    y = p;
+                    y = m;
+                    z = p;
                 }
 
-                boolean bl4 = random.nextBoolean() && x > 0 && y > 0 && column.getHeight().isPresent() && x + y == column.getHeight().getAsInt();
+                boolean bl4 = random.nextBoolean() && y > 0 && z > 0 && column.getHeight().isPresent() && y + z == column.getHeight().getAsInt();
                 if (optionalInt.isPresent()) {
-                    DripstoneUtils.growPointedDripstone(world, pos.atY(optionalInt.getAsInt() - 1), EnumDirection.DOWN, x, bl4);
+                    DripstoneUtils.growPointedDripstone(world, pos.atY(optionalInt.getAsInt() - 1), EnumDirection.DOWN, y, bl4);
                 }
 
                 if (optionalInt3.isPresent()) {
-                    DripstoneUtils.growPointedDripstone(world, pos.atY(optionalInt3.getAsInt() + 1), EnumDirection.UP, y, bl4);
+                    DripstoneUtils.growPointedDripstone(world, pos.atY(optionalInt3.getAsInt() + 1), EnumDirection.UP, z, bl4);
                 }
 
             }
@@ -174,7 +178,7 @@ public class WorldGenFeatureDripstoneCluster extends WorldGenerator<DripstoneClu
         int i = radiusX - Math.abs(localX);
         int j = radiusZ - Math.abs(localZ);
         int k = Math.min(i, j);
-        return MathHelper.clampedMap((double)k, 0.0D, (double)config.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn, (double)config.chanceOfDripstoneColumnAtMaxDistanceFromCenter, 1.0D);
+        return (double)MathHelper.clampedMap((float)k, 0.0F, (float)config.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn, config.chanceOfDripstoneColumnAtMaxDistanceFromCenter, 1.0F);
     }
 
     private static float randomBetweenBiased(Random random, float min, float max, float mean, float deviation) {

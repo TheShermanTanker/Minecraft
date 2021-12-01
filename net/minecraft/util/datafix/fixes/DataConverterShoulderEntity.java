@@ -15,7 +15,6 @@ public class DataConverterShoulderEntity extends DataFix {
         this.type = type;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.writeAndRead(this.name, this.getInputSchema().getType(this.type), this.getOutputSchema().getType(this.type));
     }

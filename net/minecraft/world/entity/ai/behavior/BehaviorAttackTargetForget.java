@@ -27,13 +27,13 @@ public class BehaviorAttackTargetForget<E extends EntityInsentient> extends Beha
     }
 
     public BehaviorAttackTargetForget(Consumer<E> forgetCallback) {
-        this((livingEntity) -> {
+        this((target) -> {
             return false;
         }, forgetCallback);
     }
 
     public BehaviorAttackTargetForget() {
-        this((livingEntity) -> {
+        this((target) -> {
             return false;
         }, (mob) -> {
         });

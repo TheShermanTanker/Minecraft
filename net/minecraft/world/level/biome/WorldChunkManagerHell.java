@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 
-public class WorldChunkManagerHell extends WorldChunkManager {
+public class WorldChunkManagerHell extends WorldChunkManager implements BiomeManager.Provider {
     public static final Codec<WorldChunkManagerHell> CODEC = BiomeBase.CODEC.fieldOf("biome").xmap(WorldChunkManagerHell::new, (fixedBiomeSource) -> {
         return fixedBiomeSource.biome;
     }).stable().codec();
@@ -38,13 +38,18 @@ public class WorldChunkManagerHell extends WorldChunkManager {
     }
 
     @Override
+    public BiomeBase getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
+        return this.biome.get();
+    }
+
+    @Override
     public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
         return this.biome.get();
     }
 
     @Nullable
     @Override
-    public BlockPosition findBiomeHorizontal(int x, int y, int z, int radius, int i, Predicate<BiomeBase> predicate, Random random, boolean bl) {
+    public BlockPosition findBiomeHorizontal(int x, int y, int z, int radius, int i, Predicate<BiomeBase> predicate, Random random, boolean bl, Climate.Sampler noiseSampler) {
         if (predicate.test(this.biome.get())) {
             return bl ? new BlockPosition(x, y, z) : new BlockPosition(x - radius + random.nextInt(radius * 2 + 1), y, z - radius + random.nextInt(radius * 2 + 1));
         } else {
@@ -53,7 +58,7 @@ public class WorldChunkManagerHell extends WorldChunkManager {
     }
 
     @Override
-    public Set<BiomeBase> getBiomesWithin(int x, int y, int z, int radius) {
+    public Set<BiomeBase> getBiomesWithin(int x, int y, int z, int radius, Climate.Sampler sampler) {
         return Sets.newHashSet(this.biome.get());
     }
 }

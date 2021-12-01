@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.stats.StatisticList;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GeneratorAccess;
+import net.minecraft.world.level.IBlockLightAccess;
 import net.minecraft.world.level.IWorldReader;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.Blocks;
@@ -31,6 +33,7 @@ import net.minecraft.world.level.pathfinder.PathType;
 public abstract class EntityAnimal extends EntityAgeable {
     static final int PARENT_AGE_AFTER_BREEDING = 6000;
     public int inLove;
+    @Nullable
     public UUID loveCause;
 
     protected EntityAnimal(EntityTypes<? extends EntityAnimal> type, World world) {
@@ -105,7 +108,11 @@ public abstract class EntityAnimal extends EntityAgeable {
     }
 
     public static boolean checkAnimalSpawnRules(EntityTypes<? extends EntityAnimal> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return world.getType(pos.below()).is(Blocks.GRASS_BLOCK) && world.getLightLevel(pos, 0) > 8;
+        return world.getType(pos.below()).is(TagsBlock.ANIMALS_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
+    }
+
+    protected static boolean isBrightEnoughToSpawn(IBlockLightAccess world, BlockPosition pos) {
+        return world.getLightLevel(pos, 0) > 8;
     }
 
     @Override

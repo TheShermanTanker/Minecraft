@@ -80,10 +80,15 @@ public class BehaviorMakeLoveAnimal extends Behavior<EntityAnimal> {
     }
 
     private Optional<? extends EntityAnimal> findValidBreedPartner(EntityAnimal animal) {
-        return animal.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().stream().filter((livingEntity) -> {
-            return livingEntity.getEntityType() == this.partnerType;
-        }).map((livingEntity) -> {
-            return (EntityAnimal)livingEntity;
-        }).filter(animal::mate).findFirst();
+        return animal.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().findClosest((entity) -> {
+            if (entity.getEntityType() == this.partnerType && entity instanceof EntityAnimal) {
+                EntityAnimal animal2 = (EntityAnimal)entity;
+                if (animal.mate(animal2)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }).map(EntityAnimal.class::cast);
     }
 }

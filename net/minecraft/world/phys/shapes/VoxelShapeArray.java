@@ -11,8 +11,8 @@ public class VoxelShapeArray extends VoxelShape {
     private final DoubleList ys;
     private final DoubleList zs;
 
-    protected VoxelShapeArray(VoxelShapeDiscrete shape, double[] ds, double[] es, double[] fs) {
-        this(shape, (DoubleList)DoubleArrayList.wrap(Arrays.copyOf(ds, shape.getXSize() + 1)), (DoubleList)DoubleArrayList.wrap(Arrays.copyOf(es, shape.getYSize() + 1)), (DoubleList)DoubleArrayList.wrap(Arrays.copyOf(fs, shape.getZSize() + 1)));
+    protected VoxelShapeArray(VoxelShapeDiscrete shape, double[] xPoints, double[] yPoints, double[] zPoints) {
+        this(shape, (DoubleList)DoubleArrayList.wrap(Arrays.copyOf(xPoints, shape.getXSize() + 1)), (DoubleList)DoubleArrayList.wrap(Arrays.copyOf(yPoints, shape.getYSize() + 1)), (DoubleList)DoubleArrayList.wrap(Arrays.copyOf(zPoints, shape.getZSize() + 1)));
     }
 
     VoxelShapeArray(VoxelShapeDiscrete shape, DoubleList xPoints, DoubleList yPoints, DoubleList zPoints) {

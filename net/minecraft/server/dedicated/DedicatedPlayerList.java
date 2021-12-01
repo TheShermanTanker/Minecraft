@@ -15,6 +15,7 @@ public class DedicatedPlayerList extends PlayerList {
         super(server, tracker, saveHandler, server.getDedicatedServerProperties().maxPlayers);
         DedicatedServerProperties dedicatedServerProperties = server.getDedicatedServerProperties();
         this.setViewDistance(dedicatedServerProperties.viewDistance);
+        this.setSimulationDistance(dedicatedServerProperties.simulationDistance);
         super.setHasWhitelist(dedicatedServerProperties.whiteList.get());
         this.loadUserBanList();
         this.saveUserBanList();
@@ -32,7 +33,7 @@ public class DedicatedPlayerList extends PlayerList {
     @Override
     public void setHasWhitelist(boolean whitelistEnabled) {
         super.setHasWhitelist(whitelistEnabled);
-        this.c().setHasWhitelist(whitelistEnabled);
+        this.getServer().setHasWhitelist(whitelistEnabled);
     }
 
     @Override
@@ -130,7 +131,7 @@ public class DedicatedPlayerList extends PlayerList {
     }
 
     @Override
-    public DedicatedServer c() {
+    public DedicatedServer getServer() {
         return (DedicatedServer)super.getServer();
     }
 

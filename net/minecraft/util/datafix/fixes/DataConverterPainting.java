@@ -12,10 +12,10 @@ import java.util.Optional;
 import net.minecraft.resources.MinecraftKey;
 
 public class DataConverterPainting extends DataConverterNamedEntity {
-    private static final Map<String, String> MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
-        hashMap.put("donkeykong", "donkey_kong");
-        hashMap.put("burningskull", "burning_skull");
-        hashMap.put("skullandroses", "skull_and_roses");
+    private static final Map<String, String> MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
+        map.put("donkeykong", "donkey_kong");
+        map.put("burningskull", "burning_skull");
+        map.put("skullandroses", "skull_and_roses");
     });
 
     public DataConverterPainting(Schema outputSchema, boolean changesType) {

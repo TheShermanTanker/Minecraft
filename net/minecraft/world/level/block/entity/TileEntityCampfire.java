@@ -2,7 +2,6 @@ package net.minecraft.world.level.block.entity;
 
 import java.util.Optional;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.NonNullList;
@@ -123,28 +122,23 @@ public class TileEntityCampfire extends TileEntity implements Clearable {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        this.saveMetadataAndItems(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
+        ContainerUtil.saveAllItems(nbt, this.items, true);
         nbt.setIntArray("CookingTimes", this.cookingProgress);
         nbt.setIntArray("CookingTotalTimes", this.cookingTime);
-        return nbt;
     }
 
-    private NBTTagCompound saveMetadataAndItems(NBTTagCompound nbt) {
-        super.save(nbt);
-        ContainerUtil.saveAllItems(nbt, this.items, true);
-        return nbt;
-    }
-
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 13, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.saveMetadataAndItems(new NBTTagCompound());
+        NBTTagCompound compoundTag = new NBTTagCompound();
+        ContainerUtil.saveAllItems(compoundTag, this.items, true);
+        return compoundTag;
     }
 
     public Optional<RecipeCampfire> getCookableRecipe(ItemStack item) {

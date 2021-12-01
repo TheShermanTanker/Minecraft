@@ -45,7 +45,7 @@ public abstract class PathfinderGoalGotoTarget extends PathfinderGoal {
     }
 
     protected int nextStartTick(EntityCreature mob) {
-        return 200 + mob.getRandom().nextInt(200);
+        return reducedTickDelay(200 + mob.getRandom().nextInt(200));
     }
 
     @Override
@@ -70,6 +70,11 @@ public abstract class PathfinderGoalGotoTarget extends PathfinderGoal {
 
     protected BlockPosition getMoveToTarget() {
         return this.blockPos.above();
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     @Override

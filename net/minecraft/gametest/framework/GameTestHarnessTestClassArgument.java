@@ -18,7 +18,6 @@ import net.minecraft.network.chat.ChatComponentText;
 public class GameTestHarnessTestClassArgument implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("techtests", "mobtests");
 
-    @Override
     public String parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
         if (GameTestHarnessRegistry.isTestClass(string)) {
@@ -37,12 +36,10 @@ public class GameTestHarnessTestClassArgument implements ArgumentType<String> {
         return context.getArgument(name, String.class);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggest(GameTestHarnessRegistry.getAllTestClassNames().stream(), suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

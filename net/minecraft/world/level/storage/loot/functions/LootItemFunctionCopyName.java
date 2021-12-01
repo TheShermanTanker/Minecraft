@@ -16,9 +16,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class LootItemFunctionCopyName extends LootItemFunctionConditional {
     final LootItemFunctionCopyName.Source source;
 
-    LootItemFunctionCopyName(LootItemCondition[] conditions, LootItemFunctionCopyName.Source nameSource) {
+    LootItemFunctionCopyName(LootItemCondition[] conditions, LootItemFunctionCopyName.Source source) {
         super(conditions);
-        this.source = nameSource;
+        this.source = source;
     }
 
     @Override

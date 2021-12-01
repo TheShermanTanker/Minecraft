@@ -1,6 +1,5 @@
 package net.minecraft.world.level.block.state.properties;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -66,7 +65,9 @@ public class BlockStateEnum<T extends Enum<T> & INamable> extends IBlockState<T>
     }
 
     public static <T extends Enum<T> & INamable> BlockStateEnum<T> of(String name, Class<T> type) {
-        return create(name, type, Predicates.alwaysTrue());
+        return create(name, type, (enum_) -> {
+            return true;
+        });
     }
 
     public static <T extends Enum<T> & INamable> BlockStateEnum<T> create(String name, Class<T> type, Predicate<T> filter) {

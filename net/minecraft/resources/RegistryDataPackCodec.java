@@ -23,12 +23,10 @@ public final class RegistryDataPackCodec<E> implements Codec<RegistryMaterials<E
         this.elementCodec = codec;
     }
 
-    @Override
     public <T> DataResult<T> encode(RegistryMaterials<E> mappedRegistry, DynamicOps<T> dynamicOps, T object) {
         return this.directCodec.encode(mappedRegistry, dynamicOps, object);
     }
 
-    @Override
     public <T> DataResult<Pair<RegistryMaterials<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
         DataResult<Pair<RegistryMaterials<E>, T>> dataResult = this.directCodec.decode(dynamicOps, object);
         return dynamicOps instanceof RegistryReadOps ? dataResult.flatMap((pair) -> {

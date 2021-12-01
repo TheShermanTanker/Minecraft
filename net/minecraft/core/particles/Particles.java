@@ -7,9 +7,8 @@ import net.minecraft.core.IRegistry;
 public class Particles {
     public static final ParticleType AMBIENT_ENTITY_EFFECT = register("ambient_entity_effect", false);
     public static final ParticleType ANGRY_VILLAGER = register("angry_villager", false);
-    public static final ParticleType BARRIER = register("barrier", false);
-    public static final ParticleType LIGHT = register("light", false);
     public static final Particle<ParticleParamBlock> BLOCK = register("block", ParticleParamBlock.DESERIALIZER, ParticleParamBlock::codec);
+    public static final Particle<ParticleParamBlock> BLOCK_MARKER = register("block_marker", ParticleParamBlock.DESERIALIZER, ParticleParamBlock::codec);
     public static final ParticleType BUBBLE = register("bubble", false);
     public static final ParticleType CLOUD = register("cloud", false);
     public static final ParticleType CRIT = register("crit", false);
@@ -94,7 +93,7 @@ public class Particles {
     public static final ParticleType WAX_OFF = register("wax_off", true);
     public static final ParticleType ELECTRIC_SPARK = register("electric_spark", true);
     public static final ParticleType SCRAPE = register("scrape", true);
-    public static final Codec<ParticleParam> CODEC = IRegistry.PARTICLE_TYPE.dispatch("type", ParticleParam::getParticle, Particle::codec);
+    public static final Codec<ParticleParam> CODEC = IRegistry.PARTICLE_TYPE.byNameCodec().dispatch("type", ParticleParam::getParticle, Particle::codec);
 
     private static ParticleType register(String name, boolean alwaysShow) {
         return IRegistry.register(IRegistry.PARTICLE_TYPE, name, new ParticleType(alwaysShow));

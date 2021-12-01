@@ -52,10 +52,10 @@ public class PrepareRamNearestTarget<E extends EntityCreature> extends Behavior<
     @Override
     protected void start(WorldServer world, EntityCreature entity, long time) {
         BehaviorController<?> brain = entity.getBehaviorController();
-        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap((mobs) -> {
-            return mobs.stream().filter((mob) -> {
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap((nearestVisibleLivingEntities) -> {
+            return nearestVisibleLivingEntities.findClosest((mob) -> {
                 return this.ramTargeting.test(entity, mob);
-            }).findFirst();
+            });
         }).ifPresent((mob) -> {
             this.chooseRamPosition(entity, mob);
         });

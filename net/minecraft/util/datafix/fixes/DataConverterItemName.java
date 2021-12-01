@@ -18,7 +18,6 @@ public abstract class DataConverterItemName extends DataFix {
         this.name = name;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<Pair<String, String>> type = DSL.named(DataConverterTypes.ITEM_NAME.typeName(), DataConverterSchemaNamed.namespacedString());
         if (!Objects.equals(this.getInputSchema().getType(DataConverterTypes.ITEM_NAME), type)) {

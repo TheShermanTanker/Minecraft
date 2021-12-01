@@ -23,19 +23,18 @@ import net.minecraft.world.phys.Vec3D;
 
 public class ArgumentAnchor implements ArgumentType<ArgumentAnchor.Anchor> {
     private static final Collection<String> EXAMPLES = Arrays.asList("eyes", "feet");
-    private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.anchor.invalid", object);
+    private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType((name) -> {
+        return new ChatMessage("argument.anchor.invalid", name);
     });
 
-    public static ArgumentAnchor.Anchor getAnchor(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, ArgumentAnchor.Anchor.class);
+    public static ArgumentAnchor.Anchor getAnchor(CommandContext<CommandListenerWrapper> context, String name) {
+        return context.getArgument(name, ArgumentAnchor.Anchor.class);
     }
 
     public static ArgumentAnchor anchor() {
         return new ArgumentAnchor();
     }
 
-    @Override
     public ArgumentAnchor.Anchor parse(StringReader stringReader) throws CommandSyntaxException {
         int i = stringReader.getCursor();
         String string = stringReader.readUnquotedString();
@@ -48,27 +47,25 @@ public class ArgumentAnchor implements ArgumentType<ArgumentAnchor.Anchor> {
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggest(ArgumentAnchor.Anchor.BY_NAME.keySet(), suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
 
     public static enum Anchor {
-        FEET("feet", (vec3, entity) -> {
-            return vec3;
+        FEET("feet", (pos, entity) -> {
+            return pos;
         }),
-        EYES("eyes", (vec3, entity) -> {
-            return new Vec3D(vec3.x, vec3.y + (double)entity.getHeadHeight(), vec3.z);
+        EYES("eyes", (pos, entity) -> {
+            return new Vec3D(pos.x, pos.y + (double)entity.getHeadHeight(), pos.z);
         });
 
-        static final Map<String, ArgumentAnchor.Anchor> BY_NAME = SystemUtils.make(Maps.newHashMap(), (hashMap) -> {
+        static final Map<String, ArgumentAnchor.Anchor> BY_NAME = SystemUtils.make(Maps.newHashMap(), (map) -> {
             for(ArgumentAnchor.Anchor anchor : values()) {
-                hashMap.put(anchor.name, anchor);
+                map.put(anchor.name, anchor);
             }
 
         });
@@ -89,9 +86,9 @@ public class ArgumentAnchor implements ArgumentType<ArgumentAnchor.Anchor> {
             return this.transform.apply(entity.getPositionVector(), entity);
         }
 
-        public Vec3D apply(CommandListenerWrapper commandSourceStack) {
-            Entity entity = commandSourceStack.getEntity();
-            return entity == null ? commandSourceStack.getPosition() : this.transform.apply(commandSourceStack.getPosition(), entity);
+        public Vec3D apply(CommandListenerWrapper source) {
+            Entity entity = source.getEntity();
+            return entity == null ? source.getPosition() : this.transform.apply(source.getPosition(), entity);
         }
     }
 }

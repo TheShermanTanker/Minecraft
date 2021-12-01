@@ -2,31 +2,33 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
-import it.unimi.dsi.fastutil.doubles.DoubleList;
-import java.util.Comparator;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
+import net.minecraft.core.QuartPos;
 import net.minecraft.data.worldgen.biome.BiomeRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.resources.RegistryLookupCodec;
-import net.minecraft.world.level.levelgen.SeededRandom;
-import net.minecraft.world.level.levelgen.synth.NoiseGeneratorNormal;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.level.levelgen.NoiseSampler;
+import net.minecraft.world.level.levelgen.TerrainInfo;
+import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class WorldChunkManagerMultiNoise extends WorldChunkManager {
-    private static final WorldChunkManagerMultiNoise.NoiseParameters DEFAULT_NOISE_PARAMETERS = new WorldChunkManagerMultiNoise.NoiseParameters(-7, ImmutableList.of(1.0D, 1.0D));
     public static final MapCodec<WorldChunkManagerMultiNoise> DIRECT_CODEC;
     public static final Codec<WorldChunkManagerMultiNoise> CODEC = Codec.mapEither(WorldChunkManagerMultiNoise.PresetInstance.CODEC, DIRECT_CODEC).xmap((either) -> {
         return either.map(WorldChunkManagerMultiNoise.PresetInstance::biomeSource, Function.identity());
@@ -35,54 +37,17 @@ public class WorldChunkManagerMultiNoise extends WorldChunkManager {
             return Either.right(multiNoiseBiomeSource);
         });
     }).codec();
-    private final WorldChunkManagerMultiNoise.NoiseParameters temperatureParams;
-    private final WorldChunkManagerMultiNoise.NoiseParameters humidityParams;
-    private final WorldChunkManagerMultiNoise.NoiseParameters altitudeParams;
-    private final WorldChunkManagerMultiNoise.NoiseParameters weirdnessParams;
-    private final NoiseGeneratorNormal temperatureNoise;
-    private final NoiseGeneratorNormal humidityNoise;
-    private final NoiseGeneratorNormal altitudeNoise;
-    private final NoiseGeneratorNormal weirdnessNoise;
-    private final List<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> parameters;
-    private final boolean useY;
-    private final long seed;
-    private final Optional<Pair<IRegistry<BiomeBase>, WorldChunkManagerMultiNoise.Preset>> preset;
+    private final Climate.ParameterList<Supplier<BiomeBase>> parameters;
+    private final Optional<WorldChunkManagerMultiNoise.PresetInstance> preset;
 
-    public WorldChunkManagerMultiNoise(long seed, List<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> biomePoints) {
-        this(seed, biomePoints, Optional.empty());
+    private WorldChunkManagerMultiNoise(Climate.ParameterList<Supplier<BiomeBase>> entries) {
+        this(entries, Optional.empty());
     }
 
-    WorldChunkManagerMultiNoise(long seed, List<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> biomePoints, Optional<Pair<IRegistry<BiomeBase>, WorldChunkManagerMultiNoise.Preset>> instance) {
-        this(seed, biomePoints, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, instance);
-    }
-
-    private WorldChunkManagerMultiNoise(long seed, List<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> biomePoints, WorldChunkManagerMultiNoise.NoiseParameters temperatureNoiseParameters, WorldChunkManagerMultiNoise.NoiseParameters humidityNoiseParameters, WorldChunkManagerMultiNoise.NoiseParameters altitudeNoiseParameters, WorldChunkManagerMultiNoise.NoiseParameters weirdnessNoiseParameters) {
-        this(seed, biomePoints, temperatureNoiseParameters, humidityNoiseParameters, altitudeNoiseParameters, weirdnessNoiseParameters, Optional.empty());
-    }
-
-    private WorldChunkManagerMultiNoise(long seed, List<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> biomePoints, WorldChunkManagerMultiNoise.NoiseParameters temperatureNoiseParameters, WorldChunkManagerMultiNoise.NoiseParameters humidityNoiseParameters, WorldChunkManagerMultiNoise.NoiseParameters altitudeNoiseParameters, WorldChunkManagerMultiNoise.NoiseParameters weirdnessNoiseParameters, Optional<Pair<IRegistry<BiomeBase>, WorldChunkManagerMultiNoise.Preset>> instance) {
-        super(biomePoints.stream().map(Pair::getSecond));
-        this.seed = seed;
+    WorldChunkManagerMultiNoise(Climate.ParameterList<Supplier<BiomeBase>> biomeEntries, Optional<WorldChunkManagerMultiNoise.PresetInstance> instance) {
+        super(biomeEntries.values().stream().map(Pair::getSecond));
         this.preset = instance;
-        this.temperatureParams = temperatureNoiseParameters;
-        this.humidityParams = humidityNoiseParameters;
-        this.altitudeParams = altitudeNoiseParameters;
-        this.weirdnessParams = weirdnessNoiseParameters;
-        this.temperatureNoise = NoiseGeneratorNormal.create(new SeededRandom(seed), temperatureNoiseParameters.firstOctave(), temperatureNoiseParameters.amplitudes());
-        this.humidityNoise = NoiseGeneratorNormal.create(new SeededRandom(seed + 1L), humidityNoiseParameters.firstOctave(), humidityNoiseParameters.amplitudes());
-        this.altitudeNoise = NoiseGeneratorNormal.create(new SeededRandom(seed + 2L), altitudeNoiseParameters.firstOctave(), altitudeNoiseParameters.amplitudes());
-        this.weirdnessNoise = NoiseGeneratorNormal.create(new SeededRandom(seed + 3L), weirdnessNoiseParameters.firstOctave(), weirdnessNoiseParameters.amplitudes());
-        this.parameters = biomePoints;
-        this.useY = false;
-    }
-
-    public static WorldChunkManagerMultiNoise overworld(IRegistry<BiomeBase> registry, long l) {
-        ImmutableList<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> immutableList = parameters(registry);
-        WorldChunkManagerMultiNoise.NoiseParameters noiseParameters = new WorldChunkManagerMultiNoise.NoiseParameters(-9, 1.0D, 0.0D, 3.0D, 3.0D, 3.0D, 3.0D);
-        WorldChunkManagerMultiNoise.NoiseParameters noiseParameters2 = new WorldChunkManagerMultiNoise.NoiseParameters(-7, 1.0D, 2.0D, 4.0D, 4.0D);
-        WorldChunkManagerMultiNoise.NoiseParameters noiseParameters3 = new WorldChunkManagerMultiNoise.NoiseParameters(-9, 1.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.0D);
-        WorldChunkManagerMultiNoise.NoiseParameters noiseParameters4 = new WorldChunkManagerMultiNoise.NoiseParameters(-8, 1.2D, 0.6D, 0.0D, 0.0D, 1.0D, 0.0D);
-        return new WorldChunkManagerMultiNoise(l, immutableList, noiseParameters, noiseParameters2, noiseParameters3, noiseParameters4, Optional.empty());
+        this.parameters = biomeEntries;
     }
 
     @Override
@@ -92,110 +57,112 @@ public class WorldChunkManagerMultiNoise extends WorldChunkManager {
 
     @Override
     public WorldChunkManager withSeed(long seed) {
-        return new WorldChunkManagerMultiNoise(seed, this.parameters, this.temperatureParams, this.humidityParams, this.altitudeParams, this.weirdnessParams, this.preset);
+        return this;
     }
 
     private Optional<WorldChunkManagerMultiNoise.PresetInstance> preset() {
-        return this.preset.map((pair) -> {
-            return new WorldChunkManagerMultiNoise.PresetInstance(pair.getSecond(), pair.getFirst(), this.seed);
-        });
+        return this.preset;
+    }
+
+    public boolean stable(WorldChunkManagerMultiNoise.Preset instance) {
+        return this.preset.isPresent() && Objects.equals(this.preset.get().preset(), instance);
     }
 
     @Override
-    public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
-        int i = this.useY ? biomeY : 0;
-        BiomeBase.ClimateParameters climateParameters = new BiomeBase.ClimateParameters((float)this.temperatureNoise.getValue((double)biomeX, (double)i, (double)biomeZ), (float)this.humidityNoise.getValue((double)biomeX, (double)i, (double)biomeZ), (float)this.altitudeNoise.getValue((double)biomeX, (double)i, (double)biomeZ), (float)this.weirdnessNoise.getValue((double)biomeX, (double)i, (double)biomeZ), 0.0F);
-        return this.parameters.stream().min(Comparator.comparing((pair) -> {
-            return pair.getFirst().fitness(climateParameters);
-        })).map(Pair::getSecond).map(Supplier::get).orElse(BiomeRegistry.THE_VOID);
+    public BiomeBase getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
+        return this.getNoiseBiome(noise.sample(x, y, z));
     }
 
-    public static ImmutableList<Pair<BiomeBase.ClimateParameters, Supplier<BiomeBase>>> parameters(IRegistry<BiomeBase> registry) {
-        return ImmutableList.of(Pair.of(new BiomeBase.ClimateParameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> {
-            return registry.getOrThrow(Biomes.PLAINS);
-        }));
+    @VisibleForDebug
+    public BiomeBase getNoiseBiome(Climate.TargetPoint point) {
+        return this.parameters.findValue(point, () -> {
+            return BiomeRegistry.THE_VOID;
+        }).get();
     }
 
-    public boolean stable(long seed) {
-        return this.seed == seed && this.preset.isPresent() && Objects.equals(this.preset.get().getSecond(), WorldChunkManagerMultiNoise.Preset.NETHER);
+    @Override
+    public void addMultinoiseDebugInfo(List<String> info, BlockPosition pos, Climate.Sampler noiseSampler) {
+        int i = QuartPos.fromBlock(pos.getX());
+        int j = QuartPos.fromBlock(pos.getY());
+        int k = QuartPos.fromBlock(pos.getZ());
+        Climate.TargetPoint targetPoint = noiseSampler.sample(i, j, k);
+        float f = Climate.unquantizeCoord(targetPoint.continentalness());
+        float g = Climate.unquantizeCoord(targetPoint.erosion());
+        float h = Climate.unquantizeCoord(targetPoint.temperature());
+        float l = Climate.unquantizeCoord(targetPoint.humidity());
+        float m = Climate.unquantizeCoord(targetPoint.weirdness());
+        double d = (double)TerrainShaper.peaksAndValleys(m);
+        DecimalFormat decimalFormat = new DecimalFormat("0.000");
+        info.add("Multinoise C: " + decimalFormat.format((double)f) + " E: " + decimalFormat.format((double)g) + " T: " + decimalFormat.format((double)h) + " H: " + decimalFormat.format((double)l) + " W: " + decimalFormat.format((double)m));
+        OverworldBiomeBuilder overworldBiomeBuilder = new OverworldBiomeBuilder();
+        info.add("Biome builder PV: " + OverworldBiomeBuilder.getDebugStringForPeaksAndValleys(d) + " C: " + overworldBiomeBuilder.getDebugStringForContinentalness((double)f) + " E: " + overworldBiomeBuilder.getDebugStringForErosion((double)g) + " T: " + overworldBiomeBuilder.getDebugStringForTemperature((double)h) + " H: " + overworldBiomeBuilder.getDebugStringForHumidity((double)l));
+        if (noiseSampler instanceof NoiseSampler) {
+            NoiseSampler noiseSampler2 = (NoiseSampler)noiseSampler;
+            TerrainInfo terrainInfo = noiseSampler2.terrainInfo(pos.getX(), pos.getZ(), f, m, g, Blender.empty());
+            info.add("Terrain PV: " + decimalFormat.format(d) + " O: " + decimalFormat.format(terrainInfo.offset()) + " F: " + decimalFormat.format(terrainInfo.factor()) + " JA: " + decimalFormat.format(terrainInfo.jaggedness()));
+        }
     }
 
     static {
         DIRECT_CODEC = RecordCodecBuilder.mapCodec((instance) -> {
-            return instance.group(Codec.LONG.fieldOf("seed").forGetter((multiNoiseBiomeSource) -> {
-                return multiNoiseBiomeSource.seed;
-            }), RecordCodecBuilder.create((instancex) -> {
-                return instancex.group(BiomeBase.ClimateParameters.CODEC.fieldOf("parameters").forGetter(Pair::getFirst), BiomeBase.CODEC.fieldOf("biome").forGetter(Pair::getSecond)).apply(instancex, Pair::of);
-            }).listOf().fieldOf("biomes").forGetter((multiNoiseBiomeSource) -> {
+            return instance.group(ExtraCodecs.<Pair<Climate.ParameterPoint, T>>nonEmptyList(RecordCodecBuilder.create((instancex) -> {
+                return instancex.group(Climate.ParameterPoint.CODEC.fieldOf("parameters").forGetter(Pair::getFirst), BiomeBase.CODEC.fieldOf("biome").forGetter(Pair::getSecond)).apply(instancex, Pair::of);
+            }).listOf()).xmap(Climate.ParameterList::new, Climate.ParameterList::values).fieldOf("biomes").forGetter((multiNoiseBiomeSource) -> {
                 return multiNoiseBiomeSource.parameters;
-            }), WorldChunkManagerMultiNoise.NoiseParameters.CODEC.fieldOf("temperature_noise").forGetter((multiNoiseBiomeSource) -> {
-                return multiNoiseBiomeSource.temperatureParams;
-            }), WorldChunkManagerMultiNoise.NoiseParameters.CODEC.fieldOf("humidity_noise").forGetter((multiNoiseBiomeSource) -> {
-                return multiNoiseBiomeSource.humidityParams;
-            }), WorldChunkManagerMultiNoise.NoiseParameters.CODEC.fieldOf("altitude_noise").forGetter((multiNoiseBiomeSource) -> {
-                return multiNoiseBiomeSource.altitudeParams;
-            }), WorldChunkManagerMultiNoise.NoiseParameters.CODEC.fieldOf("weirdness_noise").forGetter((multiNoiseBiomeSource) -> {
-                return multiNoiseBiomeSource.weirdnessParams;
             })).apply(instance, WorldChunkManagerMultiNoise::new);
         });
     }
 
-    static class NoiseParameters {
-        private final int firstOctave;
-        private final DoubleList amplitudes;
-        public static final Codec<WorldChunkManagerMultiNoise.NoiseParameters> CODEC = RecordCodecBuilder.create((instance) -> {
-            return instance.group(Codec.INT.fieldOf("firstOctave").forGetter(WorldChunkManagerMultiNoise.NoiseParameters::firstOctave), Codec.DOUBLE.listOf().fieldOf("amplitudes").forGetter(WorldChunkManagerMultiNoise.NoiseParameters::amplitudes)).apply(instance, WorldChunkManagerMultiNoise.NoiseParameters::new);
-        });
-
-        public NoiseParameters(int firstOctave, List<Double> amplitudes) {
-            this.firstOctave = firstOctave;
-            this.amplitudes = new DoubleArrayList(amplitudes);
-        }
-
-        public NoiseParameters(int firstOctave, double... amplitudes) {
-            this.firstOctave = firstOctave;
-            this.amplitudes = new DoubleArrayList(amplitudes);
-        }
-
-        public int firstOctave() {
-            return this.firstOctave;
-        }
-
-        public DoubleList amplitudes() {
-            return this.amplitudes;
-        }
-    }
-
     public static class Preset {
         static final Map<MinecraftKey, WorldChunkManagerMultiNoise.Preset> BY_NAME = Maps.newHashMap();
-        public static final WorldChunkManagerMultiNoise.Preset NETHER = new WorldChunkManagerMultiNoise.Preset(new MinecraftKey("nether"), (preset, biomeRegistry, seed) -> {
-            return new WorldChunkManagerMultiNoise(seed, ImmutableList.of(Pair.of(new BiomeBase.ClimateParameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> {
-                return biomeRegistry.getOrThrow(Biomes.NETHER_WASTES);
-            }), Pair.of(new BiomeBase.ClimateParameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F), () -> {
-                return biomeRegistry.getOrThrow(Biomes.SOUL_SAND_VALLEY);
-            }), Pair.of(new BiomeBase.ClimateParameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F), () -> {
-                return biomeRegistry.getOrThrow(Biomes.CRIMSON_FOREST);
-            }), Pair.of(new BiomeBase.ClimateParameters(0.0F, 0.5F, 0.0F, 0.0F, 0.375F), () -> {
-                return biomeRegistry.getOrThrow(Biomes.WARPED_FOREST);
-            }), Pair.of(new BiomeBase.ClimateParameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.175F), () -> {
-                return biomeRegistry.getOrThrow(Biomes.BASALT_DELTAS);
-            })), Optional.of(Pair.of(biomeRegistry, preset)));
+        public static final WorldChunkManagerMultiNoise.Preset NETHER = new WorldChunkManagerMultiNoise.Preset(new MinecraftKey("nether"), (registry) -> {
+            return new Climate.ParameterList<>(ImmutableList.of(Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> {
+                return registry.getOrThrow(Biomes.NETHER_WASTES);
+            }), Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> {
+                return registry.getOrThrow(Biomes.SOUL_SAND_VALLEY);
+            }), Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), () -> {
+                return registry.getOrThrow(Biomes.CRIMSON_FOREST);
+            }), Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), () -> {
+                return registry.getOrThrow(Biomes.WARPED_FOREST);
+            }), Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), () -> {
+                return registry.getOrThrow(Biomes.BASALT_DELTAS);
+            })));
+        });
+        public static final WorldChunkManagerMultiNoise.Preset OVERWORLD = new WorldChunkManagerMultiNoise.Preset(new MinecraftKey("overworld"), (registry) -> {
+            Builder<Pair<Climate.ParameterPoint, Supplier<BiomeBase>>> builder = ImmutableList.builder();
+            (new OverworldBiomeBuilder()).addBiomes((pair) -> {
+                builder.add(pair.mapSecond((resourceKey) -> {
+                    return () -> {
+                        return registry.getOrThrow(resourceKey);
+                    };
+                }));
+            });
+            return new Climate.ParameterList<>(builder.build());
         });
         final MinecraftKey name;
-        private final Function3<WorldChunkManagerMultiNoise.Preset, IRegistry<BiomeBase>, Long, WorldChunkManagerMultiNoise> biomeSource;
+        private final Function<IRegistry<BiomeBase>, Climate.ParameterList<Supplier<BiomeBase>>> parameterSource;
 
-        public Preset(MinecraftKey id, Function3<WorldChunkManagerMultiNoise.Preset, IRegistry<BiomeBase>, Long, WorldChunkManagerMultiNoise> biomeSourceFunction) {
+        public Preset(MinecraftKey id, Function<IRegistry<BiomeBase>, Climate.ParameterList<Supplier<BiomeBase>>> biomeSourceFunction) {
             this.name = id;
-            this.biomeSource = biomeSourceFunction;
+            this.parameterSource = biomeSourceFunction;
             BY_NAME.put(id, this);
         }
 
-        public WorldChunkManagerMultiNoise biomeSource(IRegistry<BiomeBase> biomeRegistry, long seed) {
-            return this.biomeSource.apply(this, biomeRegistry, seed);
+        WorldChunkManagerMultiNoise biomeSource(WorldChunkManagerMultiNoise.PresetInstance instance, boolean useInstance) {
+            Climate.ParameterList<Supplier<BiomeBase>> parameterList = this.parameterSource.apply(instance.biomes());
+            return new WorldChunkManagerMultiNoise(parameterList, useInstance ? Optional.of(instance) : Optional.empty());
+        }
+
+        public WorldChunkManagerMultiNoise biomeSource(IRegistry<BiomeBase> biomeRegistry, boolean useInstance) {
+            return this.biomeSource(new WorldChunkManagerMultiNoise.PresetInstance(this, biomeRegistry), useInstance);
+        }
+
+        public WorldChunkManagerMultiNoise biomeSource(IRegistry<BiomeBase> biomeRegistry) {
+            return this.biomeSource(biomeRegistry, true);
         }
     }
 
-    static final class PresetInstance {
+    static record PresetInstance(WorldChunkManagerMultiNoise.Preset preset, IRegistry<BiomeBase> biomes) {
         public static final MapCodec<WorldChunkManagerMultiNoise.PresetInstance> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
             return instance.group(MinecraftKey.CODEC.flatXmap((id) -> {
                 return Optional.ofNullable(WorldChunkManagerMultiNoise.Preset.BY_NAME.get(id)).map(DataResult::success).orElseGet(() -> {
@@ -203,16 +170,16 @@ public class WorldChunkManagerMultiNoise extends WorldChunkManager {
                 });
             }, (preset) -> {
                 return DataResult.success(preset.name);
-            }).fieldOf("preset").stable().forGetter(WorldChunkManagerMultiNoise.PresetInstance::preset), RegistryLookupCodec.create(IRegistry.BIOME_REGISTRY).forGetter(WorldChunkManagerMultiNoise.PresetInstance::biomes), Codec.LONG.fieldOf("seed").stable().forGetter(WorldChunkManagerMultiNoise.PresetInstance::seed)).apply(instance, instance.stable(WorldChunkManagerMultiNoise.PresetInstance::new));
+            }).fieldOf("preset").stable().forGetter(WorldChunkManagerMultiNoise.PresetInstance::preset), RegistryLookupCodec.create(IRegistry.BIOME_REGISTRY).forGetter(WorldChunkManagerMultiNoise.PresetInstance::biomes)).apply(instance, instance.stable(WorldChunkManagerMultiNoise.PresetInstance::new));
         });
-        private final WorldChunkManagerMultiNoise.Preset preset;
-        private final IRegistry<BiomeBase> biomes;
-        private final long seed;
 
-        PresetInstance(WorldChunkManagerMultiNoise.Preset preset, IRegistry<BiomeBase> biomeRegistry, long seed) {
+        PresetInstance(WorldChunkManagerMultiNoise.Preset preset, IRegistry<BiomeBase> biomeRegistry) {
             this.preset = preset;
             this.biomes = biomeRegistry;
-            this.seed = seed;
+        }
+
+        public WorldChunkManagerMultiNoise biomeSource() {
+            return this.preset.biomeSource(this, true);
         }
 
         public WorldChunkManagerMultiNoise.Preset preset() {
@@ -221,14 +188,6 @@ public class WorldChunkManagerMultiNoise extends WorldChunkManager {
 
         public IRegistry<BiomeBase> biomes() {
             return this.biomes;
-        }
-
-        public long seed() {
-            return this.seed;
-        }
-
-        public WorldChunkManagerMultiNoise biomeSource() {
-            return this.preset.biomeSource(this.biomes, this.seed);
         }
     }
 }

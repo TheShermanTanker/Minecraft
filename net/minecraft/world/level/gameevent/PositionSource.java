@@ -7,7 +7,7 @@ import net.minecraft.core.IRegistry;
 import net.minecraft.world.level.World;
 
 public interface PositionSource {
-    Codec<PositionSource> CODEC = IRegistry.POSITION_SOURCE_TYPE.dispatch(PositionSource::getType, PositionSourceType::codec);
+    Codec<PositionSource> CODEC = IRegistry.POSITION_SOURCE_TYPE.byNameCodec().dispatch(PositionSource::getType, PositionSourceType::codec);
 
     Optional<BlockPosition> getPosition(World world);
 

@@ -15,6 +15,7 @@ import net.minecraft.core.RegistryMaterials;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.biome.WorldChunkManager;
 import net.minecraft.world.level.biome.WorldChunkManagerMultiNoise;
 import net.minecraft.world.level.biome.WorldChunkManagerTheEnd;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -95,13 +96,18 @@ public final class WorldDimension {
                         return false;
                     } else {
                         WorldChunkManagerMultiNoise multiNoiseBiomeSource = (WorldChunkManagerMultiNoise)noiseBasedChunkGenerator.getWorldChunkManager();
-                        if (!multiNoiseBiomeSource.stable(seed)) {
-                            return false;
-                        } else if (!(noiseBasedChunkGenerator2.getWorldChunkManager() instanceof WorldChunkManagerTheEnd)) {
+                        if (!multiNoiseBiomeSource.stable(WorldChunkManagerMultiNoise.Preset.NETHER)) {
                             return false;
                         } else {
-                            WorldChunkManagerTheEnd theEndBiomeSource = (WorldChunkManagerTheEnd)noiseBasedChunkGenerator2.getWorldChunkManager();
-                            return theEndBiomeSource.stable(seed);
+                            WorldChunkManager biomeSource = entry.getValue().generator().getWorldChunkManager();
+                            if (biomeSource instanceof WorldChunkManagerMultiNoise && !((WorldChunkManagerMultiNoise)biomeSource).stable(WorldChunkManagerMultiNoise.Preset.OVERWORLD)) {
+                                return false;
+                            } else if (!(noiseBasedChunkGenerator2.getWorldChunkManager() instanceof WorldChunkManagerTheEnd)) {
+                                return false;
+                            } else {
+                                WorldChunkManagerTheEnd theEndBiomeSource = (WorldChunkManagerTheEnd)noiseBasedChunkGenerator2.getWorldChunkManager();
+                                return theEndBiomeSource.stable(seed);
+                            }
                         }
                     }
                 } else {

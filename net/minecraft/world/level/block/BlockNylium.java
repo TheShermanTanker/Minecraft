@@ -3,15 +3,14 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.features.NetherFeatures;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.IWorldReader;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.levelgen.feature.WorldGenFeatureNetherForestVegetation;
-import net.minecraft.world.level.levelgen.feature.WorldGenFeatureTwistingVines;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.lighting.LightEngineLayer;
 
 public class BlockNylium extends Block implements IBlockFragilePlantElement {
@@ -48,13 +47,14 @@ public class BlockNylium extends Block implements IBlockFragilePlantElement {
     public void performBonemeal(WorldServer world, Random random, BlockPosition pos, IBlockData state) {
         IBlockData blockState = world.getType(pos);
         BlockPosition blockPos = pos.above();
+        ChunkGenerator chunkGenerator = world.getChunkSource().getChunkGenerator();
         if (blockState.is(Blocks.CRIMSON_NYLIUM)) {
-            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, WorldGenBiomeDecoratorGroups.Configs.CRIMSON_FOREST_CONFIG, 3, 1);
+            NetherFeatures.CRIMSON_FOREST_VEGETATION_BONEMEAL.place(world, chunkGenerator, random, blockPos);
         } else if (blockState.is(Blocks.WARPED_NYLIUM)) {
-            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, WorldGenBiomeDecoratorGroups.Configs.WARPED_FOREST_CONFIG, 3, 1);
-            WorldGenFeatureNetherForestVegetation.place(world, random, blockPos, WorldGenBiomeDecoratorGroups.Configs.NETHER_SPROUTS_CONFIG, 3, 1);
+            NetherFeatures.WARPED_FOREST_VEGETATION_BONEMEAL.place(world, chunkGenerator, random, blockPos);
+            NetherFeatures.NETHER_SPROUTS_BONEMEAL.place(world, chunkGenerator, random, blockPos);
             if (random.nextInt(8) == 0) {
-                WorldGenFeatureTwistingVines.place(world, random, blockPos, 3, 1, 2);
+                NetherFeatures.TWISTING_VINES_BONEMEAL.place(world, chunkGenerator, random, blockPos);
             }
         }
 

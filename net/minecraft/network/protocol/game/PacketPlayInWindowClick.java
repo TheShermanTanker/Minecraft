@@ -3,6 +3,7 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.util.function.IntFunction;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.inventory.InventoryClickType;
@@ -34,7 +35,8 @@ public class PacketPlayInWindowClick implements Packet<PacketListenerPlayIn> {
         this.slotNum = buf.readShort();
         this.buttonNum = buf.readByte();
         this.clickType = buf.readEnum(InventoryClickType.class);
-        this.changedSlots = Int2ObjectMaps.unmodifiable(buf.readMap(PacketDataSerializer.limitValue(Int2ObjectOpenHashMap::new, 128), (bufx) -> {
+        IntFunction<Int2ObjectOpenHashMap<ItemStack>> intFunction = PacketDataSerializer.limitValue(Int2ObjectOpenHashMap::new, 128);
+        this.changedSlots = Int2ObjectMaps.unmodifiable(buf.readMap(intFunction, (bufx) -> {
             return Integer.valueOf(bufx.readShort());
         }, PacketDataSerializer::readItem));
         this.carriedItem = buf.readItem();

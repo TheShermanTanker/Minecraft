@@ -21,7 +21,6 @@ public class DataConverterRiding extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Schema schema = this.getInputSchema();
         Schema schema2 = this.getOutputSchema();

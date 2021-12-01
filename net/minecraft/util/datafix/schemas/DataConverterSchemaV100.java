@@ -22,7 +22,6 @@ public class DataConverterSchemaV100 extends Schema {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         registerMob(schema, map, "ArmorStand");
@@ -70,7 +69,6 @@ public class DataConverterSchemaV100 extends Schema {
         return map;
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         schema.registerType(false, DataConverterTypes.STRUCTURE, () -> {

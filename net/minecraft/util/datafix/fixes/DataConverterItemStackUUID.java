@@ -13,7 +13,6 @@ public class DataConverterItemStackUUID extends DataConverterUUIDBase {
         super(outputSchema, DataConverterTypes.ITEM_STACK);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(DataConverterTypes.ITEM_NAME.typeName(), DataConverterSchemaNamed.namespacedString()));
         return this.fixTypeEverywhereTyped("ItemStackUUIDFix", this.getInputSchema().getType(this.typeReference), (typed) -> {

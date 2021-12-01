@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class NBTTagList extends NBTList<NBTBase> {
     private static final int SELF_SIZE_IN_BITS = 296;
-    public static final NBTTagType<NBTTagList> TYPE = new NBTTagType<NBTTagList>() {
+    public static final NBTTagType<NBTTagList> TYPE = new TagType$VariableSize<NBTTagList>() {
         @Override
         public NBTTagList load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(296L);
@@ -33,6 +33,63 @@ public class NBTTagList extends NBTList<NBTBase> {
                     return new NBTTagList(list, b);
                 }
             }
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            NBTTagType<?> tagType = NBTTagTypes.getType(input.readByte());
+            int i = input.readInt();
+            switch(visitor.visitList(tagType, i)) {
+            case HALT:
+                return StreamTagVisitor.ValueResult.HALT;
+            case BREAK:
+                tagType.skip(input, i);
+                return visitor.visitContainerEnd();
+            default:
+                int j = 0;
+
+                while(true) {
+                    label45: {
+                        if (j < i) {
+                            switch(visitor.visitElement(tagType, j)) {
+                            case HALT:
+                                return StreamTagVisitor.ValueResult.HALT;
+                            case BREAK:
+                                tagType.skip(input);
+                                break;
+                            case SKIP:
+                                tagType.skip(input);
+                                break label45;
+                            default:
+                                switch(tagType.parse(input, visitor)) {
+                                case HALT:
+                                    return StreamTagVisitor.ValueResult.HALT;
+                                case BREAK:
+                                    break;
+                                default:
+                                    break label45;
+                                }
+                            }
+                        }
+
+                        int k = i - 1 - j;
+                        if (k > 0) {
+                            tagType.skip(input, k);
+                        }
+
+                        return visitor.visitContainerEnd();
+                    }
+
+                    ++j;
+                }
+            }
+        }
+
+        @Override
+        public void skip(DataInput input) throws IOException {
+            NBTTagType<?> tagType = NBTTagTypes.getType(input.readByte());
+            int i = input.readInt();
+            tagType.skip(input, i);
         }
 
         @Override
@@ -298,5 +355,38 @@ public class NBTTagList extends NBTList<NBTBase> {
     public void clear() {
         this.list.clear();
         this.type = 0;
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        switch(visitor.visitList(NBTTagTypes.getType(this.type), this.list.size())) {
+        case HALT:
+            return StreamTagVisitor.ValueResult.HALT;
+        case BREAK:
+            return visitor.visitContainerEnd();
+        default:
+            int i = 0;
+
+            while(i < this.list.size()) {
+                NBTBase tag = this.list.get(i);
+                switch(visitor.visitElement(tag.getType(), i)) {
+                case HALT:
+                    return StreamTagVisitor.ValueResult.HALT;
+                case BREAK:
+                    return visitor.visitContainerEnd();
+                default:
+                    switch(tag.accept(visitor)) {
+                    case HALT:
+                        return StreamTagVisitor.ValueResult.HALT;
+                    case BREAK:
+                        return visitor.visitContainerEnd();
+                    }
+                case SKIP:
+                    ++i;
+                }
+            }
+
+            return visitor.visitContainerEnd();
+        }
     }
 }

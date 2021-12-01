@@ -139,13 +139,13 @@ public class ItemWrittenBook extends Item {
         }
     }
 
-    private static String resolvePage(@Nullable CommandListenerWrapper commandSourceStack, @Nullable EntityHuman player, String string) {
+    private static String resolvePage(@Nullable CommandListenerWrapper commandSource, @Nullable EntityHuman player, String text) {
         IChatBaseComponent component2;
         try {
-            component2 = IChatBaseComponent.ChatSerializer.fromJsonLenient(string);
-            component2 = ChatComponentUtils.filterForDisplay(commandSourceStack, component2, player, 0);
+            component2 = IChatBaseComponent.ChatSerializer.fromJsonLenient(text);
+            component2 = ChatComponentUtils.filterForDisplay(commandSource, component2, player, 0);
         } catch (Exception var5) {
-            component2 = new ChatComponentText(string);
+            component2 = new ChatComponentText(text);
         }
 
         return IChatBaseComponent.ChatSerializer.toJson(component2);

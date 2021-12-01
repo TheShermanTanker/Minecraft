@@ -2,37 +2,27 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.IRegistryCustom;
-import net.minecraft.world.level.ChunkCoordIntPair;
-import net.minecraft.world.level.IWorldHeightAccess;
-import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.EnumBlockRotation;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureShipwreckConfiguration;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.WorldGenShipwreck;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class WorldGenFeatureShipwreck extends StructureGenerator<WorldGenFeatureShipwreckConfiguration> {
-    public WorldGenFeatureShipwreck(Codec<WorldGenFeatureShipwreckConfiguration> codec) {
-        super(codec);
+    public WorldGenFeatureShipwreck(Codec<WorldGenFeatureShipwreckConfiguration> configCodec) {
+        super(configCodec, PieceGeneratorSupplier.simple(WorldGenFeatureShipwreck::checkLocation, WorldGenFeatureShipwreck::generatePieces));
     }
 
-    @Override
-    public StructureGenerator.StructureStartFactory<WorldGenFeatureShipwreckConfiguration> getStartFactory() {
-        return WorldGenFeatureShipwreck.FeatureStart::new;
+    private static boolean checkLocation(PieceGeneratorSupplier.Context<WorldGenFeatureShipwreckConfiguration> context) {
+        HeightMap.Type types = (context.config()).isBeached ? HeightMap.Type.WORLD_SURFACE_WG : HeightMap.Type.OCEAN_FLOOR_WG;
+        return context.validBiomeOnTop(types);
     }
 
-    public static class FeatureStart extends StructureStart<WorldGenFeatureShipwreckConfiguration> {
-        public FeatureStart(StructureGenerator<WorldGenFeatureShipwreckConfiguration> feature, ChunkCoordIntPair pos, int references, long seed) {
-            super(feature, pos, references, seed);
-        }
-
-        @Override
-        public void generatePieces(IRegistryCustom registryManager, ChunkGenerator chunkGenerator, DefinedStructureManager manager, ChunkCoordIntPair pos, BiomeBase biome, WorldGenFeatureShipwreckConfiguration config, IWorldHeightAccess world) {
-            EnumBlockRotation rotation = EnumBlockRotation.getRandom(this.random);
-            BlockPosition blockPos = new BlockPosition(pos.getMinBlockX(), 90, pos.getMinBlockZ());
-            WorldGenShipwreck.addPieces(manager, blockPos, rotation, this, this.random, config);
-        }
+    private static void generatePieces(StructurePiecesBuilder collector, PieceGenerator.Context<WorldGenFeatureShipwreckConfiguration> context) {
+        EnumBlockRotation rotation = EnumBlockRotation.getRandom(context.random());
+        BlockPosition blockPos = new BlockPosition(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
+        WorldGenShipwreck.addPieces(context.structureManager(), blockPos, rotation, collector, context.random(), context.config());
     }
 }

@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
-import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureTreeConfiguration;
 
 public abstract class WorldGenMegaTreeProvider extends WorldGenTreeProvider {
     @Override
@@ -27,10 +26,10 @@ public abstract class WorldGenMegaTreeProvider extends WorldGenTreeProvider {
     }
 
     @Nullable
-    protected abstract WorldGenFeatureConfigured<WorldGenFeatureTreeConfiguration, ?> getConfiguredMegaFeature(Random random);
+    protected abstract WorldGenFeatureConfigured<?, ?> getConfiguredMegaFeature(Random random);
 
     public boolean placeMega(WorldServer world, ChunkGenerator chunkGenerator, BlockPosition pos, IBlockData state, Random random, int x, int z) {
-        WorldGenFeatureConfigured<WorldGenFeatureTreeConfiguration, ?> configuredFeature = this.getConfiguredMegaFeature(random);
+        WorldGenFeatureConfigured<?, ?> configuredFeature = this.getConfiguredMegaFeature(random);
         if (configuredFeature == null) {
             return false;
         } else {

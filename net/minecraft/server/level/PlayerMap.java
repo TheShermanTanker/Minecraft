@@ -2,13 +2,13 @@ package net.minecraft.server.level;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public final class PlayerMap {
     private final Object2BooleanMap<EntityPlayer> players = new Object2BooleanOpenHashMap<>();
 
-    public Stream<EntityPlayer> getPlayers(long l) {
-        return this.players.keySet().stream();
+    public Set<EntityPlayer> getPlayers(long l) {
+        return this.players.keySet();
     }
 
     public void addPlayer(long l, EntityPlayer player, boolean watchDisabled) {

@@ -3,6 +3,7 @@ package net.minecraft.world.entity.animal;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
@@ -43,8 +45,10 @@ import org.apache.commons.lang3.tuple.Pair;
 public class EntityMushroomCow extends EntityCow implements IShearable {
     private static final DataWatcherObject<String> DATA_TYPE = DataWatcher.defineId(EntityMushroomCow.class, DataWatcherRegistry.STRING);
     private static final int MUTATE_CHANCE = 1024;
+    @Nullable
     private MobEffectBase effect;
     private int effectDuration;
+    @Nullable
     private UUID lastLightningBoltUUID;
 
     public EntityMushroomCow(EntityTypes<? extends EntityMushroomCow> type, World world) {
@@ -57,7 +61,7 @@ public class EntityMushroomCow extends EntityCow implements IShearable {
     }
 
     public static boolean checkMushroomSpawnRules(EntityTypes<EntityMushroomCow> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return world.getType(pos.below()).is(Blocks.MYCELIUM) && world.getLightLevel(pos, 0) > 8;
+        return world.getType(pos.below()).is(TagsBlock.MOOSHROOMS_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
     }
 
     @Override

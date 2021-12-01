@@ -3,7 +3,6 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.particles.Particle;
 import net.minecraft.core.particles.ParticleParam;
-import net.minecraft.core.particles.Particles;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
 
@@ -34,10 +33,6 @@ public class PacketPlayOutWorldParticles implements Packet<PacketListenerPlayOut
 
     public PacketPlayOutWorldParticles(PacketDataSerializer buf) {
         Particle<?> particleType = IRegistry.PARTICLE_TYPE.fromId(buf.readInt());
-        if (particleType == null) {
-            particleType = Particles.BARRIER;
-        }
-
         this.overrideLimiter = buf.readBoolean();
         this.x = buf.readDouble();
         this.y = buf.readDouble();

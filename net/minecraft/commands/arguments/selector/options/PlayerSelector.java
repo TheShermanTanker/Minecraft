@@ -51,23 +51,23 @@ import net.minecraft.world.scores.ScoreboardTeamBase;
 
 public class PlayerSelector {
     private static final Map<String, PlayerSelector.Option> OPTIONS = Maps.newHashMap();
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_OPTION = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.entity.options.unknown", object);
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_OPTION = new DynamicCommandExceptionType((option) -> {
+        return new ChatMessage("argument.entity.options.unknown", option);
     });
-    public static final DynamicCommandExceptionType ERROR_INAPPLICABLE_OPTION = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.entity.options.inapplicable", object);
+    public static final DynamicCommandExceptionType ERROR_INAPPLICABLE_OPTION = new DynamicCommandExceptionType((option) -> {
+        return new ChatMessage("argument.entity.options.inapplicable", option);
     });
     public static final SimpleCommandExceptionType ERROR_RANGE_NEGATIVE = new SimpleCommandExceptionType(new ChatMessage("argument.entity.options.distance.negative"));
     public static final SimpleCommandExceptionType ERROR_LEVEL_NEGATIVE = new SimpleCommandExceptionType(new ChatMessage("argument.entity.options.level.negative"));
     public static final SimpleCommandExceptionType ERROR_LIMIT_TOO_SMALL = new SimpleCommandExceptionType(new ChatMessage("argument.entity.options.limit.toosmall"));
-    public static final DynamicCommandExceptionType ERROR_SORT_UNKNOWN = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.entity.options.sort.irreversible", object);
+    public static final DynamicCommandExceptionType ERROR_SORT_UNKNOWN = new DynamicCommandExceptionType((sortType) -> {
+        return new ChatMessage("argument.entity.options.sort.irreversible", sortType);
     });
-    public static final DynamicCommandExceptionType ERROR_GAME_MODE_INVALID = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.entity.options.mode.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_GAME_MODE_INVALID = new DynamicCommandExceptionType((gameMode) -> {
+        return new ChatMessage("argument.entity.options.mode.invalid", gameMode);
     });
-    public static final DynamicCommandExceptionType ERROR_ENTITY_TYPE_INVALID = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.entity.options.type.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_ENTITY_TYPE_INVALID = new DynamicCommandExceptionType((entity) -> {
+        return new ChatMessage("argument.entity.options.type.invalid", entity);
     });
 
     private static void register(String id, PlayerSelector.Modifier handler, Predicate<ArgumentParserSelector> condition, IChatBaseComponent description) {
@@ -76,117 +76,117 @@ public class PlayerSelector {
 
     public static void bootStrap() {
         if (OPTIONS.isEmpty()) {
-            register("name", (entitySelectorParser) -> {
-                int i = entitySelectorParser.getReader().getCursor();
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                String string = entitySelectorParser.getReader().readString();
-                if (entitySelectorParser.hasNameNotEquals() && !bl) {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), "name");
+            register("name", (reader) -> {
+                int i = reader.getReader().getCursor();
+                boolean bl = reader.shouldInvertValue();
+                String string = reader.getReader().readString();
+                if (reader.hasNameNotEquals() && !bl) {
+                    reader.getReader().setCursor(i);
+                    throw ERROR_INAPPLICABLE_OPTION.createWithContext(reader.getReader(), "name");
                 } else {
                     if (bl) {
-                        entitySelectorParser.setHasNameNotEquals(true);
+                        reader.setHasNameNotEquals(true);
                     } else {
-                        entitySelectorParser.setHasNameEquals(true);
+                        reader.setHasNameEquals(true);
                     }
 
-                    entitySelectorParser.addPredicate((entity) -> {
-                        return entity.getDisplayName().getString().equals(string) != bl;
+                    reader.addPredicate((readerx) -> {
+                        return readerx.getDisplayName().getString().equals(string) != bl;
                     });
                 }
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.hasNameEquals();
+            }, (reader) -> {
+                return !reader.hasNameEquals();
             }, new ChatMessage("argument.entity.options.name.description"));
-            register("distance", (entitySelectorParser) -> {
-                int i = entitySelectorParser.getReader().getCursor();
-                CriterionConditionValue.DoubleRange doubles = CriterionConditionValue.DoubleRange.fromReader(entitySelectorParser.getReader());
+            register("distance", (reader) -> {
+                int i = reader.getReader().getCursor();
+                CriterionConditionValue.DoubleRange doubles = CriterionConditionValue.DoubleRange.fromReader(reader.getReader());
                 if ((doubles.getMin() == null || !(doubles.getMin() < 0.0D)) && (doubles.getMax() == null || !(doubles.getMax() < 0.0D))) {
-                    entitySelectorParser.setDistance(doubles);
-                    entitySelectorParser.setWorldLimited();
+                    reader.setDistance(doubles);
+                    reader.setWorldLimited();
                 } else {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_RANGE_NEGATIVE.createWithContext(entitySelectorParser.getReader());
+                    reader.getReader().setCursor(i);
+                    throw ERROR_RANGE_NEGATIVE.createWithContext(reader.getReader());
                 }
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getDistance().isAny();
+            }, (reader) -> {
+                return reader.getDistance().isAny();
             }, new ChatMessage("argument.entity.options.distance.description"));
-            register("level", (entitySelectorParser) -> {
-                int i = entitySelectorParser.getReader().getCursor();
-                CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromReader(entitySelectorParser.getReader());
+            register("level", (reader) -> {
+                int i = reader.getReader().getCursor();
+                CriterionConditionValue.IntegerRange ints = CriterionConditionValue.IntegerRange.fromReader(reader.getReader());
                 if ((ints.getMin() == null || ints.getMin() >= 0) && (ints.getMax() == null || ints.getMax() >= 0)) {
-                    entitySelectorParser.setLevel(ints);
-                    entitySelectorParser.setIncludesEntities(false);
+                    reader.setLevel(ints);
+                    reader.setIncludesEntities(false);
                 } else {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_LEVEL_NEGATIVE.createWithContext(entitySelectorParser.getReader());
+                    reader.getReader().setCursor(i);
+                    throw ERROR_LEVEL_NEGATIVE.createWithContext(reader.getReader());
                 }
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getLevel().isAny();
+            }, (reader) -> {
+                return reader.getLevel().isAny();
             }, new ChatMessage("argument.entity.options.level.description"));
-            register("x", (entitySelectorParser) -> {
-                entitySelectorParser.setWorldLimited();
-                entitySelectorParser.setX(entitySelectorParser.getReader().readDouble());
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getX() == null;
+            register("x", (reader) -> {
+                reader.setWorldLimited();
+                reader.setX(reader.getReader().readDouble());
+            }, (reader) -> {
+                return reader.getX() == null;
             }, new ChatMessage("argument.entity.options.x.description"));
-            register("y", (entitySelectorParser) -> {
-                entitySelectorParser.setWorldLimited();
-                entitySelectorParser.setY(entitySelectorParser.getReader().readDouble());
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getY() == null;
+            register("y", (reader) -> {
+                reader.setWorldLimited();
+                reader.setY(reader.getReader().readDouble());
+            }, (reader) -> {
+                return reader.getY() == null;
             }, new ChatMessage("argument.entity.options.y.description"));
-            register("z", (entitySelectorParser) -> {
-                entitySelectorParser.setWorldLimited();
-                entitySelectorParser.setZ(entitySelectorParser.getReader().readDouble());
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getZ() == null;
+            register("z", (reader) -> {
+                reader.setWorldLimited();
+                reader.setZ(reader.getReader().readDouble());
+            }, (reader) -> {
+                return reader.getZ() == null;
             }, new ChatMessage("argument.entity.options.z.description"));
-            register("dx", (entitySelectorParser) -> {
-                entitySelectorParser.setWorldLimited();
-                entitySelectorParser.setDeltaX(entitySelectorParser.getReader().readDouble());
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getDeltaX() == null;
+            register("dx", (reader) -> {
+                reader.setWorldLimited();
+                reader.setDeltaX(reader.getReader().readDouble());
+            }, (reader) -> {
+                return reader.getDeltaX() == null;
             }, new ChatMessage("argument.entity.options.dx.description"));
-            register("dy", (entitySelectorParser) -> {
-                entitySelectorParser.setWorldLimited();
-                entitySelectorParser.setDeltaY(entitySelectorParser.getReader().readDouble());
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getDeltaY() == null;
+            register("dy", (reader) -> {
+                reader.setWorldLimited();
+                reader.setDeltaY(reader.getReader().readDouble());
+            }, (reader) -> {
+                return reader.getDeltaY() == null;
             }, new ChatMessage("argument.entity.options.dy.description"));
-            register("dz", (entitySelectorParser) -> {
-                entitySelectorParser.setWorldLimited();
-                entitySelectorParser.setDeltaZ(entitySelectorParser.getReader().readDouble());
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getDeltaZ() == null;
+            register("dz", (reader) -> {
+                reader.setWorldLimited();
+                reader.setDeltaZ(reader.getReader().readDouble());
+            }, (reader) -> {
+                return reader.getDeltaZ() == null;
             }, new ChatMessage("argument.entity.options.dz.description"));
-            register("x_rotation", (entitySelectorParser) -> {
-                entitySelectorParser.setRotX(CriterionConditionRange.fromReader(entitySelectorParser.getReader(), true, MathHelper::wrapDegrees));
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getRotX() == CriterionConditionRange.ANY;
+            register("x_rotation", (reader) -> {
+                reader.setRotX(CriterionConditionRange.fromReader(reader.getReader(), true, MathHelper::wrapDegrees));
+            }, (reader) -> {
+                return reader.getRotX() == CriterionConditionRange.ANY;
             }, new ChatMessage("argument.entity.options.x_rotation.description"));
-            register("y_rotation", (entitySelectorParser) -> {
-                entitySelectorParser.setRotY(CriterionConditionRange.fromReader(entitySelectorParser.getReader(), true, MathHelper::wrapDegrees));
-            }, (entitySelectorParser) -> {
-                return entitySelectorParser.getRotY() == CriterionConditionRange.ANY;
+            register("y_rotation", (reader) -> {
+                reader.setRotY(CriterionConditionRange.fromReader(reader.getReader(), true, MathHelper::wrapDegrees));
+            }, (reader) -> {
+                return reader.getRotY() == CriterionConditionRange.ANY;
             }, new ChatMessage("argument.entity.options.y_rotation.description"));
-            register("limit", (entitySelectorParser) -> {
-                int i = entitySelectorParser.getReader().getCursor();
-                int j = entitySelectorParser.getReader().readInt();
+            register("limit", (reader) -> {
+                int i = reader.getReader().getCursor();
+                int j = reader.getReader().readInt();
                 if (j < 1) {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_LIMIT_TOO_SMALL.createWithContext(entitySelectorParser.getReader());
+                    reader.getReader().setCursor(i);
+                    throw ERROR_LIMIT_TOO_SMALL.createWithContext(reader.getReader());
                 } else {
-                    entitySelectorParser.setMaxResults(j);
-                    entitySelectorParser.setLimited(true);
+                    reader.setMaxResults(j);
+                    reader.setLimited(true);
                 }
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.isCurrentEntity() && !entitySelectorParser.isLimited();
+            }, (reader) -> {
+                return !reader.isCurrentEntity() && !reader.isLimited();
             }, new ChatMessage("argument.entity.options.limit.description"));
-            register("sort", (entitySelectorParser) -> {
-                int i = entitySelectorParser.getReader().getCursor();
-                String string = entitySelectorParser.getReader().readUnquotedString();
-                entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
-                    return ICompletionProvider.suggest(Arrays.asList("nearest", "furthest", "random", "arbitrary"), suggestionsBuilder);
+            register("sort", (reader) -> {
+                int i = reader.getReader().getCursor();
+                String string = reader.getReader().readUnquotedString();
+                reader.setSuggestions((builder, consumer) -> {
+                    return ICompletionProvider.suggest(Arrays.asList("nearest", "furthest", "random", "arbitrary"), builder);
                 });
                 BiConsumer<Vec3D, List<? extends Entity>> biConsumer;
                 switch(string) {
@@ -203,19 +203,19 @@ public class PlayerSelector {
                     biConsumer = ArgumentParserSelector.ORDER_ARBITRARY;
                     break;
                 default:
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_SORT_UNKNOWN.createWithContext(entitySelectorParser.getReader(), string);
+                    reader.getReader().setCursor(i);
+                    throw ERROR_SORT_UNKNOWN.createWithContext(reader.getReader(), string);
                 }
 
-                entitySelectorParser.setOrder(biConsumer);
-                entitySelectorParser.setSorted(true);
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.isCurrentEntity() && !entitySelectorParser.isSorted();
+                reader.setOrder(biConsumer);
+                reader.setSorted(true);
+            }, (reader) -> {
+                return !reader.isCurrentEntity() && !reader.isSorted();
             }, new ChatMessage("argument.entity.options.sort.description"));
-            register("gamemode", (entitySelectorParser) -> {
-                entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
-                    String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
-                    boolean bl = !entitySelectorParser.hasGamemodeNotEquals();
+            register("gamemode", (reader) -> {
+                reader.setSuggestions((builder, consumer) -> {
+                    String string = builder.getRemaining().toLowerCase(Locale.ROOT);
+                    boolean bl = !reader.hasGamemodeNotEquals();
                     boolean bl2 = true;
                     if (!string.isEmpty()) {
                         if (string.charAt(0) == '!') {
@@ -229,31 +229,31 @@ public class PlayerSelector {
                     for(EnumGamemode gameType : EnumGamemode.values()) {
                         if (gameType.getName().toLowerCase(Locale.ROOT).startsWith(string)) {
                             if (bl2) {
-                                suggestionsBuilder.suggest("!" + gameType.getName());
+                                builder.suggest("!" + gameType.getName());
                             }
 
                             if (bl) {
-                                suggestionsBuilder.suggest(gameType.getName());
+                                builder.suggest(gameType.getName());
                             }
                         }
                     }
 
-                    return suggestionsBuilder.buildFuture();
+                    return builder.buildFuture();
                 });
-                int i = entitySelectorParser.getReader().getCursor();
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                if (entitySelectorParser.hasGamemodeNotEquals() && !bl) {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), "gamemode");
+                int i = reader.getReader().getCursor();
+                boolean bl = reader.shouldInvertValue();
+                if (reader.hasGamemodeNotEquals() && !bl) {
+                    reader.getReader().setCursor(i);
+                    throw ERROR_INAPPLICABLE_OPTION.createWithContext(reader.getReader(), "gamemode");
                 } else {
-                    String string = entitySelectorParser.getReader().readUnquotedString();
+                    String string = reader.getReader().readUnquotedString();
                     EnumGamemode gameType = EnumGamemode.byName(string, (EnumGamemode)null);
                     if (gameType == null) {
-                        entitySelectorParser.getReader().setCursor(i);
-                        throw ERROR_GAME_MODE_INVALID.createWithContext(entitySelectorParser.getReader(), string);
+                        reader.getReader().setCursor(i);
+                        throw ERROR_GAME_MODE_INVALID.createWithContext(reader.getReader(), string);
                     } else {
-                        entitySelectorParser.setIncludesEntities(false);
-                        entitySelectorParser.addPredicate((entity) -> {
+                        reader.setIncludesEntities(false);
+                        reader.addPredicate((entity) -> {
                             if (!(entity instanceof EntityPlayer)) {
                                 return false;
                             } else {
@@ -262,20 +262,20 @@ public class PlayerSelector {
                             }
                         });
                         if (bl) {
-                            entitySelectorParser.setHasGamemodeNotEquals(true);
+                            reader.setHasGamemodeNotEquals(true);
                         } else {
-                            entitySelectorParser.setHasGamemodeEquals(true);
+                            reader.setHasGamemodeEquals(true);
                         }
 
                     }
                 }
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.hasGamemodeEquals();
+            }, (reader) -> {
+                return !reader.hasGamemodeEquals();
             }, new ChatMessage("argument.entity.options.gamemode.description"));
-            register("team", (entitySelectorParser) -> {
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                String string = entitySelectorParser.getReader().readUnquotedString();
-                entitySelectorParser.addPredicate((entity) -> {
+            register("team", (reader) -> {
+                boolean bl = reader.shouldInvertValue();
+                String string = reader.getReader().readUnquotedString();
+                reader.addPredicate((entity) -> {
                     if (!(entity instanceof EntityLiving)) {
                         return false;
                     } else {
@@ -285,79 +285,79 @@ public class PlayerSelector {
                     }
                 });
                 if (bl) {
-                    entitySelectorParser.setHasTeamNotEquals(true);
+                    reader.setHasTeamNotEquals(true);
                 } else {
-                    entitySelectorParser.setHasTeamEquals(true);
+                    reader.setHasTeamEquals(true);
                 }
 
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.hasTeamEquals();
+            }, (reader) -> {
+                return !reader.hasTeamEquals();
             }, new ChatMessage("argument.entity.options.team.description"));
-            register("type", (entitySelectorParser) -> {
-                entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
-                    ICompletionProvider.suggestResource(IRegistry.ENTITY_TYPE.keySet(), suggestionsBuilder, String.valueOf('!'));
-                    ICompletionProvider.suggestResource(TagsEntity.getAllTags().getAvailableTags(), suggestionsBuilder, "!#");
-                    if (!entitySelectorParser.isTypeLimitedInversely()) {
-                        ICompletionProvider.suggestResource(IRegistry.ENTITY_TYPE.keySet(), suggestionsBuilder);
-                        ICompletionProvider.suggestResource(TagsEntity.getAllTags().getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
+            register("type", (reader) -> {
+                reader.setSuggestions((builder, consumer) -> {
+                    ICompletionProvider.suggestResource(IRegistry.ENTITY_TYPE.keySet(), builder, String.valueOf('!'));
+                    ICompletionProvider.suggestResource(TagsEntity.getAllTags().getAvailableTags(), builder, "!#");
+                    if (!reader.isTypeLimitedInversely()) {
+                        ICompletionProvider.suggestResource(IRegistry.ENTITY_TYPE.keySet(), builder);
+                        ICompletionProvider.suggestResource(TagsEntity.getAllTags().getAvailableTags(), builder, String.valueOf('#'));
                     }
 
-                    return suggestionsBuilder.buildFuture();
+                    return builder.buildFuture();
                 });
-                int i = entitySelectorParser.getReader().getCursor();
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                if (entitySelectorParser.isTypeLimitedInversely() && !bl) {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), "type");
+                int i = reader.getReader().getCursor();
+                boolean bl = reader.shouldInvertValue();
+                if (reader.isTypeLimitedInversely() && !bl) {
+                    reader.getReader().setCursor(i);
+                    throw ERROR_INAPPLICABLE_OPTION.createWithContext(reader.getReader(), "type");
                 } else {
                     if (bl) {
-                        entitySelectorParser.setTypeLimitedInversely();
+                        reader.setTypeLimitedInversely();
                     }
 
-                    if (entitySelectorParser.isTag()) {
-                        MinecraftKey resourceLocation = MinecraftKey.read(entitySelectorParser.getReader());
-                        entitySelectorParser.addPredicate((entity) -> {
+                    if (reader.isTag()) {
+                        MinecraftKey resourceLocation = MinecraftKey.read(reader.getReader());
+                        reader.addPredicate((entity) -> {
                             return entity.getEntityType().is(entity.getMinecraftServer().getTagRegistry().getOrEmpty(IRegistry.ENTITY_TYPE_REGISTRY).getTagOrEmpty(resourceLocation)) != bl;
                         });
                     } else {
-                        MinecraftKey resourceLocation2 = MinecraftKey.read(entitySelectorParser.getReader());
+                        MinecraftKey resourceLocation2 = MinecraftKey.read(reader.getReader());
                         EntityTypes<?> entityType = IRegistry.ENTITY_TYPE.getOptional(resourceLocation2).orElseThrow(() -> {
-                            entitySelectorParser.getReader().setCursor(i);
-                            return ERROR_ENTITY_TYPE_INVALID.createWithContext(entitySelectorParser.getReader(), resourceLocation2.toString());
+                            reader.getReader().setCursor(i);
+                            return ERROR_ENTITY_TYPE_INVALID.createWithContext(reader.getReader(), resourceLocation2.toString());
                         });
                         if (Objects.equals(EntityTypes.PLAYER, entityType) && !bl) {
-                            entitySelectorParser.setIncludesEntities(false);
+                            reader.setIncludesEntities(false);
                         }
 
-                        entitySelectorParser.addPredicate((entity) -> {
+                        reader.addPredicate((entity) -> {
                             return Objects.equals(entityType, entity.getEntityType()) != bl;
                         });
                         if (!bl) {
-                            entitySelectorParser.limitToType(entityType);
+                            reader.limitToType(entityType);
                         }
                     }
 
                 }
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.isTypeLimited();
+            }, (reader) -> {
+                return !reader.isTypeLimited();
             }, new ChatMessage("argument.entity.options.type.description"));
-            register("tag", (entitySelectorParser) -> {
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                String string = entitySelectorParser.getReader().readUnquotedString();
-                entitySelectorParser.addPredicate((entity) -> {
+            register("tag", (reader) -> {
+                boolean bl = reader.shouldInvertValue();
+                String string = reader.getReader().readUnquotedString();
+                reader.addPredicate((entity) -> {
                     if ("".equals(string)) {
                         return entity.getScoreboardTags().isEmpty() != bl;
                     } else {
                         return entity.getScoreboardTags().contains(string) != bl;
                     }
                 });
-            }, (entitySelectorParser) -> {
+            }, (reader) -> {
                 return true;
             }, new ChatMessage("argument.entity.options.tag.description"));
-            register("nbt", (entitySelectorParser) -> {
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                NBTTagCompound compoundTag = (new MojangsonParser(entitySelectorParser.getReader())).readStruct();
-                entitySelectorParser.addPredicate((entity) -> {
+            register("nbt", (reader) -> {
+                boolean bl = reader.shouldInvertValue();
+                NBTTagCompound compoundTag = (new MojangsonParser(reader.getReader())).readStruct();
+                reader.addPredicate((entity) -> {
                     NBTTagCompound compoundTag2 = entity.save(new NBTTagCompound());
                     if (entity instanceof EntityPlayer) {
                         ItemStack itemStack = ((EntityPlayer)entity).getInventory().getItemInHand();
@@ -368,11 +368,11 @@ public class PlayerSelector {
 
                     return GameProfileSerializer.compareNbt(compoundTag, compoundTag2, true) != bl;
                 });
-            }, (entitySelectorParser) -> {
+            }, (reader) -> {
                 return true;
             }, new ChatMessage("argument.entity.options.nbt.description"));
-            register("scores", (entitySelectorParser) -> {
-                StringReader stringReader = entitySelectorParser.getReader();
+            register("scores", (reader) -> {
+                StringReader stringReader = reader.getReader();
                 Map<String, CriterionConditionValue.IntegerRange> map = Maps.newHashMap();
                 stringReader.expect('{');
                 stringReader.skipWhitespace();
@@ -393,7 +393,7 @@ public class PlayerSelector {
 
                 stringReader.expect('}');
                 if (!map.isEmpty()) {
-                    entitySelectorParser.addPredicate((entity) -> {
+                    reader.addPredicate((entity) -> {
                         Scoreboard scoreboard = entity.getMinecraftServer().getScoreboard();
                         String string = entity.getName();
 
@@ -418,12 +418,12 @@ public class PlayerSelector {
                     });
                 }
 
-                entitySelectorParser.setHasScores(true);
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.hasScores();
+                reader.setHasScores(true);
+            }, (reader) -> {
+                return !reader.hasScores();
             }, new ChatMessage("argument.entity.options.scores.description"));
-            register("advancements", (entitySelectorParser) -> {
-                StringReader stringReader = entitySelectorParser.getReader();
+            register("advancements", (reader) -> {
+                StringReader stringReader = reader.getReader();
                 Map<MinecraftKey, Predicate<AdvancementProgress>> map = Maps.newHashMap();
                 stringReader.expect('{');
                 stringReader.skipWhitespace();
@@ -484,7 +484,7 @@ public class PlayerSelector {
 
                 stringReader.expect('}');
                 if (!map.isEmpty()) {
-                    entitySelectorParser.addPredicate((entity) -> {
+                    reader.addPredicate((entity) -> {
                         if (!(entity instanceof EntityPlayer)) {
                             return false;
                         } else {
@@ -502,17 +502,17 @@ public class PlayerSelector {
                             return true;
                         }
                     });
-                    entitySelectorParser.setIncludesEntities(false);
+                    reader.setIncludesEntities(false);
                 }
 
-                entitySelectorParser.setHasAdvancements(true);
-            }, (entitySelectorParser) -> {
-                return !entitySelectorParser.hasAdvancements();
+                reader.setHasAdvancements(true);
+            }, (reader) -> {
+                return !reader.hasAdvancements();
             }, new ChatMessage("argument.entity.options.advancements.description"));
-            register("predicate", (entitySelectorParser) -> {
-                boolean bl = entitySelectorParser.shouldInvertValue();
-                MinecraftKey resourceLocation = MinecraftKey.read(entitySelectorParser.getReader());
-                entitySelectorParser.addPredicate((entity) -> {
+            register("predicate", (reader) -> {
+                boolean bl = reader.shouldInvertValue();
+                MinecraftKey resourceLocation = MinecraftKey.read(reader.getReader());
+                reader.addPredicate((entity) -> {
                     if (!(entity.level instanceof WorldServer)) {
                         return false;
                     } else {
@@ -526,7 +526,7 @@ public class PlayerSelector {
                         }
                     }
                 });
-            }, (entitySelectorParser) -> {
+            }, (reader) -> {
                 return true;
             }, new ChatMessage("argument.entity.options.predicate.description"));
         }
@@ -566,10 +566,10 @@ public class PlayerSelector {
         public final Predicate<ArgumentParserSelector> predicate;
         public final IChatBaseComponent description;
 
-        Option(PlayerSelector.Modifier modifier, Predicate<ArgumentParserSelector> predicate, IChatBaseComponent component) {
-            this.modifier = modifier;
-            this.predicate = predicate;
-            this.description = component;
+        Option(PlayerSelector.Modifier handler, Predicate<ArgumentParserSelector> condition, IChatBaseComponent description) {
+            this.modifier = handler;
+            this.predicate = condition;
+            this.description = description;
         }
     }
 }

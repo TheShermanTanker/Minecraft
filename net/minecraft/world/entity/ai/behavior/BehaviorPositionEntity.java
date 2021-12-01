@@ -1,11 +1,11 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.phys.Vec3D;
 
 public class BehaviorPositionEntity implements BehaviorPosition {
@@ -29,11 +29,17 @@ public class BehaviorPositionEntity implements BehaviorPosition {
 
     @Override
     public boolean isVisibleBy(EntityLiving entity) {
-        if (!(this.entity instanceof EntityLiving)) {
-            return true;
+        Entity optional = this.entity;
+        if (optional instanceof EntityLiving) {
+            EntityLiving livingEntity = (EntityLiving)optional;
+            if (!livingEntity.isAlive()) {
+                return false;
+            } else {
+                Optional<NearestVisibleLivingEntities> optional = entity.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+                return optional.isPresent() && optional.get().contains(livingEntity);
+            }
         } else {
-            Optional<List<EntityLiving>> optional = entity.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-            return this.entity.isAlive() && optional.isPresent() && optional.get().contains(this.entity);
+            return true;
         }
     }
 

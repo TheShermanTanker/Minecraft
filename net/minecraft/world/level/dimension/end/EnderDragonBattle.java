@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -76,11 +76,15 @@ public class EnderDragonBattle {
     private int ticksSinceLastPlayerScan;
     private boolean dragonKilled;
     private boolean previouslyKilled;
+    @Nullable
     public UUID dragonUUID;
     private boolean needsStateScanning = true;
+    @Nullable
     public BlockPosition portalLocation;
+    @Nullable
     public EnumDragonRespawn respawnStage;
     private int respawnTime;
+    @Nullable
     private List<EntityEnderCrystal> respawnCrystals;
 
     public EnderDragonBattle(WorldServer world, long gatewaysSeed, NBTTagCompound nbt) {
@@ -380,7 +384,7 @@ public class EnderDragonBattle {
 
     private void spawnNewGateway(BlockPosition pos) {
         this.level.triggerEffect(3000, pos, 0);
-        WorldGenBiomeDecoratorGroups.END_GATEWAY_DELAYED.place(this.level, this.level.getChunkSource().getChunkGenerator(), new Random(), pos);
+        EndFeatures.END_GATEWAY_DELAYED.place(this.level, this.level.getChunkSource().getChunkGenerator(), new Random(), pos);
     }
 
     public void generateExitPortal(boolean previouslyKilled) {

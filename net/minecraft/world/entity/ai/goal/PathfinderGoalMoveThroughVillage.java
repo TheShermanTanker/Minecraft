@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.EntityCreature;
@@ -23,6 +24,7 @@ import net.minecraft.world.phys.Vec3D;
 public class PathfinderGoalMoveThroughVillage extends PathfinderGoal {
     protected final EntityCreature mob;
     private final double speedModifier;
+    @Nullable
     private PathEntity path;
     private BlockPosition poiPos;
     private final boolean onlyAtNight;
@@ -56,11 +58,11 @@ public class PathfinderGoalMoveThroughVillage extends PathfinderGoal {
                 if (!serverLevel.isCloseToVillage(blockPos, 6)) {
                     return false;
                 } else {
-                    Vec3D vec3 = LandRandomPos.getPos(this.mob, 15, 7, (blockPos2x) -> {
-                        if (!serverLevel.isVillage(blockPos2x)) {
+                    Vec3D vec3 = LandRandomPos.getPos(this.mob, 15, 7, (pos) -> {
+                        if (!serverLevel.isVillage(pos)) {
                             return Double.NEGATIVE_INFINITY;
                         } else {
-                            Optional<BlockPosition> optional = serverLevel.getPoiManager().find(VillagePlaceType.ALL, this::hasNotVisited, blockPos2x, 10, VillagePlace.Occupancy.IS_OCCUPIED);
+                            Optional<BlockPosition> optional = serverLevel.getPoiManager().find(VillagePlaceType.ALL, this::hasNotVisited, pos, 10, VillagePlace.Occupancy.IS_OCCUPIED);
                             return !optional.isPresent() ? Double.NEGATIVE_INFINITY : -optional.get().distSqr(blockPos);
                         }
                     });

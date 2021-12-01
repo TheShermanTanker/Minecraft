@@ -19,7 +19,7 @@ import net.minecraft.commands.arguments.blocks.ArgumentTileLocation;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
-import net.minecraft.data.structures.DebugReportProviderNBT;
+import net.minecraft.data.structures.DebugReportProviderStructureFromNBT;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -91,7 +91,7 @@ public class GameTestHarnessStructures {
                 String string = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
                 NBTTagCompound compoundTag = GameProfileSerializer.snbtToStructure(string);
                 NBTTagCompound compoundTag2 = StructureUpdater.update(path.toString(), compoundTag);
-                DebugReportProviderNBT.writeSnbt(path, GameProfileSerializer.structureToSnbt(compoundTag2));
+                DebugReportProviderStructureFromNBT.writeSnbt(path, GameProfileSerializer.structureToSnbt(compoundTag2));
             } catch (IOException | CommandSyntaxException var4) {
                 LOGGER.error("Something went wrong upgrading: {}", path, var4);
             }
@@ -155,7 +155,7 @@ public class GameTestHarnessStructures {
         forceLoadChunks(pos, world);
         clearSpaceForStructure(boundingBox, pos.getY(), world);
         TileEntityStructure structureBlockEntity = createStructureBlock(structureName, blockPos, rotation, world, bl);
-        world.getBlockTicks().fetchTicksInArea(boundingBox, true, false);
+        world.getBlockTicks().clearArea(boundingBox);
         world.clearBlockEvents(boundingBox);
         return structureBlockEntity;
     }
@@ -178,7 +178,7 @@ public class GameTestHarnessStructures {
         BlockPosition.betweenClosedStream(boundingBox).forEach((pos) -> {
             clearBlock(altitude, pos, world);
         });
-        world.getBlockTicks().fetchTicksInArea(boundingBox, true, false);
+        world.getBlockTicks().clearArea(boundingBox);
         world.clearBlockEvents(boundingBox);
         AxisAlignedBB aABB = new AxisAlignedBB((double)boundingBox.minX(), (double)boundingBox.minY(), (double)boundingBox.minZ(), (double)boundingBox.maxX(), (double)boundingBox.maxY(), (double)boundingBox.maxZ());
         List<Entity> list = world.getEntitiesOfClass(Entity.class, aABB, (entity) -> {
@@ -286,16 +286,10 @@ public class GameTestHarnessStructures {
     private static void clearBlock(int altitude, BlockPosition pos, WorldServer world) {
         IBlockData blockState = null;
         GeneratorSettingsFlat flatLevelGeneratorSettings = GeneratorSettingsFlat.getDefault(world.registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY));
-        if (flatLevelGeneratorSettings instanceof GeneratorSettingsFlat) {
-            List<IBlockData> list = flatLevelGeneratorSettings.getLayers();
-            int i = pos.getY() - world.getMinBuildHeight();
-            if (pos.getY() < altitude && i > 0 && i <= list.size()) {
-                blockState = list.get(i - 1);
-            }
-        } else if (pos.getY() == altitude - 1) {
-            blockState = world.getBiome(pos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();
-        } else if (pos.getY() < altitude - 1) {
-            blockState = world.getBiome(pos).getGenerationSettings().getSurfaceBuilderConfig().getUnderMaterial();
+        List<IBlockData> list = flatLevelGeneratorSettings.getLayers();
+        int i = pos.getY() - world.getMinBuildHeight();
+        if (pos.getY() < altitude && i > 0 && i <= list.size()) {
+            blockState = list.get(i - 1);
         }
 
         if (blockState == null) {

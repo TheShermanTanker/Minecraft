@@ -63,8 +63,8 @@ public class DefinedStructure {
     public static final String ENTITY_TAG_NBT = "nbt";
     public static final String SIZE_TAG = "size";
     static final int CHUNK_SIZE = 16;
-    private final List<DefinedStructure.Palette> palettes = Lists.newArrayList();
-    private final List<DefinedStructure.EntityInfo> entityInfoList = Lists.newArrayList();
+    public final List<DefinedStructure.Palette> palettes = Lists.newArrayList();
+    public final List<DefinedStructure.EntityInfo> entityInfoList = Lists.newArrayList();
     private BaseBlockPosition size = BaseBlockPosition.ZERO;
     private String author = "?";
 
@@ -97,11 +97,7 @@ public class DefinedStructure {
                     TileEntity blockEntity = world.getTileEntity(blockPos4);
                     DefinedStructure.BlockInfo structureBlockInfo;
                     if (blockEntity != null) {
-                        NBTTagCompound compoundTag = blockEntity.save(new NBTTagCompound());
-                        compoundTag.remove("x");
-                        compoundTag.remove("y");
-                        compoundTag.remove("z");
-                        structureBlockInfo = new DefinedStructure.BlockInfo(blockPos5, blockState, compoundTag.c());
+                        structureBlockInfo = new DefinedStructure.BlockInfo(blockPos5, blockState, blockEntity.saveWithId());
                     } else {
                         structureBlockInfo = new DefinedStructure.BlockInfo(blockPos5, blockState, (NBTTagCompound)null);
                     }
@@ -122,33 +118,33 @@ public class DefinedStructure {
         }
     }
 
-    private static void addToLists(DefinedStructure.BlockInfo structureBlockInfo, List<DefinedStructure.BlockInfo> list, List<DefinedStructure.BlockInfo> list2, List<DefinedStructure.BlockInfo> list3) {
-        if (structureBlockInfo.nbt != null) {
-            list2.add(structureBlockInfo);
-        } else if (!structureBlockInfo.state.getBlock().hasDynamicShape() && structureBlockInfo.state.isCollisionShapeFullBlock(BlockAccessAir.INSTANCE, BlockPosition.ZERO)) {
-            list.add(structureBlockInfo);
+    private static void addToLists(DefinedStructure.BlockInfo blockInfo, List<DefinedStructure.BlockInfo> fullBlocks, List<DefinedStructure.BlockInfo> blocksWithNbt, List<DefinedStructure.BlockInfo> otherBlocks) {
+        if (blockInfo.nbt != null) {
+            blocksWithNbt.add(blockInfo);
+        } else if (!blockInfo.state.getBlock().hasDynamicShape() && blockInfo.state.isCollisionShapeFullBlock(BlockAccessAir.INSTANCE, BlockPosition.ZERO)) {
+            fullBlocks.add(blockInfo);
         } else {
-            list3.add(structureBlockInfo);
+            otherBlocks.add(blockInfo);
         }
 
     }
 
-    private static List<DefinedStructure.BlockInfo> buildInfoList(List<DefinedStructure.BlockInfo> list, List<DefinedStructure.BlockInfo> list2, List<DefinedStructure.BlockInfo> list3) {
-        Comparator<DefinedStructure.BlockInfo> comparator = Comparator.comparingInt((structureBlockInfo) -> {
-            return structureBlockInfo.pos.getY();
-        }).thenComparingInt((structureBlockInfo) -> {
-            return structureBlockInfo.pos.getX();
-        }).thenComparingInt((structureBlockInfo) -> {
-            return structureBlockInfo.pos.getZ();
+    private static List<DefinedStructure.BlockInfo> buildInfoList(List<DefinedStructure.BlockInfo> fullBlocks, List<DefinedStructure.BlockInfo> blocksWithNbt, List<DefinedStructure.BlockInfo> otherBlocks) {
+        Comparator<DefinedStructure.BlockInfo> comparator = Comparator.comparingInt((blockInfo) -> {
+            return blockInfo.pos.getY();
+        }).thenComparingInt((blockInfo) -> {
+            return blockInfo.pos.getX();
+        }).thenComparingInt((blockInfo) -> {
+            return blockInfo.pos.getZ();
         });
-        list.sort(comparator);
-        list3.sort(comparator);
-        list2.sort(comparator);
-        List<DefinedStructure.BlockInfo> list4 = Lists.newArrayList();
-        list4.addAll(list);
-        list4.addAll(list3);
-        list4.addAll(list2);
-        return list4;
+        fullBlocks.sort(comparator);
+        otherBlocks.sort(comparator);
+        blocksWithNbt.sort(comparator);
+        List<DefinedStructure.BlockInfo> list = Lists.newArrayList();
+        list.addAll(fullBlocks);
+        list.addAll(otherBlocks);
+        list.addAll(blocksWithNbt);
+        return list;
     }
 
     private void fillEntityList(World world, BlockPosition firstCorner, BlockPosition secondCorner) {
@@ -168,7 +164,7 @@ public class DefinedStructure {
                 blockPos = new BlockPosition(vec3);
             }
 
-            this.entityInfoList.add(new DefinedStructure.EntityInfo(vec3, blockPos, compoundTag.c()));
+            this.entityInfoList.add(new DefinedStructure.EntityInfo(vec3, blockPos, compoundTag.copy()));
         }
 
     }
@@ -204,7 +200,7 @@ public class DefinedStructure {
         return transform(pos, placementData.getMirror(), placementData.getRotation(), placementData.getRotationPivot());
     }
 
-    public boolean placeInWorld(WorldAccess world, BlockPosition pos, BlockPosition pivot, DefinedStructureInfo placementData, Random random, int i) {
+    public boolean placeInWorld(WorldAccess world, BlockPosition pos, BlockPosition pivot, DefinedStructureInfo placementData, Random random, int flags) {
         if (this.palettes.isEmpty()) {
             return false;
         } else {
@@ -214,12 +210,12 @@ public class DefinedStructure {
                 List<BlockPosition> list2 = Lists.newArrayListWithCapacity(placementData.shouldKeepLiquids() ? list.size() : 0);
                 List<BlockPosition> list3 = Lists.newArrayListWithCapacity(placementData.shouldKeepLiquids() ? list.size() : 0);
                 List<Pair<BlockPosition, NBTTagCompound>> list4 = Lists.newArrayListWithCapacity(list.size());
+                int i = Integer.MAX_VALUE;
                 int j = Integer.MAX_VALUE;
                 int k = Integer.MAX_VALUE;
-                int l = Integer.MAX_VALUE;
+                int l = Integer.MIN_VALUE;
                 int m = Integer.MIN_VALUE;
                 int n = Integer.MIN_VALUE;
-                int o = Integer.MIN_VALUE;
 
                 for(DefinedStructure.BlockInfo structureBlockInfo : processBlockInfos(world, pos, pivot, placementData, list)) {
                     BlockPosition blockPos = structureBlockInfo.pos;
@@ -232,20 +228,17 @@ public class DefinedStructure {
                             world.setTypeAndData(blockPos, Blocks.BARRIER.getBlockData(), 20);
                         }
 
-                        if (world.setTypeAndData(blockPos, blockState, i)) {
-                            j = Math.min(j, blockPos.getX());
-                            k = Math.min(k, blockPos.getY());
-                            l = Math.min(l, blockPos.getZ());
-                            m = Math.max(m, blockPos.getX());
-                            n = Math.max(n, blockPos.getY());
-                            o = Math.max(o, blockPos.getZ());
+                        if (world.setTypeAndData(blockPos, blockState, flags)) {
+                            i = Math.min(i, blockPos.getX());
+                            j = Math.min(j, blockPos.getY());
+                            k = Math.min(k, blockPos.getZ());
+                            l = Math.max(l, blockPos.getX());
+                            m = Math.max(m, blockPos.getY());
+                            n = Math.max(n, blockPos.getZ());
                             list4.add(Pair.of(blockPos, structureBlockInfo.nbt));
                             if (structureBlockInfo.nbt != null) {
                                 TileEntity blockEntity2 = world.getTileEntity(blockPos);
                                 if (blockEntity2 != null) {
-                                    structureBlockInfo.nbt.setInt("x", blockPos.getX());
-                                    structureBlockInfo.nbt.setInt("y", blockPos.getY());
-                                    structureBlockInfo.nbt.setInt("z", blockPos.getZ());
                                     if (blockEntity2 instanceof TileEntityLootable) {
                                         structureBlockInfo.nbt.setLong("LootTableSeed", random.nextLong());
                                     }
@@ -279,8 +272,8 @@ public class DefinedStructure {
                         BlockPosition blockPos2 = iterator.next();
                         Fluid fluidState2 = world.getFluid(blockPos2);
 
-                        for(int p = 0; p < directions.length && !fluidState2.isSource(); ++p) {
-                            BlockPosition blockPos3 = blockPos2.relative(directions[p]);
+                        for(int o = 0; o < directions.length && !fluidState2.isSource(); ++o) {
+                            BlockPosition blockPos3 = blockPos2.relative(directions[o]);
                             Fluid fluidState3 = world.getFluid(blockPos3);
                             if (fluidState3.isSource() && !list3.contains(blockPos3)) {
                                 fluidState2 = fluidState3;
@@ -299,19 +292,19 @@ public class DefinedStructure {
                     }
                 }
 
-                if (j <= m) {
+                if (i <= l) {
                     if (!placementData.getKnownShape()) {
-                        VoxelShapeDiscrete discreteVoxelShape = new VoxelShapeBitSet(m - j + 1, n - k + 1, o - l + 1);
+                        VoxelShapeDiscrete discreteVoxelShape = new VoxelShapeBitSet(l - i + 1, m - j + 1, n - k + 1);
+                        int p = i;
                         int q = j;
                         int r = k;
-                        int s = l;
 
                         for(Pair<BlockPosition, NBTTagCompound> pair : list4) {
                             BlockPosition blockPos4 = pair.getFirst();
-                            discreteVoxelShape.fill(blockPos4.getX() - q, blockPos4.getY() - r, blockPos4.getZ() - s);
+                            discreteVoxelShape.fill(blockPos4.getX() - p, blockPos4.getY() - q, blockPos4.getZ() - r);
                         }
 
-                        updateShapeAtEdge(world, i, discreteVoxelShape, q, r, s);
+                        updateShapeAtEdge(world, flags, discreteVoxelShape, p, q, r);
                     }
 
                     for(Pair<BlockPosition, NBTTagCompound> pair2 : list4) {
@@ -320,7 +313,7 @@ public class DefinedStructure {
                             IBlockData blockState3 = world.getType(blockPos5);
                             IBlockData blockState4 = Block.updateFromNeighbourShapes(blockState3, world, blockPos5);
                             if (blockState3 != blockState4) {
-                                world.setTypeAndData(blockPos5, blockState4, i & -2 | 16);
+                                world.setTypeAndData(blockPos5, blockState4, flags & -2 | 16);
                             }
 
                             world.update(blockPos5, blockState4.getBlock());
@@ -370,7 +363,7 @@ public class DefinedStructure {
 
         for(DefinedStructure.BlockInfo structureBlockInfo : list) {
             BlockPosition blockPos = calculateRelativePosition(placementData, structureBlockInfo.pos).offset(pos);
-            DefinedStructure.BlockInfo structureBlockInfo2 = new DefinedStructure.BlockInfo(blockPos, structureBlockInfo.state, structureBlockInfo.nbt != null ? structureBlockInfo.nbt.c() : null);
+            DefinedStructure.BlockInfo structureBlockInfo2 = new DefinedStructure.BlockInfo(blockPos, structureBlockInfo.state, structureBlockInfo.nbt != null ? structureBlockInfo.nbt.copy() : null);
 
             for(Iterator<DefinedStructureProcessor> iterator = placementData.getProcessors().iterator(); structureBlockInfo2 != null && iterator.hasNext(); structureBlockInfo2 = iterator.next().processBlock(world, pos, pivot, structureBlockInfo, structureBlockInfo2, placementData)) {
             }
@@ -383,11 +376,11 @@ public class DefinedStructure {
         return list2;
     }
 
-    private void placeEntities(WorldAccess world, BlockPosition pos, EnumBlockMirror mirror, EnumBlockRotation rotation, BlockPosition pivot, @Nullable StructureBoundingBox area, boolean bl) {
+    private void placeEntities(WorldAccess world, BlockPosition pos, EnumBlockMirror mirror, EnumBlockRotation rotation, BlockPosition pivot, @Nullable StructureBoundingBox area, boolean initializeMobs) {
         for(DefinedStructure.EntityInfo structureEntityInfo : this.entityInfoList) {
             BlockPosition blockPos = transform(structureEntityInfo.blockPos, mirror, rotation, pivot).offset(pos);
             if (area == null || area.isInside(blockPos)) {
-                NBTTagCompound compoundTag = structureEntityInfo.nbt.c();
+                NBTTagCompound compoundTag = structureEntityInfo.nbt.copy();
                 Vec3D vec3 = transform(structureEntityInfo.pos, mirror, rotation, pivot);
                 Vec3D vec32 = vec3.add((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
                 NBTTagList listTag = new NBTTagList();
@@ -400,7 +393,7 @@ public class DefinedStructure {
                     float f = entity.mirror(mirror);
                     f = f + (entity.getYRot() - entity.rotate(rotation));
                     entity.setPositionRotation(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
-                    if (bl && entity instanceof EntityInsentient) {
+                    if (initializeMobs && entity instanceof EntityInsentient) {
                         ((EntityInsentient)entity).prepare(world, world.getDamageScaler(new BlockPosition(vec32)), EnumMobSpawn.STRUCTURE, (GroupDataEntity)null, compoundTag);
                     }
 
@@ -607,7 +600,7 @@ public class DefinedStructure {
 
         nbt.set("entities", listTag5);
         nbt.set("size", this.newIntegerList(this.size.getX(), this.size.getY(), this.size.getZ()));
-        nbt.setInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+        nbt.setInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         return nbt;
     }
 

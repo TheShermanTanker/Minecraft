@@ -14,7 +14,9 @@ import net.minecraft.world.phys.Vec3D;
 
 public class DragonControllerLandingFly extends DragonControllerAbstract {
     private static final PathfinderTargetCondition NEAR_EGG_TARGETING = PathfinderTargetCondition.forCombat().ignoreLineOfSight();
+    @Nullable
     private PathEntity currentPath;
+    @Nullable
     private Vec3D targetLocation;
 
     public DragonControllerLandingFly(EntityEnderDragon dragon) {

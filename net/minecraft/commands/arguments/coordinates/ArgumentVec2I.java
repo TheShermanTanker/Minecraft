@@ -31,7 +31,6 @@ public class ArgumentVec2I implements ArgumentType<IVectorPosition> {
         return new BlockPosition2D(blockPos.getX(), blockPos.getZ());
     }
 
-    @Override
     public IVectorPosition parse(StringReader stringReader) throws CommandSyntaxException {
         int i = stringReader.getCursor();
         if (!stringReader.canRead()) {
@@ -49,7 +48,6 @@ public class ArgumentVec2I implements ArgumentType<IVectorPosition> {
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         if (!(commandContext.getSource() instanceof ICompletionProvider)) {
             return Suggestions.empty();
@@ -66,7 +64,6 @@ public class ArgumentVec2I implements ArgumentType<IVectorPosition> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

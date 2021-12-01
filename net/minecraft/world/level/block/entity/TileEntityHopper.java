@@ -55,14 +55,13 @@ public class TileEntityHopper extends TileEntityLootable implements IHopper {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (!this.trySaveLootTable(nbt)) {
             ContainerUtil.saveAllItems(nbt, this.items);
         }
 
         nbt.setInt("TransferCooldown", this.cooldownTime);
-        return nbt;
     }
 
     @Override
@@ -170,15 +169,15 @@ public class TileEntityHopper extends TileEntityLootable implements IHopper {
     }
 
     private static boolean isFullContainer(IInventory inventory, EnumDirection direction) {
-        return getSlots(inventory, direction).allMatch((i) -> {
-            ItemStack itemStack = inventory.getItem(i);
+        return getSlots(inventory, direction).allMatch((slot) -> {
+            ItemStack itemStack = inventory.getItem(slot);
             return itemStack.getCount() >= itemStack.getMaxStackSize();
         });
     }
 
     private static boolean isEmptyContainer(IInventory inv, EnumDirection facing) {
-        return getSlots(inv, facing).allMatch((i) -> {
-            return inv.getItem(i).isEmpty();
+        return getSlots(inv, facing).allMatch((slot) -> {
+            return inv.getItem(slot).isEmpty();
         });
     }
 
@@ -186,8 +185,8 @@ public class TileEntityHopper extends TileEntityLootable implements IHopper {
         IInventory container = getSourceContainer(world, hopper);
         if (container != null) {
             EnumDirection direction = EnumDirection.DOWN;
-            return isEmptyContainer(container, direction) ? false : getSlots(container, direction).anyMatch((i) -> {
-                return tryTakeInItemFromSlot(hopper, container, i, direction);
+            return isEmptyContainer(container, direction) ? false : getSlots(container, direction).anyMatch((slot) -> {
+                return tryTakeInItemFromSlot(hopper, container, slot, direction);
             });
         } else {
             for(EntityItem itemEntity : getItemsAtAndAbove(world, hopper)) {
@@ -261,9 +260,9 @@ public class TileEntityHopper extends TileEntityLootable implements IHopper {
         return !(inv instanceof IWorldInventory) || ((IWorldInventory)inv).canTakeItemThroughFace(slot, stack, facing);
     }
 
-    private static ItemStack tryMoveInItem(@Nullable IInventory from, IInventory to, ItemStack stack, int slot, @Nullable EnumDirection direction) {
+    private static ItemStack tryMoveInItem(@Nullable IInventory from, IInventory to, ItemStack stack, int slot, @Nullable EnumDirection side) {
         ItemStack itemStack = to.getItem(slot);
-        if (canPlaceItemInContainer(to, stack, slot, direction)) {
+        if (canPlaceItemInContainer(to, stack, slot, side)) {
             boolean bl = false;
             boolean bl2 = to.isEmpty();
             if (itemStack.isEmpty()) {
@@ -313,8 +312,8 @@ public class TileEntityHopper extends TileEntityLootable implements IHopper {
     }
 
     public static List<EntityItem> getItemsAtAndAbove(World world, IHopper hopper) {
-        return hopper.getSuckShape().toList().stream().flatMap((aABB) -> {
-            return world.getEntitiesOfClass(EntityItem.class, aABB.move(hopper.getWorldX() - 0.5D, hopper.getWorldY() - 0.5D, hopper.getWorldZ() - 0.5D), IEntitySelector.ENTITY_STILL_ALIVE).stream();
+        return hopper.getSuckShape().toList().stream().flatMap((box) -> {
+            return world.getEntitiesOfClass(EntityItem.class, box.move(hopper.getWorldX() - 0.5D, hopper.getWorldY() - 0.5D, hopper.getWorldZ() - 0.5D), IEntitySelector.ENTITY_STILL_ALIVE).stream();
         }).collect(Collectors.toList());
     }
 

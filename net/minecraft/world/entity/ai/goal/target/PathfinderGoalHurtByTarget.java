@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.goal.target;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.EntityCreature;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -20,6 +21,7 @@ public class PathfinderGoalHurtByTarget extends PathfinderGoalTarget {
     private boolean alertSameType;
     private int timestamp;
     private final Class<?>[] toIgnoreDamage;
+    @Nullable
     private Class<?>[] toIgnoreAlert;
 
     public PathfinderGoalHurtByTarget(EntityCreature mob, Class<?>... noRevengeTypes) {

@@ -88,29 +88,38 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         EntityLiving livingEntity = this.mob.getGoalTarget();
-        this.mob.getControllerLook().setLookAt(livingEntity, 30.0F, 30.0F);
-        double d = this.mob.distanceToSqr(livingEntity.locX(), livingEntity.locY(), livingEntity.locZ());
-        this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
-        if ((this.followingTargetEvenIfNotSeen || this.mob.getEntitySenses().hasLineOfSight(livingEntity)) && this.ticksUntilNextPathRecalculation <= 0 && (this.pathedTargetX == 0.0D && this.pathedTargetY == 0.0D && this.pathedTargetZ == 0.0D || livingEntity.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= 1.0D || this.mob.getRandom().nextFloat() < 0.05F)) {
-            this.pathedTargetX = livingEntity.locX();
-            this.pathedTargetY = livingEntity.locY();
-            this.pathedTargetZ = livingEntity.locZ();
-            this.ticksUntilNextPathRecalculation = 4 + this.mob.getRandom().nextInt(7);
-            if (d > 1024.0D) {
-                this.ticksUntilNextPathRecalculation += 10;
-            } else if (d > 256.0D) {
-                this.ticksUntilNextPathRecalculation += 5;
+        if (livingEntity != null) {
+            this.mob.getControllerLook().setLookAt(livingEntity, 30.0F, 30.0F);
+            double d = this.mob.distanceToSqr(livingEntity.locX(), livingEntity.locY(), livingEntity.locZ());
+            this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
+            if ((this.followingTargetEvenIfNotSeen || this.mob.getEntitySenses().hasLineOfSight(livingEntity)) && this.ticksUntilNextPathRecalculation <= 0 && (this.pathedTargetX == 0.0D && this.pathedTargetY == 0.0D && this.pathedTargetZ == 0.0D || livingEntity.distanceToSqr(this.pathedTargetX, this.pathedTargetY, this.pathedTargetZ) >= 1.0D || this.mob.getRandom().nextFloat() < 0.05F)) {
+                this.pathedTargetX = livingEntity.locX();
+                this.pathedTargetY = livingEntity.locY();
+                this.pathedTargetZ = livingEntity.locZ();
+                this.ticksUntilNextPathRecalculation = 4 + this.mob.getRandom().nextInt(7);
+                if (d > 1024.0D) {
+                    this.ticksUntilNextPathRecalculation += 10;
+                } else if (d > 256.0D) {
+                    this.ticksUntilNextPathRecalculation += 5;
+                }
+
+                if (!this.mob.getNavigation().moveTo(livingEntity, this.speedModifier)) {
+                    this.ticksUntilNextPathRecalculation += 15;
+                }
+
+                this.ticksUntilNextPathRecalculation = this.adjustedTickDelay(this.ticksUntilNextPathRecalculation);
             }
 
-            if (!this.mob.getNavigation().moveTo(livingEntity, this.speedModifier)) {
-                this.ticksUntilNextPathRecalculation += 15;
-            }
+            this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
+            this.checkAndPerformAttack(livingEntity, d);
         }
-
-        this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
-        this.checkAndPerformAttack(livingEntity, d);
     }
 
     protected void checkAndPerformAttack(EntityLiving target, double squaredDistance) {
@@ -124,7 +133,7 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
     }
 
     protected void resetAttackCooldown() {
-        this.ticksUntilNextAttack = 20;
+        this.ticksUntilNextAttack = this.adjustedTickDelay(20);
     }
 
     protected boolean isTimeToAttack() {
@@ -136,7 +145,7 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
     }
 
     protected int getAttackInterval() {
-        return 20;
+        return this.adjustedTickDelay(20);
     }
 
     protected double getAttackReachSqr(EntityLiving entity) {

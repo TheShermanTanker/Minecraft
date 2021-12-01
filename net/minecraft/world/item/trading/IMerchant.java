@@ -8,7 +8,6 @@ import net.minecraft.world.TileInventory;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.inventory.ContainerMerchant;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.World;
 
 public interface IMerchant {
     void setTradingPlayer(@Nullable EntityHuman customer);
@@ -23,8 +22,6 @@ public interface IMerchant {
     void notifyTrade(MerchantRecipe offer);
 
     void notifyTradeUpdated(ItemStack stack);
-
-    World getWorld();
 
     int getExperience();
 
@@ -50,4 +47,6 @@ public interface IMerchant {
         }
 
     }
+
+    boolean isClientSide();
 }

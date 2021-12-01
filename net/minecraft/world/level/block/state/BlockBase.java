@@ -93,10 +93,12 @@ public abstract class BlockBase {
         this.properties = settings;
     }
 
+    /** @deprecated */
     @Deprecated
     public void updateIndirectNeighbourShapes(IBlockData state, GeneratorAccess world, BlockPosition pos, int flags, int maxUpdateDepth) {
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean isPathfindable(IBlockData state, IBlockAccess world, BlockPosition pos, PathMode type) {
         switch(type) {
@@ -111,25 +113,30 @@ public abstract class BlockBase {
         }
     }
 
+    /** @deprecated */
     @Deprecated
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         return state;
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean skipRendering(IBlockData state, IBlockData stateFrom, EnumDirection direction) {
         return false;
     }
 
+    /** @deprecated */
     @Deprecated
     public void doPhysics(IBlockData state, World world, BlockPosition pos, Block block, BlockPosition fromPos, boolean notify) {
         PacketDebug.sendNeighborsUpdatePacket(world, pos);
     }
 
+    /** @deprecated */
     @Deprecated
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
     }
 
+    /** @deprecated */
     @Deprecated
     public void remove(IBlockData state, World world, BlockPosition pos, IBlockData newState, boolean moved) {
         if (state.isTileEntity() && !state.is(newState.getBlock())) {
@@ -138,41 +145,49 @@ public abstract class BlockBase {
 
     }
 
+    /** @deprecated */
     @Deprecated
     public EnumInteractionResult interact(IBlockData state, World world, BlockPosition pos, EntityHuman player, EnumHand hand, MovingObjectPositionBlock hit) {
         return EnumInteractionResult.PASS;
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean triggerEvent(IBlockData state, World world, BlockPosition pos, int type, int data) {
         return false;
     }
 
+    /** @deprecated */
     @Deprecated
     public EnumRenderType getRenderShape(IBlockData state) {
         return EnumRenderType.MODEL;
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean useShapeForLightOcclusion(IBlockData state) {
         return false;
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean isPowerSource(IBlockData state) {
         return false;
     }
 
+    /** @deprecated */
     @Deprecated
     public EnumPistonReaction getPushReaction(IBlockData state) {
         return this.material.getPushReaction();
     }
 
+    /** @deprecated */
     @Deprecated
     public Fluid getFluidState(IBlockData state) {
         return FluidTypes.EMPTY.defaultFluidState();
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean isComplexRedstone(IBlockData state) {
         return false;
@@ -190,26 +205,31 @@ public abstract class BlockBase {
         return 0.2F;
     }
 
+    /** @deprecated */
     @Deprecated
     public IBlockData rotate(IBlockData state, EnumBlockRotation rotation) {
         return state;
     }
 
+    /** @deprecated */
     @Deprecated
     public IBlockData mirror(IBlockData state, EnumBlockMirror mirror) {
         return state;
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean canBeReplaced(IBlockData state, BlockActionContext context) {
         return this.material.isReplaceable() && (context.getItemStack().isEmpty() || !context.getItemStack().is(this.getItem()));
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean canBeReplaced(IBlockData state, FluidType fluid) {
         return this.material.isReplaceable() || !this.material.isBuildable();
     }
 
+    /** @deprecated */
     @Deprecated
     public List<ItemStack> getDrops(IBlockData state, LootTableInfo.Builder builder) {
         MinecraftKey resourceLocation = this.getLootTable();
@@ -223,26 +243,31 @@ public abstract class BlockBase {
         }
     }
 
+    /** @deprecated */
     @Deprecated
     public long getSeed(IBlockData state, BlockPosition pos) {
         return MathHelper.getSeed(pos);
     }
 
+    /** @deprecated */
     @Deprecated
     public VoxelShape getOcclusionShape(IBlockData state, IBlockAccess world, BlockPosition pos) {
         return state.getShape(world, pos);
     }
 
+    /** @deprecated */
     @Deprecated
     public VoxelShape getBlockSupportShape(IBlockData state, IBlockAccess world, BlockPosition pos) {
         return this.getCollisionShape(state, world, pos, VoxelShapeCollision.empty());
     }
 
+    /** @deprecated */
     @Deprecated
     public VoxelShape getInteractionShape(IBlockData state, IBlockAccess world, BlockPosition pos) {
         return VoxelShapes.empty();
     }
 
+    /** @deprecated */
     @Deprecated
     public int getLightBlock(IBlockData state, IBlockAccess world, BlockPosition pos) {
         if (state.isSolidRender(world, pos)) {
@@ -252,56 +277,67 @@ public abstract class BlockBase {
         }
     }
 
+    /** @deprecated */
     @Nullable
     @Deprecated
     public ITileInventory getInventory(IBlockData state, World world, BlockPosition pos) {
         return null;
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean canPlace(IBlockData state, IWorldReader world, BlockPosition pos) {
         return true;
     }
 
+    /** @deprecated */
     @Deprecated
     public float getShadeBrightness(IBlockData state, IBlockAccess world, BlockPosition pos) {
         return state.isCollisionShapeFullBlock(world, pos) ? 0.2F : 1.0F;
     }
 
+    /** @deprecated */
     @Deprecated
     public int getAnalogOutputSignal(IBlockData state, World world, BlockPosition pos) {
         return 0;
     }
 
+    /** @deprecated */
     @Deprecated
     public VoxelShape getShape(IBlockData state, IBlockAccess world, BlockPosition pos, VoxelShapeCollision context) {
         return VoxelShapes.block();
     }
 
+    /** @deprecated */
     @Deprecated
     public VoxelShape getCollisionShape(IBlockData state, IBlockAccess world, BlockPosition pos, VoxelShapeCollision context) {
         return this.hasCollision ? state.getShape(world, pos) : VoxelShapes.empty();
     }
 
+    /** @deprecated */
     @Deprecated
     public boolean isCollisionShapeFullBlock(IBlockData state, IBlockAccess world, BlockPosition pos) {
         return Block.isShapeFullBlock(state.getCollisionShape(world, pos));
     }
 
+    /** @deprecated */
     @Deprecated
     public VoxelShape getVisualShape(IBlockData state, IBlockAccess world, BlockPosition pos, VoxelShapeCollision context) {
         return this.getCollisionShape(state, world, pos, context);
     }
 
+    /** @deprecated */
     @Deprecated
     public void tick(IBlockData state, WorldServer world, BlockPosition pos, Random random) {
         this.tickAlways(state, world, pos, random);
     }
 
+    /** @deprecated */
     @Deprecated
     public void tickAlways(IBlockData state, WorldServer world, BlockPosition pos, Random random) {
     }
 
+    /** @deprecated */
     @Deprecated
     public float getDamage(IBlockData state, EntityHuman player, IBlockAccess world, BlockPosition pos) {
         float f = state.getDestroySpeed(world, pos);
@@ -313,23 +349,28 @@ public abstract class BlockBase {
         }
     }
 
+    /** @deprecated */
     @Deprecated
     public void dropNaturally(IBlockData state, WorldServer world, BlockPosition pos, ItemStack stack) {
     }
 
+    /** @deprecated */
     @Deprecated
     public void attack(IBlockData state, World world, BlockPosition pos, EntityHuman player) {
     }
 
+    /** @deprecated */
     @Deprecated
     public int getSignal(IBlockData state, IBlockAccess world, BlockPosition pos, EnumDirection direction) {
         return 0;
     }
 
+    /** @deprecated */
     @Deprecated
     public void entityInside(IBlockData state, World world, BlockPosition pos, Entity entity) {
     }
 
+    /** @deprecated */
     @Deprecated
     public int getDirectSignal(IBlockData state, IBlockAccess world, BlockPosition pos, EnumDirection direction) {
         return 0;
@@ -344,6 +385,7 @@ public abstract class BlockBase {
         return this.drops;
     }
 
+    /** @deprecated */
     @Deprecated
     public void onProjectileHit(World world, IBlockData state, MovingObjectPositionBlock hit, IProjectile projectile) {
     }

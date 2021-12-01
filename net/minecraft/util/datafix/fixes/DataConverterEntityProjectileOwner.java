@@ -16,7 +16,6 @@ public class DataConverterEntityProjectileOwner extends DataFix {
         super(outputSchema, false);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Schema schema = this.getInputSchema();
         return this.fixTypeEverywhereTyped("EntityProjectileOwner", schema.getType(DataConverterTypes.ENTITY), this::updateProjectiles);

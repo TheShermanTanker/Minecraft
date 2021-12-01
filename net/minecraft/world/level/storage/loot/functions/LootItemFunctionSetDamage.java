@@ -19,10 +19,10 @@ public class LootItemFunctionSetDamage extends LootItemFunctionConditional {
     final NumberProvider damage;
     final boolean add;
 
-    LootItemFunctionSetDamage(LootItemCondition[] conditions, NumberProvider numberProvider, boolean bl) {
-        super(conditions);
-        this.damage = numberProvider;
-        this.add = bl;
+    LootItemFunctionSetDamage(LootItemCondition[] conditons, NumberProvider durabilityRange, boolean add) {
+        super(conditons);
+        this.damage = durabilityRange;
+        this.add = add;
     }
 
     @Override

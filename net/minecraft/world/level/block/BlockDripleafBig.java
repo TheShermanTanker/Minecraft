@@ -13,6 +13,7 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -116,7 +117,7 @@ public class BlockDripleafBig extends BlockFacingHorizontal implements IBlockFra
     public boolean canPlace(IBlockData state, IWorldReader world, BlockPosition pos) {
         BlockPosition blockPos = pos.below();
         IBlockData blockState = world.getType(blockPos);
-        return blockState.is(Blocks.BIG_DRIPLEAF_STEM) || blockState.is(this) || blockState.isFaceSturdy(world, blockPos, EnumDirection.UP);
+        return blockState.is(this) || blockState.is(Blocks.BIG_DRIPLEAF_STEM) || blockState.is(TagsBlock.BIG_DRIPLEAF_PLACEABLE);
     }
 
     @Override
@@ -125,7 +126,7 @@ public class BlockDripleafBig extends BlockFacingHorizontal implements IBlockFra
             return Blocks.AIR.getBlockData();
         } else {
             if (state.get(WATERLOGGED)) {
-                world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
             }
 
             return direction == EnumDirection.UP && neighborState.is(this) ? Blocks.BIG_DRIPLEAF_STEM.withPropertiesOf(state) : super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -207,7 +208,7 @@ public class BlockDripleafBig extends BlockFacingHorizontal implements IBlockFra
 
         int i = DELAY_UNTIL_NEXT_TILT_STATE.getInt(tilt);
         if (i != -1) {
-            world.getBlockTickList().scheduleTick(pos, this, i);
+            world.scheduleTick(pos, this, i);
         }
 
     }

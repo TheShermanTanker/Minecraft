@@ -19,7 +19,7 @@ public class WorldGenFeatureReplaceBlockConfiguration implements WorldGenFeature
         this(ImmutableList.of(WorldGenFeatureOreConfiguration.target(new DefinedStructureTestBlockState(target), state)));
     }
 
-    public WorldGenFeatureReplaceBlockConfiguration(List<WorldGenFeatureOreConfiguration.TargetBlockState> list) {
-        this.targetStates = list;
+    public WorldGenFeatureReplaceBlockConfiguration(List<WorldGenFeatureOreConfiguration.TargetBlockState> targets) {
+        this.targetStates = targets;
     }
 }

@@ -1,58 +1,55 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.mojang.serialization.Codec;
+import java.util.Optional;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.core.IRegistryCustom;
+import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.BlockAccessAir;
 import net.minecraft.world.level.BlockColumn;
-import net.minecraft.world.level.ChunkCoordIntPair;
-import net.minecraft.world.level.IWorldHeightAccess;
-import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.SeededRandom;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
-import net.minecraft.world.level.levelgen.feature.StructureGenerator;
-import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureChanceDecoratorRangeConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
+import net.minecraft.world.level.levelgen.feature.configurations.RangeConfiguration;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 
-public class WorldGenFeatureNetherFossil extends StructureGenerator<WorldGenFeatureChanceDecoratorRangeConfiguration> {
-    public WorldGenFeatureNetherFossil(Codec<WorldGenFeatureChanceDecoratorRangeConfiguration> codec) {
-        super(codec);
+public class WorldGenFeatureNetherFossil extends NoiseAffectingStructureFeature<RangeConfiguration> {
+    public WorldGenFeatureNetherFossil(Codec<RangeConfiguration> configCodec) {
+        super(configCodec, WorldGenFeatureNetherFossil::pieceGeneratorSupplier);
     }
 
-    @Override
-    public StructureGenerator.StructureStartFactory<WorldGenFeatureChanceDecoratorRangeConfiguration> getStartFactory() {
-        return WorldGenFeatureNetherFossil.FeatureStart::new;
-    }
+    private static Optional<PieceGenerator<RangeConfiguration>> pieceGeneratorSupplier(PieceGeneratorSupplier.Context<RangeConfiguration> context) {
+        SeededRandom worldgenRandom = new SeededRandom(new LegacyRandomSource(0L));
+        worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+        int i = context.chunkPos().getMinBlockX() + worldgenRandom.nextInt(16);
+        int j = context.chunkPos().getMinBlockZ() + worldgenRandom.nextInt(16);
+        int k = context.chunkGenerator().getSeaLevel();
+        WorldGenerationContext worldGenerationContext = new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor());
+        int l = (context.config()).height.sample(worldgenRandom, worldGenerationContext);
+        BlockColumn noiseColumn = context.chunkGenerator().getBaseColumn(i, j, context.heightAccessor());
+        BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition(i, l, j);
 
-    public static class FeatureStart extends NoiseAffectingStructureStart<WorldGenFeatureChanceDecoratorRangeConfiguration> {
-        public FeatureStart(StructureGenerator<WorldGenFeatureChanceDecoratorRangeConfiguration> feature, ChunkCoordIntPair pos, int references, long seed) {
-            super(feature, pos, references, seed);
+        while(l > k) {
+            IBlockData blockState = noiseColumn.getBlock(l);
+            --l;
+            IBlockData blockState2 = noiseColumn.getBlock(l);
+            if (blockState.isAir() && (blockState2.is(Blocks.SOUL_SAND) || blockState2.isFaceSturdy(BlockAccessAir.INSTANCE, mutableBlockPos.setY(l), EnumDirection.UP))) {
+                break;
+            }
         }
 
-        @Override
-        public void generatePieces(IRegistryCustom registryManager, ChunkGenerator chunkGenerator, DefinedStructureManager manager, ChunkCoordIntPair pos, BiomeBase biome, WorldGenFeatureChanceDecoratorRangeConfiguration config, IWorldHeightAccess world) {
-            int i = pos.getMinBlockX() + this.random.nextInt(16);
-            int j = pos.getMinBlockZ() + this.random.nextInt(16);
-            int k = chunkGenerator.getSeaLevel();
-            WorldGenerationContext worldGenerationContext = new WorldGenerationContext(chunkGenerator, world);
-            int l = config.height.sample(this.random, worldGenerationContext);
-            BlockColumn noiseColumn = chunkGenerator.getBaseColumn(i, j, world);
-
-            for(BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition(i, l, j); l > k; --l) {
-                IBlockData blockState = noiseColumn.getBlockState(mutableBlockPos);
-                mutableBlockPos.move(EnumDirection.DOWN);
-                IBlockData blockState2 = noiseColumn.getBlockState(mutableBlockPos);
-                if (blockState.isAir() && (blockState2.is(Blocks.SOUL_SAND) || blockState2.isFaceSturdy(BlockAccessAir.INSTANCE, mutableBlockPos, EnumDirection.UP))) {
-                    break;
-                }
-            }
-
-            if (l > k) {
-                WorldGenNetherFossil.addPieces(manager, this, this.random, new BlockPosition(i, l, j));
-            }
+        if (l <= k) {
+            return Optional.empty();
+        } else if (!context.validBiome().test(context.chunkGenerator().getBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(l), QuartPos.fromBlock(j)))) {
+            return Optional.empty();
+        } else {
+            BlockPosition blockPos = new BlockPosition(i, l, j);
+            return Optional.of((structurePiecesBuilder, context2) -> {
+                WorldGenNetherFossil.addPieces(context.structureManager(), structurePiecesBuilder, worldgenRandom, blockPos);
+            });
         }
     }
 }

@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
@@ -30,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.BlockPropertySlabType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.storage.loot.LootTables;
 
 public class WorldGenStrongholdPieces {
@@ -80,41 +80,41 @@ public class WorldGenStrongholdPieces {
         return bl;
     }
 
-    private static WorldGenStrongholdPieces.WorldGenStrongholdPiece findAndCreatePieceFactory(Class<? extends WorldGenStrongholdPieces.WorldGenStrongholdPiece> pieceType, StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, @Nullable EnumDirection orientation, int chainLength) {
+    private static WorldGenStrongholdPieces.WorldGenStrongholdPiece findAndCreatePieceFactory(Class<? extends WorldGenStrongholdPieces.WorldGenStrongholdPiece> pieceType, StructurePieceAccessor holder, Random random, int x, int y, int z, @Nullable EnumDirection orientation, int chainLength) {
         WorldGenStrongholdPieces.WorldGenStrongholdPiece strongholdPiece = null;
         if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdStairs.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdStairs.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdStairs.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdPrison.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdPrison.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdPrison.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdRightTurn.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdRightTurn.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdRightTurn.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdStairs2.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdStairs2.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdStairs2.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdCrossing.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdCrossing.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdCrossing.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdLibrary.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdLibrary.createPiece(structurePieceAccessor, random, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdLibrary.createPiece(holder, random, x, y, z, orientation, chainLength);
         } else if (pieceType == WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom.class) {
-            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom.createPiece(structurePieceAccessor, x, y, z, orientation, chainLength);
+            strongholdPiece = WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom.createPiece(holder, x, y, z, orientation, chainLength);
         }
 
         return strongholdPiece;
     }
 
-    private static WorldGenStrongholdPieces.WorldGenStrongholdPiece generatePieceFromSmallDoor(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+    private static WorldGenStrongholdPieces.WorldGenStrongholdPiece generatePieceFromSmallDoor(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
         if (!updatePieceWeight()) {
             return null;
         } else {
             if (imposedPiece != null) {
-                WorldGenStrongholdPieces.WorldGenStrongholdPiece strongholdPiece = findAndCreatePieceFactory(imposedPiece, structurePieceAccessor, random, x, y, z, orientation, chainLength);
+                WorldGenStrongholdPieces.WorldGenStrongholdPiece strongholdPiece = findAndCreatePieceFactory(imposedPiece, holder, random, x, y, z, orientation, chainLength);
                 imposedPiece = null;
                 if (strongholdPiece != null) {
                     return strongholdPiece;
@@ -134,7 +134,7 @@ public class WorldGenStrongholdPieces {
                             break;
                         }
 
-                        WorldGenStrongholdPieces.WorldGenStrongholdPiece strongholdPiece2 = findAndCreatePieceFactory(pieceWeight.pieceClass, structurePieceAccessor, random, x, y, z, orientation, chainLength);
+                        WorldGenStrongholdPieces.WorldGenStrongholdPiece strongholdPiece2 = findAndCreatePieceFactory(pieceWeight.pieceClass, holder, random, x, y, z, orientation, chainLength);
                         if (strongholdPiece2 != null) {
                             ++pieceWeight.placeCount;
                             start.previousPiece = pieceWeight;
@@ -148,18 +148,18 @@ public class WorldGenStrongholdPieces {
                 }
             }
 
-            StructureBoundingBox boundingBox = WorldGenStrongholdPieces.WorldGenStrongholdCorridor.findPieceBox(structurePieceAccessor, random, x, y, z, orientation);
+            StructureBoundingBox boundingBox = WorldGenStrongholdPieces.WorldGenStrongholdCorridor.findPieceBox(holder, random, x, y, z, orientation);
             return boundingBox != null && boundingBox.minY() > 1 ? new WorldGenStrongholdPieces.WorldGenStrongholdCorridor(chainLength, boundingBox, orientation) : null;
         }
     }
 
-    static StructurePiece generateAndAddPiece(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, @Nullable EnumDirection orientation, int chainLength) {
+    static StructurePiece generateAndAddPiece(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor holder, Random random, int x, int y, int z, @Nullable EnumDirection orientation, int chainLength) {
         if (chainLength > 50) {
             return null;
         } else if (Math.abs(x - start.getBoundingBox().minX()) <= 112 && Math.abs(z - start.getBoundingBox().minZ()) <= 112) {
-            StructurePiece structurePiece = generatePieceFromSmallDoor(start, structurePieceAccessor, random, x, y, z, orientation, chainLength + 1);
+            StructurePiece structurePiece = generatePieceFromSmallDoor(start, holder, random, x, y, z, orientation, chainLength + 1);
             if (structurePiece != null) {
-                structurePieceAccessor.addPiece(structurePiece);
+                holder.addPiece(structurePiece);
                 start.pendingChildren.add(structurePiece);
             }
 
@@ -195,48 +195,47 @@ public class WorldGenStrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public WorldGenStrongholdChestCorridor(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdChestCorridor(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_CHEST_CORRIDOR, nbt);
             this.hasPlacedChest = nbt.getBoolean("Chest");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("Chest", this.hasPlacedChest);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainlength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainlength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -1, 0, 5, 5, 7, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor(chainlength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdChestCorridor(chainlength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 4, 4, 6, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 1, 0);
-            this.generateSmallDoor(world, random, boundingBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 6);
-            this.generateBox(world, boundingBox, 3, 1, 2, 3, 1, 4, Blocks.STONE_BRICKS.getBlockData(), Blocks.STONE_BRICKS.getBlockData(), false);
-            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 1, 1, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 1, 5, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 2, 2, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 2, 4, boundingBox);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 4, 4, 6, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 1, 0);
+            this.generateSmallDoor(world, random, chunkBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 6);
+            this.generateBox(world, chunkBox, 3, 1, 2, 3, 1, 4, Blocks.STONE_BRICKS.getBlockData(), Blocks.STONE_BRICKS.getBlockData(), false);
+            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 1, 1, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 1, 5, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 2, 2, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 3, 2, 4, chunkBox);
 
             for(int i = 2; i <= 4; ++i) {
-                this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 2, 1, i, boundingBox);
+                this.placeBlock(world, Blocks.STONE_BRICK_SLAB.getBlockData(), 2, 1, i, chunkBox);
             }
 
-            if (!this.hasPlacedChest && boundingBox.isInside(this.getWorldPos(3, 2, 3))) {
+            if (!this.hasPlacedChest && chunkBox.isInside(this.getWorldPos(3, 2, 3))) {
                 this.hasPlacedChest = true;
-                this.createChest(world, boundingBox, random, 3, 2, 3, LootTables.STRONGHOLD_CORRIDOR);
+                this.createChest(world, chunkBox, random, 3, 2, 3, LootTables.STRONGHOLD_CORRIDOR);
             }
 
-            return true;
         }
     }
 
@@ -249,21 +248,21 @@ public class WorldGenStrongholdPieces {
             this.steps = orientation != EnumDirection.NORTH && orientation != EnumDirection.SOUTH ? boundingBox.getXSpan() : boundingBox.getZSpan();
         }
 
-        public WorldGenStrongholdCorridor(WorldServer serverLevel, NBTTagCompound nbt) {
+        public WorldGenStrongholdCorridor(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_FILLER_CORRIDOR, nbt);
             this.steps = nbt.getInt("Steps");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setInt("Steps", this.steps);
         }
 
-        public static StructureBoundingBox findPieceBox(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation) {
+        public static StructureBoundingBox findPieceBox(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation) {
             int i = 3;
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -1, 0, 5, 5, 4, orientation);
-            StructurePiece structurePiece = structurePieceAccessor.findCollisionPiece(boundingBox);
+            StructurePiece structurePiece = holder.findCollisionPiece(boundingBox);
             if (structurePiece == null) {
                 return null;
             } else {
@@ -281,30 +280,29 @@ public class WorldGenStrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             for(int i = 0; i < this.steps; ++i) {
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 0, 0, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 0, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 0, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 0, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 4, 0, i, boundingBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 0, 0, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 0, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 0, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 0, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 4, 0, i, chunkBox);
 
                 for(int j = 1; j <= 3; ++j) {
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 0, j, i, boundingBox);
-                    this.placeBlock(world, Blocks.CAVE_AIR.getBlockData(), 1, j, i, boundingBox);
-                    this.placeBlock(world, Blocks.CAVE_AIR.getBlockData(), 2, j, i, boundingBox);
-                    this.placeBlock(world, Blocks.CAVE_AIR.getBlockData(), 3, j, i, boundingBox);
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 4, j, i, boundingBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 0, j, i, chunkBox);
+                    this.placeBlock(world, Blocks.CAVE_AIR.getBlockData(), 1, j, i, chunkBox);
+                    this.placeBlock(world, Blocks.CAVE_AIR.getBlockData(), 2, j, i, chunkBox);
+                    this.placeBlock(world, Blocks.CAVE_AIR.getBlockData(), 3, j, i, chunkBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 4, j, i, chunkBox);
                 }
 
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 0, 4, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 4, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 4, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 4, i, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 4, 4, i, boundingBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 0, 4, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 4, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 4, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 4, i, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 4, 4, i, chunkBox);
             }
 
-            return true;
         }
     }
 
@@ -327,7 +325,7 @@ public class WorldGenStrongholdPieces {
             this.rightHigh = random.nextInt(3) > 0;
         }
 
-        public WorldGenStrongholdCrossing(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdCrossing(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_FIVE_CROSSING, nbt);
             this.leftLow = nbt.getBoolean("leftLow");
             this.leftHigh = nbt.getBoolean("leftHigh");
@@ -336,8 +334,8 @@ public class WorldGenStrongholdPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("leftLow", this.leftLow);
             nbt.setBoolean("leftHigh", this.leftHigh);
             nbt.setBoolean("rightLow", this.rightLow);
@@ -345,7 +343,7 @@ public class WorldGenStrongholdPieces {
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
             int i = 3;
             int j = 5;
             EnumDirection direction = this.getOrientation();
@@ -354,66 +352,65 @@ public class WorldGenStrongholdPieces {
                 j = 8 - j;
             }
 
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 5, 1);
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 5, 1);
             if (this.leftLow) {
-                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, i, 1);
+                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, i, 1);
             }
 
             if (this.leftHigh) {
-                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, j, 7);
+                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, j, 7);
             }
 
             if (this.rightLow) {
-                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, i, 1);
+                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, i, 1);
             }
 
             if (this.rightHigh) {
-                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, j, 7);
+                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, j, 7);
             }
 
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdCrossing createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdCrossing createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -4, -3, 0, 10, 9, 11, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdCrossing(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdCrossing(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 9, 8, 10, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 4, 3, 0);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 9, 8, 10, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 4, 3, 0);
             if (this.leftLow) {
-                this.generateBox(world, boundingBox, 0, 3, 1, 0, 5, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 0, 3, 1, 0, 5, 3, CAVE_AIR, CAVE_AIR, false);
             }
 
             if (this.rightLow) {
-                this.generateBox(world, boundingBox, 9, 3, 1, 9, 5, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 9, 3, 1, 9, 5, 3, CAVE_AIR, CAVE_AIR, false);
             }
 
             if (this.leftHigh) {
-                this.generateBox(world, boundingBox, 0, 5, 7, 0, 7, 9, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 0, 5, 7, 0, 7, 9, CAVE_AIR, CAVE_AIR, false);
             }
 
             if (this.rightHigh) {
-                this.generateBox(world, boundingBox, 9, 5, 7, 9, 7, 9, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 9, 5, 7, 9, 7, 9, CAVE_AIR, CAVE_AIR, false);
             }
 
-            this.generateBox(world, boundingBox, 5, 1, 10, 7, 3, 10, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox(world, boundingBox, 1, 2, 1, 8, 2, 6, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 1, 5, 4, 4, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 8, 1, 5, 8, 4, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 1, 4, 7, 3, 4, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 1, 3, 5, 3, 3, 6, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 1, 3, 4, 3, 3, 4, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
-            this.generateBox(world, boundingBox, 1, 4, 6, 3, 4, 6, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
-            this.generateBox(world, boundingBox, 5, 1, 7, 7, 1, 8, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 5, 1, 9, 7, 1, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
-            this.generateBox(world, boundingBox, 5, 2, 7, 7, 2, 7, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
-            this.generateBox(world, boundingBox, 4, 5, 7, 4, 5, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
-            this.generateBox(world, boundingBox, 8, 5, 7, 8, 5, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
-            this.generateBox(world, boundingBox, 5, 5, 7, 7, 5, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData().set(BlockStepAbstract.TYPE, BlockPropertySlabType.DOUBLE), Blocks.SMOOTH_STONE_SLAB.getBlockData().set(BlockStepAbstract.TYPE, BlockPropertySlabType.DOUBLE), false);
-            this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.SOUTH), 6, 5, 6, boundingBox);
-            return true;
+            this.generateBox(world, chunkBox, 5, 1, 10, 7, 3, 10, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(world, chunkBox, 1, 2, 1, 8, 2, 6, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 1, 5, 4, 4, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 8, 1, 5, 8, 4, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 1, 4, 7, 3, 4, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 1, 3, 5, 3, 3, 6, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 1, 3, 4, 3, 3, 4, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
+            this.generateBox(world, chunkBox, 1, 4, 6, 3, 4, 6, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
+            this.generateBox(world, chunkBox, 5, 1, 7, 7, 1, 8, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 5, 1, 9, 7, 1, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
+            this.generateBox(world, chunkBox, 5, 2, 7, 7, 2, 7, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
+            this.generateBox(world, chunkBox, 4, 5, 7, 4, 5, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
+            this.generateBox(world, chunkBox, 8, 5, 7, 8, 5, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData(), Blocks.SMOOTH_STONE_SLAB.getBlockData(), false);
+            this.generateBox(world, chunkBox, 5, 5, 7, 7, 5, 9, Blocks.SMOOTH_STONE_SLAB.getBlockData().set(BlockStepAbstract.TYPE, BlockPropertySlabType.DOUBLE), Blocks.SMOOTH_STONE_SLAB.getBlockData().set(BlockStepAbstract.TYPE, BlockPropertySlabType.DOUBLE), false);
+            this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.SOUTH), 6, 5, 6, chunkBox);
         }
     }
 
@@ -424,38 +421,37 @@ public class WorldGenStrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public WorldGenStrongholdLeftTurn(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdLeftTurn(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_LEFT_TURN, nbt);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
             EnumDirection direction = this.getOrientation();
             if (direction != EnumDirection.NORTH && direction != EnumDirection.EAST) {
-                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
             } else {
-                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
             }
 
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -1, 0, 5, 5, 5, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdLeftTurn(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 4, 4, 4, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 1, 0);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 4, 4, 4, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 1, 0);
             EnumDirection direction = this.getOrientation();
             if (direction != EnumDirection.NORTH && direction != EnumDirection.EAST) {
-                this.generateBox(world, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
             } else {
-                this.generateBox(world, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
             }
 
-            return true;
         }
     }
 
@@ -473,22 +469,22 @@ public class WorldGenStrongholdPieces {
             this.isTall = boundingBox.getYSpan() > 6;
         }
 
-        public WorldGenStrongholdLibrary(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdLibrary(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_LIBRARY, nbt);
             this.isTall = nbt.getBoolean("Tall");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("Tall", this.isTall);
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdLibrary createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdLibrary createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -4, -1, 0, 14, 11, 15, orientation);
-            if (!isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
+            if (!isOkBox(boundingBox) || holder.findCollisionPiece(boundingBox) != null) {
                 boundingBox = StructureBoundingBox.orientBox(x, y, z, -4, -1, 0, 14, 6, 15, orientation);
-                if (!isOkBox(boundingBox) || structurePieceAccessor.findCollisionPiece(boundingBox) != null) {
+                if (!isOkBox(boundingBox) || holder.findCollisionPiece(boundingBox) != null) {
                     return null;
                 }
             }
@@ -497,110 +493,109 @@ public class WorldGenStrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             int i = 11;
             if (!this.isTall) {
                 i = 6;
             }
 
-            this.generateBox(world, boundingBox, 0, 0, 0, 13, i - 1, 14, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 4, 1, 0);
-            this.generateMaybeBox(world, boundingBox, random, 0.07F, 2, 1, 1, 11, 4, 13, Blocks.COBWEB.getBlockData(), Blocks.COBWEB.getBlockData(), false, false);
+            this.generateBox(world, chunkBox, 0, 0, 0, 13, i - 1, 14, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 4, 1, 0);
+            this.generateMaybeBox(world, chunkBox, random, 0.07F, 2, 1, 1, 11, 4, 13, Blocks.COBWEB.getBlockData(), Blocks.COBWEB.getBlockData(), false, false);
             int j = 1;
             int k = 12;
 
             for(int l = 1; l <= 13; ++l) {
                 if ((l - 1) % 4 == 0) {
-                    this.generateBox(world, boundingBox, 1, 1, l, 1, 4, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                    this.generateBox(world, boundingBox, 12, 1, l, 12, 4, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                    this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.EAST), 2, 3, l, boundingBox);
-                    this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.WEST), 11, 3, l, boundingBox);
+                    this.generateBox(world, chunkBox, 1, 1, l, 1, 4, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                    this.generateBox(world, chunkBox, 12, 1, l, 12, 4, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                    this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.EAST), 2, 3, l, chunkBox);
+                    this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.WEST), 11, 3, l, chunkBox);
                     if (this.isTall) {
-                        this.generateBox(world, boundingBox, 1, 6, l, 1, 9, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                        this.generateBox(world, boundingBox, 12, 6, l, 12, 9, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                        this.generateBox(world, chunkBox, 1, 6, l, 1, 9, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                        this.generateBox(world, chunkBox, 12, 6, l, 12, 9, l, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
                     }
                 } else {
-                    this.generateBox(world, boundingBox, 1, 1, l, 1, 4, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
-                    this.generateBox(world, boundingBox, 12, 1, l, 12, 4, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                    this.generateBox(world, chunkBox, 1, 1, l, 1, 4, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                    this.generateBox(world, chunkBox, 12, 1, l, 12, 4, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
                     if (this.isTall) {
-                        this.generateBox(world, boundingBox, 1, 6, l, 1, 9, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
-                        this.generateBox(world, boundingBox, 12, 6, l, 12, 9, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                        this.generateBox(world, chunkBox, 1, 6, l, 1, 9, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                        this.generateBox(world, chunkBox, 12, 6, l, 12, 9, l, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
                     }
                 }
             }
 
             for(int m = 3; m < 12; m += 2) {
-                this.generateBox(world, boundingBox, 3, 1, m, 4, 3, m, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
-                this.generateBox(world, boundingBox, 6, 1, m, 7, 3, m, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
-                this.generateBox(world, boundingBox, 9, 1, m, 10, 3, m, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                this.generateBox(world, chunkBox, 3, 1, m, 4, 3, m, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                this.generateBox(world, chunkBox, 6, 1, m, 7, 3, m, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
+                this.generateBox(world, chunkBox, 9, 1, m, 10, 3, m, Blocks.BOOKSHELF.getBlockData(), Blocks.BOOKSHELF.getBlockData(), false);
             }
 
             if (this.isTall) {
-                this.generateBox(world, boundingBox, 1, 5, 1, 3, 5, 13, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                this.generateBox(world, boundingBox, 10, 5, 1, 12, 5, 13, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                this.generateBox(world, boundingBox, 4, 5, 1, 9, 5, 2, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                this.generateBox(world, boundingBox, 4, 5, 12, 9, 5, 13, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
-                this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 9, 5, 11, boundingBox);
-                this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 8, 5, 11, boundingBox);
-                this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 9, 5, 10, boundingBox);
+                this.generateBox(world, chunkBox, 1, 5, 1, 3, 5, 13, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                this.generateBox(world, chunkBox, 10, 5, 1, 12, 5, 13, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                this.generateBox(world, chunkBox, 4, 5, 1, 9, 5, 2, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                this.generateBox(world, chunkBox, 4, 5, 12, 9, 5, 13, Blocks.OAK_PLANKS.getBlockData(), Blocks.OAK_PLANKS.getBlockData(), false);
+                this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 9, 5, 11, chunkBox);
+                this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 8, 5, 11, chunkBox);
+                this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 9, 5, 10, chunkBox);
                 IBlockData blockState = Blocks.OAK_FENCE.getBlockData().set(BlockFence.WEST, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true));
                 IBlockData blockState2 = Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.SOUTH, Boolean.valueOf(true));
-                this.generateBox(world, boundingBox, 3, 6, 3, 3, 6, 11, blockState2, blockState2, false);
-                this.generateBox(world, boundingBox, 10, 6, 3, 10, 6, 9, blockState2, blockState2, false);
-                this.generateBox(world, boundingBox, 4, 6, 2, 9, 6, 2, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 4, 6, 12, 7, 6, 12, blockState, blockState, false);
-                this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true)), 3, 6, 2, boundingBox);
-                this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.SOUTH, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true)), 3, 6, 12, boundingBox);
-                this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.WEST, Boolean.valueOf(true)), 10, 6, 2, boundingBox);
+                this.generateBox(world, chunkBox, 3, 6, 3, 3, 6, 11, blockState2, blockState2, false);
+                this.generateBox(world, chunkBox, 10, 6, 3, 10, 6, 9, blockState2, blockState2, false);
+                this.generateBox(world, chunkBox, 4, 6, 2, 9, 6, 2, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 4, 6, 12, 7, 6, 12, blockState, blockState, false);
+                this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true)), 3, 6, 2, chunkBox);
+                this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.SOUTH, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true)), 3, 6, 12, chunkBox);
+                this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.WEST, Boolean.valueOf(true)), 10, 6, 2, chunkBox);
 
                 for(int n = 0; n <= 2; ++n) {
-                    this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.SOUTH, Boolean.valueOf(true)).set(BlockFence.WEST, Boolean.valueOf(true)), 8 + n, 6, 12 - n, boundingBox);
+                    this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.SOUTH, Boolean.valueOf(true)).set(BlockFence.WEST, Boolean.valueOf(true)), 8 + n, 6, 12 - n, chunkBox);
                     if (n != 2) {
-                        this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true)), 8 + n, 6, 11 - n, boundingBox);
+                        this.placeBlock(world, Blocks.OAK_FENCE.getBlockData().set(BlockFence.NORTH, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true)), 8 + n, 6, 11 - n, chunkBox);
                     }
                 }
 
                 IBlockData blockState3 = Blocks.LADDER.getBlockData().set(BlockLadder.FACING, EnumDirection.SOUTH);
-                this.placeBlock(world, blockState3, 10, 1, 13, boundingBox);
-                this.placeBlock(world, blockState3, 10, 2, 13, boundingBox);
-                this.placeBlock(world, blockState3, 10, 3, 13, boundingBox);
-                this.placeBlock(world, blockState3, 10, 4, 13, boundingBox);
-                this.placeBlock(world, blockState3, 10, 5, 13, boundingBox);
-                this.placeBlock(world, blockState3, 10, 6, 13, boundingBox);
-                this.placeBlock(world, blockState3, 10, 7, 13, boundingBox);
+                this.placeBlock(world, blockState3, 10, 1, 13, chunkBox);
+                this.placeBlock(world, blockState3, 10, 2, 13, chunkBox);
+                this.placeBlock(world, blockState3, 10, 3, 13, chunkBox);
+                this.placeBlock(world, blockState3, 10, 4, 13, chunkBox);
+                this.placeBlock(world, blockState3, 10, 5, 13, chunkBox);
+                this.placeBlock(world, blockState3, 10, 6, 13, chunkBox);
+                this.placeBlock(world, blockState3, 10, 7, 13, chunkBox);
                 int o = 7;
                 int p = 7;
                 IBlockData blockState4 = Blocks.OAK_FENCE.getBlockData().set(BlockFence.EAST, Boolean.valueOf(true));
-                this.placeBlock(world, blockState4, 6, 9, 7, boundingBox);
+                this.placeBlock(world, blockState4, 6, 9, 7, chunkBox);
                 IBlockData blockState5 = Blocks.OAK_FENCE.getBlockData().set(BlockFence.WEST, Boolean.valueOf(true));
-                this.placeBlock(world, blockState5, 7, 9, 7, boundingBox);
-                this.placeBlock(world, blockState4, 6, 8, 7, boundingBox);
-                this.placeBlock(world, blockState5, 7, 8, 7, boundingBox);
+                this.placeBlock(world, blockState5, 7, 9, 7, chunkBox);
+                this.placeBlock(world, blockState4, 6, 8, 7, chunkBox);
+                this.placeBlock(world, blockState5, 7, 8, 7, chunkBox);
                 IBlockData blockState6 = blockState2.set(BlockFence.WEST, Boolean.valueOf(true)).set(BlockFence.EAST, Boolean.valueOf(true));
-                this.placeBlock(world, blockState6, 6, 7, 7, boundingBox);
-                this.placeBlock(world, blockState6, 7, 7, 7, boundingBox);
-                this.placeBlock(world, blockState4, 5, 7, 7, boundingBox);
-                this.placeBlock(world, blockState5, 8, 7, 7, boundingBox);
-                this.placeBlock(world, blockState4.set(BlockFence.NORTH, Boolean.valueOf(true)), 6, 7, 6, boundingBox);
-                this.placeBlock(world, blockState4.set(BlockFence.SOUTH, Boolean.valueOf(true)), 6, 7, 8, boundingBox);
-                this.placeBlock(world, blockState5.set(BlockFence.NORTH, Boolean.valueOf(true)), 7, 7, 6, boundingBox);
-                this.placeBlock(world, blockState5.set(BlockFence.SOUTH, Boolean.valueOf(true)), 7, 7, 8, boundingBox);
+                this.placeBlock(world, blockState6, 6, 7, 7, chunkBox);
+                this.placeBlock(world, blockState6, 7, 7, 7, chunkBox);
+                this.placeBlock(world, blockState4, 5, 7, 7, chunkBox);
+                this.placeBlock(world, blockState5, 8, 7, 7, chunkBox);
+                this.placeBlock(world, blockState4.set(BlockFence.NORTH, Boolean.valueOf(true)), 6, 7, 6, chunkBox);
+                this.placeBlock(world, blockState4.set(BlockFence.SOUTH, Boolean.valueOf(true)), 6, 7, 8, chunkBox);
+                this.placeBlock(world, blockState5.set(BlockFence.NORTH, Boolean.valueOf(true)), 7, 7, 6, chunkBox);
+                this.placeBlock(world, blockState5.set(BlockFence.SOUTH, Boolean.valueOf(true)), 7, 7, 8, chunkBox);
                 IBlockData blockState7 = Blocks.TORCH.getBlockData();
-                this.placeBlock(world, blockState7, 5, 8, 7, boundingBox);
-                this.placeBlock(world, blockState7, 8, 8, 7, boundingBox);
-                this.placeBlock(world, blockState7, 6, 8, 6, boundingBox);
-                this.placeBlock(world, blockState7, 6, 8, 8, boundingBox);
-                this.placeBlock(world, blockState7, 7, 8, 6, boundingBox);
-                this.placeBlock(world, blockState7, 7, 8, 8, boundingBox);
+                this.placeBlock(world, blockState7, 5, 8, 7, chunkBox);
+                this.placeBlock(world, blockState7, 8, 8, 7, chunkBox);
+                this.placeBlock(world, blockState7, 6, 8, 6, chunkBox);
+                this.placeBlock(world, blockState7, 6, 8, 8, chunkBox);
+                this.placeBlock(world, blockState7, 7, 8, 6, chunkBox);
+                this.placeBlock(world, blockState7, 7, 8, 8, chunkBox);
             }
 
-            this.createChest(world, boundingBox, random, 3, 3, 5, LootTables.STRONGHOLD_LIBRARY);
+            this.createChest(world, chunkBox, random, 3, 3, 5, LootTables.STRONGHOLD_LIBRARY);
             if (this.isTall) {
-                this.placeBlock(world, CAVE_AIR, 12, 9, 1, boundingBox);
-                this.createChest(world, boundingBox, random, 12, 8, 1, LootTables.STRONGHOLD_LIBRARY);
+                this.placeBlock(world, CAVE_AIR, 12, 9, 1, chunkBox);
+                this.createChest(world, chunkBox, random, 12, 8, 1, LootTables.STRONGHOLD_LIBRARY);
             }
 
-            return true;
         }
     }
 
@@ -622,7 +617,7 @@ public class WorldGenStrongholdPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
             nbt.setString("EntryDoor", this.entryDoor.name());
         }
 
@@ -686,18 +681,18 @@ public class WorldGenStrongholdPieces {
         }
 
         @Nullable
-        protected StructurePiece generateSmallDoorChildForward(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor structurePieceAccessor, Random random, int leftRightOffset, int heightOffset) {
+        protected StructurePiece generateSmallDoorChildForward(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor holder, Random random, int leftRightOffset, int heightOffset) {
             EnumDirection direction = this.getOrientation();
             if (direction != null) {
                 switch(direction) {
                 case NORTH:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() - 1, direction, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() - 1, direction, this.getGenDepth());
                 case SOUTH:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.maxZ() + 1, direction, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.maxZ() + 1, direction, this.getGenDepth());
                 case WEST:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, direction, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, direction, this.getGenDepth());
                 case EAST:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, direction, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, direction, this.getGenDepth());
                 }
             }
 
@@ -705,18 +700,18 @@ public class WorldGenStrongholdPieces {
         }
 
         @Nullable
-        protected StructurePiece generateSmallDoorChildLeft(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor structurePieceAccessor, Random random, int heightOffset, int leftRightOffset) {
+        protected StructurePiece generateSmallDoorChildLeft(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor holder, Random random, int heightOffset, int leftRightOffset) {
             EnumDirection direction = this.getOrientation();
             if (direction != null) {
                 switch(direction) {
                 case NORTH:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.WEST, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.WEST, this.getGenDepth());
                 case SOUTH:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.WEST, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() - 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.WEST, this.getGenDepth());
                 case WEST:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() - 1, EnumDirection.NORTH, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() - 1, EnumDirection.NORTH, this.getGenDepth());
                 case EAST:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() - 1, EnumDirection.NORTH, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() - 1, EnumDirection.NORTH, this.getGenDepth());
                 }
             }
 
@@ -724,18 +719,18 @@ public class WorldGenStrongholdPieces {
         }
 
         @Nullable
-        protected StructurePiece generateSmallDoorChildRight(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor structurePieceAccessor, Random random, int heightOffset, int leftRightOffset) {
+        protected StructurePiece generateSmallDoorChildRight(WorldGenStrongholdPieces.WorldGenStrongholdStart start, StructurePieceAccessor holder, Random random, int heightOffset, int leftRightOffset) {
             EnumDirection direction = this.getOrientation();
             if (direction != null) {
                 switch(direction) {
                 case NORTH:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.EAST, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.EAST, this.getGenDepth());
                 case SOUTH:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.EAST, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.maxX() + 1, this.boundingBox.minY() + heightOffset, this.boundingBox.minZ() + leftRightOffset, EnumDirection.EAST, this.getGenDepth());
                 case WEST:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.maxZ() + 1, EnumDirection.SOUTH, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.maxZ() + 1, EnumDirection.SOUTH, this.getGenDepth());
                 case EAST:
-                    return WorldGenStrongholdPieces.generateAndAddPiece(start, structurePieceAccessor, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.maxZ() + 1, EnumDirection.SOUTH, this.getGenDepth());
+                    return WorldGenStrongholdPieces.generateAndAddPiece(start, holder, random, this.boundingBox.minX() + leftRightOffset, this.boundingBox.minY() + heightOffset, this.boundingBox.maxZ() + 1, EnumDirection.SOUTH, this.getGenDepth());
                 }
             }
 
@@ -786,66 +781,66 @@ public class WorldGenStrongholdPieces {
             this.setOrientation(orientation);
         }
 
-        public WorldGenStrongholdPortalRoom(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdPortalRoom(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_PORTAL_ROOM, nbt);
             this.hasPlacedSpawner = nbt.getBoolean("Mob");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("Mob", this.hasPlacedSpawner);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
             if (start != null) {
                 ((WorldGenStrongholdPieces.WorldGenStrongholdStart)start).portalRoomPiece = this;
             }
 
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom createPiece(StructurePieceAccessor structurePieceAccessor, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom createPiece(StructurePieceAccessor holder, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -4, -1, 0, 11, 8, 16, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom(chainLength, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdPortalRoom(chainLength, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 10, 7, 15, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.GRATES, 4, 1, 0);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 10, 7, 15, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.GRATES, 4, 1, 0);
             int i = 6;
-            this.generateBox(world, boundingBox, 1, i, 1, 1, i, 14, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 9, i, 1, 9, i, 14, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 2, i, 1, 8, i, 2, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 2, i, 14, 8, i, 14, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 1, 1, 1, 2, 1, 4, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 8, 1, 1, 9, 1, 4, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 1, 1, 1, 1, 1, 3, Blocks.LAVA.getBlockData(), Blocks.LAVA.getBlockData(), false);
-            this.generateBox(world, boundingBox, 9, 1, 1, 9, 1, 3, Blocks.LAVA.getBlockData(), Blocks.LAVA.getBlockData(), false);
-            this.generateBox(world, boundingBox, 3, 1, 8, 7, 1, 12, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 1, 9, 6, 1, 11, Blocks.LAVA.getBlockData(), Blocks.LAVA.getBlockData(), false);
+            this.generateBox(world, chunkBox, 1, i, 1, 1, i, 14, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 9, i, 1, 9, i, 14, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 2, i, 1, 8, i, 2, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 2, i, 14, 8, i, 14, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 1, 1, 1, 2, 1, 4, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 8, 1, 1, 9, 1, 4, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 1, 1, 1, 1, 1, 3, Blocks.LAVA.getBlockData(), Blocks.LAVA.getBlockData(), false);
+            this.generateBox(world, chunkBox, 9, 1, 1, 9, 1, 3, Blocks.LAVA.getBlockData(), Blocks.LAVA.getBlockData(), false);
+            this.generateBox(world, chunkBox, 3, 1, 8, 7, 1, 12, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 1, 9, 6, 1, 11, Blocks.LAVA.getBlockData(), Blocks.LAVA.getBlockData(), false);
             IBlockData blockState = Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true));
             IBlockData blockState2 = Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true));
 
             for(int j = 3; j < 14; j += 2) {
-                this.generateBox(world, boundingBox, 0, 3, j, 0, 4, j, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 10, 3, j, 10, 4, j, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 0, 3, j, 0, 4, j, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 10, 3, j, 10, 4, j, blockState, blockState, false);
             }
 
             for(int k = 2; k < 9; k += 2) {
-                this.generateBox(world, boundingBox, k, 3, 15, k, 4, 15, blockState2, blockState2, false);
+                this.generateBox(world, chunkBox, k, 3, 15, k, 4, 15, blockState2, blockState2, false);
             }
 
             IBlockData blockState3 = Blocks.STONE_BRICK_STAIRS.getBlockData().set(BlockStairs.FACING, EnumDirection.NORTH);
-            this.generateBox(world, boundingBox, 4, 1, 5, 6, 1, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 2, 6, 6, 2, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 3, 7, 6, 3, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 1, 5, 6, 1, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 2, 6, 6, 2, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 3, 7, 6, 3, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
 
             for(int l = 4; l <= 6; ++l) {
-                this.placeBlock(world, blockState3, l, 1, 4, boundingBox);
-                this.placeBlock(world, blockState3, l, 2, 5, boundingBox);
-                this.placeBlock(world, blockState3, l, 3, 6, boundingBox);
+                this.placeBlock(world, blockState3, l, 1, 4, chunkBox);
+                this.placeBlock(world, blockState3, l, 2, 5, chunkBox);
+                this.placeBlock(world, blockState3, l, 3, 6, chunkBox);
             }
 
             IBlockData blockState4 = Blocks.END_PORTAL_FRAME.getBlockData().set(BlockEnderPortalFrame.FACING, EnumDirection.NORTH);
@@ -860,34 +855,34 @@ public class WorldGenStrongholdPieces {
                 bl &= bls[m];
             }
 
-            this.placeBlock(world, blockState4.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[0])), 4, 3, 8, boundingBox);
-            this.placeBlock(world, blockState4.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[1])), 5, 3, 8, boundingBox);
-            this.placeBlock(world, blockState4.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[2])), 6, 3, 8, boundingBox);
-            this.placeBlock(world, blockState5.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[3])), 4, 3, 12, boundingBox);
-            this.placeBlock(world, blockState5.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[4])), 5, 3, 12, boundingBox);
-            this.placeBlock(world, blockState5.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[5])), 6, 3, 12, boundingBox);
-            this.placeBlock(world, blockState6.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[6])), 3, 3, 9, boundingBox);
-            this.placeBlock(world, blockState6.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[7])), 3, 3, 10, boundingBox);
-            this.placeBlock(world, blockState6.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[8])), 3, 3, 11, boundingBox);
-            this.placeBlock(world, blockState7.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[9])), 7, 3, 9, boundingBox);
-            this.placeBlock(world, blockState7.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[10])), 7, 3, 10, boundingBox);
-            this.placeBlock(world, blockState7.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[11])), 7, 3, 11, boundingBox);
+            this.placeBlock(world, blockState4.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[0])), 4, 3, 8, chunkBox);
+            this.placeBlock(world, blockState4.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[1])), 5, 3, 8, chunkBox);
+            this.placeBlock(world, blockState4.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[2])), 6, 3, 8, chunkBox);
+            this.placeBlock(world, blockState5.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[3])), 4, 3, 12, chunkBox);
+            this.placeBlock(world, blockState5.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[4])), 5, 3, 12, chunkBox);
+            this.placeBlock(world, blockState5.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[5])), 6, 3, 12, chunkBox);
+            this.placeBlock(world, blockState6.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[6])), 3, 3, 9, chunkBox);
+            this.placeBlock(world, blockState6.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[7])), 3, 3, 10, chunkBox);
+            this.placeBlock(world, blockState6.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[8])), 3, 3, 11, chunkBox);
+            this.placeBlock(world, blockState7.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[9])), 7, 3, 9, chunkBox);
+            this.placeBlock(world, blockState7.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[10])), 7, 3, 10, chunkBox);
+            this.placeBlock(world, blockState7.set(BlockEnderPortalFrame.HAS_EYE, Boolean.valueOf(bls[11])), 7, 3, 11, chunkBox);
             if (bl) {
                 IBlockData blockState8 = Blocks.END_PORTAL.getBlockData();
-                this.placeBlock(world, blockState8, 4, 3, 9, boundingBox);
-                this.placeBlock(world, blockState8, 5, 3, 9, boundingBox);
-                this.placeBlock(world, blockState8, 6, 3, 9, boundingBox);
-                this.placeBlock(world, blockState8, 4, 3, 10, boundingBox);
-                this.placeBlock(world, blockState8, 5, 3, 10, boundingBox);
-                this.placeBlock(world, blockState8, 6, 3, 10, boundingBox);
-                this.placeBlock(world, blockState8, 4, 3, 11, boundingBox);
-                this.placeBlock(world, blockState8, 5, 3, 11, boundingBox);
-                this.placeBlock(world, blockState8, 6, 3, 11, boundingBox);
+                this.placeBlock(world, blockState8, 4, 3, 9, chunkBox);
+                this.placeBlock(world, blockState8, 5, 3, 9, chunkBox);
+                this.placeBlock(world, blockState8, 6, 3, 9, chunkBox);
+                this.placeBlock(world, blockState8, 4, 3, 10, chunkBox);
+                this.placeBlock(world, blockState8, 5, 3, 10, chunkBox);
+                this.placeBlock(world, blockState8, 6, 3, 10, chunkBox);
+                this.placeBlock(world, blockState8, 4, 3, 11, chunkBox);
+                this.placeBlock(world, blockState8, 5, 3, 11, chunkBox);
+                this.placeBlock(world, blockState8, 6, 3, 11, chunkBox);
             }
 
             if (!this.hasPlacedSpawner) {
                 BlockPosition blockPos = this.getWorldPos(5, 3, 6);
-                if (boundingBox.isInside(blockPos)) {
+                if (chunkBox.isInside(blockPos)) {
                     this.hasPlacedSpawner = true;
                     world.setTypeAndData(blockPos, Blocks.SPAWNER.getBlockData(), 2);
                     TileEntity blockEntity = world.getTileEntity(blockPos);
@@ -897,7 +892,6 @@ public class WorldGenStrongholdPieces {
                 }
             }
 
-            return true;
         }
     }
 
@@ -912,48 +906,47 @@ public class WorldGenStrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public WorldGenStrongholdPrison(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdPrison(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_PRISON_HALL, nbt);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdPrison createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdPrison createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -1, 0, 9, 5, 11, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdPrison(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdPrison(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 8, 4, 10, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 1, 0);
-            this.generateBox(world, boundingBox, 1, 1, 10, 3, 3, 10, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox(world, boundingBox, 4, 1, 1, 4, 3, 1, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 1, 3, 4, 3, 3, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 1, 7, 4, 3, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateBox(world, boundingBox, 4, 1, 9, 4, 3, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 8, 4, 10, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 1, 0);
+            this.generateBox(world, chunkBox, 1, 1, 10, 3, 3, 10, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(world, chunkBox, 4, 1, 1, 4, 3, 1, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 1, 3, 4, 3, 3, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 1, 7, 4, 3, 7, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateBox(world, chunkBox, 4, 1, 9, 4, 3, 9, false, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
 
             for(int i = 1; i <= 3; ++i) {
-                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, i, 4, boundingBox);
-                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 4, i, 5, boundingBox);
-                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, i, 6, boundingBox);
-                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 5, i, 5, boundingBox);
-                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 6, i, 5, boundingBox);
-                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 7, i, 5, boundingBox);
+                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, i, 4, chunkBox);
+                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 4, i, 5, chunkBox);
+                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, i, 6, chunkBox);
+                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 5, i, 5, chunkBox);
+                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 6, i, 5, chunkBox);
+                this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.WEST, Boolean.valueOf(true)).set(BlockIronBars.EAST, Boolean.valueOf(true)), 7, i, 5, chunkBox);
             }
 
-            this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, 3, 2, boundingBox);
-            this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, 3, 8, boundingBox);
+            this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, 3, 2, chunkBox);
+            this.placeBlock(world, Blocks.IRON_BARS.getBlockData().set(BlockIronBars.NORTH, Boolean.valueOf(true)).set(BlockIronBars.SOUTH, Boolean.valueOf(true)), 4, 3, 8, chunkBox);
             IBlockData blockState = Blocks.IRON_DOOR.getBlockData().set(BlockDoor.FACING, EnumDirection.WEST);
             IBlockData blockState2 = Blocks.IRON_DOOR.getBlockData().set(BlockDoor.FACING, EnumDirection.WEST).set(BlockDoor.HALF, BlockPropertyDoubleBlockHalf.UPPER);
-            this.placeBlock(world, blockState, 4, 1, 2, boundingBox);
-            this.placeBlock(world, blockState2, 4, 2, 2, boundingBox);
-            this.placeBlock(world, blockState, 4, 1, 8, boundingBox);
-            this.placeBlock(world, blockState2, 4, 2, 8, boundingBox);
-            return true;
+            this.placeBlock(world, blockState, 4, 1, 2, chunkBox);
+            this.placeBlock(world, blockState2, 4, 2, 2, chunkBox);
+            this.placeBlock(world, blockState, 4, 1, 8, chunkBox);
+            this.placeBlock(world, blockState2, 4, 2, 8, chunkBox);
         }
     }
 
@@ -964,38 +957,37 @@ public class WorldGenStrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public WorldGenStrongholdRightTurn(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdRightTurn(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_RIGHT_TURN, nbt);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
             EnumDirection direction = this.getOrientation();
             if (direction != EnumDirection.NORTH && direction != EnumDirection.EAST) {
-                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
             } else {
-                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
             }
 
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdRightTurn createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdRightTurn createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -1, 0, 5, 5, 5, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdRightTurn(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdRightTurn(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 4, 4, 4, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 1, 0);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 4, 4, 4, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 1, 0);
             EnumDirection direction = this.getOrientation();
             if (direction != EnumDirection.NORTH && direction != EnumDirection.EAST) {
-                this.generateBox(world, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
             } else {
-                this.generateBox(world, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
             }
 
-            return true;
         }
     }
 
@@ -1012,117 +1004,116 @@ public class WorldGenStrongholdPieces {
             this.type = random.nextInt(5);
         }
 
-        public WorldGenStrongholdRoomCrossing(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdRoomCrossing(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_ROOM_CROSSING, nbt);
             this.type = nbt.getInt("Type");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setInt("Type", this.type);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 4, 1);
-            this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 4);
-            this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 4);
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 4, 1);
+            this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 4);
+            this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 4);
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -4, -1, 0, 11, 7, 11, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdRoomCrossing(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 10, 6, 10, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 4, 1, 0);
-            this.generateBox(world, boundingBox, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox(world, boundingBox, 0, 1, 4, 0, 3, 6, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox(world, boundingBox, 10, 1, 4, 10, 3, 6, CAVE_AIR, CAVE_AIR, false);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 10, 6, 10, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 4, 1, 0);
+            this.generateBox(world, chunkBox, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(world, chunkBox, 0, 1, 4, 0, 3, 6, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(world, chunkBox, 10, 1, 4, 10, 3, 6, CAVE_AIR, CAVE_AIR, false);
             switch(this.type) {
             case 0:
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 1, 5, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 2, 5, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 3, 5, boundingBox);
-                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.WEST), 4, 3, 5, boundingBox);
-                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.EAST), 6, 3, 5, boundingBox);
-                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.SOUTH), 5, 3, 4, boundingBox);
-                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.NORTH), 5, 3, 6, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 4, 1, 4, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 4, 1, 5, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 4, 1, 6, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 6, 1, 4, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 6, 1, 5, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 6, 1, 6, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 5, 1, 4, boundingBox);
-                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 5, 1, 6, boundingBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 1, 5, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 2, 5, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 3, 5, chunkBox);
+                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.WEST), 4, 3, 5, chunkBox);
+                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.EAST), 6, 3, 5, chunkBox);
+                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.SOUTH), 5, 3, 4, chunkBox);
+                this.placeBlock(world, Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.NORTH), 5, 3, 6, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 4, 1, 4, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 4, 1, 5, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 4, 1, 6, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 6, 1, 4, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 6, 1, 5, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 6, 1, 6, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 5, 1, 4, chunkBox);
+                this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 5, 1, 6, chunkBox);
                 break;
             case 1:
                 for(int i = 0; i < 5; ++i) {
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 1, 3 + i, boundingBox);
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 7, 1, 3 + i, boundingBox);
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3 + i, 1, 3, boundingBox);
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3 + i, 1, 7, boundingBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 1, 3 + i, chunkBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 7, 1, 3 + i, chunkBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3 + i, 1, 3, chunkBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3 + i, 1, 7, chunkBox);
                 }
 
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 1, 5, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 2, 5, boundingBox);
-                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 3, 5, boundingBox);
-                this.placeBlock(world, Blocks.WATER.getBlockData(), 5, 4, 5, boundingBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 1, 5, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 2, 5, chunkBox);
+                this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 5, 3, 5, chunkBox);
+                this.placeBlock(world, Blocks.WATER.getBlockData(), 5, 4, 5, chunkBox);
                 break;
             case 2:
                 for(int j = 1; j <= 9; ++j) {
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 1, 3, j, boundingBox);
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 9, 3, j, boundingBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 1, 3, j, chunkBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 9, 3, j, chunkBox);
                 }
 
                 for(int k = 1; k <= 9; ++k) {
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), k, 3, 1, boundingBox);
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), k, 3, 9, boundingBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), k, 3, 1, chunkBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), k, 3, 9, chunkBox);
                 }
 
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 1, 4, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 1, 6, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 3, 4, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 3, 6, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, 1, 5, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, 1, 5, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, 3, 5, boundingBox);
-                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, 3, 5, boundingBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 1, 4, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 1, 6, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 3, 4, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 5, 3, 6, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, 1, 5, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, 1, 5, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, 3, 5, chunkBox);
+                this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, 3, 5, chunkBox);
 
                 for(int l = 1; l <= 3; ++l) {
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, l, 4, boundingBox);
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, l, 4, boundingBox);
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, l, 6, boundingBox);
-                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, l, 6, boundingBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, l, 4, chunkBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, l, 4, chunkBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 4, l, 6, chunkBox);
+                    this.placeBlock(world, Blocks.COBBLESTONE.getBlockData(), 6, l, 6, chunkBox);
                 }
 
-                this.placeBlock(world, Blocks.TORCH.getBlockData(), 5, 3, 5, boundingBox);
+                this.placeBlock(world, Blocks.TORCH.getBlockData(), 5, 3, 5, chunkBox);
 
                 for(int m = 2; m <= 8; ++m) {
-                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 2, 3, m, boundingBox);
-                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 3, 3, m, boundingBox);
+                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 2, 3, m, chunkBox);
+                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 3, 3, m, chunkBox);
                     if (m <= 3 || m >= 7) {
-                        this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 4, 3, m, boundingBox);
-                        this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 5, 3, m, boundingBox);
-                        this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 6, 3, m, boundingBox);
+                        this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 4, 3, m, chunkBox);
+                        this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 5, 3, m, chunkBox);
+                        this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 6, 3, m, chunkBox);
                     }
 
-                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 7, 3, m, boundingBox);
-                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 8, 3, m, boundingBox);
+                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 7, 3, m, chunkBox);
+                    this.placeBlock(world, Blocks.OAK_PLANKS.getBlockData(), 8, 3, m, chunkBox);
                 }
 
                 IBlockData blockState = Blocks.LADDER.getBlockData().set(BlockLadder.FACING, EnumDirection.WEST);
-                this.placeBlock(world, blockState, 9, 1, 3, boundingBox);
-                this.placeBlock(world, blockState, 9, 2, 3, boundingBox);
-                this.placeBlock(world, blockState, 9, 3, 3, boundingBox);
-                this.createChest(world, boundingBox, random, 3, 4, 8, LootTables.STRONGHOLD_CROSSING);
+                this.placeBlock(world, blockState, 9, 1, 3, chunkBox);
+                this.placeBlock(world, blockState, 9, 2, 3, chunkBox);
+                this.placeBlock(world, blockState, 9, 3, 3, chunkBox);
+                this.createChest(world, chunkBox, random, 3, 4, 8, LootTables.STRONGHOLD_CROSSING);
             }
 
-            return true;
         }
     }
 
@@ -1141,57 +1132,56 @@ public class WorldGenStrongholdPieces {
             this.rightChild = random.nextInt(2) == 0;
         }
 
-        public WorldGenStrongholdStairs(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdStairs(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_STRAIGHT, nbt);
             this.leftChild = nbt.getBoolean("Left");
             this.rightChild = nbt.getBoolean("Right");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("Left", this.leftChild);
             nbt.setBoolean("Right", this.rightChild);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
             if (this.leftChild) {
-                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 2);
+                this.generateSmallDoorChildLeft((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 2);
             }
 
             if (this.rightChild) {
-                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 2);
+                this.generateSmallDoorChildRight((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 2);
             }
 
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdStairs createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdStairs createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -1, 0, 5, 5, 7, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdStairs(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdStairs(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 4, 4, 6, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 1, 0);
-            this.generateSmallDoor(world, random, boundingBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 6);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 4, 4, 6, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 1, 0);
+            this.generateSmallDoor(world, random, chunkBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 6);
             IBlockData blockState = Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.EAST);
             IBlockData blockState2 = Blocks.WALL_TORCH.getBlockData().set(BlockTorchWall.FACING, EnumDirection.WEST);
-            this.maybeGenerateBlock(world, boundingBox, random, 0.1F, 1, 2, 1, blockState);
-            this.maybeGenerateBlock(world, boundingBox, random, 0.1F, 3, 2, 1, blockState2);
-            this.maybeGenerateBlock(world, boundingBox, random, 0.1F, 1, 2, 5, blockState);
-            this.maybeGenerateBlock(world, boundingBox, random, 0.1F, 3, 2, 5, blockState2);
+            this.maybeGenerateBlock(world, chunkBox, random, 0.1F, 1, 2, 1, blockState);
+            this.maybeGenerateBlock(world, chunkBox, random, 0.1F, 3, 2, 1, blockState2);
+            this.maybeGenerateBlock(world, chunkBox, random, 0.1F, 1, 2, 5, blockState);
+            this.maybeGenerateBlock(world, chunkBox, random, 0.1F, 3, 2, 5, blockState2);
             if (this.leftChild) {
-                this.generateBox(world, boundingBox, 0, 1, 2, 0, 3, 4, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 0, 1, 2, 0, 3, 4, CAVE_AIR, CAVE_AIR, false);
             }
 
             if (this.rightChild) {
-                this.generateBox(world, boundingBox, 4, 1, 2, 4, 3, 4, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(world, chunkBox, 4, 1, 2, 4, 3, 4, CAVE_AIR, CAVE_AIR, false);
             }
 
-            return true;
         }
     }
 
@@ -1220,53 +1210,52 @@ public class WorldGenStrongholdPieces {
             this.isSource = nbt.getBoolean("Source");
         }
 
-        public WorldGenStrongholdStairs2(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdStairs2(NBTTagCompound nbt) {
             this(WorldGenFeatureStructurePieceType.STRONGHOLD_STAIRS_DOWN, nbt);
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("Source", this.isSource);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
             if (this.isSource) {
                 WorldGenStrongholdPieces.imposedPiece = WorldGenStrongholdPieces.WorldGenStrongholdCrossing.class;
             }
 
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdStairs2 createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdStairs2 createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -7, 0, 5, 11, 5, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdStairs2(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdStairs2(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 4, 10, 4, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 7, 0);
-            this.generateSmallDoor(world, random, boundingBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 4);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 6, 1, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 5, 1, boundingBox);
-            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 6, 1, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 5, 2, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 4, 3, boundingBox);
-            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 5, 3, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 4, 3, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 3, 3, boundingBox);
-            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 3, 4, 3, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 3, 2, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 2, 1, boundingBox);
-            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 3, 3, 1, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 2, 1, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 1, 1, boundingBox);
-            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 2, 1, boundingBox);
-            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 1, 2, boundingBox);
-            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 1, 3, boundingBox);
-            return true;
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 4, 10, 4, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 7, 0);
+            this.generateSmallDoor(world, random, chunkBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 4);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 6, 1, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 5, 1, chunkBox);
+            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 6, 1, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 5, 2, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 4, 3, chunkBox);
+            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 5, 3, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 4, 3, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 3, 3, chunkBox);
+            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 3, 4, 3, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 3, 2, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 2, 1, chunkBox);
+            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 3, 3, 1, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 2, 1, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 1, 1, chunkBox);
+            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 2, 1, chunkBox);
+            this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 1, 2, chunkBox);
+            this.placeBlock(world, Blocks.SMOOTH_STONE_SLAB.getBlockData(), 1, 1, 3, chunkBox);
         }
     }
 
@@ -1281,39 +1270,38 @@ public class WorldGenStrongholdPieces {
             this.entryDoor = this.randomSmallDoor(random);
         }
 
-        public WorldGenStrongholdStairsStraight(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenStrongholdStairsStraight(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_STRAIGHT_STAIRS_DOWN, nbt);
         }
 
         @Override
-        public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
-            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, structurePieceAccessor, random, 1, 1);
+        public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
+            this.generateSmallDoorChildForward((WorldGenStrongholdPieces.WorldGenStrongholdStart)start, holder, random, 1, 1);
         }
 
-        public static WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight createPiece(StructurePieceAccessor structurePieceAccessor, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
+        public static WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight createPiece(StructurePieceAccessor holder, Random random, int x, int y, int z, EnumDirection orientation, int chainLength) {
             StructureBoundingBox boundingBox = StructureBoundingBox.orientBox(x, y, z, -1, -7, 0, 5, 11, 8, orientation);
-            return isOkBox(boundingBox) && structurePieceAccessor.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight(chainLength, random, boundingBox, orientation) : null;
+            return isOkBox(boundingBox) && holder.findCollisionPiece(boundingBox) == null ? new WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight(chainLength, random, boundingBox, orientation) : null;
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 0, 0, 4, 10, 7, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
-            this.generateSmallDoor(world, random, boundingBox, this.entryDoor, 1, 7, 0);
-            this.generateSmallDoor(world, random, boundingBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 7);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 0, 0, 4, 10, 7, true, random, WorldGenStrongholdPieces.SMOOTH_STONE_SELECTOR);
+            this.generateSmallDoor(world, random, chunkBox, this.entryDoor, 1, 7, 0);
+            this.generateSmallDoor(world, random, chunkBox, WorldGenStrongholdPieces.WorldGenStrongholdPiece.WorldGenStrongholdDoorType.OPENING, 1, 1, 7);
             IBlockData blockState = Blocks.COBBLESTONE_STAIRS.getBlockData().set(BlockStairs.FACING, EnumDirection.SOUTH);
 
             for(int i = 0; i < 6; ++i) {
-                this.placeBlock(world, blockState, 1, 6 - i, 1 + i, boundingBox);
-                this.placeBlock(world, blockState, 2, 6 - i, 1 + i, boundingBox);
-                this.placeBlock(world, blockState, 3, 6 - i, 1 + i, boundingBox);
+                this.placeBlock(world, blockState, 1, 6 - i, 1 + i, chunkBox);
+                this.placeBlock(world, blockState, 2, 6 - i, 1 + i, chunkBox);
+                this.placeBlock(world, blockState, 3, 6 - i, 1 + i, chunkBox);
                 if (i < 5) {
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 5 - i, 1 + i, boundingBox);
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 5 - i, 1 + i, boundingBox);
-                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 5 - i, 1 + i, boundingBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 1, 5 - i, 1 + i, chunkBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 2, 5 - i, 1 + i, chunkBox);
+                    this.placeBlock(world, Blocks.STONE_BRICKS.getBlockData(), 3, 5 - i, 1 + i, chunkBox);
                 }
             }
 
-            return true;
         }
     }
 
@@ -1327,7 +1315,7 @@ public class WorldGenStrongholdPieces {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_START, 0, i, j, getRandomHorizontalDirection(random));
         }
 
-        public WorldGenStrongholdStart(WorldServer serverLevel, NBTTagCompound nbt) {
+        public WorldGenStrongholdStart(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.STRONGHOLD_START, nbt);
         }
 

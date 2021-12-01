@@ -42,7 +42,7 @@ public class BlockMagma extends Block {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (direction == EnumDirection.UP && neighborState.is(Blocks.WATER)) {
-            world.getBlockTickList().scheduleTick(pos, this, 20);
+            world.scheduleTick(pos, this, 20);
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -60,6 +60,6 @@ public class BlockMagma extends Block {
 
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
-        world.getBlockTickList().scheduleTick(pos, this, 20);
+        world.scheduleTick(pos, this, 20);
     }
 }

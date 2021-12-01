@@ -24,20 +24,22 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMonsterType;
 import net.minecraft.world.entity.IPowerable;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
+import net.minecraft.world.entity.ai.control.ControllerMoveFlying;
 import net.minecraft.world.entity.ai.goal.PathfinderGoal;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalArrowAttack;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
+import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomFly;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomLookaround;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStrollLand;
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalHurtByTarget;
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackableTarget;
+import net.minecraft.world.entity.ai.navigation.NavigationAbstract;
+import net.minecraft.world.entity.ai.navigation.NavigationFlying;
 import net.minecraft.world.entity.ai.targeting.PathfinderTargetCondition;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.monster.EntityMonster;
@@ -74,20 +76,29 @@ public class EntityWither extends EntityMonster implements IPowerable, IRangedEn
 
     public EntityWither(EntityTypes<? extends EntityWither> type, World world) {
         super(type, world);
+        this.moveControl = new ControllerMoveFlying(this, 10, false);
         this.setHealth(this.getMaxHealth());
-        this.getNavigation().setCanFloat(true);
         this.xpReward = 50;
+    }
+
+    @Override
+    protected NavigationAbstract createNavigation(World world) {
+        NavigationFlying flyingPathNavigation = new NavigationFlying(this, world);
+        flyingPathNavigation.setCanOpenDoors(false);
+        flyingPathNavigation.setCanFloat(true);
+        flyingPathNavigation.setCanPassDoors(true);
+        return flyingPathNavigation;
     }
 
     @Override
     protected void initPathfinder() {
         this.goalSelector.addGoal(0, new EntityWither.PathfinderGoalWitherSpawn());
         this.goalSelector.addGoal(2, new PathfinderGoalArrowAttack(this, 1.0D, 40, 20.0F));
-        this.goalSelector.addGoal(5, new PathfinderGoalRandomStrollLand(this, 1.0D));
+        this.goalSelector.addGoal(5, new PathfinderGoalRandomFly(this, 1.0D));
         this.goalSelector.addGoal(6, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 8.0F));
         this.goalSelector.addGoal(7, new PathfinderGoalRandomLookaround(this));
         this.targetSelector.addGoal(1, new PathfinderGoalHurtByTarget(this));
-        this.targetSelector.addGoal(2, new PathfinderGoalNearestAttackableTarget<>(this, EntityInsentient.class, 0, false, false, LIVING_ENTITY_SELECTOR));
+        this.targetSelector.addGoal(2, new PathfinderGoalNearestAttackableTarget<>(this, EntityLiving.class, 0, false, false, LIVING_ENTITY_SELECTOR));
     }
 
     @Override
@@ -473,7 +484,7 @@ public class EntityWither extends EntityMonster implements IPowerable, IRangedEn
     }
 
     public static AttributeProvider.Builder createAttributes() {
-        return EntityMonster.createMonsterAttributes().add(GenericAttributes.MAX_HEALTH, 300.0D).add(GenericAttributes.MOVEMENT_SPEED, (double)0.6F).add(GenericAttributes.FOLLOW_RANGE, 40.0D).add(GenericAttributes.ARMOR, 4.0D);
+        return EntityMonster.createMonsterAttributes().add(GenericAttributes.MAX_HEALTH, 300.0D).add(GenericAttributes.MOVEMENT_SPEED, (double)0.6F).add(GenericAttributes.FLYING_SPEED, (double)0.6F).add(GenericAttributes.FOLLOW_RANGE, 40.0D).add(GenericAttributes.ARMOR, 4.0D);
     }
 
     public float getHeadYRot(int headIndex) {

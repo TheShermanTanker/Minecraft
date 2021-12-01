@@ -18,7 +18,6 @@ public class ArgumentItemStack implements ArgumentType<ArgumentPredicateItemStac
         return new ArgumentItemStack();
     }
 
-    @Override
     public ArgumentPredicateItemStack parse(StringReader stringReader) throws CommandSyntaxException {
         ArgumentParserItemStack itemParser = (new ArgumentParserItemStack(stringReader, false)).parse();
         return new ArgumentPredicateItemStack(itemParser.getItem(), itemParser.getNbt());
@@ -28,7 +27,6 @@ public class ArgumentItemStack implements ArgumentType<ArgumentPredicateItemStac
         return context.getArgument(name, ArgumentPredicateItemStack.class);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
         stringReader.setCursor(suggestionsBuilder.getStart());
@@ -42,7 +40,6 @@ public class ArgumentItemStack implements ArgumentType<ArgumentPredicateItemStac
         return itemParser.fillSuggestions(suggestionsBuilder, TagsItem.getAllTags());
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

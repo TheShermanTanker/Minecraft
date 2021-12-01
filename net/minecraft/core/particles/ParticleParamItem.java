@@ -27,11 +27,11 @@ public class ParticleParamItem implements ParticleParam {
     private final Particle<ParticleParamItem> type;
     private final ItemStack itemStack;
 
-    public static Codec<ParticleParamItem> codec(Particle<ParticleParamItem> particleType) {
-        return ItemStack.CODEC.xmap((itemStack) -> {
-            return new ParticleParamItem(particleType, itemStack);
-        }, (itemParticleOption) -> {
-            return itemParticleOption.itemStack;
+    public static Codec<ParticleParamItem> codec(Particle<ParticleParamItem> type) {
+        return ItemStack.CODEC.xmap((stack) -> {
+            return new ParticleParamItem(type, stack);
+        }, (effect) -> {
+            return effect.itemStack;
         });
     }
 

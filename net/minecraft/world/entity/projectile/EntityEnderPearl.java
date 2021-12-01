@@ -62,12 +62,12 @@ public class EntityEnderPearl extends EntityProjectileThrowable {
                         entity.enderTeleportTo(this.locX(), this.locY(), this.locZ());
                     }
 
-                    entity.fallDistance = 0.0F;
+                    entity.resetFallDistance();
                     entity.damageEntity(DamageSource.FALL, 5.0F);
                 }
             } else if (entity != null) {
                 entity.enderTeleportTo(this.locX(), this.locY(), this.locZ());
-                entity.fallDistance = 0.0F;
+                entity.resetFallDistance();
             }
 
             this.die();

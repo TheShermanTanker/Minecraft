@@ -48,7 +48,7 @@ public class BlockSeagrass extends BlockPlant implements IBlockFragilePlantEleme
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         IBlockData blockState = super.updateState(state, direction, neighborState, world, pos, neighborPos);
         if (!blockState.isAir()) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return blockState;

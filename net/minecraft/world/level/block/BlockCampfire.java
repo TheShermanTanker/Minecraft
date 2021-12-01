@@ -117,7 +117,7 @@ public class BlockCampfire extends BlockTileEntity implements IBlockWaterlogged 
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return direction == EnumDirection.DOWN ? state.set(SIGNAL_FIRE, Boolean.valueOf(this.isSmokeSource(neighborState))) : super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -181,7 +181,7 @@ public class BlockCampfire extends BlockTileEntity implements IBlockWaterlogged 
             }
 
             world.setTypeAndData(pos, state.set(WATERLOGGED, Boolean.valueOf(true)).set(LIT, Boolean.valueOf(false)), 3);
-            world.getFluidTickList().scheduleTick(pos, fluidState.getType(), fluidState.getType().getTickDelay(world));
+            world.scheduleTick(pos, fluidState.getType(), fluidState.getType().getTickDelay(world));
             return true;
         } else {
             return false;

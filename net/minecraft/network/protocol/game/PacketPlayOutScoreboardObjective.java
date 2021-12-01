@@ -24,7 +24,7 @@ public class PacketPlayOutScoreboardObjective implements Packet<PacketListenerPl
     }
 
     public PacketPlayOutScoreboardObjective(PacketDataSerializer buf) {
-        this.objectiveName = buf.readUtf(16);
+        this.objectiveName = buf.readUtf();
         this.method = buf.readByte();
         if (this.method != 0 && this.method != 2) {
             this.displayName = ChatComponentText.EMPTY;

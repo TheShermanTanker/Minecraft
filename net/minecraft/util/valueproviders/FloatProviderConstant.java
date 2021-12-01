@@ -8,15 +8,15 @@ import java.util.Random;
 public class FloatProviderConstant extends FloatProvider {
     public static final FloatProviderConstant ZERO = new FloatProviderConstant(0.0F);
     public static final Codec<FloatProviderConstant> CODEC = Codec.either(Codec.FLOAT, RecordCodecBuilder.create((instance) -> {
-        return instance.group(Codec.FLOAT.fieldOf("value").forGetter((constantFloat) -> {
-            return constantFloat.value;
+        return instance.group(Codec.FLOAT.fieldOf("value").forGetter((provider) -> {
+            return provider.value;
         })).apply(instance, FloatProviderConstant::new);
     })).xmap((either) -> {
-        return either.map(FloatProviderConstant::of, (constantFloat) -> {
-            return constantFloat;
+        return either.map(FloatProviderConstant::of, (provider) -> {
+            return provider;
         });
-    }, (constantFloat) -> {
-        return Either.left(constantFloat.value);
+    }, (provider) -> {
+        return Either.left(provider.value);
     });
     private final float value;
 

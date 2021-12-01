@@ -34,8 +34,8 @@ public class MobEffectBase {
         return IRegistry.MOB_EFFECT.getId(type);
     }
 
-    protected MobEffectBase(MobEffectInfo type, int color) {
-        this.category = type;
+    protected MobEffectBase(MobEffectInfo category, int color) {
+        this.category = category;
         this.color = color;
     }
 

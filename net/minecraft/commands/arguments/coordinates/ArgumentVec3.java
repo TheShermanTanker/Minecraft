@@ -39,16 +39,14 @@ public class ArgumentVec3 implements ArgumentType<IVectorPosition> {
         return context.getArgument(name, IVectorPosition.class).getPosition(context.getSource());
     }
 
-    public static IVectorPosition getCoordinates(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, IVectorPosition.class);
+    public static IVectorPosition getCoordinates(CommandContext<CommandListenerWrapper> context, String name) {
+        return context.getArgument(name, IVectorPosition.class);
     }
 
-    @Override
     public IVectorPosition parse(StringReader stringReader) throws CommandSyntaxException {
         return (IVectorPosition)(stringReader.canRead() && stringReader.peek() == '^' ? ArgumentVectorPosition.parse(stringReader) : VectorPosition.parseDouble(stringReader, this.centerCorrect));
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         if (!(commandContext.getSource() instanceof ICompletionProvider)) {
             return Suggestions.empty();
@@ -65,7 +63,6 @@ public class ArgumentVec3 implements ArgumentType<IVectorPosition> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

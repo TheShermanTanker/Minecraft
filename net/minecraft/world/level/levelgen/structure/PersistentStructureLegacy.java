@@ -46,10 +46,10 @@ public class PersistentStructureLegacy {
     private final List<String> legacyKeys;
     private final List<String> currentKeys;
 
-    public PersistentStructureLegacy(@Nullable WorldPersistentData dimensionDataStorage, List<String> list, List<String> list2) {
+    public PersistentStructureLegacy(@Nullable WorldPersistentData persistentStateManager, List<String> list, List<String> list2) {
         this.legacyKeys = list;
         this.currentKeys = list2;
-        this.populateCaches(dimensionDataStorage);
+        this.populateCaches(persistentStateManager);
         boolean bl = false;
 
         for(String string : this.currentKeys) {
@@ -150,13 +150,13 @@ public class PersistentStructureLegacy {
         return nbt;
     }
 
-    private void populateCaches(@Nullable WorldPersistentData dimensionDataStorage) {
-        if (dimensionDataStorage != null) {
+    private void populateCaches(@Nullable WorldPersistentData persistentStateManager) {
+        if (persistentStateManager != null) {
             for(String string : this.legacyKeys) {
                 NBTTagCompound compoundTag = new NBTTagCompound();
 
                 try {
-                    compoundTag = dimensionDataStorage.readTagFromDisk(string, 1493).getCompound("data").getCompound("Features");
+                    compoundTag = persistentStateManager.readTagFromDisk(string, 1493).getCompound("data").getCompound("Features");
                     if (compoundTag.isEmpty()) {
                         continue;
                     }
@@ -182,7 +182,7 @@ public class PersistentStructureLegacy {
                 }
 
                 String string6 = string + "_index";
-                PersistentIndexed structureFeatureIndexSavedData = dimensionDataStorage.computeIfAbsent(PersistentIndexed::load, PersistentIndexed::new, string6);
+                PersistentIndexed structureFeatureIndexSavedData = persistentStateManager.computeIfAbsent(PersistentIndexed::load, PersistentIndexed::new, string6);
                 if (!structureFeatureIndexSavedData.getAll().isEmpty()) {
                     this.indexMap.put(string, structureFeatureIndexSavedData);
                 } else {
@@ -201,15 +201,15 @@ public class PersistentStructureLegacy {
         }
     }
 
-    public static PersistentStructureLegacy getLegacyStructureHandler(ResourceKey<World> world, @Nullable WorldPersistentData dimensionDataStorage) {
+    public static PersistentStructureLegacy getLegacyStructureHandler(ResourceKey<World> world, @Nullable WorldPersistentData persistentStateManager) {
         if (world == World.OVERWORLD) {
-            return new PersistentStructureLegacy(dimensionDataStorage, ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"), ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument"));
+            return new PersistentStructureLegacy(persistentStateManager, ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"), ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument"));
         } else if (world == World.NETHER) {
             List<String> list = ImmutableList.of("Fortress");
-            return new PersistentStructureLegacy(dimensionDataStorage, list, list);
+            return new PersistentStructureLegacy(persistentStateManager, list, list);
         } else if (world == World.END) {
             List<String> list2 = ImmutableList.of("EndCity");
-            return new PersistentStructureLegacy(dimensionDataStorage, list2, list2);
+            return new PersistentStructureLegacy(persistentStateManager, list2, list2);
         } else {
             throw new RuntimeException(String.format("Unknown dimension type : %s", world));
         }

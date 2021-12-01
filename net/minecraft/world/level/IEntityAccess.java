@@ -1,10 +1,11 @@
 package net.minecraft.world.level;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList.Builder;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
@@ -50,24 +51,23 @@ public interface IEntityAccess {
         return this.getEntitiesOfClass(entityClass, box, IEntitySelector.NO_SPECTATORS);
     }
 
-    default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB box, Predicate<Entity> predicate) {
+    default List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB box) {
         if (box.getSize() < 1.0E-7D) {
-            return Stream.empty();
+            return List.of();
         } else {
-            AxisAlignedBB aABB = box.inflate(1.0E-7D);
-            return this.getEntities(entity, aABB, predicate.and((entityx) -> {
-                if (entityx.getBoundingBox().intersects(aABB)) {
-                    if (entity == null) {
-                        if (entityx.canBeCollidedWith()) {
-                            return true;
-                        }
-                    } else if (entity.canCollideWith(entityx)) {
-                        return true;
-                    }
+            Predicate<Entity> predicate = entity == null ? IEntitySelector.CAN_BE_COLLIDED_WITH : IEntitySelector.NO_SPECTATORS.and(entity::canCollideWith);
+            List<Entity> list = this.getEntities(entity, box.inflate(1.0E-7D), predicate);
+            if (list.isEmpty()) {
+                return List.of();
+            } else {
+                Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(list.size());
+
+                for(Entity entity2 : list) {
+                    builder.add(VoxelShapes.create(entity2.getBoundingBox()));
                 }
 
-                return false;
-            })).stream().map(Entity::getBoundingBox).map(VoxelShapes::create);
+                return builder.build();
+            }
         }
     }
 

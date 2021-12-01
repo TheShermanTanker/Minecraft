@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.Particles;
+import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
@@ -80,6 +81,7 @@ public abstract class EntityInsentient extends EntityLiving {
     public static final String LEASH_TAG = "Leash";
     private static final int PICKUP_REACH = 1;
     public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
+    public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
     public int ambientSoundTime;
     protected int xpReward;
     protected ControllerLook lookControl;
@@ -89,6 +91,7 @@ public abstract class EntityInsentient extends EntityLiving {
     protected NavigationAbstract navigation;
     public PathfinderGoalSelector goalSelector;
     public PathfinderGoalSelector targetSelector;
+    @Nullable
     private EntityLiving target;
     private final EntitySenses sensing;
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
@@ -96,8 +99,9 @@ public abstract class EntityInsentient extends EntityLiving {
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
     public final float[] armorDropChances = new float[4];
     private boolean canPickUpLoot;
-    public boolean persistenceRequired;
+    private boolean persistenceRequired;
     private final Map<PathType, Float> pathfindingMalus = Maps.newEnumMap(PathType.class);
+    @Nullable
     public MinecraftKey lootTable;
     public long lootTableSeed;
     @Nullable
@@ -392,7 +396,7 @@ public abstract class EntityInsentient extends EntityLiving {
 
             nbt.set("Leash", compoundTag3);
         } else if (this.leashInfoTag != null) {
-            nbt.set("Leash", this.leashInfoTag.c());
+            nbt.set("Leash", this.leashInfoTag.copy());
         }
 
         nbt.setBoolean("LeftHanded", this.isLeftHanded());
@@ -686,12 +690,23 @@ public abstract class EntityInsentient extends EntityLiving {
         this.level.getMethodProfiler().enter("sensing");
         this.sensing.tick();
         this.level.getMethodProfiler().exit();
-        this.level.getMethodProfiler().enter("targetSelector");
-        this.targetSelector.doTick();
-        this.level.getMethodProfiler().exit();
-        this.level.getMethodProfiler().enter("goalSelector");
-        this.goalSelector.doTick();
-        this.level.getMethodProfiler().exit();
+        int i = this.level.getMinecraftServer().getTickCount() + this.getId();
+        if (i % 2 != 0 && this.tickCount > 1) {
+            this.level.getMethodProfiler().enter("targetSelector");
+            this.targetSelector.tickRunningGoals(false);
+            this.level.getMethodProfiler().exit();
+            this.level.getMethodProfiler().enter("goalSelector");
+            this.goalSelector.tickRunningGoals(false);
+            this.level.getMethodProfiler().exit();
+        } else {
+            this.level.getMethodProfiler().enter("targetSelector");
+            this.targetSelector.doTick();
+            this.level.getMethodProfiler().exit();
+            this.level.getMethodProfiler().enter("goalSelector");
+            this.goalSelector.doTick();
+            this.level.getMethodProfiler().exit();
+        }
+
         this.level.getMethodProfiler().enter("navigation");
         this.navigation.tick();
         this.level.getMethodProfiler().exit();
@@ -747,17 +762,17 @@ public abstract class EntityInsentient extends EntityLiving {
         this.setYRot(this.rotlerp(this.getYRot(), i, maxYawChange));
     }
 
-    private float rotlerp(float oldAngle, float newAngle, float maxChangeInAngle) {
-        float f = MathHelper.wrapDegrees(newAngle - oldAngle);
-        if (f > maxChangeInAngle) {
-            f = maxChangeInAngle;
+    private float rotlerp(float from, float to, float max) {
+        float f = MathHelper.wrapDegrees(to - from);
+        if (f > max) {
+            f = max;
         }
 
-        if (f < -maxChangeInAngle) {
-            f = -maxChangeInAngle;
+        if (f < -max) {
+            f = -max;
         }
 
-        return oldAngle + f;
+        return from + f;
     }
 
     public static boolean checkMobSpawnRules(EntityTypes<? extends EntityInsentient> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
@@ -1073,8 +1088,8 @@ public abstract class EntityInsentient extends EntityLiving {
                 if (this.level instanceof WorldServer) {
                     ItemMonsterEgg spawnEggItem = (ItemMonsterEgg)itemStack.getItem();
                     Optional<EntityInsentient> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this, this.getEntityType(), (WorldServer)this.level, this.getPositionVector(), itemStack);
-                    optional.ifPresent((mob) -> {
-                        this.onOffspringSpawnedFromEgg(player, mob);
+                    optional.ifPresent((entity) -> {
+                        this.onOffspringSpawnedFromEgg(player, entity);
                     });
                     return optional.isPresent() ? EnumInteractionResult.SUCCESS : EnumInteractionResult.PASS;
                 } else {
@@ -1253,7 +1268,7 @@ public abstract class EntityInsentient extends EntityLiving {
                     return;
                 }
             } else if (this.leashInfoTag.hasKeyOfType("X", 99) && this.leashInfoTag.hasKeyOfType("Y", 99) && this.leashInfoTag.hasKeyOfType("Z", 99)) {
-                BlockPosition blockPos = new BlockPosition(this.leashInfoTag.getInt("X"), this.leashInfoTag.getInt("Y"), this.leashInfoTag.getInt("Z"));
+                BlockPosition blockPos = GameProfileSerializer.readBlockPos(this.leashInfoTag);
                 this.setLeashHolder(EntityLeash.getOrCreateKnot(this.level, blockPos), true);
                 return;
             }

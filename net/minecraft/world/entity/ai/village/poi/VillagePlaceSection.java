@@ -45,10 +45,10 @@ public class VillagePlaceSection {
         this(updateListener, true, ImmutableList.of());
     }
 
-    private VillagePlaceSection(Runnable updateListener, boolean valid, List<VillagePlaceRecord> list) {
+    private VillagePlaceSection(Runnable updateListener, boolean valid, List<VillagePlaceRecord> pois) {
         this.setDirty = updateListener;
         this.isValid = valid;
-        list.forEach(this::add);
+        pois.forEach(this::add);
     }
 
     public Stream<VillagePlaceRecord> getRecords(Predicate<VillagePlaceType> predicate, VillagePlace.Occupancy occupationStatus) {
@@ -102,10 +102,11 @@ public class VillagePlaceSection {
         }
     }
 
+    /** @deprecated */
     @Deprecated
     @VisibleForDebug
-    public int getFreeTickets(BlockPosition blockPos) {
-        return this.getPoiRecord(blockPos).map(VillagePlaceRecord::getFreeTickets).orElse(0);
+    public int getFreeTickets(BlockPosition pos) {
+        return this.getPoiRecord(pos).map(VillagePlaceRecord::getFreeTickets).orElse(0);
     }
 
     public boolean release(BlockPosition pos) {
@@ -137,7 +138,7 @@ public class VillagePlaceSection {
             this.clear();
             consumer.accept((pos, poiType) -> {
                 short s = SectionPosition.sectionRelativePos(pos);
-                VillagePlaceRecord poiRecord = short2ObjectMap.computeIfAbsent(s, (i) -> {
+                VillagePlaceRecord poiRecord = short2ObjectMap.computeIfAbsent(s, (sx) -> {
                     return new VillagePlaceRecord(pos, poiType, this.setDirty);
                 });
                 this.add(poiRecord);

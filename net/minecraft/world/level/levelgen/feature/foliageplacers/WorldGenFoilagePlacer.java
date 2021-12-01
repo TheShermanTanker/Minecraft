@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.feature.WorldGenTrees;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureTreeConfiguration;
 
 public abstract class WorldGenFoilagePlacer {
-    public static final Codec<WorldGenFoilagePlacer> CODEC = IRegistry.FOLIAGE_PLACER_TYPES.dispatch(WorldGenFoilagePlacer::type, WorldGenFoilagePlacers::codec);
+    public static final Codec<WorldGenFoilagePlacer> CODEC = IRegistry.FOLIAGE_PLACER_TYPES.byNameCodec().dispatch(WorldGenFoilagePlacer::type, WorldGenFoilagePlacers::codec);
     protected final IntProvider radius;
     protected final IntProvider offset;
 

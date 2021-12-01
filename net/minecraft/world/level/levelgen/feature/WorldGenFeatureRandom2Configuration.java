@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureRandom2;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class WorldGenFeatureRandom2Configuration extends WorldGenerator<WorldGenFeatureRandom2> {
     public WorldGenFeatureRandom2Configuration(Codec<WorldGenFeatureRandom2> configCodec) {
@@ -20,7 +21,7 @@ public class WorldGenFeatureRandom2Configuration extends WorldGenerator<WorldGen
         BlockPosition blockPos = context.origin();
         ChunkGenerator chunkGenerator = context.chunkGenerator();
         int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
-        WorldGenFeatureConfigured<?, ?> configuredFeature = simpleRandomFeatureConfiguration.features.get(i).get();
-        return configuredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
+        PlacedFeature placedFeature = simpleRandomFeatureConfiguration.features.get(i).get();
+        return placedFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 }

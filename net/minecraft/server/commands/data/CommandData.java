@@ -98,7 +98,7 @@ public class CommandData {
                         }
 
                         NBTTagCompound compoundTag = (NBTTagCompound)tag;
-                        NBTTagCompound compoundTag2 = compoundTag.c();
+                        NBTTagCompound compoundTag2 = compoundTag.copy();
 
                         for(NBTBase tag2 : elements) {
                             if (!(tag2 instanceof NBTTagCompound)) {
@@ -261,7 +261,7 @@ public class CommandData {
 
     private static int mergeData(CommandListenerWrapper source, CommandDataAccessor object, NBTTagCompound nbt) throws CommandSyntaxException {
         NBTTagCompound compoundTag = object.getData();
-        NBTTagCompound compoundTag2 = compoundTag.c().merge(nbt);
+        NBTTagCompound compoundTag2 = compoundTag.copy().merge(nbt);
         if (compoundTag.equals(compoundTag2)) {
             throw ERROR_MERGE_UNCHANGED.create();
         } else {

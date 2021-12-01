@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportSystemDetails;
@@ -27,7 +28,7 @@ public class NBTTagCompound implements NBTBase {
     });
     private static final int SELF_SIZE_IN_BITS = 384;
     private static final int MAP_ENTRY_SIZE_IN_BITS = 256;
-    public static final NBTTagType<NBTTagCompound> TYPE = new NBTTagType<NBTTagCompound>() {
+    public static final NBTTagType<NBTTagCompound> TYPE = new TagType$VariableSize<NBTTagCompound>() {
         @Override
         public NBTTagCompound load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(384L);
@@ -48,6 +49,67 @@ public class NBTTagCompound implements NBTBase {
 
                 return new NBTTagCompound(map);
             }
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            while(true) {
+                byte b;
+                if ((b = input.readByte()) != 0) {
+                    NBTTagType<?> tagType = NBTTagTypes.getType(b);
+                    switch(visitor.visitEntry(tagType)) {
+                    case HALT:
+                        return StreamTagVisitor.ValueResult.HALT;
+                    case BREAK:
+                        NBTTagString.skipString(input);
+                        tagType.skip(input);
+                        break;
+                    case SKIP:
+                        NBTTagString.skipString(input);
+                        tagType.skip(input);
+                        continue;
+                    default:
+                        String string = input.readUTF();
+                        switch(visitor.visitEntry(tagType, string)) {
+                        case HALT:
+                            return StreamTagVisitor.ValueResult.HALT;
+                        case BREAK:
+                            tagType.skip(input);
+                            break;
+                        case SKIP:
+                            tagType.skip(input);
+                            continue;
+                        default:
+                            switch(tagType.parse(input, visitor)) {
+                            case HALT:
+                                return StreamTagVisitor.ValueResult.HALT;
+                            case BREAK:
+                            default:
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (b != 0) {
+                    while((b = input.readByte()) != 0) {
+                        NBTTagString.skipString(input);
+                        NBTTagTypes.getType(b).skip(input);
+                    }
+                }
+
+                return visitor.visitContainerEnd();
+            }
+        }
+
+        @Override
+        public void skip(DataInput input) throws IOException {
+            byte b;
+            while((b = input.readByte()) != 0) {
+                NBTTagString.skipString(input);
+                NBTTagTypes.getType(b).skip(input);
+            }
+
         }
 
         @Override
@@ -356,8 +418,8 @@ public class NBTTagCompound implements NBTBase {
         return this.tags.isEmpty();
     }
 
-    private CrashReport createReport(String key, NBTTagType<?> reader, ClassCastException classCastException) {
-        CrashReport crashReport = CrashReport.forThrowable(classCastException, "Reading NBT data");
+    private CrashReport createReport(String key, NBTTagType<?> reader, ClassCastException exception) {
+        CrashReport crashReport = CrashReport.forThrowable(exception, "Reading NBT data");
         CrashReportSystemDetails crashReportCategory = crashReport.addCategory("Corrupt NBT tag", 1);
         crashReportCategory.setDetail("Tag type found", () -> {
             return this.tags.get(key).getType().getName();
@@ -368,7 +430,7 @@ public class NBTTagCompound implements NBTBase {
     }
 
     @Override
-    public NBTTagCompound c() {
+    public NBTTagCompound copy() {
         Map<String, NBTBase> map = Maps.newHashMap(Maps.transformValues(this.tags, NBTBase::clone));
         return new NBTTagCompound(map);
     }
@@ -440,5 +502,42 @@ public class NBTTagCompound implements NBTBase {
 
     protected Map<String, NBTBase> entries() {
         return Collections.unmodifiableMap(this.tags);
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        for(Entry<String, NBTBase> entry : this.tags.entrySet()) {
+            NBTBase tag = entry.getValue();
+            NBTTagType<?> tagType = tag.getType();
+            StreamTagVisitor.EntryResult entryResult = visitor.visitEntry(tagType);
+            switch(entryResult) {
+            case HALT:
+                return StreamTagVisitor.ValueResult.HALT;
+            case BREAK:
+                return visitor.visitContainerEnd();
+            case SKIP:
+                break;
+            default:
+                entryResult = visitor.visitEntry(tagType, entry.getKey());
+                switch(entryResult) {
+                case HALT:
+                    return StreamTagVisitor.ValueResult.HALT;
+                case BREAK:
+                    return visitor.visitContainerEnd();
+                case SKIP:
+                    break;
+                default:
+                    StreamTagVisitor.ValueResult valueResult = tag.accept(visitor);
+                    switch(valueResult) {
+                    case HALT:
+                        return StreamTagVisitor.ValueResult.HALT;
+                    case BREAK:
+                        return visitor.visitContainerEnd();
+                    }
+                }
+            }
+        }
+
+        return visitor.visitContainerEnd();
     }
 }

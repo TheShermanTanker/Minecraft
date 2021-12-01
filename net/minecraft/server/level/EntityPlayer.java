@@ -124,6 +124,7 @@ import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityCommand;
 import net.minecraft.world.level.block.entity.TileEntitySign;
 import net.minecraft.world.level.block.state.IBlockData;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.ShapeDetectorShape;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.AxisAlignedBB;
@@ -158,15 +159,21 @@ public class EntityPlayer extends EntityHuman {
     private EnumChatVisibility chatVisibility = EnumChatVisibility.FULL;
     private boolean canChatColor = true;
     private long lastActionTime = SystemUtils.getMonotonicMillis();
+    @Nullable
     private Entity camera;
     public boolean isChangingDimension;
     private boolean seenCredits;
     private final RecipeBookServer recipeBook = new RecipeBookServer();
+    @Nullable
     private Vec3D levitationStartPos;
     private int levitationStartTime;
     private boolean disconnected;
     @Nullable
+    private Vec3D startingToFallPosition;
+    @Nullable
     private Vec3D enteredNetherPosition;
+    @Nullable
+    private Vec3D enteredLavaOnVehiclePosition;
     private SectionPosition lastSectionPos = SectionPosition.of(0, 0, 0);
     private ResourceKey<World> respawnDimension = World.OVERWORLD;
     @Nullable
@@ -175,6 +182,7 @@ public class EntityPlayer extends EntityHuman {
     private float respawnAngle;
     private final ITextFilter textFilter;
     private boolean textFilteringEnabled;
+    private boolean allowsListing = true;
     private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
         @Override
         public void sendInitialData(Container handler, NonNullList<ItemStack> stacks, ItemStack cursorStack, int[] properties) {
@@ -259,7 +267,7 @@ public class EntityPlayer extends EntityHuman {
                 int q = (o + n * p) % k;
                 int r = q % (i * 2 + 1);
                 int s = q / (i * 2 + 1);
-                BlockPosition blockPos2 = WorldProviderNormal.getOverworldRespawnPos(world, blockPos.getX() + r - i, blockPos.getZ() + s - i, false);
+                BlockPosition blockPos2 = WorldProviderNormal.getOverworldRespawnPos(world, blockPos.getX() + r - i, blockPos.getZ() + s - i);
                 if (blockPos2 != null) {
                     this.setPositionRotation(blockPos2, 0.0F, 0.0F);
                     if (world.getCubes(this)) {
@@ -435,6 +443,8 @@ public class EntityPlayer extends EntityHuman {
             CriterionTriggers.LEVITATION.trigger(this, this.levitationStartPos, this.tickCount - this.levitationStartTime);
         }
 
+        this.trackStartFallingPosition();
+        this.trackEnteredOrExitedLavaOnVehicle();
         this.advancements.flushDirty(this);
     }
 
@@ -508,6 +518,38 @@ public class EntityPlayer extends EntityHuman {
         }
     }
 
+    @Override
+    public void resetFallDistance() {
+        if (this.getHealth() > 0.0F && this.startingToFallPosition != null) {
+            CriterionTriggers.FALL_FROM_HEIGHT.trigger(this, this.startingToFallPosition);
+        }
+
+        this.startingToFallPosition = null;
+        super.resetFallDistance();
+    }
+
+    public void trackStartFallingPosition() {
+        if (this.fallDistance > 0.0F && this.startingToFallPosition == null) {
+            this.startingToFallPosition = this.getPositionVector();
+        }
+
+    }
+
+    public void trackEnteredOrExitedLavaOnVehicle() {
+        if (this.getVehicle() != null && this.getVehicle().isInLava()) {
+            if (this.enteredLavaOnVehiclePosition == null) {
+                this.enteredLavaOnVehiclePosition = this.getPositionVector();
+            } else {
+                CriterionTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER.trigger(this, this.enteredLavaOnVehiclePosition);
+            }
+        }
+
+        if (this.enteredLavaOnVehiclePosition != null && (this.getVehicle() == null || !this.getVehicle().isInLava())) {
+            this.enteredLavaOnVehiclePosition = null;
+        }
+
+    }
+
     private void updateScoreForCriteria(IScoreboardCriteria criterion, int score) {
         this.getScoreboard().getObjectivesForCriteria(criterion, this.getName(), (scorex) -> {
             scorex.setScore(score);
@@ -574,10 +616,10 @@ public class EntityPlayer extends EntityHuman {
 
     private void tellNeutralMobsThatIDied() {
         AxisAlignedBB aABB = (new AxisAlignedBB(this.getChunkCoordinates())).grow(32.0D, 10.0D, 32.0D);
-        this.level.getEntitiesOfClass(EntityInsentient.class, aABB, IEntitySelector.NO_SPECTATORS).stream().filter((mob) -> {
-            return mob instanceof IEntityAngerable;
-        }).forEach((mob) -> {
-            ((IEntityAngerable)mob).playerDied(this);
+        this.level.getEntitiesOfClass(EntityInsentient.class, aABB, IEntitySelector.NO_SPECTATORS).stream().filter((entity) -> {
+            return entity instanceof IEntityAngerable;
+        }).forEach((entity) -> {
+            ((IEntityAngerable)entity).playerDied(this);
         });
     }
 
@@ -737,8 +779,8 @@ public class EntityPlayer extends EntityHuman {
     }
 
     @Override
-    protected Optional<BlockUtil.Rectangle> findOrCreatePortal(WorldServer destWorld, BlockPosition destPos, boolean destIsNether) {
-        Optional<BlockUtil.Rectangle> optional = super.findOrCreatePortal(destWorld, destPos, destIsNether);
+    protected Optional<BlockUtil.Rectangle> getExitPortal(WorldServer destWorld, BlockPosition destPos, boolean destIsNether, WorldBorder worldBorder) {
+        Optional<BlockUtil.Rectangle> optional = super.getExitPortal(destWorld, destPos, destIsNether, worldBorder);
         if (optional.isPresent()) {
             return optional;
         } else {
@@ -773,16 +815,6 @@ public class EntityPlayer extends EntityHuman {
         } else {
             return this.isSpectator() ? false : super.broadcastToPlayer(spectator);
         }
-    }
-
-    private void broadcast(TileEntity blockEntity) {
-        if (blockEntity != null) {
-            PacketPlayOutTileEntityData clientboundBlockEntityDataPacket = blockEntity.getUpdatePacket();
-            if (clientboundBlockEntityDataPacket != null) {
-                this.connection.sendPacket(clientboundBlockEntityDataPacket);
-            }
-        }
-
     }
 
     @Override
@@ -856,12 +888,12 @@ public class EntityPlayer extends EntityHuman {
     }
 
     @Override
-    public void wakeup(boolean bl, boolean updateSleepingPlayers) {
+    public void wakeup(boolean skipSleepTimer, boolean updateSleepingPlayers) {
         if (this.isSleeping()) {
             this.getWorldServer().getChunkSource().broadcastIncludingSelf(this, new PacketPlayOutAnimation(this, 2));
         }
 
-        super.wakeup(bl, updateSleepingPlayers);
+        super.wakeup(skipSleepTimer, updateSleepingPlayers);
         if (this.connection != null) {
             this.connection.teleport(this.locX(), this.locY(), this.locZ(), this.getYRot(), this.getXRot());
         }
@@ -995,8 +1027,7 @@ public class EntityPlayer extends EntityHuman {
 
     @Override
     public void openCommandBlock(TileEntityCommand commandBlock) {
-        commandBlock.setSendToClient(true);
-        this.broadcast(commandBlock);
+        this.connection.sendPacket(PacketPlayOutTileEntityData.create(commandBlock, TileEntity::saveWithoutMetadata));
     }
 
     @Override
@@ -1203,6 +1234,7 @@ public class EntityPlayer extends EntityHuman {
         }
     }
 
+    @Override
     public WorldServer getWorldServer() {
         return (WorldServer)this.level;
     }
@@ -1261,11 +1293,12 @@ public class EntityPlayer extends EntityHuman {
     }
 
     public void updateOptions(PacketPlayInSettings packet) {
-        this.chatVisibility = packet.getChatVisibility();
-        this.canChatColor = packet.getChatColors();
-        this.textFilteringEnabled = packet.isTextFilteringEnabled();
-        this.getDataWatcher().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)packet.getModelCustomisation());
-        this.getDataWatcher().set(DATA_PLAYER_MAIN_HAND, (byte)(packet.getMainHand() == EnumMainHand.LEFT ? 0 : 1));
+        this.chatVisibility = packet.chatVisibility();
+        this.canChatColor = packet.chatColors();
+        this.textFilteringEnabled = packet.textFilteringEnabled();
+        this.allowsListing = packet.allowsListing();
+        this.getDataWatcher().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)packet.modelCustomisation());
+        this.getDataWatcher().set(DATA_PLAYER_MAIN_HAND, (byte)(packet.mainHand() == EnumMainHand.LEFT ? 0 : 1));
     }
 
     public boolean canChatInColor() {
@@ -1324,7 +1357,7 @@ public class EntityPlayer extends EntityHuman {
         return (Entity)(this.camera == null ? this : this.camera);
     }
 
-    public void setSpectatorTarget(Entity entity) {
+    public void setSpectatorTarget(@Nullable Entity entity) {
         Entity entity2 = this.getSpecatorTarget();
         this.camera = (Entity)(entity == null ? this : entity);
         if (entity2 != this.camera) {
@@ -1420,7 +1453,7 @@ public class EntityPlayer extends EntityHuman {
         return this.respawnForced;
     }
 
-    public void setRespawnPosition(ResourceKey<World> dimension, @Nullable BlockPosition pos, float angle, boolean spawnPointSet, boolean sendMessage) {
+    public void setRespawnPosition(ResourceKey<World> dimension, @Nullable BlockPosition pos, float angle, boolean forced, boolean sendMessage) {
         if (pos != null) {
             boolean bl = pos.equals(this.respawnPosition) && dimension.equals(this.respawnDimension);
             if (sendMessage && !bl) {
@@ -1430,7 +1463,7 @@ public class EntityPlayer extends EntityHuman {
             this.respawnPosition = pos;
             this.respawnDimension = dimension;
             this.respawnAngle = angle;
-            this.respawnForced = spawnPointSet;
+            this.respawnForced = forced;
         } else {
             this.respawnPosition = null;
             this.respawnDimension = World.OVERWORLD;
@@ -1440,8 +1473,7 @@ public class EntityPlayer extends EntityHuman {
 
     }
 
-    public void trackChunk(ChunkCoordIntPair chunkPos, Packet<?> chunkDataPacket, Packet<?> lightUpdatePacket) {
-        this.connection.sendPacket(lightUpdatePacket);
+    public void trackChunk(ChunkCoordIntPair chunkPos, Packet<?> chunkDataPacket) {
         this.connection.sendPacket(chunkDataPacket);
     }
 
@@ -1556,5 +1588,9 @@ public class EntityPlayer extends EntityHuman {
             this.containerMenu.setRemoteSlot(i, inventory.getItemInHand());
         });
         return this.drop(itemStack, false, true) != null;
+    }
+
+    public boolean allowsListing() {
+        return this.allowsListing;
     }
 }

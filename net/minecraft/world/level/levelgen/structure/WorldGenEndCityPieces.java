@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.EntityItemFrame;
@@ -19,6 +18,7 @@ import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.block.entity.TileEntityLootable;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureProcessorBlockIgnore;
@@ -203,7 +203,7 @@ public class WorldGenEndCityPieces {
 
                 for(StructurePiece structurePiece : list) {
                     structurePiece.genDepth = i;
-                    StructurePiece structurePiece2 = StructureStart.findCollisionPiece(pieces, structurePiece.getBoundingBox());
+                    StructurePiece structurePiece2 = StructurePiece.findCollisionPiece(pieces, structurePiece.getBoundingBox());
                     if (structurePiece2 != null && structurePiece2.genDepth != parent.genDepth) {
                         bl = true;
                         break;
@@ -225,9 +225,9 @@ public class WorldGenEndCityPieces {
             super(WorldGenFeatureStructurePieceType.END_CITY_PIECE, 0, manager, makeResourceLocation(template), template, makeSettings(includeAir, rotation), pos);
         }
 
-        public Piece(WorldServer world, NBTTagCompound compoundTag) {
-            super(WorldGenFeatureStructurePieceType.END_CITY_PIECE, compoundTag, world, (resourceLocation) -> {
-                return makeSettings(compoundTag.getBoolean("OW"), EnumBlockRotation.valueOf(compoundTag.getString("Rot")));
+        public Piece(DefinedStructureManager manager, NBTTagCompound nbt) {
+            super(WorldGenFeatureStructurePieceType.END_CITY_PIECE, nbt, manager, (resourceLocation) -> {
+                return makeSettings(nbt.getBoolean("OW"), EnumBlockRotation.valueOf(nbt.getString("Rot")));
             });
         }
 
@@ -246,8 +246,8 @@ public class WorldGenEndCityPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setString("Rot", this.placeSettings.getRotation().name());
             nbt.setBoolean("OW", this.placeSettings.getProcessors().get(0) == DefinedStructureProcessorBlockIgnore.STRUCTURE_BLOCK);
         }

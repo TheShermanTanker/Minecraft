@@ -1,11 +1,8 @@
 package net.minecraft.util.thread;
 
 import com.google.common.collect.Queues;
-import java.util.Collection;
-import java.util.List;
 import java.util.Queue;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
 public interface PairedQueue<T, F> {
@@ -19,20 +16,25 @@ public interface PairedQueue<T, F> {
     int size();
 
     public static final class FixedPriorityQueue implements PairedQueue<PairedQueue.IntRunnable, Runnable> {
-        private final List<Queue<Runnable>> queueList;
+        private final Queue<Runnable>[] queues;
+        private final AtomicInteger size = new AtomicInteger();
 
         public FixedPriorityQueue(int priorityCount) {
-            this.queueList = IntStream.range(0, priorityCount).mapToObj((i) -> {
-                return Queues.newConcurrentLinkedQueue();
-            }).collect(Collectors.toList());
+            this.queues = new Queue[priorityCount];
+
+            for(int i = 0; i < priorityCount; ++i) {
+                this.queues[i] = Queues.newConcurrentLinkedQueue();
+            }
+
         }
 
         @Nullable
         @Override
         public Runnable pop() {
-            for(Queue<Runnable> queue : this.queueList) {
+            for(Queue<Runnable> queue : this.queues) {
                 Runnable runnable = queue.poll();
                 if (runnable != null) {
+                    this.size.decrementAndGet();
                     return runnable;
                 }
             }
@@ -42,30 +44,29 @@ public interface PairedQueue<T, F> {
 
         @Override
         public boolean push(PairedQueue.IntRunnable message) {
-            int i = message.getPriority();
-            this.queueList.get(i).add(message);
-            return true;
+            int i = message.priority;
+            if (i < this.queues.length && i >= 0) {
+                this.queues[i].add(message);
+                this.size.incrementAndGet();
+                return true;
+            } else {
+                throw new IndexOutOfBoundsException("Priority %d not supported. Expected range [0-%d]".formatted(i, this.queues.length - 1));
+            }
         }
 
         @Override
         public boolean isEmpty() {
-            return this.queueList.stream().allMatch(Collection::isEmpty);
+            return this.size.get() == 0;
         }
 
         @Override
         public int size() {
-            int i = 0;
-
-            for(Queue<Runnable> queue : this.queueList) {
-                i += queue.size();
-            }
-
-            return i;
+            return this.size.get();
         }
     }
 
     public static final class IntRunnable implements Runnable {
-        private final int priority;
+        final int priority;
         private final Runnable task;
 
         public IntRunnable(int priority, Runnable runnable) {

@@ -23,12 +23,10 @@ public class ArgumentNBTBase implements ArgumentType<NBTBase> {
         return context.getArgument(name, NBTBase.class);
     }
 
-    @Override
     public NBTBase parse(StringReader stringReader) throws CommandSyntaxException {
         return (new MojangsonParser(stringReader)).readValue();
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

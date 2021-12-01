@@ -48,6 +48,7 @@ import net.minecraft.world.level.block.BlockTNT;
 import net.minecraft.world.level.block.BlockTallPlant;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ICaveVine;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.block.state.properties.BlockPropertyBedPart;
 import net.minecraft.world.level.block.state.properties.BlockPropertyDoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.BlockPropertySlabType;
@@ -148,8 +149,8 @@ public class LootTableBlock implements Consumer<BiConsumer<MinecraftKey, LootTab
         return LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(applyExplosionDecay(drop, LootItem.lootTableItem(drop).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(2.0F)).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(drop).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockStepAbstract.TYPE, BlockPropertySlabType.DOUBLE)))))));
     }
 
-    private static <T extends Comparable<T> & INamable> LootTable.Builder createSinglePropConditionTable(Block drop, IBlockState<T> property, T comparable) {
-        return LootTable.lootTable().withPool(applyExplosionCondition(drop, LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(drop).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(drop).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(property, comparable))))));
+    private static <T extends Comparable<T> & INamable> LootTable.Builder createSinglePropConditionTable(Block drop, IBlockState<T> property, T value) {
+        return LootTable.lootTable().withPool(applyExplosionCondition(drop, LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(drop).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(drop).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(property, value))))));
     }
 
     private static LootTable.Builder createNameableBlockEntityTable(Block drop) {
@@ -157,11 +158,11 @@ public class LootTableBlock implements Consumer<BiConsumer<MinecraftKey, LootTab
     }
 
     private static LootTable.Builder createShulkerBoxDrop(Block drop) {
-        return LootTable.lootTable().withPool(applyExplosionCondition(drop, LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(drop).apply(LootItemFunctionCopyName.copyName(LootItemFunctionCopyName.Source.BLOCK_ENTITY)).apply(LootItemFunctionCopyNBT.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Lock", "BlockEntityTag.Lock").copy("LootTable", "BlockEntityTag.LootTable").copy("LootTableSeed", "BlockEntityTag.LootTableSeed")).apply(LootItemFunctionSetContents.setContents().withEntry(LootSelectorDynamic.dynamicEntry(BlockShulkerBox.CONTENTS))))));
+        return LootTable.lootTable().withPool(applyExplosionCondition(drop, LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(drop).apply(LootItemFunctionCopyName.copyName(LootItemFunctionCopyName.Source.BLOCK_ENTITY)).apply(LootItemFunctionCopyNBT.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Lock", "BlockEntityTag.Lock").copy("LootTable", "BlockEntityTag.LootTable").copy("LootTableSeed", "BlockEntityTag.LootTableSeed")).apply(LootItemFunctionSetContents.setContents(TileEntityTypes.SHULKER_BOX).withEntry(LootSelectorDynamic.dynamicEntry(BlockShulkerBox.CONTENTS))))));
     }
 
     private static LootTable.Builder createCopperOreDrops(Block ore) {
-        return createSilkTouchDispatchTable(ore, applyExplosionDecay(ore, LootItem.lootTableItem(Items.RAW_COPPER).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(2.0F, 3.0F))).apply(LootItemFunctionApplyBonus.addOreBonusCount(Enchantments.BLOCK_FORTUNE))));
+        return createSilkTouchDispatchTable(ore, applyExplosionDecay(ore, LootItem.lootTableItem(Items.RAW_COPPER).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(2.0F, 5.0F))).apply(LootItemFunctionApplyBonus.addOreBonusCount(Enchantments.BLOCK_FORTUNE))));
     }
 
     private static LootTable.Builder createLapisOreDrops(Block ore) {
@@ -212,8 +213,8 @@ public class LootTableBlock implements Consumer<BiConsumer<MinecraftKey, LootTab
         return LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(HAS_SHEARS).add(LootItem.lootTableItem(drop)));
     }
 
-    private static LootTable.Builder createGlowLichenDrops(Block block) {
-        return LootTable.lootTable().withPool(LootSelector.lootPool().add(applyExplosionDecay(block, LootItem.lootTableItem(block).when(HAS_SHEARS).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(block).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.EAST, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(block).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.WEST, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(block).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.NORTH, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(block).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.SOUTH, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(block).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.UP, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(block).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.DOWN, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(-1.0F), true)))));
+    private static LootTable.Builder createGlowLichenDrops(Block glowLichen) {
+        return LootTable.lootTable().withPool(LootSelector.lootPool().add(applyExplosionDecay(glowLichen, LootItem.lootTableItem(glowLichen).when(HAS_SHEARS).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(glowLichen).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.EAST, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(glowLichen).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.WEST, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(glowLichen).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.NORTH, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(glowLichen).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.SOUTH, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(glowLichen).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.UP, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F), true).when(LootItemConditionBlockStateProperty.hasBlockStateProperties(glowLichen).setProperties(CriterionTriggerProperties.Builder.properties().hasProperty(BlockSprawling.DOWN, true)))).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(-1.0F), true)))));
     }
 
     private static LootTable.Builder createLeavesDrops(Block leaves, Block drop, float... chance) {
@@ -1282,8 +1283,8 @@ public class LootTableBlock implements Consumer<BiConsumer<MinecraftKey, LootTab
     }
 
     public void dropPottedContents(Block block) {
-        this.add(block, (blockx) -> {
-            return createPotFlowerItemTable(((BlockFlowerPot)blockx).getContent());
+        this.add(block, (flowerPot) -> {
+            return createPotFlowerItemTable(((BlockFlowerPot)flowerPot).getContent());
         });
     }
 

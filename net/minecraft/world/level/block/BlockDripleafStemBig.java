@@ -6,6 +6,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.WorldServer;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.IBlockAccess;
@@ -64,7 +65,7 @@ public class BlockDripleafStemBig extends BlockFacingHorizontal implements IBloc
         BlockPosition blockPos = pos.below();
         IBlockData blockState = world.getType(blockPos);
         IBlockData blockState2 = world.getType(pos.above());
-        return (blockState.is(this) || blockState.isFaceSturdy(world, blockPos, EnumDirection.UP)) && (blockState2.is(this) || blockState2.is(Blocks.BIG_DRIPLEAF));
+        return (blockState.is(this) || blockState.is(TagsBlock.BIG_DRIPLEAF_PLACEABLE)) && (blockState2.is(this) || blockState2.is(Blocks.BIG_DRIPLEAF));
     }
 
     protected static boolean place(GeneratorAccess world, BlockPosition pos, Fluid fluidState, EnumDirection direction) {
@@ -75,11 +76,11 @@ public class BlockDripleafStemBig extends BlockFacingHorizontal implements IBloc
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if ((direction == EnumDirection.DOWN || direction == EnumDirection.UP) && !state.canPlace(world, pos)) {
-            world.getBlockTickList().scheduleTick(pos, this, 1);
+            world.scheduleTick(pos, this, 1);
         }
 
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);

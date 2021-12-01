@@ -68,7 +68,7 @@ public class Behaviors {
     }
 
     private static Pair<Integer, Behavior<EntityLiving>> getFullLookBehavior() {
-        return Pair.of(5, new BehaviorGateSingle<>(ImmutableList.of(Pair.of(new BehaviorLookTarget(EntityTypes.CAT, 8.0F), 8), Pair.of(new BehaviorLookTarget(EntityTypes.VILLAGER, 8.0F), 2), Pair.of(new BehaviorLookTarget(EntityTypes.PLAYER, 8.0F), 2), Pair.of(new BehaviorLookTarget(EnumCreatureType.CREATURE, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.WATER_CREATURE, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.UNDERGROUND_WATER_CREATURE, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.WATER_AMBIENT, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.MONSTER, 8.0F), 1), Pair.of(new BehaviorNop(30, 60), 2))));
+        return Pair.of(5, new BehaviorGateSingle<>(ImmutableList.of(Pair.of(new BehaviorLookTarget(EntityTypes.CAT, 8.0F), 8), Pair.of(new BehaviorLookTarget(EntityTypes.VILLAGER, 8.0F), 2), Pair.of(new BehaviorLookTarget(EntityTypes.PLAYER, 8.0F), 2), Pair.of(new BehaviorLookTarget(EnumCreatureType.CREATURE, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.WATER_CREATURE, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.AXOLOTLS, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.UNDERGROUND_WATER_CREATURE, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.WATER_AMBIENT, 8.0F), 1), Pair.of(new BehaviorLookTarget(EnumCreatureType.MONSTER, 8.0F), 1), Pair.of(new BehaviorNop(30, 60), 2))));
     }
 
     private static Pair<Integer, Behavior<EntityLiving>> getMinimalLookBehavior() {

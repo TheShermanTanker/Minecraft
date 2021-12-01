@@ -14,6 +14,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.ChatDeserializer;
 
 public class Criterion {
+    @Nullable
     private final CriterionInstance trigger;
 
     public Criterion(CriterionInstance conditions) {
@@ -68,13 +69,17 @@ public class Criterion {
     }
 
     public JsonElement serializeToJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("trigger", this.trigger.getCriterion().toString());
-        JsonObject jsonObject2 = this.trigger.serializeToJson(LootSerializationContext.INSTANCE);
-        if (jsonObject2.size() != 0) {
-            jsonObject.add("conditions", jsonObject2);
-        }
+        if (this.trigger == null) {
+            throw new JsonSyntaxException("Missing trigger");
+        } else {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("trigger", this.trigger.getCriterion().toString());
+            JsonObject jsonObject2 = this.trigger.serializeToJson(LootSerializationContext.INSTANCE);
+            if (jsonObject2.size() != 0) {
+                jsonObject.add("conditions", jsonObject2);
+            }
 
-        return jsonObject;
+            return jsonObject;
+        }
     }
 }

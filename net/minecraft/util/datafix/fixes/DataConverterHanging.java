@@ -39,7 +39,6 @@ public class DataConverterHanging extends DataFix {
         return dynamic;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getChoiceType(DataConverterTypes.ENTITY, "Painting");
         OpticFinder<?> opticFinder = DSL.namedChoice("Painting", type);

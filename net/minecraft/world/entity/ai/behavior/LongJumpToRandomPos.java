@@ -10,7 +10,8 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.WeightedRandom;
+import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.util.random.WeightedRandom2;
 import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityPose;
@@ -41,13 +42,13 @@ public class LongJumpToRandomPos<E extends EntityInsentient> extends Behavior<E>
     private long prepareJumpStart;
     private Function<E, SoundEffect> getJumpSound;
 
-    public LongJumpToRandomPos(IntProviderUniform cooldownRange, int verticalRange, int horizontalRange, float maxRange, Function<E, SoundEffect> function) {
+    public LongJumpToRandomPos(IntProviderUniform cooldownRange, int verticalRange, int horizontalRange, float maxRange, Function<E, SoundEffect> entityToSound) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_ABSENT), 200);
         this.timeBetweenLongJumps = cooldownRange;
         this.maxLongJumpHeight = verticalRange;
         this.maxLongJumpWidth = horizontalRange;
         this.maxJumpVelocity = maxRange;
-        this.getJumpSound = function;
+        this.getJumpSound = entityToSound;
     }
 
     @Override
@@ -105,7 +106,7 @@ public class LongJumpToRandomPos<E extends EntityInsentient> extends Behavior<E>
             }
         } else {
             --this.findJumpTries;
-            Optional<LongJumpToRandomPos.PossibleJump> optional = WeightedRandom.getRandomItem(serverLevel.random, this.jumpCandidates);
+            Optional<LongJumpToRandomPos.PossibleJump> optional = WeightedRandom2.getRandomItem(serverLevel.random, this.jumpCandidates);
             if (optional.isPresent()) {
                 this.jumpCandidates.remove(optional.get());
                 mob.getBehaviorController().setMemory(MemoryModuleType.LOOK_TARGET, new BehaviorTarget(optional.get().getJumpTarget()));
@@ -201,7 +202,7 @@ public class LongJumpToRandomPos<E extends EntityInsentient> extends Behavior<E>
         return true;
     }
 
-    public static class PossibleJump extends WeightedRandom.WeightedRandomChoice {
+    public static class PossibleJump extends WeightedEntry.IntrusiveBase {
         private final BlockPosition jumpTarget;
         private final Vec3D jumpVector;
 

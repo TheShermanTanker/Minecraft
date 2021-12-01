@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -33,25 +33,25 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
     public final WorldServer level;
     private final IOWorker worker;
     private final LongSet emptyChunks = new LongOpenHashSet();
-    private final ThreadedMailbox<Runnable> entityDeserializerQueue;
+    public final ThreadedMailbox<Runnable> entityDeserializerQueue;
     protected final DataFixer fixerUpper;
 
-    public EntityStorage(WorldServer world, File chunkFile, DataFixer dataFixer, boolean dsync, Executor executor) {
+    public EntityStorage(WorldServer world, Path path, DataFixer dataFixer, boolean dsync, Executor executor) {
         this.level = world;
         this.fixerUpper = dataFixer;
         this.entityDeserializerQueue = ThreadedMailbox.create(executor, "entity-deserializer");
-        this.worker = new IOWorker(chunkFile, dsync, "entities");
+        this.worker = new IOWorker(path, dsync, "entities");
     }
 
     @Override
     public CompletableFuture<ChunkEntities<Entity>> loadEntities(ChunkCoordIntPair pos) {
-        return this.emptyChunks.contains(pos.pair()) ? CompletableFuture.completedFuture(emptyChunk(pos)) : this.worker.loadAsync(pos).thenApplyAsync((compoundTag) -> {
-            if (compoundTag == null) {
+        return this.emptyChunks.contains(pos.pair()) ? CompletableFuture.completedFuture(emptyChunk(pos)) : this.worker.loadAsync(pos).thenApplyAsync((compound) -> {
+            if (compound == null) {
                 this.emptyChunks.add(pos.pair());
                 return emptyChunk(pos);
             } else {
                 try {
-                    ChunkCoordIntPair chunkPos2 = readChunkPos(compoundTag);
+                    ChunkCoordIntPair chunkPos2 = readChunkPos(compound);
                     if (!Objects.equals(pos, chunkPos2)) {
                         LOGGER.error("Chunk file at {} is in the wrong location. (Expected {}, got {})", pos, pos, chunkPos2);
                     }
@@ -59,8 +59,8 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
                     LOGGER.warn("Failed to parse chunk {} position info", pos, var6);
                 }
 
-                NBTTagCompound compoundTag2 = this.upgradeChunkTag(compoundTag);
-                NBTTagList listTag = compoundTag2.getList("Entities", 10);
+                NBTTagCompound compoundTag = this.upgradeChunkTag(compound);
+                NBTTagList listTag = compoundTag.getList("Entities", 10);
                 List<Entity> list = EntityTypes.loadEntitiesRecursive(listTag, this.level).collect(ImmutableList.toImmutableList());
                 return new ChunkEntities<>(pos, list);
             }
@@ -98,11 +98,11 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 
             });
             NBTTagCompound compoundTag = new NBTTagCompound();
-            compoundTag.setInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            compoundTag.setInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
             compoundTag.set("Entities", listTag);
             writeChunkPos(compoundTag, chunkPos);
-            this.worker.store(chunkPos, compoundTag).exceptionally((throwable) -> {
-                LOGGER.error("Failed to store chunk {}", chunkPos, throwable);
+            this.worker.store(chunkPos, compoundTag).exceptionally((ex) -> {
+                LOGGER.error("Failed to store chunk {}", chunkPos, ex);
                 return null;
             });
             this.emptyChunks.remove(chunkPos.pair());
@@ -110,8 +110,8 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
     }
 
     @Override
-    public void flush(boolean bl) {
-        this.worker.synchronize(bl).join();
+    public void flush(boolean sync) {
+        this.worker.synchronize(sync).join();
         this.entityDeserializerQueue.runAll();
     }
 

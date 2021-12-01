@@ -39,12 +39,12 @@ public class BlockIceFrost extends BlockIce {
                 mutableBlockPos.setWithOffset(pos, direction);
                 IBlockData blockState = world.getType(mutableBlockPos);
                 if (blockState.is(this) && !this.slightlyMelt(blockState, world, mutableBlockPos)) {
-                    world.getBlockTicks().scheduleTick(mutableBlockPos, this, MathHelper.nextInt(random, 20, 40));
+                    world.scheduleTick(mutableBlockPos, this, MathHelper.nextInt(random, 20, 40));
                 }
             }
 
         } else {
-            world.getBlockTicks().scheduleTick(pos, this, MathHelper.nextInt(random, 20, 40));
+            world.scheduleTick(pos, this, MathHelper.nextInt(random, 20, 40));
         }
     }
 

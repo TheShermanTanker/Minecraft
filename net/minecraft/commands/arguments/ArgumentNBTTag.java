@@ -23,12 +23,10 @@ public class ArgumentNBTTag implements ArgumentType<NBTTagCompound> {
         return context.getArgument(name, NBTTagCompound.class);
     }
 
-    @Override
     public NBTTagCompound parse(StringReader stringReader) throws CommandSyntaxException {
         return (new MojangsonParser(stringReader)).readStruct();
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

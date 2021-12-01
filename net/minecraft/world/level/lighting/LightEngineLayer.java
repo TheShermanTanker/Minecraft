@@ -153,7 +153,7 @@ public abstract class LightEngineLayer<M extends LightEngineStorageArray<M>, S e
     }
 
     @Override
-    public int runUpdates(int i, boolean bl, boolean bl2) {
+    public int runUpdates(int i, boolean doSkylight, boolean skipEdgeLightPropagation) {
         if (!this.runningLightUpdates) {
             if (this.storage.hasWork()) {
                 i = this.storage.runUpdates(i);
@@ -162,7 +162,7 @@ public abstract class LightEngineLayer<M extends LightEngineStorageArray<M>, S e
                 }
             }
 
-            this.storage.markNewInconsistencies(this, bl, bl2);
+            this.storage.markNewInconsistencies(this, doSkylight, skipEdgeLightPropagation);
         }
 
         this.runningLightUpdates = true;
@@ -179,8 +179,8 @@ public abstract class LightEngineLayer<M extends LightEngineStorageArray<M>, S e
         return i;
     }
 
-    protected void queueSectionData(long sectionPos, @Nullable NibbleArray lightArray, boolean bl) {
-        this.storage.queueSectionData(sectionPos, lightArray, bl);
+    protected void queueSectionData(long sectionPos, @Nullable NibbleArray lightArray, boolean nonEdge) {
+        this.storage.queueSectionData(sectionPos, lightArray, nonEdge);
     }
 
     @Nullable
@@ -219,9 +219,9 @@ public abstract class LightEngineLayer<M extends LightEngineStorageArray<M>, S e
     }
 
     @Override
-    public void enableLightSources(ChunkCoordIntPair chunkPos, boolean bl) {
-        long l = SectionPosition.getZeroNode(SectionPosition.asLong(chunkPos.x, 0, chunkPos.z));
-        this.storage.enableLightSources(l, bl);
+    public void enableLightSources(ChunkCoordIntPair pos, boolean retainData) {
+        long l = SectionPosition.getZeroNode(SectionPosition.asLong(pos.x, 0, pos.z));
+        this.storage.enableLightSources(l, retainData);
     }
 
     public void retainData(ChunkCoordIntPair pos, boolean retainData) {

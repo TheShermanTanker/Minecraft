@@ -5,19 +5,20 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class WorldGenFeatureChoiceConfiguration implements WorldGenFeatureConfiguration {
     public static final Codec<WorldGenFeatureChoiceConfiguration> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(WorldGenFeatureConfigured.CODEC.fieldOf("feature_true").forGetter((randomBooleanFeatureConfiguration) -> {
+        return instance.group(PlacedFeature.CODEC.fieldOf("feature_true").forGetter((randomBooleanFeatureConfiguration) -> {
             return randomBooleanFeatureConfiguration.featureTrue;
-        }), WorldGenFeatureConfigured.CODEC.fieldOf("feature_false").forGetter((randomBooleanFeatureConfiguration) -> {
+        }), PlacedFeature.CODEC.fieldOf("feature_false").forGetter((randomBooleanFeatureConfiguration) -> {
             return randomBooleanFeatureConfiguration.featureFalse;
         })).apply(instance, WorldGenFeatureChoiceConfiguration::new);
     });
-    public final Supplier<WorldGenFeatureConfigured<?, ?>> featureTrue;
-    public final Supplier<WorldGenFeatureConfigured<?, ?>> featureFalse;
+    public final Supplier<PlacedFeature> featureTrue;
+    public final Supplier<PlacedFeature> featureFalse;
 
-    public WorldGenFeatureChoiceConfiguration(Supplier<WorldGenFeatureConfigured<?, ?>> featureTrue, Supplier<WorldGenFeatureConfigured<?, ?>> featureFalse) {
+    public WorldGenFeatureChoiceConfiguration(Supplier<PlacedFeature> featureTrue, Supplier<PlacedFeature> featureFalse) {
         this.featureTrue = featureTrue;
         this.featureFalse = featureFalse;
     }

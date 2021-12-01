@@ -38,7 +38,9 @@ public class EntityItem extends Entity {
     public int age;
     public int pickupDelay;
     private int health = 5;
+    @Nullable
     private UUID thrower;
+    @Nullable
     private UUID owner;
     public final float bobOffs;
 
@@ -108,9 +110,7 @@ public class EntityItem extends Entity {
             if (this.level.isClientSide) {
                 this.noPhysics = false;
             } else {
-                this.noPhysics = !this.level.noCollision(this, this.getBoundingBox().shrink(1.0E-7D), (entity) -> {
-                    return true;
-                });
+                this.noPhysics = !this.level.getCubes(this, this.getBoundingBox().shrink(1.0E-7D));
                 if (this.noPhysics) {
                     this.moveTowardsClosestSpace(this.locX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0D, this.locZ());
                 }

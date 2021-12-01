@@ -14,8 +14,8 @@ import net.minecraft.network.chat.IChatBaseComponent;
 
 public class ArgumentChatComponent implements ArgumentType<IChatBaseComponent> {
     private static final Collection<String> EXAMPLES = Arrays.asList("\"hello world\"", "\"\"", "\"{\"text\":\"hello world\"}", "[\"\"]");
-    public static final DynamicCommandExceptionType ERROR_INVALID_JSON = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.component.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_INVALID_JSON = new DynamicCommandExceptionType((text) -> {
+        return new ChatMessage("argument.component.invalid", text);
     });
 
     private ArgumentChatComponent() {
@@ -29,7 +29,6 @@ public class ArgumentChatComponent implements ArgumentType<IChatBaseComponent> {
         return new ArgumentChatComponent();
     }
 
-    @Override
     public IChatBaseComponent parse(StringReader stringReader) throws CommandSyntaxException {
         try {
             IChatBaseComponent component = IChatBaseComponent.ChatSerializer.fromJson(stringReader);
@@ -44,7 +43,6 @@ public class ArgumentChatComponent implements ArgumentType<IChatBaseComponent> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

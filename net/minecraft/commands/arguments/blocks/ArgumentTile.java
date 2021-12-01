@@ -19,7 +19,6 @@ public class ArgumentTile implements ArgumentType<ArgumentTileLocation> {
         return new ArgumentTile();
     }
 
-    @Override
     public ArgumentTileLocation parse(StringReader stringReader) throws CommandSyntaxException {
         ArgumentBlock blockStateParser = (new ArgumentBlock(stringReader, false)).parse(true);
         return new ArgumentTileLocation(blockStateParser.getBlockData(), blockStateParser.getStateMap().keySet(), blockStateParser.getNbt());
@@ -29,7 +28,6 @@ public class ArgumentTile implements ArgumentType<ArgumentTileLocation> {
         return context.getArgument(name, ArgumentTileLocation.class);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
         stringReader.setCursor(suggestionsBuilder.getStart());
@@ -43,7 +41,6 @@ public class ArgumentTile implements ArgumentType<ArgumentTileLocation> {
         return blockStateParser.fillSuggestions(suggestionsBuilder, TagsBlock.getAllTags());
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

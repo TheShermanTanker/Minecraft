@@ -28,7 +28,7 @@ public class BulkSectionAccess implements AutoCloseable {
             if (this.lastSection == null || this.lastSectionKey != l) {
                 this.lastSection = this.acquiredSections.computeIfAbsent(l, (lx) -> {
                     IChunkAccess chunkAccess = this.level.getChunkAt(SectionPosition.blockToSectionCoord(pos.getX()), SectionPosition.blockToSectionCoord(pos.getZ()));
-                    ChunkSection levelChunkSection = chunkAccess.getOrCreateSection(i);
+                    ChunkSection levelChunkSection = chunkAccess.getSection(i);
                     levelChunkSection.acquire();
                     return levelChunkSection;
                 });
@@ -37,13 +37,13 @@ public class BulkSectionAccess implements AutoCloseable {
 
             return this.lastSection;
         } else {
-            return Chunk.EMPTY_SECTION;
+            return null;
         }
     }
 
     public IBlockData getBlockState(BlockPosition pos) {
         ChunkSection levelChunkSection = this.getSection(pos);
-        if (levelChunkSection == Chunk.EMPTY_SECTION) {
+        if (levelChunkSection == null) {
             return Blocks.AIR.getBlockData();
         } else {
             int i = SectionPosition.sectionRelative(pos.getX());

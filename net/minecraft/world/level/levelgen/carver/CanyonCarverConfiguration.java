@@ -20,14 +20,14 @@ public class CanyonCarverConfiguration extends WorldGenCarverConfiguration {
     public final FloatProvider verticalRotation;
     public final CanyonCarverConfiguration.CanyonShapeConfiguration shape;
 
-    public CanyonCarverConfiguration(float probability, HeightProvider y, FloatProvider yScale, VerticalAnchor lavaLevel, boolean aquifers, CarverDebugSettings debugConfig, FloatProvider verticalRotation, CanyonCarverConfiguration.CanyonShapeConfiguration shape) {
-        super(probability, y, yScale, lavaLevel, aquifers, debugConfig);
+    public CanyonCarverConfiguration(float probability, HeightProvider y, FloatProvider yScale, VerticalAnchor lavaLevel, CarverDebugSettings debugConfig, FloatProvider verticalRotation, CanyonCarverConfiguration.CanyonShapeConfiguration shape) {
+        super(probability, y, yScale, lavaLevel, debugConfig);
         this.verticalRotation = verticalRotation;
         this.shape = shape;
     }
 
     public CanyonCarverConfiguration(WorldGenCarverConfiguration config, FloatProvider verticalRotation, CanyonCarverConfiguration.CanyonShapeConfiguration shape) {
-        this(config.probability, config.y, config.yScale, config.lavaLevel, config.aquifersEnabled, config.debugSettings, verticalRotation, shape);
+        this(config.probability, config.y, config.yScale, config.lavaLevel, config.debugSettings, verticalRotation, shape);
     }
 
     public static class CanyonShapeConfiguration {

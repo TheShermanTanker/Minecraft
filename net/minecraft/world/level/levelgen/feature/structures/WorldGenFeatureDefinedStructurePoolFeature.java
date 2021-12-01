@@ -10,7 +10,6 @@ import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.BlockPropertyJigsawOrientation;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
@@ -19,21 +18,21 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.block.entity.TileEntityJigsaw;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
 
 public class WorldGenFeatureDefinedStructurePoolFeature extends WorldGenFeatureDefinedStructurePoolStructure {
     public static final Codec<WorldGenFeatureDefinedStructurePoolFeature> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(WorldGenFeatureConfigured.CODEC.fieldOf("feature").forGetter((featurePoolElement) -> {
+        return instance.group(PlacedFeature.CODEC.fieldOf("feature").forGetter((featurePoolElement) -> {
             return featurePoolElement.feature;
         }), projectionCodec()).apply(instance, WorldGenFeatureDefinedStructurePoolFeature::new);
     });
-    private final Supplier<WorldGenFeatureConfigured<?, ?>> feature;
+    private final Supplier<PlacedFeature> feature;
     private final NBTTagCompound defaultJigsawNBT;
 
-    protected WorldGenFeatureDefinedStructurePoolFeature(Supplier<WorldGenFeatureConfigured<?, ?>> feature, WorldGenFeatureDefinedStructurePoolTemplate.Matching projection) {
+    protected WorldGenFeatureDefinedStructurePoolFeature(Supplier<PlacedFeature> feature, WorldGenFeatureDefinedStructurePoolTemplate.Matching projection) {
         super(projection);
         this.feature = feature;
         this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
@@ -79,6 +78,6 @@ public class WorldGenFeatureDefinedStructurePoolFeature extends WorldGenFeatureD
 
     @Override
     public String toString() {
-        return "Feature[" + IRegistry.FEATURE.getKey(this.feature.get().feature()) + "]";
+        return "Feature[" + this.feature.get() + "]";
     }
 }

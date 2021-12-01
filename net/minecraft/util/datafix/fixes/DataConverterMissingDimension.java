@@ -23,22 +23,21 @@ public class DataConverterMissingDimension extends DataFix {
         super(outputSchema, changesType);
     }
 
-    private static <A> Type<Pair<A, Dynamic<?>>> fields(String string, Type<A> type) {
+    protected static <A> Type<Pair<A, Dynamic<?>>> fields(String string, Type<A> type) {
         return DSL.and(DSL.field(string, type), DSL.remainderType());
     }
 
-    private static <A> Type<Pair<Either<A, Unit>, Dynamic<?>>> optionalFields(String string, Type<A> type) {
+    protected static <A> Type<Pair<Either<A, Unit>, Dynamic<?>>> optionalFields(String string, Type<A> type) {
         return DSL.and(DSL.optional(DSL.field(string, type)), DSL.remainderType());
     }
 
-    private static <A1, A2> Type<Pair<Either<A1, Unit>, Pair<Either<A2, Unit>, Dynamic<?>>>> optionalFields(String string, Type<A1> type, String string2, Type<A2> type2) {
+    protected static <A1, A2> Type<Pair<Either<A1, Unit>, Pair<Either<A2, Unit>, Dynamic<?>>>> optionalFields(String string, Type<A1> type, String string2, Type<A2> type2) {
         return DSL.and(DSL.optional(DSL.field(string, type)), DSL.optional(DSL.field(string2, type2)), DSL.remainderType());
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Schema schema = this.getInputSchema();
-        TaggedChoiceType<String> taggedChoiceType = new TaggedChoiceType<>("type", DSL.string(), ImmutableMap.of("minecraft:debug", DSL.remainderType(), "minecraft:flat", optionalFields("settings", optionalFields("biome", schema.getType(DataConverterTypes.BIOME), "layers", DSL.list(optionalFields("block", schema.getType(DataConverterTypes.BLOCK_NAME))))), "minecraft:noise", optionalFields("biome_source", DSL.taggedChoiceType("type", DSL.string(), ImmutableMap.of("minecraft:fixed", fields("biome", schema.getType(DataConverterTypes.BIOME)), "minecraft:multi_noise", DSL.list(fields("biome", schema.getType(DataConverterTypes.BIOME))), "minecraft:checkerboard", fields("biomes", DSL.list(schema.getType(DataConverterTypes.BIOME))), "minecraft:vanilla_layered", DSL.remainderType(), "minecraft:the_end", DSL.remainderType())), "settings", DSL.or(DSL.string(), optionalFields("default_block", schema.getType(DataConverterTypes.BLOCK_NAME), "default_fluid", schema.getType(DataConverterTypes.BLOCK_NAME))))));
+        TaggedChoiceType<String> taggedChoiceType = new TaggedChoiceType<>("type", DSL.string(), ImmutableMap.of("minecraft:debug", DSL.remainderType(), "minecraft:flat", flatType(schema), "minecraft:noise", optionalFields("biome_source", DSL.taggedChoiceType("type", DSL.string(), ImmutableMap.of("minecraft:fixed", fields("biome", schema.getType(DataConverterTypes.BIOME)), "minecraft:multi_noise", DSL.list(fields("biome", schema.getType(DataConverterTypes.BIOME))), "minecraft:checkerboard", fields("biomes", DSL.list(schema.getType(DataConverterTypes.BIOME))), "minecraft:vanilla_layered", DSL.remainderType(), "minecraft:the_end", DSL.remainderType())), "settings", DSL.or(DSL.string(), optionalFields("default_block", schema.getType(DataConverterTypes.BLOCK_NAME), "default_fluid", schema.getType(DataConverterTypes.BLOCK_NAME))))));
         CompoundListType<String, ?> compoundListType = DSL.compoundList(DataConverterSchemaNamed.namespacedString(), fields("generator", taggedChoiceType));
         Type<?> type = DSL.and(compoundListType, DSL.remainderType());
         Type<?> type2 = schema.getType(DataConverterTypes.WORLD_GEN_SETTINGS);
@@ -63,6 +62,10 @@ public class DataConverterMissingDimension extends DataFix {
                 });
             });
         }
+    }
+
+    protected static Type<? extends Pair<? extends Either<? extends Pair<? extends Either<?, Unit>, ? extends Pair<? extends Either<? extends List<? extends Pair<? extends Either<?, Unit>, Dynamic<?>>>, Unit>, Dynamic<?>>>, Unit>, Dynamic<?>>> flatType(Schema schema) {
+        return optionalFields("settings", optionalFields("biome", schema.getType(DataConverterTypes.BIOME), "layers", DSL.list(optionalFields("block", schema.getType(DataConverterTypes.BLOCK_NAME)))));
     }
 
     private <T> Dynamic<T> recreateSettings(Dynamic<T> dynamic) {

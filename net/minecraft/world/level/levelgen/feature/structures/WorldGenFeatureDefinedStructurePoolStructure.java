@@ -18,14 +18,14 @@ import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorList;
 
 public abstract class WorldGenFeatureDefinedStructurePoolStructure {
-    public static final Codec<WorldGenFeatureDefinedStructurePoolStructure> CODEC = IRegistry.STRUCTURE_POOL_ELEMENT.dispatch("element_type", WorldGenFeatureDefinedStructurePoolStructure::getType, WorldGenFeatureDefinedStructurePools::codec);
+    public static final Codec<WorldGenFeatureDefinedStructurePoolStructure> CODEC = IRegistry.STRUCTURE_POOL_ELEMENT.byNameCodec().dispatch("element_type", WorldGenFeatureDefinedStructurePoolStructure::getType, WorldGenFeatureDefinedStructurePools::codec);
     @Nullable
     private volatile WorldGenFeatureDefinedStructurePoolTemplate.Matching projection;
 
@@ -47,7 +47,7 @@ public abstract class WorldGenFeatureDefinedStructurePoolStructure {
 
     public abstract WorldGenFeatureDefinedStructurePools<?> getType();
 
-    public void handleDataMarker(GeneratorAccess levelAccessor, DefinedStructure.BlockInfo structureBlockInfo, BlockPosition blockPos, EnumBlockRotation rotation, Random random, StructureBoundingBox boundingBox) {
+    public void handleDataMarker(GeneratorAccess world, DefinedStructure.BlockInfo structureBlockInfo, BlockPosition pos, EnumBlockRotation rotation, Random random, StructureBoundingBox box) {
     }
 
     public WorldGenFeatureDefinedStructurePoolStructure setProjection(WorldGenFeatureDefinedStructurePoolTemplate.Matching projection) {
@@ -106,10 +106,10 @@ public abstract class WorldGenFeatureDefinedStructurePoolStructure {
         };
     }
 
-    public static Function<WorldGenFeatureDefinedStructurePoolTemplate.Matching, WorldGenFeatureDefinedStructurePoolFeature> feature(WorldGenFeatureConfigured<?, ?> processors) {
+    public static Function<WorldGenFeatureDefinedStructurePoolTemplate.Matching, WorldGenFeatureDefinedStructurePoolFeature> feature(PlacedFeature placedFeature) {
         return (projection) -> {
             return new WorldGenFeatureDefinedStructurePoolFeature(() -> {
-                return processors;
+                return placedFeature;
             }, projection);
         };
     }

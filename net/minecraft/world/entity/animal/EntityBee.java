@@ -115,6 +115,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
     public static final String TAG_FLOWER_POS = "FlowerPos";
     public static final String TAG_HIVE_POS = "HivePos";
     private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
+    @Nullable
     private UUID persistentAngerTarget;
     private float rollAmount;
     private float rollAmountO;
@@ -396,6 +397,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
         this.entityData.set(DATA_REMAINING_ANGER_TIME, ticks);
     }
 
+    @Nullable
     @Override
     public UUID getAngerTarget() {
         return this.persistentAngerTarget;
@@ -794,7 +796,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
         public void tick() {
             if (EntityBee.this.hivePos != null) {
                 ++this.travellingTicks;
-                if (this.travellingTicks > 600) {
+                if (this.travellingTicks > this.adjustedTickDelay(600)) {
                     this.dropAndBlacklistHive();
                 } else if (!EntityBee.this.navigation.isInProgress()) {
                     if (!EntityBee.this.closerThan(EntityBee.this.hivePos, 16)) {
@@ -903,7 +905,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
         public void tick() {
             if (EntityBee.this.savedFlowerPos != null) {
                 ++this.travellingTicks;
-                if (this.travellingTicks > 600) {
+                if (this.travellingTicks > this.adjustedTickDelay(600)) {
                     EntityBee.this.savedFlowerPos = null;
                 } else if (!EntityBee.this.navigation.isInProgress()) {
                     if (EntityBee.this.isTooFarAway(EntityBee.this.savedFlowerPos)) {
@@ -941,7 +943,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
 
         @Override
         public void tick() {
-            if (EntityBee.this.random.nextInt(30) == 0) {
+            if (EntityBee.this.random.nextInt(this.adjustedTickDelay(30)) == 0) {
                 for(int i = 1; i <= 2; ++i) {
                     BlockPosition blockPos = EntityBee.this.getChunkCoordinates().below(i);
                     IBlockData blockState = EntityBee.this.level.getType(blockPos);
@@ -1083,6 +1085,7 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
         private int successfulPollinatingTicks;
         private int lastSoundPlayedTick;
         private boolean pollinating;
+        @Nullable
         private Vec3D hoverPos;
         private int pollinatingTicks;
         private static final int MAX_POLLINATING_TICKS = 600;
@@ -1160,6 +1163,11 @@ public class EntityBee extends EntityAnimal implements IEntityAngerable, EntityB
             this.pollinating = false;
             EntityBee.this.navigation.stop();
             EntityBee.this.remainingCooldownBeforeLocatingNewFlower = 200;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
         }
 
         @Override

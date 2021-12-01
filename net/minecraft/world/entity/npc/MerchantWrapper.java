@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.IMerchant;
 import net.minecraft.world.item.trading.MerchantRecipe;
 import net.minecraft.world.item.trading.MerchantRecipeList;
-import net.minecraft.world.level.World;
 
 public class MerchantWrapper implements IMerchant {
     private final EntityHuman source;
@@ -48,8 +47,8 @@ public class MerchantWrapper implements IMerchant {
     }
 
     @Override
-    public World getWorld() {
-        return this.source.level;
+    public boolean isClientSide() {
+        return this.source.getLevel().isClientSide;
     }
 
     @Override

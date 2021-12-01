@@ -1,7 +1,6 @@
 package net.minecraft.world.level;
 
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.SectionPosition;
@@ -79,6 +78,11 @@ public class ChunkCache implements IBlockAccess, ICollisionAccess {
         return this.getChunk(chunkX, chunkZ);
     }
 
+    @Override
+    public List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB box) {
+        return List.of();
+    }
+
     @Nullable
     @Override
     public TileEntity getTileEntity(BlockPosition pos) {
@@ -94,16 +98,6 @@ public class ChunkCache implements IBlockAccess, ICollisionAccess {
             IChunkAccess chunkAccess = this.getChunk(pos);
             return chunkAccess.getType(pos);
         }
-    }
-
-    @Override
-    public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB box, Predicate<Entity> predicate) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Stream<VoxelShape> getCollisions(@Nullable Entity entity, AxisAlignedBB box, Predicate<Entity> predicate) {
-        return this.getBlockCollisions(entity, box);
     }
 
     @Override

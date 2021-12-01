@@ -18,7 +18,6 @@ public class DataConverterSchemaV1800 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         registerMob(schema, map, "minecraft:panda");

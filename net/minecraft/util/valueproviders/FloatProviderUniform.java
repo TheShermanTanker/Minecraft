@@ -9,13 +9,13 @@ import net.minecraft.util.MathHelper;
 
 public class FloatProviderUniform extends FloatProvider {
     public static final Codec<FloatProviderUniform> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(Codec.FLOAT.fieldOf("min_inclusive").forGetter((uniformFloat) -> {
-            return uniformFloat.minInclusive;
-        }), Codec.FLOAT.fieldOf("max_exclusive").forGetter((uniformFloat) -> {
-            return uniformFloat.maxExclusive;
+        return instance.group(Codec.FLOAT.fieldOf("min_inclusive").forGetter((provider) -> {
+            return provider.minInclusive;
+        }), Codec.FLOAT.fieldOf("max_exclusive").forGetter((provider) -> {
+            return provider.maxExclusive;
         })).apply(instance, FloatProviderUniform::new);
-    }).comapFlatMap((uniformFloat) -> {
-        return uniformFloat.maxExclusive <= uniformFloat.minInclusive ? DataResult.error("Max must be larger than min, min_inclusive: " + uniformFloat.minInclusive + ", max_exclusive: " + uniformFloat.maxExclusive) : DataResult.success(uniformFloat);
+    }).comapFlatMap((provider) -> {
+        return provider.maxExclusive <= provider.minInclusive ? DataResult.error("Max must be larger than min, min_inclusive: " + provider.minInclusive + ", max_exclusive: " + provider.maxExclusive) : DataResult.success(provider);
     }, Function.identity());
     private final float minInclusive;
     private final float maxExclusive;

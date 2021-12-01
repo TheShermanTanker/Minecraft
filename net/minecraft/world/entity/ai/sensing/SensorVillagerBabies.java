@@ -1,14 +1,14 @@
 package net.minecraft.world.entity.ai.sensing;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 
 public class SensorVillagerBabies extends Sensor<EntityLiving> {
     @Override
@@ -22,14 +22,14 @@ public class SensorVillagerBabies extends Sensor<EntityLiving> {
     }
 
     private List<EntityLiving> getNearestVillagerBabies(EntityLiving entities) {
-        return this.getVisibleEntities(entities).stream().filter(this::isVillagerBaby).collect(Collectors.toList());
+        return ImmutableList.copyOf(this.getVisibleEntities(entities).findAll(this::isVillagerBaby));
     }
 
     private boolean isVillagerBaby(EntityLiving entity) {
         return entity.getEntityType() == EntityTypes.VILLAGER && entity.isBaby();
     }
 
-    private List<EntityLiving> getVisibleEntities(EntityLiving entity) {
-        return entity.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList());
+    private NearestVisibleLivingEntities getVisibleEntities(EntityLiving entity) {
+        return entity.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
     }
 }

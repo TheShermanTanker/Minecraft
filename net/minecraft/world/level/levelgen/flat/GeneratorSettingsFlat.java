@@ -7,15 +7,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.SystemUtils;
 import net.minecraft.core.IRegistry;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
-import net.minecraft.data.worldgen.WorldGenStructureFeatures;
+import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.BiomeSettingsGeneration;
@@ -26,12 +22,10 @@ import net.minecraft.world.level.dimension.DimensionManager;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.WorldGenStage;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
-import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
 import net.minecraft.world.level.levelgen.feature.WorldGenerator;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureSettingsFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureFillConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,24 +42,6 @@ public class GeneratorSettingsFlat {
             return Optional.of(flatLevelGeneratorSettings.biome);
         })).apply(instance, GeneratorSettingsFlat::new);
     }).comapFlatMap(GeneratorSettingsFlat::validateHeight, Function.identity()).stable();
-    private static final Map<StructureGenerator<?>, StructureFeature<?, ?>> STRUCTURE_FEATURES = SystemUtils.make(Maps.newHashMap(), (hashMap) -> {
-        hashMap.put(StructureGenerator.MINESHAFT, WorldGenStructureFeatures.MINESHAFT);
-        hashMap.put(StructureGenerator.VILLAGE, WorldGenStructureFeatures.VILLAGE_PLAINS);
-        hashMap.put(StructureGenerator.STRONGHOLD, WorldGenStructureFeatures.STRONGHOLD);
-        hashMap.put(StructureGenerator.SWAMP_HUT, WorldGenStructureFeatures.SWAMP_HUT);
-        hashMap.put(StructureGenerator.DESERT_PYRAMID, WorldGenStructureFeatures.DESERT_PYRAMID);
-        hashMap.put(StructureGenerator.JUNGLE_TEMPLE, WorldGenStructureFeatures.JUNGLE_TEMPLE);
-        hashMap.put(StructureGenerator.IGLOO, WorldGenStructureFeatures.IGLOO);
-        hashMap.put(StructureGenerator.OCEAN_RUIN, WorldGenStructureFeatures.OCEAN_RUIN_COLD);
-        hashMap.put(StructureGenerator.SHIPWRECK, WorldGenStructureFeatures.SHIPWRECK);
-        hashMap.put(StructureGenerator.OCEAN_MONUMENT, WorldGenStructureFeatures.OCEAN_MONUMENT);
-        hashMap.put(StructureGenerator.END_CITY, WorldGenStructureFeatures.END_CITY);
-        hashMap.put(StructureGenerator.WOODLAND_MANSION, WorldGenStructureFeatures.WOODLAND_MANSION);
-        hashMap.put(StructureGenerator.NETHER_BRIDGE, WorldGenStructureFeatures.NETHER_BRIDGE);
-        hashMap.put(StructureGenerator.PILLAGER_OUTPOST, WorldGenStructureFeatures.PILLAGER_OUTPOST);
-        hashMap.put(StructureGenerator.RUINED_PORTAL, WorldGenStructureFeatures.RUINED_PORTAL_STANDARD);
-        hashMap.put(StructureGenerator.BASTION_REMNANT, WorldGenStructureFeatures.BASTION_REMNANT);
-    });
     private final IRegistry<BiomeBase> biomes;
     private final StructureSettings structureSettings;
     private final List<WorldGenFlatLayerInfo> layersInfo = Lists.newArrayList();
@@ -147,23 +123,19 @@ public class GeneratorSettingsFlat {
     public BiomeBase getBiomeFromSettings() {
         BiomeBase biome = this.getBiome();
         BiomeSettingsGeneration biomeGenerationSettings = biome.getGenerationSettings();
-        BiomeSettingsGeneration.Builder builder = (new BiomeSettingsGeneration.Builder()).surfaceBuilder(biomeGenerationSettings.getSurfaceBuilder());
+        BiomeSettingsGeneration.Builder builder = new BiomeSettingsGeneration.Builder();
         if (this.addLakes) {
-            builder.addFeature(WorldGenStage.Decoration.LAKES, WorldGenBiomeDecoratorGroups.LAKE_WATER);
-            builder.addFeature(WorldGenStage.Decoration.LAKES, WorldGenBiomeDecoratorGroups.LAKE_LAVA);
-        }
-
-        for(Entry<StructureGenerator<?>, StructureSettingsFeature> entry : this.structureSettings.structureConfig().entrySet()) {
-            builder.addStructureStart(biomeGenerationSettings.withBiomeConfig(STRUCTURE_FEATURES.get(entry.getKey())));
+            builder.addFeature(WorldGenStage.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND);
+            builder.addFeature(WorldGenStage.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_SURFACE);
         }
 
         boolean bl = (!this.voidGen || this.biomes.getResourceKey(biome).equals(Optional.of(Biomes.THE_VOID))) && this.decoration;
         if (bl) {
-            List<List<Supplier<WorldGenFeatureConfigured<?, ?>>>> list = biomeGenerationSettings.features();
+            List<List<Supplier<PlacedFeature>>> list = biomeGenerationSettings.features();
 
             for(int i = 0; i < list.size(); ++i) {
                 if (i != WorldGenStage.Decoration.UNDERGROUND_STRUCTURES.ordinal() && i != WorldGenStage.Decoration.SURFACE_STRUCTURES.ordinal()) {
-                    for(Supplier<WorldGenFeatureConfigured<?, ?>> supplier : list.get(i)) {
+                    for(Supplier<PlacedFeature> supplier : list.get(i)) {
                         builder.addFeature(i, supplier);
                     }
                 }
@@ -176,11 +148,11 @@ public class GeneratorSettingsFlat {
             IBlockData blockState = list3.get(j);
             if (!HeightMap.Type.MOTION_BLOCKING.isOpaque().test(blockState)) {
                 list3.set(j, (IBlockData)null);
-                builder.addFeature(WorldGenStage.Decoration.TOP_LAYER_MODIFICATION, WorldGenerator.FILL_LAYER.configured(new WorldGenFeatureFillConfiguration(j, blockState)));
+                builder.addFeature(WorldGenStage.Decoration.TOP_LAYER_MODIFICATION, WorldGenerator.FILL_LAYER.configured(new WorldGenFeatureFillConfiguration(j, blockState)).placed());
             }
         }
 
-        return (new BiomeBase.BiomeBuilder()).precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).depth(biome.getDepth()).scale(biome.getScale()).temperature(biome.getBaseTemperature()).downfall(biome.getHumidity()).specialEffects(biome.getSpecialEffects()).generationSettings(builder.build()).mobSpawnSettings(biome.getMobSettings()).build();
+        return (new BiomeBase.BiomeBuilder()).precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).temperature(biome.getBaseTemperature()).downfall(biome.getHumidity()).specialEffects(biome.getSpecialEffects()).generationSettings(builder.build()).mobSpawnSettings(biome.getMobSettings()).build();
     }
 
     public StructureSettings structureSettings() {
@@ -212,8 +184,8 @@ public class GeneratorSettingsFlat {
             }
         }
 
-        this.voidGen = this.layers.stream().allMatch((blockState) -> {
-            return blockState.is(Blocks.AIR);
+        this.voidGen = this.layers.stream().allMatch((state) -> {
+            return state.is(Blocks.AIR);
         });
     }
 

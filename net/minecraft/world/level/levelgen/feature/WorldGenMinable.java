@@ -10,7 +10,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.BulkSectionAccess;
-import net.minecraft.world.level.chunk.Chunk;
 import net.minecraft.world.level.chunk.ChunkSection;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureOreConfiguration;
@@ -53,7 +52,7 @@ public class WorldGenMinable extends WorldGenerator<WorldGenFeatureOreConfigurat
         return false;
     }
 
-    protected boolean doPlace(GeneratorAccessSeed worldGenLevel, Random random, WorldGenFeatureOreConfiguration config, double startX, double endX, double startZ, double endZ, double startY, double endY, int x, int y, int z, int horizontalSize, int verticalSize) {
+    protected boolean doPlace(GeneratorAccessSeed world, Random random, WorldGenFeatureOreConfiguration config, double startX, double endX, double startZ, double endZ, double startY, double endY, int x, int y, int z, int horizontalSize, int verticalSize) {
         int i = 0;
         BitSet bitSet = new BitSet(horizontalSize * verticalSize * horizontalSize);
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
@@ -93,7 +92,7 @@ public class WorldGenMinable extends WorldGenerator<WorldGenFeatureOreConfigurat
             }
         }
 
-        BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(worldGenLevel);
+        BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(world);
 
         try {
             for(int s = 0; s < j; ++s) {
@@ -117,14 +116,14 @@ public class WorldGenMinable extends WorldGenerator<WorldGenFeatureOreConfigurat
                                 if (ah * ah + aj * aj < 1.0D) {
                                     for(int ak = ac; ak <= af; ++ak) {
                                         double al = ((double)ak + 0.5D - w) / t;
-                                        if (ah * ah + aj * aj + al * al < 1.0D && !worldGenLevel.isOutsideBuildHeight(ai)) {
+                                        if (ah * ah + aj * aj + al * al < 1.0D && !world.isOutsideBuildHeight(ai)) {
                                             int am = ag - x + (ai - y) * horizontalSize + (ak - z) * horizontalSize * verticalSize;
                                             if (!bitSet.get(am)) {
                                                 bitSet.set(am);
                                                 mutableBlockPos.set(ag, ai, ak);
-                                                if (worldGenLevel.ensureCanWrite(mutableBlockPos)) {
+                                                if (world.ensureCanWrite(mutableBlockPos)) {
                                                     ChunkSection levelChunkSection = bulkSectionAccess.getSection(mutableBlockPos);
-                                                    if (levelChunkSection != Chunk.EMPTY_SECTION) {
+                                                    if (levelChunkSection != null) {
                                                         int an = SectionPosition.sectionRelative(ag);
                                                         int ao = SectionPosition.sectionRelative(ai);
                                                         int ap = SectionPosition.sectionRelative(ak);

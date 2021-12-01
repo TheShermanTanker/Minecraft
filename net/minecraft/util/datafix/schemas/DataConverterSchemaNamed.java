@@ -11,12 +11,10 @@ import net.minecraft.resources.MinecraftKey;
 
 public class DataConverterSchemaNamed extends Schema {
     public static final PrimitiveCodec<String> NAMESPACED_STRING_CODEC = new PrimitiveCodec<String>() {
-        @Override
         public <T> DataResult<String> read(DynamicOps<T> dynamicOps, T object) {
             return dynamicOps.getStringValue(object).map(DataConverterSchemaNamed::ensureNamespaced);
         }
 
-        @Override
         public <T> T write(DynamicOps<T> dynamicOps, String string) {
             return dynamicOps.createString(string);
         }
@@ -41,7 +39,6 @@ public class DataConverterSchemaNamed extends Schema {
         return NAMESPACED_STRING;
     }
 
-    @Override
     public Type<?> getChoiceType(TypeReference typeReference, String string) {
         return super.getChoiceType(typeReference, ensureNamespaced(string));
     }

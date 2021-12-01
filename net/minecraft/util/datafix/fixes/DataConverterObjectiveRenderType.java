@@ -17,7 +17,6 @@ public class DataConverterObjectiveRenderType extends DataFix {
         return oldName.equals("health") ? IScoreboardCriteria.EnumScoreboardHealthDisplay.HEARTS : IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.OBJECTIVE);
         return this.fixTypeEverywhereTyped("ObjectiveRenderTypeFix", type, (typed) -> {

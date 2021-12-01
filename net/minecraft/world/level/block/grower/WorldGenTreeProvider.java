@@ -10,14 +10,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
-import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureTreeConfiguration;
 
 public abstract class WorldGenTreeProvider {
     @Nullable
-    protected abstract WorldGenFeatureConfigured<WorldGenFeatureTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bees);
+    protected abstract WorldGenFeatureConfigured<?, ?> getConfiguredFeature(Random random, boolean bees);
 
     public boolean growTree(WorldServer world, ChunkGenerator chunkGenerator, BlockPosition pos, IBlockData state, Random random) {
-        WorldGenFeatureConfigured<WorldGenFeatureTreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(world, pos));
+        WorldGenFeatureConfigured<?, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(world, pos));
         if (configuredFeature == null) {
             return false;
         } else {

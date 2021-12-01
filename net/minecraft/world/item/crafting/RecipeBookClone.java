@@ -67,7 +67,7 @@ public class RecipeBookClone extends IRecipeComplex {
 
         if (!itemStack.isEmpty() && itemStack.hasTag() && i >= 1 && ItemWrittenBook.getGeneration(itemStack) < 2) {
             ItemStack itemStack3 = new ItemStack(Items.WRITTEN_BOOK, i);
-            NBTTagCompound compoundTag = itemStack.getTag().c();
+            NBTTagCompound compoundTag = itemStack.getTag().copy();
             compoundTag.setInt("generation", ItemWrittenBook.getGeneration(itemStack) + 1);
             itemStack3.setTag(compoundTag);
             return itemStack3;

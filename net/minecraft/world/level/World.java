@@ -99,6 +99,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
     private final ResourceKey<World> dimension;
+    private long subTickCount;
 
     protected World(WorldDataMutable properties, ResourceKey<World> registryRef, DimensionManager dimensionType, Supplier<GameProfilerFiller> profiler, boolean isClient, boolean debugWorld, long seed) {
         this.profiler = profiler;
@@ -123,7 +124,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
         }
 
         this.thread = Thread.currentThread();
-        this.biomeManager = new BiomeManager(this, seed, dimensionType.getGenLayerZoomer());
+        this.biomeManager = new BiomeManager(this, seed);
         this.isDebug = debugWorld;
     }
 
@@ -388,9 +389,9 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
         this.playSound(player, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, sound, category, volume, pitch);
     }
 
-    public abstract void playSound(@Nullable EntityHuman player, double x, double y, double z, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
+    public abstract void playSound(@Nullable EntityHuman except, double x, double y, double z, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
 
-    public abstract void playSound(@Nullable EntityHuman player, Entity entity, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
+    public abstract void playSound(@Nullable EntityHuman except, Entity entity, SoundEffect sound, EnumSoundCategory category, float volume, float pitch);
 
     public void playLocalSound(double x, double y, double z, SoundEffect sound, EnumSoundCategory category, float volume, float pitch, boolean useDistance) {
     }
@@ -432,7 +433,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
             TickingBlockEntity tickingBlockEntity = iterator.next();
             if (tickingBlockEntity.isRemoved()) {
                 iterator.remove();
-            } else {
+            } else if (this.shouldTickBlocksAt(ChunkCoordIntPair.asLong(tickingBlockEntity.getPos()))) {
                 tickingBlockEntity.tick();
             }
         }
@@ -450,6 +451,14 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
             entity.appendEntityCrashDetails(crashReportCategory);
             throw new ReportedException(crashReport);
         }
+    }
+
+    public boolean shouldTickDeath(Entity entity) {
+        return true;
+    }
+
+    public boolean shouldTickBlocksAt(long chunkPos) {
+        return true;
     }
 
     public Explosion explode(@Nullable Entity entity, double x, double y, double z, float power, Explosion.Effect destructionType) {
@@ -545,14 +554,14 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
     public List<Entity> getEntities(@Nullable Entity except, AxisAlignedBB box, Predicate<? super Entity> predicate) {
         this.getMethodProfiler().incrementCounter("getEntities");
         List<Entity> list = Lists.newArrayList();
-        this.getEntities().get(box, (entity2) -> {
-            if (entity2 != except && predicate.test(entity2)) {
-                list.add(entity2);
+        this.getEntities().get(box, (entity) -> {
+            if (entity != except && predicate.test(entity)) {
+                list.add(entity);
             }
 
-            if (entity2 instanceof EntityEnderDragon) {
-                for(EntityComplexPart enderDragonPart : ((EntityEnderDragon)entity2).getSubEntities()) {
-                    if (entity2 != except && predicate.test(enderDragonPart)) {
+            if (entity instanceof EntityEnderDragon) {
+                for(EntityComplexPart enderDragonPart : ((EntityEnderDragon)entity).getSubEntities()) {
+                    if (entity != except && predicate.test(enderDragonPart)) {
                         list.add(enderDragonPart);
                     }
                 }
@@ -572,7 +581,9 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
             }
 
             if (entity instanceof EntityEnderDragon) {
-                for(EntityComplexPart enderDragonPart : ((EntityEnderDragon)entity).getSubEntities()) {
+                EntityEnderDragon enderDragon = (EntityEnderDragon)entity;
+
+                for(EntityComplexPart enderDragonPart : enderDragon.getSubEntities()) {
                     T entity2 = filter.tryCast(enderDragonPart);
                     if (entity2 != null && predicate.test(entity2)) {
                         list.add(entity2);
@@ -589,7 +600,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
 
     public void blockEntityChanged(BlockPosition pos) {
         if (this.isLoaded(pos)) {
-            this.getChunkAtWorldCoords(pos).markDirty();
+            this.getChunkAtWorldCoords(pos).setNeedsSaving(true);
         }
 
     }
@@ -745,7 +756,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
             return false;
         } else {
             BiomeBase biome = this.getBiome(pos);
-            return biome.getPrecipitation() == BiomeBase.Precipitation.RAIN && biome.getAdjustedTemperature(pos) >= 0.15F;
+            return biome.getPrecipitation() == BiomeBase.Precipitation.RAIN && biome.warmEnoughToRain(pos);
         }
     }
 
@@ -914,5 +925,14 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
             }
         }
 
+    }
+
+    @Override
+    public long nextSubTickCount() {
+        return (long)(this.subTickCount++);
+    }
+
+    public boolean shouldDelayFallingBlockEntityRemoval(Entity.RemovalReason reason) {
+        return false;
     }
 }

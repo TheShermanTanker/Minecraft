@@ -5,7 +5,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,9 +24,6 @@ import net.minecraft.world.scores.ScoreboardTeamBase;
 
 public class CommandTeam {
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_EXISTS = new SimpleCommandExceptionType(new ChatMessage("commands.team.add.duplicate"));
-    private static final DynamicCommandExceptionType ERROR_TEAM_NAME_TOO_LONG = new DynamicCommandExceptionType((maxLength) -> {
-        return new ChatMessage("commands.team.add.longName", maxLength);
-    });
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_EMPTY = new SimpleCommandExceptionType(new ChatMessage("commands.team.empty.unchanged"));
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_NAME = new SimpleCommandExceptionType(new ChatMessage("commands.team.option.name.unchanged"));
     private static final SimpleCommandExceptionType ERROR_TEAM_ALREADY_COLOR = new SimpleCommandExceptionType(new ChatMessage("commands.team.option.color.unchanged"));
@@ -239,8 +235,6 @@ public class CommandTeam {
         Scoreboard scoreboard = source.getServer().getScoreboard();
         if (scoreboard.getTeam(team) != null) {
             throw ERROR_TEAM_ALREADY_EXISTS.create();
-        } else if (team.length() > 16) {
-            throw ERROR_TEAM_NAME_TOO_LONG.create(16);
         } else {
             ScoreboardTeam playerTeam = scoreboard.createTeam(team);
             playerTeam.setDisplayName(displayName);

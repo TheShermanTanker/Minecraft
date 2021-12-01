@@ -6,14 +6,15 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class WorldGenFeatureRandom2 implements WorldGenFeatureConfiguration {
-    public static final Codec<WorldGenFeatureRandom2> CODEC = ExtraCodecs.nonEmptyList(WorldGenFeatureConfigured.LIST_CODEC).fieldOf("features").xmap(WorldGenFeatureRandom2::new, (simpleRandomFeatureConfiguration) -> {
+    public static final Codec<WorldGenFeatureRandom2> CODEC = ExtraCodecs.nonEmptyList(PlacedFeature.LIST_CODEC).fieldOf("features").xmap(WorldGenFeatureRandom2::new, (simpleRandomFeatureConfiguration) -> {
         return simpleRandomFeatureConfiguration.features;
     }).codec();
-    public final List<Supplier<WorldGenFeatureConfigured<?, ?>>> features;
+    public final List<Supplier<PlacedFeature>> features;
 
-    public WorldGenFeatureRandom2(List<Supplier<WorldGenFeatureConfigured<?, ?>>> features) {
+    public WorldGenFeatureRandom2(List<Supplier<PlacedFeature>> features) {
         this.features = features;
     }
 

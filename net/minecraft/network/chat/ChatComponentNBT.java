@@ -151,7 +151,7 @@ public abstract class ChatComponentNBT extends ChatBaseComponent implements Chat
                 if (serverLevel.isLoaded(blockPos)) {
                     TileEntity blockEntity = serverLevel.getTileEntity(blockPos);
                     if (blockEntity != null) {
-                        return Stream.of(blockEntity.save(new NBTTagCompound()));
+                        return Stream.of(blockEntity.saveWithFullMetadata());
                     }
                 }
             }

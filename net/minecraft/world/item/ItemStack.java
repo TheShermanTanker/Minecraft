@@ -13,19 +13,16 @@ import java.text.DecimalFormatSymbols;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.EnumChatFormat;
 import net.minecraft.SystemUtils;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.commands.arguments.blocks.ArgumentBlock;
-import net.minecraft.commands.arguments.blocks.ArgumentBlockPredicate;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTBase;
@@ -77,7 +74,7 @@ import org.apache.logging.log4j.Logger;
 
 public final class ItemStack {
     public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(IRegistry.ITEM.fieldOf("id").forGetter((stack) -> {
+        return instance.group(IRegistry.ITEM.byNameCodec().fieldOf("id").forGetter((stack) -> {
             return stack.item;
         }), Codec.INT.fieldOf("Count").forGetter((stack) -> {
             return stack.count;
@@ -105,15 +102,18 @@ public final class ItemStack {
     private static final ChatModifier LORE_STYLE = ChatModifier.EMPTY.setColor(EnumChatFormat.DARK_PURPLE).setItalic(true);
     private int count;
     private int popTime;
+    /** @deprecated */
     @Deprecated
     private Item item;
+    @Nullable
     public NBTTagCompound tag;
     private boolean emptyCacheFlag;
+    @Nullable
     private Entity entityRepresentation;
-    private ShapeDetectorBlock cachedBreakBlock;
-    private boolean cachedBreakBlockResult;
-    private ShapeDetectorBlock cachedPlaceBlock;
-    private boolean cachedPlaceBlockResult;
+    @Nullable
+    private AdventureModeCheck adventureBreakCheck;
+    @Nullable
+    private AdventureModeCheck adventurePlaceCheck;
 
     public Optional<TooltipComponent> getTooltipImage() {
         return this.getItem().getTooltipImage(this);
@@ -123,9 +123,9 @@ public final class ItemStack {
         this(item, 1);
     }
 
-    private ItemStack(IMaterial item, int count, Optional<NBTTagCompound> tag) {
+    private ItemStack(IMaterial item, int count, Optional<NBTTagCompound> nbt) {
         this(item, count);
-        tag.ifPresent(this::setTag);
+        nbt.ifPresent(this::setTag);
     }
 
     public ItemStack(IMaterial item, int count) {
@@ -143,11 +143,11 @@ public final class ItemStack {
         this.emptyCacheFlag = this.isEmpty();
     }
 
-    private ItemStack(NBTTagCompound tag) {
-        this.item = IRegistry.ITEM.get(new MinecraftKey(tag.getString("id")));
-        this.count = tag.getByte("Count");
-        if (tag.hasKeyOfType("tag", 10)) {
-            this.tag = tag.getCompound("tag");
+    private ItemStack(NBTTagCompound nbt) {
+        this.item = IRegistry.ITEM.get(new MinecraftKey(nbt.getString("id")));
+        this.count = nbt.getByte("Count");
+        if (nbt.hasKeyOfType("tag", 10)) {
+            this.tag = nbt.getCompound("tag");
             this.getItem().verifyTagAfterLoad(this.tag);
         }
 
@@ -231,7 +231,7 @@ public final class ItemStack {
         nbt.setString("id", resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
         nbt.setByte("Count", (byte)this.count);
         if (this.tag != null) {
-            nbt.set("tag", this.tag.c());
+            nbt.set("tag", this.tag.copy());
         }
 
         return nbt;
@@ -369,7 +369,7 @@ public final class ItemStack {
             ItemStack itemStack = new ItemStack(this.getItem(), this.count);
             itemStack.setPopTime(this.getPopTime());
             if (this.tag != null) {
-                itemStack.tag = this.tag.c();
+                itemStack.tag = this.tag.copy();
             }
 
             return itemStack;
@@ -529,14 +529,14 @@ public final class ItemStack {
         return this.tag != null ? this.tag.getList("Enchantments", 10) : new NBTTagList();
     }
 
-    public void setTag(@Nullable NBTTagCompound tag) {
-        this.tag = tag;
+    public void setTag(@Nullable NBTTagCompound nbt) {
+        this.tag = nbt;
         if (this.getItem().usesDurability()) {
             this.setDamage(this.getDamage());
         }
 
-        if (tag != null) {
-            this.getItem().verifyTagAfterLoad(tag);
+        if (nbt != null) {
+            this.getItem().verifyTagAfterLoad(nbt);
         }
 
     }
@@ -819,8 +819,8 @@ public final class ItemStack {
         }
     }
 
-    public void addTagElement(String key, NBTBase tag) {
-        this.getOrCreateTag().set(key, tag);
+    public void addTagElement(String key, NBTBase element) {
+        this.getOrCreateTag().set(key, element);
     }
 
     public boolean isFramed() {
@@ -906,78 +906,28 @@ public final class ItemStack {
         return mutableComponent2;
     }
 
-    private static boolean areSameBlocks(ShapeDetectorBlock first, @Nullable ShapeDetectorBlock second) {
-        if (second != null && first.getState() == second.getState()) {
-            if (first.getEntity() == null && second.getEntity() == null) {
-                return true;
-            } else {
-                return first.getEntity() != null && second.getEntity() != null ? Objects.equals(first.getEntity().save(new NBTTagCompound()), second.getEntity().save(new NBTTagCompound())) : false;
-            }
-        } else {
-            return false;
+    public boolean hasAdventureModePlaceTagForBlock(ITagRegistry tagManager, ShapeDetectorBlock pos) {
+        if (this.adventurePlaceCheck == null) {
+            this.adventurePlaceCheck = new AdventureModeCheck("CanPlaceOn");
         }
+
+        return this.adventurePlaceCheck.test(this, tagManager, pos);
     }
 
     public boolean hasAdventureModeBreakTagForBlock(ITagRegistry tagManager, ShapeDetectorBlock pos) {
-        if (areSameBlocks(pos, this.cachedBreakBlock)) {
-            return this.cachedBreakBlockResult;
-        } else {
-            this.cachedBreakBlock = pos;
-            if (this.hasTag() && this.tag.hasKeyOfType("CanDestroy", 9)) {
-                NBTTagList listTag = this.tag.getList("CanDestroy", 8);
-
-                for(int i = 0; i < listTag.size(); ++i) {
-                    String string = listTag.getString(i);
-
-                    try {
-                        Predicate<ShapeDetectorBlock> predicate = ArgumentBlockPredicate.blockPredicate().parse(new StringReader(string)).create(tagManager);
-                        if (predicate.test(pos)) {
-                            this.cachedBreakBlockResult = true;
-                            return true;
-                        }
-                    } catch (CommandSyntaxException var7) {
-                    }
-                }
-            }
-
-            this.cachedBreakBlockResult = false;
-            return false;
+        if (this.adventureBreakCheck == null) {
+            this.adventureBreakCheck = new AdventureModeCheck("CanDestroy");
         }
-    }
 
-    public boolean hasAdventureModePlaceTagForBlock(ITagRegistry tagManager, ShapeDetectorBlock pos) {
-        if (areSameBlocks(pos, this.cachedPlaceBlock)) {
-            return this.cachedPlaceBlockResult;
-        } else {
-            this.cachedPlaceBlock = pos;
-            if (this.hasTag() && this.tag.hasKeyOfType("CanPlaceOn", 9)) {
-                NBTTagList listTag = this.tag.getList("CanPlaceOn", 8);
-
-                for(int i = 0; i < listTag.size(); ++i) {
-                    String string = listTag.getString(i);
-
-                    try {
-                        Predicate<ShapeDetectorBlock> predicate = ArgumentBlockPredicate.blockPredicate().parse(new StringReader(string)).create(tagManager);
-                        if (predicate.test(pos)) {
-                            this.cachedPlaceBlockResult = true;
-                            return true;
-                        }
-                    } catch (CommandSyntaxException var7) {
-                    }
-                }
-            }
-
-            this.cachedPlaceBlockResult = false;
-            return false;
-        }
+        return this.adventureBreakCheck.test(this, tagManager, pos);
     }
 
     public int getPopTime() {
         return this.popTime;
     }
 
-    public void setPopTime(int cooldown) {
-        this.popTime = cooldown;
+    public void setPopTime(int bobbingAnimationTime) {
+        this.popTime = bobbingAnimationTime;
     }
 
     public int getCount() {

@@ -21,6 +21,7 @@ public interface IWorldReader extends IBlockLightAccess, ICollisionAccess, Biome
     @Nullable
     IChunkAccess getChunkAt(int chunkX, int chunkZ, ChunkStatus leastStatus, boolean create);
 
+    /** @deprecated */
     @Deprecated
     boolean isChunkLoaded(int chunkX, int chunkZ);
 
@@ -52,13 +53,14 @@ public interface IWorldReader extends IBlockLightAccess, ICollisionAccess, Biome
     @Override
     default BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
         IChunkAccess chunkAccess = this.getChunkAt(QuartPos.toSection(biomeX), QuartPos.toSection(biomeZ), ChunkStatus.BIOMES, false);
-        return chunkAccess != null && chunkAccess.getBiomeIndex() != null ? chunkAccess.getBiomeIndex().getBiome(biomeX, biomeY, biomeZ) : this.getUncachedNoiseBiome(biomeX, biomeY, biomeZ);
+        return chunkAccess != null ? chunkAccess.getBiome(biomeX, biomeY, biomeZ) : this.getUncachedNoiseBiome(biomeX, biomeY, biomeZ);
     }
 
     BiomeBase getUncachedNoiseBiome(int biomeX, int biomeY, int biomeZ);
 
     boolean isClientSide();
 
+    /** @deprecated */
     @Deprecated
     int getSeaLevel();
 
@@ -102,6 +104,7 @@ public interface IWorldReader extends IBlockLightAccess, ICollisionAccess, Biome
         }
     }
 
+    /** @deprecated */
     @Deprecated
     default float getBrightness(BlockPosition pos) {
         return this.getDimensionManager().brightness(this.getLightLevel(pos));
@@ -164,26 +167,31 @@ public interface IWorldReader extends IBlockLightAccess, ICollisionAccess, Biome
         return pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000 ? this.getLightLevel(pos, ambientDarkness) : 15;
     }
 
+    /** @deprecated */
     @Deprecated
     default boolean hasChunkAt(int x, int z) {
         return this.isChunkLoaded(SectionPosition.blockToSectionCoord(x), SectionPosition.blockToSectionCoord(z));
     }
 
+    /** @deprecated */
     @Deprecated
     default boolean isLoaded(BlockPosition pos) {
         return this.hasChunkAt(pos.getX(), pos.getZ());
     }
 
+    /** @deprecated */
     @Deprecated
     default boolean areChunksLoadedBetween(BlockPosition min, BlockPosition max) {
         return this.isAreaLoaded(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ());
     }
 
+    /** @deprecated */
     @Deprecated
     default boolean isAreaLoaded(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         return maxY >= this.getMinBuildHeight() && minY < this.getMaxBuildHeight() ? this.hasChunksAt(minX, minZ, maxX, maxZ) : false;
     }
 
+    /** @deprecated */
     @Deprecated
     default boolean hasChunksAt(int minX, int minZ, int maxX, int maxZ) {
         int i = SectionPosition.blockToSectionCoord(minX);

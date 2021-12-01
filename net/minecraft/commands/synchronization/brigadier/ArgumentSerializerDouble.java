@@ -7,16 +7,16 @@ import net.minecraft.network.PacketDataSerializer;
 
 public class ArgumentSerializerDouble implements ArgumentSerializer<DoubleArgumentType> {
     @Override
-    public void serializeToNetwork(DoubleArgumentType doubleArgumentType, PacketDataSerializer friendlyByteBuf) {
-        boolean bl = doubleArgumentType.getMinimum() != -Double.MAX_VALUE;
-        boolean bl2 = doubleArgumentType.getMaximum() != Double.MAX_VALUE;
-        friendlyByteBuf.writeByte(ArgumentSerializers.createNumberFlags(bl, bl2));
+    public void serializeToNetwork(DoubleArgumentType type, PacketDataSerializer buf) {
+        boolean bl = type.getMinimum() != -Double.MAX_VALUE;
+        boolean bl2 = type.getMaximum() != Double.MAX_VALUE;
+        buf.writeByte(ArgumentSerializers.createNumberFlags(bl, bl2));
         if (bl) {
-            friendlyByteBuf.writeDouble(doubleArgumentType.getMinimum());
+            buf.writeDouble(type.getMinimum());
         }
 
         if (bl2) {
-            friendlyByteBuf.writeDouble(doubleArgumentType.getMaximum());
+            buf.writeDouble(type.getMaximum());
         }
 
     }
@@ -30,13 +30,13 @@ public class ArgumentSerializerDouble implements ArgumentSerializer<DoubleArgume
     }
 
     @Override
-    public void serializeToJson(DoubleArgumentType doubleArgumentType, JsonObject jsonObject) {
-        if (doubleArgumentType.getMinimum() != -Double.MAX_VALUE) {
-            jsonObject.addProperty("min", doubleArgumentType.getMinimum());
+    public void serializeToJson(DoubleArgumentType type, JsonObject json) {
+        if (type.getMinimum() != -Double.MAX_VALUE) {
+            json.addProperty("min", type.getMinimum());
         }
 
-        if (doubleArgumentType.getMaximum() != Double.MAX_VALUE) {
-            jsonObject.addProperty("max", doubleArgumentType.getMaximum());
+        if (type.getMaximum() != Double.MAX_VALUE) {
+            json.addProperty("max", type.getMaximum());
         }
 
     }

@@ -14,8 +14,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParameter;
 public class FixedScoreboardNameProvider implements ScoreboardNameProvider {
     final String name;
 
-    FixedScoreboardNameProvider(String string) {
-        this.name = string;
+    FixedScoreboardNameProvider(String name) {
+        this.name = name;
     }
 
     public static ScoreboardNameProvider forName(String name) {

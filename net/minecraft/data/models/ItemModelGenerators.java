@@ -122,7 +122,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.GHAST_TEAR, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.GLASS_BOTTLE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.GLISTERING_MELON_SLICE, ModelTemplates.FLAT_ITEM);
-        this.generateFlatItem(Items.GLOBE_BANNER_PATTER, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.GLOBE_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.GLOW_BERRIES, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.GLOWSTONE_DUST, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.GLOW_INK_SAC, ModelTemplates.FLAT_ITEM);
@@ -194,6 +194,7 @@ public class ItemModelGenerators {
         this.generateFlatItem(Items.MUSIC_DISC_STRAD, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MUSIC_DISC_WAIT, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MUSIC_DISC_WARD, ModelTemplates.FLAT_ITEM);
+        this.generateFlatItem(Items.MUSIC_DISC_OTHERSIDE, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.MUTTON, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.NAME_TAG, ModelTemplates.FLAT_ITEM);
         this.generateFlatItem(Items.NAUTILUS_SHELL, ModelTemplates.FLAT_ITEM);

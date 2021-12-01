@@ -1,14 +1,15 @@
 package net.minecraft.world.level.entity;
 
+import java.util.Collection;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.util.EntitySlice;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.world.phys.AxisAlignedBB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EntitySection<T> {
+public class EntitySection<T extends EntityAccess> {
     protected static final Logger LOGGER = LogManager.getLogger();
     private final EntitySlice<T> storage;
     private Visibility chunkStatus;
@@ -18,31 +19,34 @@ public class EntitySection<T> {
         this.storage = new EntitySlice<>(entityClass);
     }
 
-    public void add(T obj) {
-        this.storage.add(obj);
+    public void add(T entity) {
+        this.storage.add(entity);
     }
 
-    public boolean remove(T obj) {
-        return this.storage.remove(obj);
+    public boolean remove(T entity) {
+        return this.storage.remove(entity);
     }
 
-    public void getEntities(Predicate<? super T> predicate, Consumer<T> action) {
-        for(T object : this.storage) {
-            if (predicate.test(object)) {
-                action.accept(object);
+    public void getEntities(AxisAlignedBB box, Consumer<T> action) {
+        for(T entityAccess : this.storage) {
+            if (entityAccess.getBoundingBox().intersects(box)) {
+                action.accept(entityAccess);
             }
         }
 
     }
 
-    public <U extends T> void getEntities(EntityTypeTest<T, U> type, Predicate<? super U> filter, Consumer<? super U> action) {
-        for(T object : this.storage.find(type.getBaseClass())) {
-            U object2 = (U)type.tryCast(object);
-            if (object2 != null && filter.test(object2)) {
-                action.accept((T)object2);
+    public <U extends T> void getEntities(EntityTypeTest<T, U> type, AxisAlignedBB box, Consumer<? super U> action) {
+        Collection<? extends T> collection = this.storage.find(type.getBaseClass());
+        if (!collection.isEmpty()) {
+            for(T entityAccess : collection) {
+                U entityAccess2 = (U)((EntityAccess)type.tryCast(entityAccess));
+                if (entityAccess2 != null && entityAccess.getBoundingBox().intersects(box)) {
+                    action.accept((T)entityAccess2);
+                }
             }
-        }
 
+        }
     }
 
     public boolean isEmpty() {

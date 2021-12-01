@@ -14,7 +14,6 @@ public class DataConverterAbstractArrowPickup extends DataFix {
         super(outputSchema, false);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Schema schema = this.getInputSchema();
         return this.fixTypeEverywhereTyped("AbstractArrowPickupFix", schema.getType(DataConverterTypes.ENTITY), this::updateProjectiles);

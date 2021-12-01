@@ -61,7 +61,7 @@ public class RecipeShulkerBox extends IRecipeComplex {
 
         ItemStack itemStack3 = BlockShulkerBox.getColoredItemStack(dyeItem.getDyeColor());
         if (itemStack.hasTag()) {
-            itemStack3.setTag(itemStack.getTag().c());
+            itemStack3.setTag(itemStack.getTag().copy());
         }
 
         return itemStack3;

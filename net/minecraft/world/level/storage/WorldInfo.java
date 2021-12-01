@@ -1,10 +1,10 @@
 package net.minecraft.world.level.storage;
 
-import com.mojang.bridge.game.GameVersion;
 import java.io.File;
 import javax.annotation.Nullable;
 import net.minecraft.EnumChatFormat;
 import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
 import net.minecraft.network.chat.ChatComponentText;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.network.chat.IChatBaseComponent;
@@ -18,7 +18,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
     private final WorldSettings settings;
     private final LevelVersion levelVersion;
     private final String levelId;
-    private final boolean requiresConversion;
+    private final boolean requiresManualConversion;
     private final boolean locked;
     private final File icon;
     @Nullable
@@ -30,7 +30,7 @@ public class WorldInfo implements Comparable<WorldInfo> {
         this.levelId = name;
         this.locked = locked;
         this.icon = file;
-        this.requiresConversion = requiresConversion;
+        this.requiresManualConversion = requiresConversion;
     }
 
     public String getLevelId() {
@@ -45,8 +45,8 @@ public class WorldInfo implements Comparable<WorldInfo> {
         return this.icon;
     }
 
-    public boolean isRequiresConversion() {
-        return this.requiresConversion;
+    public boolean requiresManualConversion() {
+        return this.requiresManualConversion;
     }
 
     public long getLastPlayed() {
@@ -87,18 +87,18 @@ public class WorldInfo implements Comparable<WorldInfo> {
     }
 
     public boolean markVersionInList() {
-        return this.askToOpenWorld() || !SharedConstants.getGameVersion().isStable() && !this.levelVersion.snapshot() || this.backupStatus().shouldBackup();
+        return this.askToOpenWorld() || !SharedConstants.getCurrentVersion().isStable() && !this.levelVersion.snapshot() || this.backupStatus().shouldBackup();
     }
 
     public boolean askToOpenWorld() {
-        return this.levelVersion.minecraftVersion() > SharedConstants.getGameVersion().getWorldVersion();
+        return this.levelVersion.minecraftVersion().getVersion() > SharedConstants.getCurrentVersion().getDataVersion().getVersion();
     }
 
     public WorldInfo.BackupStatus backupStatus() {
-        GameVersion gameVersion = SharedConstants.getGameVersion();
-        int i = gameVersion.getWorldVersion();
-        int j = this.levelVersion.minecraftVersion();
-        if (!gameVersion.isStable() && j < i) {
+        WorldVersion worldVersion = SharedConstants.getCurrentVersion();
+        int i = worldVersion.getDataVersion().getVersion();
+        int j = this.levelVersion.minecraftVersion().getVersion();
+        if (!worldVersion.isStable() && j < i) {
             return WorldInfo.BackupStatus.UPGRADE_TO_SNAPSHOT;
         } else {
             return j > i ? WorldInfo.BackupStatus.DOWNGRADE : WorldInfo.BackupStatus.NONE;
@@ -109,14 +109,16 @@ public class WorldInfo implements Comparable<WorldInfo> {
         return this.locked;
     }
 
-    public boolean isIncompatibleWorldHeight() {
-        int i = this.levelVersion.minecraftVersion();
-        boolean bl = i > 2692 && i <= 2706;
-        return bl;
+    public boolean isDisabled() {
+        if (!this.isLocked() && !this.requiresManualConversion()) {
+            return !this.isCompatible();
+        } else {
+            return true;
+        }
     }
 
-    public boolean isDisabled() {
-        return this.isLocked() || this.isIncompatibleWorldHeight();
+    public boolean isCompatible() {
+        return SharedConstants.getCurrentVersion().getDataVersion().isCompatible(this.levelVersion.minecraftVersion());
     }
 
     public IChatBaseComponent getInfo() {
@@ -130,10 +132,10 @@ public class WorldInfo implements Comparable<WorldInfo> {
     private IChatBaseComponent createInfo() {
         if (this.isLocked()) {
             return (new ChatMessage("selectWorld.locked")).withStyle(EnumChatFormat.RED);
-        } else if (this.isIncompatibleWorldHeight()) {
-            return (new ChatMessage("selectWorld.pre_worldheight")).withStyle(EnumChatFormat.RED);
-        } else if (this.isRequiresConversion()) {
-            return new ChatMessage("selectWorld.conversion");
+        } else if (this.requiresManualConversion()) {
+            return (new ChatMessage("selectWorld.conversion")).withStyle(EnumChatFormat.RED);
+        } else if (!this.isCompatible()) {
+            return (new ChatMessage("selectWorld.incompatible_series")).withStyle(EnumChatFormat.RED);
         } else {
             IChatMutableComponent mutableComponent = (IChatMutableComponent)(this.isHardcore() ? (new ChatComponentText("")).addSibling((new ChatMessage("gameMode.hardcore")).withStyle(EnumChatFormat.DARK_RED)) : new ChatMessage("gameMode." + this.getGameMode().getName()));
             if (this.hasCheats()) {

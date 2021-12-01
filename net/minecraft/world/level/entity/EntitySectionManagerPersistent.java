@@ -33,7 +33,7 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
     static final Logger LOGGER = LogManager.getLogger();
     final Set<UUID> knownUuids = Sets.newHashSet();
     final IWorldCallback<T> callbacks;
-    private final EntityPersistentStorage<T> permanentStorage;
+    public final EntityPersistentStorage<T> permanentStorage;
     private final EntityLookup<T> visibleEntityStorage;
     final EntitySectionStorage<T> sectionStorage;
     private final IWorldEntityAccess<T> entityGetter;
@@ -154,31 +154,31 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
             boolean bl3 = visibility2.isTicking();
             boolean bl4 = trackingStatus.isTicking();
             if (bl3 && !bl4) {
-                group.getEntities().filter((entityAccess) -> {
-                    return !entityAccess.isAlwaysTicking();
+                group.getEntities().filter((entity) -> {
+                    return !entity.isAlwaysTicking();
                 }).forEach(this::stopTicking);
             }
 
             if (bl && !bl2) {
-                group.getEntities().filter((entityAccess) -> {
-                    return !entityAccess.isAlwaysTicking();
+                group.getEntities().filter((entity) -> {
+                    return !entity.isAlwaysTicking();
                 }).forEach(this::stopTracking);
             } else if (!bl && bl2) {
-                group.getEntities().filter((entityAccess) -> {
-                    return !entityAccess.isAlwaysTicking();
+                group.getEntities().filter((entity) -> {
+                    return !entity.isAlwaysTicking();
                 }).forEach(this::startTracking);
             }
 
             if (!bl3 && bl4) {
-                group.getEntities().filter((entityAccess) -> {
-                    return !entityAccess.isAlwaysTicking();
+                group.getEntities().filter((entity) -> {
+                    return !entity.isAlwaysTicking();
                 }).forEach(this::startTicking);
             }
 
         });
     }
 
-    private void ensureChunkQueuedForLoad(long chunkPos) {
+    public void ensureChunkQueuedForLoad(long chunkPos) {
         EntitySectionManagerPersistent.ChunkLoadStatus chunkLoadStatus = this.chunkLoadStatuses.get(chunkPos);
         if (chunkLoadStatus == EntitySectionManagerPersistent.ChunkLoadStatus.FRESH) {
             this.requestChunkLoad(chunkPos);
@@ -314,16 +314,16 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
         return this.entityGetter;
     }
 
-    public boolean isPositionTicking(BlockPosition blockPos) {
-        return this.chunkVisibility.get(ChunkCoordIntPair.asLong(blockPos)).isTicking();
+    public boolean isPositionTicking(BlockPosition pos) {
+        return this.chunkVisibility.get(ChunkCoordIntPair.asLong(pos)).isTicking();
     }
 
-    public boolean isPositionTicking(ChunkCoordIntPair chunkPos) {
-        return this.chunkVisibility.get(chunkPos.pair()).isTicking();
+    public boolean isPositionTicking(ChunkCoordIntPair pos) {
+        return this.chunkVisibility.get(pos.pair()).isTicking();
     }
 
-    public boolean areEntitiesLoaded(long l) {
-        return this.chunkLoadStatuses.get(l) == EntitySectionManagerPersistent.ChunkLoadStatus.LOADED;
+    public boolean areEntitiesLoaded(long chunkPos) {
+        return this.chunkLoadStatuses.get(chunkPos) == EntitySectionManagerPersistent.ChunkLoadStatus.LOADED;
     }
 
     public void dumpSections(Writer writer) throws IOException {
@@ -354,10 +354,10 @@ public class EntitySectionManagerPersistent<T extends EntityAccess> implements A
         private long currentSectionKey;
         private EntitySection<T> currentSection;
 
-        Callback(T entityAccess, long l, EntitySection<T> entitySection) {
-            this.entity = entityAccess;
+        Callback(T entity, long l, EntitySection<T> section) {
+            this.entity = entity;
             this.currentSectionKey = l;
-            this.currentSection = entitySection;
+            this.currentSection = section;
         }
 
         @Override

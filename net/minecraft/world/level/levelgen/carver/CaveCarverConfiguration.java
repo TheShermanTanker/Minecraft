@@ -22,18 +22,18 @@ public class CaveCarverConfiguration extends WorldGenCarverConfiguration {
     public final FloatProvider verticalRadiusMultiplier;
     final FloatProvider floorLevel;
 
-    public CaveCarverConfiguration(float probability, HeightProvider y, FloatProvider yScale, VerticalAnchor lavaLevel, boolean aquifers, CarverDebugSettings debugConfig, FloatProvider horizontalRadiusMultiplier, FloatProvider verticalRadiusMultiplier, FloatProvider floorLevel) {
-        super(probability, y, yScale, lavaLevel, aquifers, debugConfig);
+    public CaveCarverConfiguration(float probability, HeightProvider y, FloatProvider yScale, VerticalAnchor lavaLevel, CarverDebugSettings debugConfig, FloatProvider horizontalRadiusMultiplier, FloatProvider verticalRadiusMultiplier, FloatProvider floorLevel) {
+        super(probability, y, yScale, lavaLevel, debugConfig);
         this.horizontalRadiusMultiplier = horizontalRadiusMultiplier;
         this.verticalRadiusMultiplier = verticalRadiusMultiplier;
         this.floorLevel = floorLevel;
     }
 
     public CaveCarverConfiguration(float probability, HeightProvider y, FloatProvider yScale, VerticalAnchor lavaLevel, boolean aquifers, FloatProvider horizontalRadiusMultiplier, FloatProvider verticalRadiusMultiplier, FloatProvider floorLevel) {
-        this(probability, y, yScale, lavaLevel, aquifers, CarverDebugSettings.DEFAULT, horizontalRadiusMultiplier, verticalRadiusMultiplier, floorLevel);
+        this(probability, y, yScale, lavaLevel, CarverDebugSettings.DEFAULT, horizontalRadiusMultiplier, verticalRadiusMultiplier, floorLevel);
     }
 
     public CaveCarverConfiguration(WorldGenCarverConfiguration config, FloatProvider horizontalRadiusMultiplier, FloatProvider verticalRadiusMultiplier, FloatProvider floorLevel) {
-        this(config.probability, config.y, config.yScale, config.lavaLevel, config.aquifersEnabled, config.debugSettings, horizontalRadiusMultiplier, verticalRadiusMultiplier, floorLevel);
+        this(config.probability, config.y, config.yScale, config.lavaLevel, config.debugSettings, horizontalRadiusMultiplier, verticalRadiusMultiplier, floorLevel);
     }
 }

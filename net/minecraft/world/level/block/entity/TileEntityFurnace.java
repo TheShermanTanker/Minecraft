@@ -221,18 +221,17 @@ public abstract class TileEntityFurnace extends TileEntityContainer implements I
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setShort("BurnTime", (short)this.litTime);
         nbt.setShort("CookTime", (short)this.cookingProgress);
         nbt.setShort("CookTimeTotal", (short)this.cookingTotalTime);
         ContainerUtil.saveAllItems(nbt, this.items);
         NBTTagCompound compoundTag = new NBTTagCompound();
-        this.recipesUsed.forEach((resourceLocation, integer) -> {
-            compoundTag.setInt(resourceLocation.toString(), integer);
+        this.recipesUsed.forEach((identifier, count) -> {
+            compoundTag.setInt(identifier.toString(), count);
         });
         nbt.set("RecipesUsed", compoundTag);
-        return nbt;
     }
 
     public static void serverTick(World world, BlockPosition pos, IBlockData state, TileEntityFurnace blockEntity) {

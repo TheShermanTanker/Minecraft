@@ -28,6 +28,7 @@ public interface IBucketable {
 
     SoundEffect getPickupSound();
 
+    /** @deprecated */
     @Deprecated
     static void saveDefaultDataToBucketTag(EntityInsentient entity, ItemStack stack) {
         NBTTagCompound compoundTag = stack.getOrCreateTag();
@@ -58,6 +59,7 @@ public interface IBucketable {
         compoundTag.setFloat("Health", entity.getHealth());
     }
 
+    /** @deprecated */
     @Deprecated
     static void loadDefaultDataFromBucketTag(EntityInsentient entity, NBTTagCompound nbt) {
         if (nbt.hasKey("NoAI")) {

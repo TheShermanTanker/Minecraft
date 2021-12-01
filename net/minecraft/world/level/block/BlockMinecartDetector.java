@@ -99,7 +99,7 @@ public class BlockMinecartDetector extends BlockMinecartTrackAbstract {
             }
 
             if (bl2) {
-                world.getBlockTickList().scheduleTick(pos, this, 20);
+                world.scheduleTick(pos, this, 20);
             }
 
             world.updateAdjacentComparators(pos, this);
@@ -137,7 +137,7 @@ public class BlockMinecartDetector extends BlockMinecartTrackAbstract {
     @Override
     public int getAnalogOutputSignal(IBlockData state, World world, BlockPosition pos) {
         if (state.get(POWERED)) {
-            List<EntityMinecartCommandBlock> list = this.getInteractingMinecartOfType(world, pos, EntityMinecartCommandBlock.class, (entity) -> {
+            List<EntityMinecartCommandBlock> list = this.getInteractingMinecartOfType(world, pos, EntityMinecartCommandBlock.class, (cart) -> {
                 return true;
             });
             if (!list.isEmpty()) {

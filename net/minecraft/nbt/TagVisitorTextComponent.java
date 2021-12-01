@@ -37,7 +37,7 @@ public class TagVisitorTextComponent implements TagVisitor {
     private static final String NEWLINE = "\n";
     private final String indentation;
     private final int depth;
-    private IChatBaseComponent result;
+    private IChatBaseComponent result = ChatComponentText.EMPTY;
 
     public TagVisitorTextComponent(String prefix, int indentationLevel) {
         this.indentation = prefix;

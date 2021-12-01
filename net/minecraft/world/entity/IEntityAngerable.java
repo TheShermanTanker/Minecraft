@@ -55,7 +55,7 @@ public interface IEntityAngerable {
         }
     }
 
-    default void updatePersistentAnger(WorldServer world, boolean bl) {
+    default void updatePersistentAnger(WorldServer world, boolean angerPersistent) {
         EntityLiving livingEntity = this.getGoalTarget();
         UUID uUID = this.getAngerTarget();
         if ((livingEntity == null || livingEntity.isDeadOrDying()) && uUID != null && world.getEntity(uUID) instanceof EntityInsentient) {
@@ -66,7 +66,7 @@ public interface IEntityAngerable {
                 this.anger();
             }
 
-            if (this.getAnger() > 0 && (livingEntity == null || livingEntity.getEntityType() != EntityTypes.PLAYER || !bl)) {
+            if (this.getAnger() > 0 && (livingEntity == null || livingEntity.getEntityType() != EntityTypes.PLAYER || !angerPersistent)) {
                 this.setAnger(this.getAnger() - 1);
                 if (this.getAnger() == 0) {
                     this.pacify();
@@ -76,11 +76,11 @@ public interface IEntityAngerable {
         }
     }
 
-    default boolean isAngryAt(EntityLiving livingEntity) {
-        if (!this.canAttack(livingEntity)) {
+    default boolean isAngryAt(EntityLiving entity) {
+        if (!this.canAttack(entity)) {
             return false;
         } else {
-            return livingEntity.getEntityType() == EntityTypes.PLAYER && this.isAngryAtAllPlayers(livingEntity.level) ? true : livingEntity.getUniqueID().equals(this.getAngerTarget());
+            return entity.getEntityType() == EntityTypes.PLAYER && this.isAngryAtAllPlayers(entity.level) ? true : entity.getUniqueID().equals(this.getAngerTarget());
         }
     }
 
@@ -121,7 +121,7 @@ public interface IEntityAngerable {
 
     void setGoalTarget(@Nullable EntityLiving target);
 
-    boolean canAttack(EntityLiving livingEntity);
+    boolean canAttack(EntityLiving target);
 
     @Nullable
     EntityLiving getGoalTarget();

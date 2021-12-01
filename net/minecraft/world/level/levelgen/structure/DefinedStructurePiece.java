@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.block.state.properties.BlockPropertyStructureMode;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
@@ -33,23 +33,23 @@ public abstract class DefinedStructurePiece extends StructurePiece {
     protected DefinedStructureInfo placeSettings;
     protected BlockPosition templatePosition;
 
-    public DefinedStructurePiece(WorldGenFeatureStructurePieceType type, int i, DefinedStructureManager structureManager, MinecraftKey identifier, String string, DefinedStructureInfo placementData, BlockPosition pos) {
-        super(type, i, structureManager.getOrCreate(identifier).getBoundingBox(placementData, pos));
+    public DefinedStructurePiece(WorldGenFeatureStructurePieceType type, int length, DefinedStructureManager structureManager, MinecraftKey id, String template, DefinedStructureInfo placementData, BlockPosition pos) {
+        super(type, length, structureManager.getOrCreate(id).getBoundingBox(placementData, pos));
         this.setOrientation(EnumDirection.NORTH);
-        this.templateName = string;
+        this.templateName = template;
         this.templatePosition = pos;
-        this.template = structureManager.getOrCreate(identifier);
+        this.template = structureManager.getOrCreate(id);
         this.placeSettings = placementData;
     }
 
-    public DefinedStructurePiece(WorldGenFeatureStructurePieceType type, NBTTagCompound compoundTag, WorldServer world, Function<MinecraftKey, DefinedStructureInfo> function) {
-        super(type, compoundTag);
+    public DefinedStructurePiece(WorldGenFeatureStructurePieceType type, NBTTagCompound nbt, DefinedStructureManager structureManager, Function<MinecraftKey, DefinedStructureInfo> placementDataGetter) {
+        super(type, nbt);
         this.setOrientation(EnumDirection.NORTH);
-        this.templateName = compoundTag.getString("Template");
-        this.templatePosition = new BlockPosition(compoundTag.getInt("TPX"), compoundTag.getInt("TPY"), compoundTag.getInt("TPZ"));
+        this.templateName = nbt.getString("Template");
+        this.templatePosition = new BlockPosition(nbt.getInt("TPX"), nbt.getInt("TPY"), nbt.getInt("TPZ"));
         MinecraftKey resourceLocation = this.makeTemplateLocation();
-        this.template = world.getStructureManager().getOrCreate(resourceLocation);
-        this.placeSettings = function.apply(resourceLocation);
+        this.template = structureManager.getOrCreate(resourceLocation);
+        this.placeSettings = placementDataGetter.apply(resourceLocation);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
     }
 
@@ -58,7 +58,7 @@ public abstract class DefinedStructurePiece extends StructurePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
+    protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
         nbt.setInt("TPX", this.templatePosition.getX());
         nbt.setInt("TPY", this.templatePosition.getY());
         nbt.setInt("TPZ", this.templatePosition.getZ());
@@ -66,15 +66,15 @@ public abstract class DefinedStructurePiece extends StructurePiece {
     }
 
     @Override
-    public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-        this.placeSettings.setBoundingBox(boundingBox);
+    public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        this.placeSettings.setBoundingBox(chunkBox);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
         if (this.template.placeInWorld(world, this.templatePosition, pos, this.placeSettings, random, 2)) {
             for(DefinedStructure.BlockInfo structureBlockInfo : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK)) {
                 if (structureBlockInfo.nbt != null) {
                     BlockPropertyStructureMode structureMode = BlockPropertyStructureMode.valueOf(structureBlockInfo.nbt.getString("mode"));
                     if (structureMode == BlockPropertyStructureMode.DATA) {
-                        this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, world, random, boundingBox);
+                        this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, world, random, chunkBox);
                     }
                 }
             }
@@ -102,11 +102,12 @@ public abstract class DefinedStructurePiece extends StructurePiece {
             }
         }
 
-        return true;
     }
 
     protected abstract void handleDataMarker(String metadata, BlockPosition pos, WorldAccess world, Random random, StructureBoundingBox boundingBox);
 
+    /** @deprecated */
+    @Deprecated
     @Override
     public void move(int x, int y, int z) {
         super.move(x, y, z);

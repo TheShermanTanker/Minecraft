@@ -189,7 +189,7 @@ public class StatisticManagerServer extends StatisticManager {
 
         JsonObject jsonObject2 = new JsonObject();
         jsonObject2.add("stats", jsonObject);
-        jsonObject2.addProperty("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+        jsonObject2.addProperty("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         return jsonObject2.toString();
     }
 

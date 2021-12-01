@@ -2,8 +2,8 @@ package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.util.Unit;
 import net.minecraft.util.thread.PairedQueue;
 import net.minecraft.util.thread.ThreadedMailbox;
@@ -22,14 +23,14 @@ import net.minecraft.world.level.ChunkCoordIntPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class IOWorker implements AutoCloseable {
+public class IOWorker implements ChunkScanAccess, AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
     private final AtomicBoolean shutdownRequested = new AtomicBoolean();
     private final ThreadedMailbox<PairedQueue.IntRunnable> mailbox;
     private final RegionFileCache storage;
     private final Map<ChunkCoordIntPair, IOWorker.PendingStore> pendingWrites = Maps.newLinkedHashMap();
 
-    protected IOWorker(File directory, boolean dsync, String name) {
+    protected IOWorker(Path directory, boolean dsync, String name) {
         this.storage = new RegionFileCache(directory, dsync);
         this.mailbox = new ThreadedMailbox<>(new PairedQueue.FixedPriorityQueue(IOWorker.Priority.values().length), SystemUtils.ioPool(), "IOWorker-" + name);
     }
@@ -76,7 +77,7 @@ public class IOWorker implements AutoCloseable {
         });
     }
 
-    public CompletableFuture<Void> synchronize(boolean bl) {
+    public CompletableFuture<Void> synchronize(boolean sync) {
         CompletableFuture<Void> completableFuture = this.submitTask(() -> {
             return Either.left(CompletableFuture.allOf(this.pendingWrites.values().stream().map((pendingStore) -> {
                 return pendingStore.result;
@@ -84,7 +85,7 @@ public class IOWorker implements AutoCloseable {
                 return new CompletableFuture[i];
             })));
         }).thenCompose(Function.identity());
-        return bl ? completableFuture.thenCompose((void_) -> {
+        return sync ? completableFuture.thenCompose((void_) -> {
             return this.submitTask(() -> {
                 try {
                     this.storage.flush();
@@ -98,6 +99,27 @@ public class IOWorker implements AutoCloseable {
             return this.submitTask(() -> {
                 return Either.left((Void)null);
             });
+        });
+    }
+
+    @Override
+    public CompletableFuture<Void> scanChunk(ChunkCoordIntPair pos, StreamTagVisitor scanner) {
+        return this.submitTask(() -> {
+            try {
+                IOWorker.PendingStore pendingStore = this.pendingWrites.get(pos);
+                if (pendingStore != null) {
+                    if (pendingStore.data != null) {
+                        pendingStore.data.acceptAsRoot(scanner);
+                    }
+                } else {
+                    this.storage.scanChunk(pos, scanner);
+                }
+
+                return Either.left((Void)null);
+            } catch (Exception var4) {
+                LOGGER.warn("Failed to bulk scan chunk {}", pos, var4);
+                return Either.right(var4);
+            }
         });
     }
 

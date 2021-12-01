@@ -1,40 +1,89 @@
 package net.minecraft.util;
 
-import com.mojang.datafixers.util.Pair;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportSystemDetails;
 import net.minecraft.ReportedException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ThreadingDetector {
-    public static void checkAndLock(Semaphore semaphore, @Nullable DebugBuffer<Pair<Thread, StackTraceElement[]>> lockStack, String message) {
-        boolean bl = semaphore.tryAcquire();
-        if (!bl) {
-            throw makeThreadingException(message, lockStack);
-        }
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final String name;
+    private final Semaphore lock = new Semaphore(1);
+    private final Lock stackTraceLock = new ReentrantLock();
+    @Nullable
+    private volatile Thread threadThatFailedToAcquire;
+    @Nullable
+    private volatile ReportedException fullException;
+
+    public ThreadingDetector(String name) {
+        this.name = name;
     }
 
-    public static ReportedException makeThreadingException(String message, @Nullable DebugBuffer<Pair<Thread, StackTraceElement[]>> lockStack) {
-        String string = Thread.getAllStackTraces().keySet().stream().filter(Objects::nonNull).map((thread) -> {
-            return thread.getName() + ": \n\tat " + (String)Arrays.stream(thread.getStackTrace()).map(Object::toString).collect(Collectors.joining("\n\tat "));
-        }).collect(Collectors.joining("\n"));
-        CrashReport crashReport = new CrashReport("Accessing " + message + " from multiple threads", new IllegalStateException());
-        CrashReportSystemDetails crashReportCategory = crashReport.addCategory("Thread dumps");
-        crashReportCategory.setDetail("Thread dumps", string);
-        if (lockStack != null) {
-            StringBuilder stringBuilder = new StringBuilder();
+    public void checkAndLock() {
+        boolean bl = false;
 
-            for(Pair<Thread, StackTraceElement[]> pair : lockStack.dump()) {
-                stringBuilder.append("Thread ").append(pair.getFirst().getName()).append(": \n\tat ").append(Arrays.stream(pair.getSecond()).map(Object::toString).collect(Collectors.joining("\n\tat "))).append("\n");
+        try {
+            this.stackTraceLock.lock();
+            if (!this.lock.tryAcquire()) {
+                this.threadThatFailedToAcquire = Thread.currentThread();
+                bl = true;
+                this.stackTraceLock.unlock();
+
+                try {
+                    this.lock.acquire();
+                } catch (InterruptedException var6) {
+                    Thread.currentThread().interrupt();
+                }
+
+                throw this.fullException;
+            }
+        } finally {
+            if (!bl) {
+                this.stackTraceLock.unlock();
             }
 
-            crashReportCategory.setDetail("Last threads", stringBuilder.toString());
         }
 
+    }
+
+    public void checkAndUnlock() {
+        try {
+            this.stackTraceLock.lock();
+            Thread thread = this.threadThatFailedToAcquire;
+            if (thread != null) {
+                ReportedException reportedException = makeThreadingException(this.name, thread);
+                this.fullException = reportedException;
+                this.lock.release();
+                throw reportedException;
+            }
+
+            this.lock.release();
+        } finally {
+            this.stackTraceLock.unlock();
+        }
+
+    }
+
+    public static ReportedException makeThreadingException(String message, @Nullable Thread thread) {
+        String string = Stream.of(Thread.currentThread(), thread).filter(Objects::nonNull).map(ThreadingDetector::stackTrace).collect(Collectors.joining("\n"));
+        String string2 = "Accessing " + message + " from multiple threads";
+        CrashReport crashReport = new CrashReport(string2, new IllegalStateException(string2));
+        CrashReportSystemDetails crashReportCategory = crashReport.addCategory("Thread dumps");
+        crashReportCategory.setDetail("Thread dumps", string);
+        LOGGER.error("Thread dumps: \n" + string);
         return new ReportedException(crashReport);
+    }
+
+    private static String stackTrace(Thread thread) {
+        return thread.getName() + ": \n\tat " + (String)Arrays.stream(thread.getStackTrace()).map(Object::toString).collect(Collectors.joining("\n\tat "));
     }
 }

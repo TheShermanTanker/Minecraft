@@ -138,8 +138,8 @@ public class TagDataPack<T> {
     public Tags<T> build(Map<MinecraftKey, Tag.Builder> tags) {
         Map<MinecraftKey, Tag<T>> map = Maps.newHashMap();
         Function<MinecraftKey, Tag<T>> function = map::get;
-        Function<MinecraftKey, T> function2 = (resourceLocation) -> {
-            return this.idToValue.apply(resourceLocation).orElse((T)null);
+        Function<MinecraftKey, T> function2 = (id) -> {
+            return this.idToValue.apply(id).orElse((T)null);
         };
         Multimap<MinecraftKey, MinecraftKey> multimap = HashMultimap.create();
         tags.forEach((resourceLocation, builder) -> {

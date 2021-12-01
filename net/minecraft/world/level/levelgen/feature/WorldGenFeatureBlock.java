@@ -17,23 +17,21 @@ public class WorldGenFeatureBlock extends WorldGenerator<WorldGenFeatureBlockCon
         WorldGenFeatureBlockConfiguration simpleBlockConfiguration = context.config();
         GeneratorAccessSeed worldGenLevel = context.level();
         BlockPosition blockPos = context.origin();
-        if ((simpleBlockConfiguration.placeOn.isEmpty() || simpleBlockConfiguration.placeOn.contains(worldGenLevel.getType(blockPos.below()))) && (simpleBlockConfiguration.placeIn.isEmpty() || simpleBlockConfiguration.placeIn.contains(worldGenLevel.getType(blockPos))) && (simpleBlockConfiguration.placeUnder.isEmpty() || simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getType(blockPos.above())))) {
-            IBlockData blockState = simpleBlockConfiguration.toPlace.getState(context.random(), blockPos);
-            if (blockState.canPlace(worldGenLevel, blockPos)) {
-                if (blockState.getBlock() instanceof BlockTallPlant) {
-                    if (!worldGenLevel.isEmpty(blockPos.above())) {
-                        return false;
-                    }
-
-                    BlockTallPlant.placeAt(worldGenLevel, blockState, blockPos, 2);
-                } else {
-                    worldGenLevel.setTypeAndData(blockPos, blockState, 2);
+        IBlockData blockState = simpleBlockConfiguration.toPlace().getState(context.random(), blockPos);
+        if (blockState.canPlace(worldGenLevel, blockPos)) {
+            if (blockState.getBlock() instanceof BlockTallPlant) {
+                if (!worldGenLevel.isEmpty(blockPos.above())) {
+                    return false;
                 }
 
-                return true;
+                BlockTallPlant.placeAt(worldGenLevel, blockState, blockPos, 2);
+            } else {
+                worldGenLevel.setTypeAndData(blockPos, blockState, 2);
             }
-        }
 
-        return false;
+            return true;
+        } else {
+            return false;
+        }
     }
 }

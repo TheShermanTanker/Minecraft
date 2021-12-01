@@ -24,8 +24,8 @@ public class DebugReportProviderRegistryDump implements DebugReportProvider {
     @Override
     public void run(HashCache cache) throws IOException {
         JsonObject jsonObject = new JsonObject();
-        IRegistry.REGISTRY.keySet().forEach((resourceLocation) -> {
-            jsonObject.add(resourceLocation.toString(), dumpRegistry(IRegistry.REGISTRY.get(resourceLocation)));
+        IRegistry.REGISTRY.keySet().forEach((id) -> {
+            jsonObject.add(id.toString(), dumpRegistry(IRegistry.REGISTRY.get(id)));
         });
         Path path = this.generator.getOutputFolder().resolve("reports/registries.json");
         DebugReportProvider.save(GSON, cache, jsonObject, path);

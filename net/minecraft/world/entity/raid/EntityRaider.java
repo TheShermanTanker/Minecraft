@@ -288,7 +288,7 @@ public abstract class EntityRaider extends EntityMonsterPatrolling {
 
     public abstract SoundEffect getCelebrateSound();
 
-    public class HoldGroundAttackGoal extends PathfinderGoal {
+    protected class HoldGroundAttackGoal extends PathfinderGoal {
         private final EntityRaider mob;
         private final float hostileRadiusSqr;
         public final PathfinderTargetCondition shoutTargeting = PathfinderTargetCondition.forNonCombat().range(8.0D).ignoreLineOfSight().ignoreInvisibilityTesting();
@@ -329,6 +329,11 @@ public abstract class EntityRaider extends EntityMonsterPatrolling {
                 this.mob.setAggressive(true);
             }
 
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
         }
 
         @Override
@@ -415,11 +420,11 @@ public abstract class EntityRaider extends EntityMonsterPatrolling {
 
         @Override
         public void tick() {
-            if (!this.mob.isSilent() && this.mob.random.nextInt(100) == 0) {
+            if (!this.mob.isSilent() && this.mob.random.nextInt(this.adjustedTickDelay(100)) == 0) {
                 EntityRaider.this.playSound(EntityRaider.this.getCelebrateSound(), EntityRaider.this.getSoundVolume(), EntityRaider.this.getVoicePitch());
             }
 
-            if (!this.mob.isPassenger() && this.mob.random.nextInt(50) == 0) {
+            if (!this.mob.isPassenger() && this.mob.random.nextInt(this.adjustedTickDelay(50)) == 0) {
                 this.mob.getControllerJump().jump();
             }
 

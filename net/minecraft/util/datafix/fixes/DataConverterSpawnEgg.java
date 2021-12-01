@@ -89,7 +89,6 @@ public class DataConverterSpawnEgg extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Schema schema = this.getInputSchema();
         Type<?> type = schema.getType(DataConverterTypes.ITEM_STACK);

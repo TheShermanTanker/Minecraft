@@ -186,7 +186,7 @@ public class PlayerInventory implements IInventory, INamableTileEntity {
         if (itemStack.isEmpty()) {
             itemStack = new ItemStack(item, 0);
             if (stack.hasTag()) {
-                itemStack.setTag(stack.getTag().c());
+                itemStack.setTag(stack.getTag().copy());
             }
 
             this.setItem(slot, itemStack);

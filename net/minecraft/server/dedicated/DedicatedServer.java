@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -50,7 +49,6 @@ import net.minecraft.server.rcon.thread.RemoteControlListener;
 import net.minecraft.server.rcon.thread.RemoteStatusListener;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.monitoring.jmx.MinecraftServerBeans;
-import net.minecraft.world.MojangStatisticsGenerator;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Items;
@@ -69,8 +67,10 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     private static final int CONVERSION_RETRIES = 2;
     private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
     private final List<ServerCommand> consoleInput = Collections.synchronizedList(Lists.newArrayList());
+    @Nullable
     private RemoteStatusListener queryThreadGs4;
     public final RemoteControlCommandListener rconConsoleSource;
+    @Nullable
     private RemoteControlListener rconThread;
     public DedicatedServerSettings settings;
     @Nullable
@@ -109,7 +109,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
         thread.setDaemon(true);
         thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
         thread.start();
-        LOGGER.info("Starting minecraft server version {}", (Object)SharedConstants.getGameVersion().getName());
+        LOGGER.info("Starting minecraft server version {}", (Object)SharedConstants.getCurrentVersion().getName());
         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
             LOGGER.warn("To start the server with more ram, launch it as \"java -Xmx1024M -Xms1024M -jar minecraft_server.jar\"");
         }
@@ -169,9 +169,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
         } else {
             this.setPlayerList(new DedicatedPlayerList(this, this.registryHolder, this.playerDataStorage));
             long l = SystemUtils.getMonotonicNanos();
-            TileEntitySkull.setProfileCache(this.getUserCache());
-            TileEntitySkull.setSessionService(this.getMinecraftSessionService());
-            TileEntitySkull.setMainThreadExecutor(this);
+            TileEntitySkull.setup(this.getUserCache(), this.getMinecraftSessionService(), this);
             UserCache.setUsesAuthentication(this.getOnlineMode());
             LOGGER.info("Preparing level \"{}\"", (Object)this.getWorld());
             this.loadWorld();
@@ -269,7 +267,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     @Override
     public SystemReport fillServerSystemReport(SystemReport details) {
         details.setDetail("Is Modded", () -> {
-            return this.getModded().orElse("Unknown (can't tell)");
+            return this.getModdedStatus().fullDescription();
         });
         details.setDetail("Type", () -> {
             return "Dedicated Server (map_server.txt)";
@@ -290,6 +288,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             writer.write(String.format("max-world-size=%d%n", dedicatedServerProperties.maxWorldSize));
             writer.write(String.format("spawn-npcs=%s%n", dedicatedServerProperties.spawnNpcs));
             writer.write(String.format("view-distance=%d%n", dedicatedServerProperties.viewDistance));
+            writer.write(String.format("simulation-distance=%d%n", dedicatedServerProperties.simulationDistance));
             writer.write(String.format("spawn-animals=%s%n", dedicatedServerProperties.spawnAnimals));
             writer.write(String.format("generate-structures=%s%n", dedicatedServerProperties.getWorldGenSettings(this.registryHolder).shouldGenerateMapFeatures()));
             writer.write(String.format("use-native=%s%n", dedicatedServerProperties.useNativeTransport));
@@ -310,12 +309,6 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
             writer.close();
         }
 
-    }
-
-    @Override
-    public Optional<String> getModded() {
-        String string = this.getServerModName();
-        return !"vanilla".equals(string) ? Optional.of("Definitely; Server brand changed to '" + string + "'") : Optional.empty();
     }
 
     @Override
@@ -347,18 +340,6 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     @Override
     public boolean getAllowNether() {
         return this.getDedicatedServerProperties().allowNether;
-    }
-
-    @Override
-    public void populateSnooper(MojangStatisticsGenerator snooper) {
-        snooper.setDynamicData("whitelist_enabled", this.getPlayerList().getHasWhitelist());
-        snooper.setDynamicData("whitelist_count", this.getPlayerList().getWhitelisted().length);
-        super.populateSnooper(snooper);
-    }
-
-    @Override
-    public boolean isSnooperEnabled() {
-        return this.getDedicatedServerProperties().snooperEnabled;
     }
 
     public void issueCommand(String command, CommandListenerWrapper commandSource) {
@@ -457,6 +438,11 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     @Override
     public boolean repliesToStatus() {
         return this.getDedicatedServerProperties().enableStatus;
+    }
+
+    @Override
+    public boolean hidesOnlinePlayers() {
+        return this.getDedicatedServerProperties().hideOnlinePlayers;
     }
 
     @Override
@@ -591,6 +577,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
     public void stop() {
         super.stop();
         SystemUtils.shutdownExecutors();
+        TileEntitySkull.clear();
     }
 
     @Override

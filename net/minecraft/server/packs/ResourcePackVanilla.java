@@ -37,6 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ResourcePackVanilla implements IResourcePack, ResourceProvider {
+    @Nullable
     public static Path generatedDir;
     private static final Logger LOGGER = LogManager.getLogger();
     public static Class<?> clientObject;

@@ -31,7 +31,13 @@ public class DismountUtil {
     }
 
     public static boolean canDismountTo(ICollisionAccess world, EntityLiving entity, AxisAlignedBB targetBox) {
-        return world.getBlockCollisions(entity, targetBox).allMatch(VoxelShape::isEmpty);
+        for(VoxelShape voxelShape : world.getBlockCollisions(entity, targetBox)) {
+            if (!voxelShape.isEmpty()) {
+                return false;
+            }
+        }
+
+        return world.getWorldBorder().isWithinBounds(targetBox);
     }
 
     public static boolean canDismountTo(ICollisionAccess world, Vec3D offset, EntityLiving entity, EntityPose pose) {
@@ -74,7 +80,15 @@ public class DismountUtil {
                 return null;
             } else {
                 Vec3D vec3 = Vec3D.upFromBottomCenterOf(pos, d);
-                return world.getBlockCollisions((Entity)null, entityType.getDimensions().makeBoundingBox(vec3)).allMatch(VoxelShape::isEmpty) ? vec3 : null;
+                AxisAlignedBB aABB = entityType.getDimensions().makeBoundingBox(vec3);
+
+                for(VoxelShape voxelShape : world.getBlockCollisions((Entity)null, aABB)) {
+                    if (!voxelShape.isEmpty()) {
+                        return null;
+                    }
+                }
+
+                return !world.getWorldBorder().isWithinBounds(aABB) ? null : vec3;
             }
         }
     }

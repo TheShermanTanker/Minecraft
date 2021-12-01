@@ -1,8 +1,6 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketDataSerializer;
 
 public interface DataPalette<T> {
@@ -10,8 +8,7 @@ public interface DataPalette<T> {
 
     boolean maybeHas(Predicate<T> predicate);
 
-    @Nullable
-    T valueFor(int index);
+    T valueFor(int id);
 
     void read(PacketDataSerializer buf);
 
@@ -21,5 +18,5 @@ public interface DataPalette<T> {
 
     int getSize();
 
-    void read(NBTTagList nbt);
+    DataPalette<T> copy();
 }

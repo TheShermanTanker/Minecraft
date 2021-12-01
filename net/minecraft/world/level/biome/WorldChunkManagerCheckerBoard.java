@@ -35,7 +35,7 @@ public class WorldChunkManagerCheckerBoard extends WorldChunkManager {
     }
 
     @Override
-    public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
-        return this.allowedBiomes.get(Math.floorMod((biomeX >> this.bitShift) + (biomeZ >> this.bitShift), this.allowedBiomes.size())).get();
+    public BiomeBase getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
+        return this.allowedBiomes.get(Math.floorMod((x >> this.bitShift) + (z >> this.bitShift), this.allowedBiomes.size())).get();
     }
 }

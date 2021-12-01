@@ -12,7 +12,6 @@ public class DataConverterSchemaV1451_3 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         schema.registerSimple(map, "minecraft:egg");

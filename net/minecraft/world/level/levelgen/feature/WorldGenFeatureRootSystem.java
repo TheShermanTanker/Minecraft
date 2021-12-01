@@ -30,15 +30,15 @@ public class WorldGenFeatureRootSystem extends WorldGenerator<RootSystemConfigur
             BlockPosition blockPos2 = context.origin();
             RootSystemConfiguration rootSystemConfiguration = context.config();
             BlockPosition.MutableBlockPosition mutableBlockPos = blockPos2.mutable();
-            if (this.placeDirtAndTree(worldGenLevel, context.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
-                this.placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
+            if (placeDirtAndTree(worldGenLevel, context.chunkGenerator(), rootSystemConfiguration, random, mutableBlockPos, blockPos2)) {
+                placeRoots(worldGenLevel, rootSystemConfiguration, random, blockPos2, mutableBlockPos);
             }
 
             return true;
         }
     }
 
-    private boolean spaceForTree(GeneratorAccessSeed world, RootSystemConfiguration config, BlockPosition pos) {
+    private static boolean spaceForTree(GeneratorAccessSeed world, RootSystemConfiguration config, BlockPosition pos) {
         BlockPosition.MutableBlockPosition mutableBlockPos = pos.mutable();
 
         for(int i = 1; i <= config.requiredVerticalSpaceForTree; ++i) {
@@ -53,45 +53,51 @@ public class WorldGenFeatureRootSystem extends WorldGenerator<RootSystemConfigur
     }
 
     private static boolean isAllowedTreeSpace(IBlockData state, int height, int allowedVerticalWaterForTree) {
-        return state.isAir() || height <= allowedVerticalWaterForTree && state.getFluid().is(TagsFluid.WATER);
+        if (state.isAir()) {
+            return true;
+        } else {
+            int i = height + 1;
+            return i <= allowedVerticalWaterForTree && state.getFluid().is(TagsFluid.WATER);
+        }
     }
 
-    private boolean placeDirtAndTree(GeneratorAccessSeed world, ChunkGenerator generator, RootSystemConfiguration config, Random random, BlockPosition.MutableBlockPosition mutablePos, BlockPosition pos) {
-        int i = pos.getX();
-        int j = pos.getZ();
-
-        for(int k = 0; k < config.rootColumnMaxHeight; ++k) {
+    private static boolean placeDirtAndTree(GeneratorAccessSeed world, ChunkGenerator generator, RootSystemConfiguration config, Random random, BlockPosition.MutableBlockPosition mutablePos, BlockPosition pos) {
+        for(int i = 0; i < config.rootColumnMaxHeight; ++i) {
             mutablePos.move(EnumDirection.UP);
-            if (WorldGenTrees.validTreePos(world, mutablePos)) {
-                if (this.spaceForTree(world, config, mutablePos)) {
-                    BlockPosition blockPos = mutablePos.below();
-                    if (world.getFluid(blockPos).is(TagsFluid.LAVA) || !world.getType(blockPos).getMaterial().isBuildable()) {
-                        return false;
-                    }
-
-                    if (this.tryPlaceAzaleaTree(world, generator, config, random, mutablePos)) {
-                        return true;
-                    }
+            if (config.allowedTreePosition.test(world, mutablePos) && spaceForTree(world, config, mutablePos)) {
+                BlockPosition blockPos = mutablePos.below();
+                if (world.getFluid(blockPos).is(TagsFluid.LAVA) || !world.getType(blockPos).getMaterial().isBuildable()) {
+                    return false;
                 }
-            } else {
-                this.placeRootedDirt(world, config, random, i, j, mutablePos);
+
+                if (config.treeFeature.get().place(world, generator, random, mutablePos)) {
+                    placeDirt(pos, pos.getY() + i, world, config, random);
+                    return true;
+                }
             }
         }
 
         return false;
     }
 
-    private boolean tryPlaceAzaleaTree(GeneratorAccessSeed world, ChunkGenerator generator, RootSystemConfiguration config, Random random, BlockPosition pos) {
-        return config.treeFeature.get().place(world, generator, random, pos);
+    private static void placeDirt(BlockPosition pos, int maxY, GeneratorAccessSeed world, RootSystemConfiguration config, Random random) {
+        int i = pos.getX();
+        int j = pos.getZ();
+        BlockPosition.MutableBlockPosition mutableBlockPos = pos.mutable();
+
+        for(int k = pos.getY(); k < maxY; ++k) {
+            placeRootedDirt(world, config, random, i, j, mutableBlockPos.set(i, k, j));
+        }
+
     }
 
-    private void placeRootedDirt(GeneratorAccessSeed world, RootSystemConfiguration config, Random random, int x, int z, BlockPosition.MutableBlockPosition mutablePos) {
+    private static void placeRootedDirt(GeneratorAccessSeed world, RootSystemConfiguration config, Random random, int x, int z, BlockPosition.MutableBlockPosition mutablePos) {
         int i = config.rootRadius;
         Tag<Block> tag = TagsBlock.getAllTags().getTag(config.rootReplaceable);
-        Predicate<IBlockData> predicate = tag == null ? (blockState) -> {
+        Predicate<IBlockData> predicate = tag == null ? (state) -> {
             return true;
-        } : (blockState) -> {
-            return blockState.is(tag);
+        } : (state) -> {
+            return state.is(tag);
         };
 
         for(int j = 0; j < config.rootPlacementAttempts; ++j) {
@@ -106,7 +112,7 @@ public class WorldGenFeatureRootSystem extends WorldGenerator<RootSystemConfigur
 
     }
 
-    private void placeRoots(GeneratorAccessSeed world, RootSystemConfiguration config, Random random, BlockPosition pos, BlockPosition.MutableBlockPosition mutablePos) {
+    private static void placeRoots(GeneratorAccessSeed world, RootSystemConfiguration config, Random random, BlockPosition pos, BlockPosition.MutableBlockPosition mutablePos) {
         int i = config.hangingRootRadius;
         int j = config.hangingRootsVerticalSpan;
 

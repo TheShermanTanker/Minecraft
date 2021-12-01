@@ -29,10 +29,10 @@ public class LootItemFunctionCopyNBT extends LootItemFunctionConditional {
     final NbtProvider source;
     final List<LootItemFunctionCopyNBT.CopyOperation> operations;
 
-    LootItemFunctionCopyNBT(LootItemCondition[] conditions, NbtProvider nbtProvider, List<LootItemFunctionCopyNBT.CopyOperation> list) {
+    LootItemFunctionCopyNBT(LootItemCondition[] conditions, NbtProvider source, List<LootItemFunctionCopyNBT.CopyOperation> operations) {
         super(conditions);
-        this.source = nbtProvider;
-        this.operations = ImmutableList.copyOf(list);
+        this.source = source;
+        this.operations = ImmutableList.copyOf(operations);
     }
 
     @Override
@@ -116,8 +116,8 @@ public class LootItemFunctionCopyNBT extends LootItemFunctionConditional {
 
         public abstract void merge(NBTBase itemTag, ArgumentNBTKey.NbtPath targetPath, List<NBTBase> sourceTags) throws CommandSyntaxException;
 
-        Action(String string2) {
-            this.name = string2;
+        Action(String name) {
+            this.name = name;
         }
 
         public static LootItemFunctionCopyNBT.Action getByName(String name) {
@@ -135,8 +135,8 @@ public class LootItemFunctionCopyNBT extends LootItemFunctionConditional {
         private final NbtProvider source;
         private final List<LootItemFunctionCopyNBT.CopyOperation> ops = Lists.newArrayList();
 
-        Builder(NbtProvider nbtProvider) {
-            this.source = nbtProvider;
+        Builder(NbtProvider source) {
+            this.source = source;
         }
 
         public LootItemFunctionCopyNBT.Builder copy(String source, String target, LootItemFunctionCopyNBT.Action operator) {
@@ -166,12 +166,12 @@ public class LootItemFunctionCopyNBT extends LootItemFunctionConditional {
         private final ArgumentNBTKey.NbtPath targetPath;
         private final LootItemFunctionCopyNBT.Action op;
 
-        CopyOperation(String string, String string2, LootItemFunctionCopyNBT.Action mergeStrategy) {
-            this.sourcePathText = string;
-            this.sourcePath = LootItemFunctionCopyNBT.compileNbtPath(string);
-            this.targetPathText = string2;
-            this.targetPath = LootItemFunctionCopyNBT.compileNbtPath(string2);
-            this.op = mergeStrategy;
+        CopyOperation(String sourcePath, String targetPath, LootItemFunctionCopyNBT.Action operator) {
+            this.sourcePathText = sourcePath;
+            this.sourcePath = LootItemFunctionCopyNBT.compileNbtPath(sourcePath);
+            this.targetPathText = targetPath;
+            this.targetPath = LootItemFunctionCopyNBT.compileNbtPath(targetPath);
+            this.op = operator;
         }
 
         public void apply(Supplier<NBTBase> itemTagTagGetter, NBTBase sourceEntityTag) {

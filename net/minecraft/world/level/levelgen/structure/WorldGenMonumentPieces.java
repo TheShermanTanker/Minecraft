@@ -9,7 +9,6 @@ import java.util.Set;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.GroupDataEntity;
@@ -22,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public class WorldGenMonumentPieces {
     private WorldGenMonumentPieces() {
@@ -103,7 +103,7 @@ public class WorldGenMonumentPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
         }
 
         protected void generateWaterBox(GeneratorAccessSeed world, StructureBoundingBox box, int x, int y, int z, int width, int height, int depth) {
@@ -228,7 +228,7 @@ public class WorldGenMonumentPieces {
             this.childPieces.add(new WorldGenMonumentPieces.WorldGenMonumentPiecePenthouse(orientation, boundingBox3));
         }
 
-        public WorldGenMonumentPiece1(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece1(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_BUILDING, nbt);
         }
 
@@ -346,17 +346,17 @@ public class WorldGenMonumentPieces {
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             int i = Math.max(world.getSeaLevel(), 64) - this.boundingBox.minY();
-            this.generateWaterBox(world, boundingBox, 0, 0, 0, 58, i, 58);
-            this.generateWing(false, 0, world, random, boundingBox);
-            this.generateWing(true, 33, world, random, boundingBox);
-            this.generateEntranceArchs(world, random, boundingBox);
-            this.generateEntranceWall(world, random, boundingBox);
-            this.generateRoofPiece(world, random, boundingBox);
-            this.generateLowerWall(world, random, boundingBox);
-            this.generateMiddleWall(world, random, boundingBox);
-            this.generateUpperWall(world, random, boundingBox);
+            this.generateWaterBox(world, chunkBox, 0, 0, 0, 58, i, 58);
+            this.generateWing(false, 0, world, random, chunkBox);
+            this.generateWing(true, 33, world, random, chunkBox);
+            this.generateEntranceArchs(world, random, chunkBox);
+            this.generateEntranceWall(world, random, chunkBox);
+            this.generateRoofPiece(world, random, chunkBox);
+            this.generateLowerWall(world, random, chunkBox);
+            this.generateMiddleWall(world, random, chunkBox);
+            this.generateUpperWall(world, random, chunkBox);
 
             for(int j = 0; j < 7; ++j) {
                 int k = 0;
@@ -371,8 +371,8 @@ public class WorldGenMonumentPieces {
 
                     for(int n = 0; n < 4; ++n) {
                         for(int o = 0; o < 4; ++o) {
-                            this.placeBlock(world, BASE_LIGHT, l + n, 0, m + o, boundingBox);
-                            this.fillColumnDown(world, BASE_LIGHT, l + n, -1, m + o, boundingBox);
+                            this.placeBlock(world, BASE_LIGHT, l + n, 0, m + o, chunkBox);
+                            this.fillColumnDown(world, BASE_LIGHT, l + n, -1, m + o, chunkBox);
                         }
                     }
 
@@ -385,19 +385,18 @@ public class WorldGenMonumentPieces {
             }
 
             for(int p = 0; p < 5; ++p) {
-                this.generateWaterBox(world, boundingBox, -1 - p, 0 + p * 2, -1 - p, -1 - p, 23, 58 + p);
-                this.generateWaterBox(world, boundingBox, 58 + p, 0 + p * 2, -1 - p, 58 + p, 23, 58 + p);
-                this.generateWaterBox(world, boundingBox, 0 - p, 0 + p * 2, -1 - p, 57 + p, 23, -1 - p);
-                this.generateWaterBox(world, boundingBox, 0 - p, 0 + p * 2, 58 + p, 57 + p, 23, 58 + p);
+                this.generateWaterBox(world, chunkBox, -1 - p, 0 + p * 2, -1 - p, -1 - p, 23, 58 + p);
+                this.generateWaterBox(world, chunkBox, 58 + p, 0 + p * 2, -1 - p, 58 + p, 23, 58 + p);
+                this.generateWaterBox(world, chunkBox, 0 - p, 0 + p * 2, -1 - p, 57 + p, 23, -1 - p);
+                this.generateWaterBox(world, chunkBox, 0 - p, 0 + p * 2, 58 + p, 57 + p, 23, 58 + p);
             }
 
             for(WorldGenMonumentPieces.WorldGenMonumentPiece oceanMonumentPiece : this.childPieces) {
-                if (oceanMonumentPiece.getBoundingBox().intersects(boundingBox)) {
-                    oceanMonumentPiece.postProcess(world, structureAccessor, chunkGenerator, random, boundingBox, chunkPos, pos);
+                if (oceanMonumentPiece.getBoundingBox().intersects(chunkBox)) {
+                    oceanMonumentPiece.postProcess(world, structureAccessor, chunkGenerator, random, chunkBox, chunkPos, pos);
                 }
             }
 
-            return true;
         }
 
         private void generateWing(boolean bl, int i, GeneratorAccessSeed world, Random random, StructureBoundingBox box) {
@@ -729,19 +728,19 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_CORE_ROOM, 1, orientation, setting, 2, 2, 2);
         }
 
-        public WorldGenMonumentPiece2(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece2(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_CORE_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBoxOnFillOnly(world, boundingBox, 1, 8, 0, 14, 8, 14, BASE_GRAY);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBoxOnFillOnly(world, chunkBox, 1, 8, 0, 14, 8, 14, BASE_GRAY);
             int i = 7;
             IBlockData blockState = BASE_LIGHT;
-            this.generateBox(world, boundingBox, 0, 7, 0, 0, 7, 15, blockState, blockState, false);
-            this.generateBox(world, boundingBox, 15, 7, 0, 15, 7, 15, blockState, blockState, false);
-            this.generateBox(world, boundingBox, 1, 7, 0, 15, 7, 0, blockState, blockState, false);
-            this.generateBox(world, boundingBox, 1, 7, 15, 14, 7, 15, blockState, blockState, false);
+            this.generateBox(world, chunkBox, 0, 7, 0, 0, 7, 15, blockState, blockState, false);
+            this.generateBox(world, chunkBox, 15, 7, 0, 15, 7, 15, blockState, blockState, false);
+            this.generateBox(world, chunkBox, 1, 7, 0, 15, 7, 0, blockState, blockState, false);
+            this.generateBox(world, chunkBox, 1, 7, 15, 14, 7, 15, blockState, blockState, false);
 
             for(int j = 1; j <= 6; ++j) {
                 blockState = BASE_LIGHT;
@@ -750,56 +749,55 @@ public class WorldGenMonumentPieces {
                 }
 
                 for(int k = 0; k <= 15; k += 15) {
-                    this.generateBox(world, boundingBox, k, j, 0, k, j, 1, blockState, blockState, false);
-                    this.generateBox(world, boundingBox, k, j, 6, k, j, 9, blockState, blockState, false);
-                    this.generateBox(world, boundingBox, k, j, 14, k, j, 15, blockState, blockState, false);
+                    this.generateBox(world, chunkBox, k, j, 0, k, j, 1, blockState, blockState, false);
+                    this.generateBox(world, chunkBox, k, j, 6, k, j, 9, blockState, blockState, false);
+                    this.generateBox(world, chunkBox, k, j, 14, k, j, 15, blockState, blockState, false);
                 }
 
-                this.generateBox(world, boundingBox, 1, j, 0, 1, j, 0, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 6, j, 0, 9, j, 0, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 14, j, 0, 14, j, 0, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 1, j, 15, 14, j, 15, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 1, j, 0, 1, j, 0, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 6, j, 0, 9, j, 0, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 14, j, 0, 14, j, 0, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 1, j, 15, 14, j, 15, blockState, blockState, false);
             }
 
-            this.generateBox(world, boundingBox, 6, 3, 6, 9, 6, 9, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 7, 4, 7, 8, 5, 8, Blocks.GOLD_BLOCK.getBlockData(), Blocks.GOLD_BLOCK.getBlockData(), false);
+            this.generateBox(world, chunkBox, 6, 3, 6, 9, 6, 9, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 7, 4, 7, 8, 5, 8, Blocks.GOLD_BLOCK.getBlockData(), Blocks.GOLD_BLOCK.getBlockData(), false);
 
             for(int l = 3; l <= 6; l += 3) {
                 for(int m = 6; m <= 9; m += 3) {
-                    this.placeBlock(world, LAMP_BLOCK, m, l, 6, boundingBox);
-                    this.placeBlock(world, LAMP_BLOCK, m, l, 9, boundingBox);
+                    this.placeBlock(world, LAMP_BLOCK, m, l, 6, chunkBox);
+                    this.placeBlock(world, LAMP_BLOCK, m, l, 9, chunkBox);
                 }
             }
 
-            this.generateBox(world, boundingBox, 5, 1, 6, 5, 2, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 1, 9, 5, 2, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 1, 6, 10, 2, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 1, 9, 10, 2, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 1, 5, 6, 2, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 9, 1, 5, 9, 2, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 1, 10, 6, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 9, 1, 10, 9, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 2, 5, 5, 6, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 2, 10, 5, 6, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 2, 5, 10, 6, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 2, 10, 10, 6, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 7, 1, 5, 7, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 7, 1, 10, 7, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 7, 9, 5, 7, 14, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 7, 9, 10, 7, 14, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 7, 5, 6, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 7, 10, 6, 7, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 9, 7, 5, 14, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 9, 7, 10, 14, 7, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 1, 2, 2, 1, 3, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 3, 1, 2, 3, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 13, 1, 2, 13, 1, 3, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 12, 1, 2, 12, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 1, 12, 2, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 3, 1, 13, 3, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 13, 1, 12, 13, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 12, 1, 13, 12, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
-            return true;
+            this.generateBox(world, chunkBox, 5, 1, 6, 5, 2, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 1, 9, 5, 2, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 1, 6, 10, 2, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 1, 9, 10, 2, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 1, 5, 6, 2, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 9, 1, 5, 9, 2, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 1, 10, 6, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 9, 1, 10, 9, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 2, 5, 5, 6, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 2, 10, 5, 6, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 2, 5, 10, 6, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 2, 10, 10, 6, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 7, 1, 5, 7, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 7, 1, 10, 7, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 7, 9, 5, 7, 14, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 7, 9, 10, 7, 14, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 7, 5, 6, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 7, 10, 6, 7, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 9, 7, 5, 14, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 9, 7, 10, 14, 7, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 1, 2, 2, 1, 3, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 3, 1, 2, 3, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 13, 1, 2, 13, 1, 3, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 12, 1, 2, 12, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 1, 12, 2, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 3, 1, 13, 3, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 13, 1, 12, 13, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 12, 1, 13, 12, 1, 13, BASE_LIGHT, BASE_LIGHT, false);
         }
     }
 
@@ -808,69 +806,68 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_X_ROOM, 1, orientation, setting, 2, 1, 1);
         }
 
-        public WorldGenMonumentPiece3(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece3(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_X_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition = this.roomDefinition.connections[EnumDirection.EAST.get3DDataValue()];
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 8, 0, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
-                this.generateDefaultFloor(world, boundingBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 8, 0, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             if (roomDefinition2.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 4, 1, 7, 4, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 4, 1, 7, 4, 6, BASE_GRAY);
             }
 
             if (roomDefinition.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 8, 4, 1, 14, 4, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 8, 4, 1, 14, 4, 6, BASE_GRAY);
             }
 
-            this.generateBox(world, boundingBox, 0, 3, 0, 0, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 15, 3, 0, 15, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 0, 15, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 7, 14, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 2, 0, 0, 2, 7, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 15, 2, 0, 15, 2, 7, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 1, 2, 0, 15, 2, 0, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 1, 2, 7, 14, 2, 7, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 15, 1, 0, 15, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 0, 15, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 7, 14, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 1, 0, 10, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 2, 0, 9, 2, 3, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 5, 3, 0, 10, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.placeBlock(world, LAMP_BLOCK, 6, 2, 3, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 9, 2, 3, boundingBox);
+            this.generateBox(world, chunkBox, 0, 3, 0, 0, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 15, 3, 0, 15, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 0, 15, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 7, 14, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 2, 0, 0, 2, 7, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 15, 2, 0, 15, 2, 7, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 1, 2, 0, 15, 2, 0, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 1, 2, 7, 14, 2, 7, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 15, 1, 0, 15, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 0, 15, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 7, 14, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 1, 0, 10, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 2, 0, 9, 2, 3, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 5, 3, 0, 10, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.placeBlock(world, LAMP_BLOCK, 6, 2, 3, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 9, 2, 3, chunkBox);
             if (roomDefinition2.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 0, 4, 2, 0);
+                this.generateWaterBox(world, chunkBox, 3, 1, 0, 4, 2, 0);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 7, 4, 2, 7);
+                this.generateWaterBox(world, chunkBox, 3, 1, 7, 4, 2, 7);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 3, 0, 2, 4);
+                this.generateWaterBox(world, chunkBox, 0, 1, 3, 0, 2, 4);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 11, 1, 0, 12, 2, 0);
+                this.generateWaterBox(world, chunkBox, 11, 1, 0, 12, 2, 0);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 11, 1, 7, 12, 2, 7);
+                this.generateWaterBox(world, chunkBox, 11, 1, 7, 12, 2, 7);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 15, 1, 3, 15, 2, 4);
+                this.generateWaterBox(world, chunkBox, 15, 1, 3, 15, 2, 4);
             }
 
-            return true;
         }
     }
 
@@ -879,27 +876,27 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_XY_ROOM, 1, orientation, setting, 2, 2, 1);
         }
 
-        public WorldGenMonumentPiece4(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece4(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_XY_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition = this.roomDefinition.connections[EnumDirection.EAST.get3DDataValue()];
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition2 = this.roomDefinition;
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition3 = roomDefinition2.connections[EnumDirection.UP.get3DDataValue()];
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition4 = roomDefinition.connections[EnumDirection.UP.get3DDataValue()];
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 8, 0, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
-                this.generateDefaultFloor(world, boundingBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 8, 0, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             if (roomDefinition3.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 8, 1, 7, 8, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 8, 1, 7, 8, 6, BASE_GRAY);
             }
 
             if (roomDefinition4.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 8, 8, 1, 14, 8, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 8, 8, 1, 14, 8, 6, BASE_GRAY);
             }
 
             for(int i = 1; i <= 7; ++i) {
@@ -908,84 +905,83 @@ public class WorldGenMonumentPieces {
                     blockState = BASE_GRAY;
                 }
 
-                this.generateBox(world, boundingBox, 0, i, 0, 0, i, 7, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 15, i, 0, 15, i, 7, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 1, i, 0, 15, i, 0, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 1, i, 7, 14, i, 7, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 0, i, 0, 0, i, 7, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 15, i, 0, 15, i, 7, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 1, i, 0, 15, i, 0, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 1, i, 7, 14, i, 7, blockState, blockState, false);
             }
 
-            this.generateBox(world, boundingBox, 2, 1, 3, 2, 7, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 3, 1, 2, 4, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 3, 1, 5, 4, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 13, 1, 3, 13, 7, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 11, 1, 2, 12, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 11, 1, 5, 12, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 1, 3, 5, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 1, 3, 10, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 7, 2, 10, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 5, 2, 5, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 5, 2, 10, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 5, 5, 5, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 10, 5, 5, 10, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.placeBlock(world, BASE_LIGHT, 6, 6, 2, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 9, 6, 2, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 6, 6, 5, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 9, 6, 5, boundingBox);
-            this.generateBox(world, boundingBox, 5, 4, 3, 6, 4, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 9, 4, 3, 10, 4, 4, BASE_LIGHT, BASE_LIGHT, false);
-            this.placeBlock(world, LAMP_BLOCK, 5, 4, 2, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 5, 4, 5, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 10, 4, 2, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 10, 4, 5, boundingBox);
+            this.generateBox(world, chunkBox, 2, 1, 3, 2, 7, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 3, 1, 2, 4, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 3, 1, 5, 4, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 13, 1, 3, 13, 7, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 11, 1, 2, 12, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 11, 1, 5, 12, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 1, 3, 5, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 1, 3, 10, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 7, 2, 10, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 5, 2, 5, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 5, 2, 10, 7, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 5, 5, 5, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 10, 5, 5, 10, 7, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.placeBlock(world, BASE_LIGHT, 6, 6, 2, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 9, 6, 2, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 6, 6, 5, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 9, 6, 5, chunkBox);
+            this.generateBox(world, chunkBox, 5, 4, 3, 6, 4, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 9, 4, 3, 10, 4, 4, BASE_LIGHT, BASE_LIGHT, false);
+            this.placeBlock(world, LAMP_BLOCK, 5, 4, 2, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 5, 4, 5, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 10, 4, 2, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 10, 4, 5, chunkBox);
             if (roomDefinition2.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 0, 4, 2, 0);
+                this.generateWaterBox(world, chunkBox, 3, 1, 0, 4, 2, 0);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 7, 4, 2, 7);
+                this.generateWaterBox(world, chunkBox, 3, 1, 7, 4, 2, 7);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 3, 0, 2, 4);
+                this.generateWaterBox(world, chunkBox, 0, 1, 3, 0, 2, 4);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 11, 1, 0, 12, 2, 0);
+                this.generateWaterBox(world, chunkBox, 11, 1, 0, 12, 2, 0);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 11, 1, 7, 12, 2, 7);
+                this.generateWaterBox(world, chunkBox, 11, 1, 7, 12, 2, 7);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 15, 1, 3, 15, 2, 4);
+                this.generateWaterBox(world, chunkBox, 15, 1, 3, 15, 2, 4);
             }
 
             if (roomDefinition3.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 5, 0, 4, 6, 0);
+                this.generateWaterBox(world, chunkBox, 3, 5, 0, 4, 6, 0);
             }
 
             if (roomDefinition3.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 5, 7, 4, 6, 7);
+                this.generateWaterBox(world, chunkBox, 3, 5, 7, 4, 6, 7);
             }
 
             if (roomDefinition3.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 5, 3, 0, 6, 4);
+                this.generateWaterBox(world, chunkBox, 0, 5, 3, 0, 6, 4);
             }
 
             if (roomDefinition4.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 11, 5, 0, 12, 6, 0);
+                this.generateWaterBox(world, chunkBox, 11, 5, 0, 12, 6, 0);
             }
 
             if (roomDefinition4.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 11, 5, 7, 12, 6, 7);
+                this.generateWaterBox(world, chunkBox, 11, 5, 7, 12, 6, 7);
             }
 
             if (roomDefinition4.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 15, 5, 3, 15, 6, 4);
+                this.generateWaterBox(world, chunkBox, 15, 5, 3, 15, 6, 4);
             }
 
-            return true;
         }
     }
 
@@ -994,80 +990,79 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_Y_ROOM, 1, orientation, setting, 1, 2, 1);
         }
 
-        public WorldGenMonumentPiece5(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece5(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_Y_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 0, 0, this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition = this.roomDefinition.connections[EnumDirection.UP.get3DDataValue()];
             if (roomDefinition.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 8, 1, 6, 8, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 8, 1, 6, 8, 6, BASE_GRAY);
             }
 
-            this.generateBox(world, boundingBox, 0, 4, 0, 0, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 7, 4, 0, 7, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 4, 0, 6, 4, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 4, 7, 6, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 4, 1, 2, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 4, 2, 1, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 4, 1, 5, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 4, 2, 6, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 4, 5, 2, 4, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 4, 5, 1, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 4, 5, 5, 4, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 4, 5, 6, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 4, 0, 0, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 7, 4, 0, 7, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 4, 0, 6, 4, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 4, 7, 6, 4, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 4, 1, 2, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 4, 2, 1, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 4, 1, 5, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 4, 2, 6, 4, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 4, 5, 2, 4, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 4, 5, 1, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 4, 5, 5, 4, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 4, 5, 6, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition2 = this.roomDefinition;
 
             for(int i = 1; i <= 5; i += 4) {
                 int j = 0;
                 if (roomDefinition2.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 2, i, j, 2, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 5, i, j, 5, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 3, i + 2, j, 4, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 2, i, j, 2, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 5, i, j, 5, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, i + 2, j, 4, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, 0, i, j, 7, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 0, i + 1, j, 7, i + 1, j, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 0, i, j, 7, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, i + 1, j, 7, i + 1, j, BASE_GRAY, BASE_GRAY, false);
                 }
 
                 j = 7;
                 if (roomDefinition2.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 2, i, j, 2, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 5, i, j, 5, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 3, i + 2, j, 4, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 2, i, j, 2, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 5, i, j, 5, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, i + 2, j, 4, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, 0, i, j, 7, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 0, i + 1, j, 7, i + 1, j, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 0, i, j, 7, i + 2, j, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, i + 1, j, 7, i + 1, j, BASE_GRAY, BASE_GRAY, false);
                 }
 
                 int k = 0;
                 if (roomDefinition2.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, k, i, 2, k, i + 2, 2, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, i, 5, k, i + 2, 5, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, i + 2, 3, k, i + 2, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i, 2, k, i + 2, 2, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i, 5, k, i + 2, 5, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i + 2, 3, k, i + 2, 4, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, k, i, 0, k, i + 2, 7, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, i + 1, 0, k, i + 1, 7, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, k, i, 0, k, i + 2, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i + 1, 0, k, i + 1, 7, BASE_GRAY, BASE_GRAY, false);
                 }
 
                 k = 7;
                 if (roomDefinition2.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, k, i, 2, k, i + 2, 2, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, i, 5, k, i + 2, 5, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, i + 2, 3, k, i + 2, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i, 2, k, i + 2, 2, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i, 5, k, i + 2, 5, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i + 2, 3, k, i + 2, 4, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, k, i, 0, k, i + 2, 7, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, i + 1, 0, k, i + 1, 7, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, k, i, 0, k, i + 2, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, i + 1, 0, k, i + 1, 7, BASE_GRAY, BASE_GRAY, false);
                 }
 
                 roomDefinition2 = roomDefinition;
             }
 
-            return true;
         }
     }
 
@@ -1076,27 +1071,27 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_YZ_ROOM, 1, orientation, setting, 1, 2, 2);
         }
 
-        public WorldGenMonumentPiece6(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece6(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_YZ_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition = this.roomDefinition.connections[EnumDirection.NORTH.get3DDataValue()];
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition2 = this.roomDefinition;
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition3 = roomDefinition.connections[EnumDirection.UP.get3DDataValue()];
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition4 = roomDefinition2.connections[EnumDirection.UP.get3DDataValue()];
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 0, 8, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
-                this.generateDefaultFloor(world, boundingBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 8, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             if (roomDefinition4.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 8, 1, 6, 8, 7, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 8, 1, 6, 8, 7, BASE_GRAY);
             }
 
             if (roomDefinition3.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 8, 8, 6, 8, 14, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 8, 8, 6, 8, 14, BASE_GRAY);
             }
 
             for(int i = 1; i <= 7; ++i) {
@@ -1105,10 +1100,10 @@ public class WorldGenMonumentPieces {
                     blockState = BASE_GRAY;
                 }
 
-                this.generateBox(world, boundingBox, 0, i, 0, 0, i, 15, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 7, i, 0, 7, i, 15, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 1, i, 0, 6, i, 0, blockState, blockState, false);
-                this.generateBox(world, boundingBox, 1, i, 15, 6, i, 15, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 0, i, 0, 0, i, 15, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 7, i, 0, 7, i, 15, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 1, i, 0, 6, i, 0, blockState, blockState, false);
+                this.generateBox(world, chunkBox, 1, i, 15, 6, i, 15, blockState, blockState, false);
             }
 
             for(int j = 1; j <= 7; ++j) {
@@ -1117,70 +1112,69 @@ public class WorldGenMonumentPieces {
                     blockState2 = LAMP_BLOCK;
                 }
 
-                this.generateBox(world, boundingBox, 3, j, 7, 4, j, 8, blockState2, blockState2, false);
+                this.generateBox(world, chunkBox, 3, j, 7, 4, j, 8, blockState2, blockState2, false);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 0, 4, 2, 0);
+                this.generateWaterBox(world, chunkBox, 3, 1, 0, 4, 2, 0);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 7, 1, 3, 7, 2, 4);
+                this.generateWaterBox(world, chunkBox, 7, 1, 3, 7, 2, 4);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 3, 0, 2, 4);
+                this.generateWaterBox(world, chunkBox, 0, 1, 3, 0, 2, 4);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 15, 4, 2, 15);
+                this.generateWaterBox(world, chunkBox, 3, 1, 15, 4, 2, 15);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 11, 0, 2, 12);
+                this.generateWaterBox(world, chunkBox, 0, 1, 11, 0, 2, 12);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 7, 1, 11, 7, 2, 12);
+                this.generateWaterBox(world, chunkBox, 7, 1, 11, 7, 2, 12);
             }
 
             if (roomDefinition4.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 5, 0, 4, 6, 0);
+                this.generateWaterBox(world, chunkBox, 3, 5, 0, 4, 6, 0);
             }
 
             if (roomDefinition4.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 7, 5, 3, 7, 6, 4);
-                this.generateBox(world, boundingBox, 5, 4, 2, 6, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 1, 2, 6, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 1, 5, 6, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateWaterBox(world, chunkBox, 7, 5, 3, 7, 6, 4);
+                this.generateBox(world, chunkBox, 5, 4, 2, 6, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 1, 2, 6, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 1, 5, 6, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
             }
 
             if (roomDefinition4.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 5, 3, 0, 6, 4);
-                this.generateBox(world, boundingBox, 1, 4, 2, 2, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 1, 2, 1, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 1, 5, 1, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateWaterBox(world, chunkBox, 0, 5, 3, 0, 6, 4);
+                this.generateBox(world, chunkBox, 1, 4, 2, 2, 4, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 1, 2, 1, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 1, 5, 1, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
             }
 
             if (roomDefinition3.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 5, 15, 4, 6, 15);
+                this.generateWaterBox(world, chunkBox, 3, 5, 15, 4, 6, 15);
             }
 
             if (roomDefinition3.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 5, 11, 0, 6, 12);
-                this.generateBox(world, boundingBox, 1, 4, 10, 2, 4, 13, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 1, 10, 1, 3, 10, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 1, 13, 1, 3, 13, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateWaterBox(world, chunkBox, 0, 5, 11, 0, 6, 12);
+                this.generateBox(world, chunkBox, 1, 4, 10, 2, 4, 13, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 1, 10, 1, 3, 10, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 1, 13, 1, 3, 13, BASE_LIGHT, BASE_LIGHT, false);
             }
 
             if (roomDefinition3.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 7, 5, 11, 7, 6, 12);
-                this.generateBox(world, boundingBox, 5, 4, 10, 6, 4, 13, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 1, 10, 6, 3, 10, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 1, 13, 6, 3, 13, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateWaterBox(world, chunkBox, 7, 5, 11, 7, 6, 12);
+                this.generateBox(world, chunkBox, 5, 4, 10, 6, 4, 13, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 1, 10, 6, 3, 10, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 1, 13, 6, 3, 13, BASE_LIGHT, BASE_LIGHT, false);
             }
 
-            return true;
         }
     }
 
@@ -1189,88 +1183,87 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_Z_ROOM, 1, orientation, setting, 1, 1, 2);
         }
 
-        public WorldGenMonumentPiece7(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece7(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_DOUBLE_Z_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition = this.roomDefinition.connections[EnumDirection.NORTH.get3DDataValue()];
             WorldGenMonumentPieces.WorldGenMonumentStateTracker roomDefinition2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 0, 8, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
-                this.generateDefaultFloor(world, boundingBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 8, roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, roomDefinition2.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             if (roomDefinition2.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 4, 1, 6, 4, 7, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 4, 1, 6, 4, 7, BASE_GRAY);
             }
 
             if (roomDefinition.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 4, 8, 6, 4, 14, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 4, 8, 6, 4, 14, BASE_GRAY);
             }
 
-            this.generateBox(world, boundingBox, 0, 3, 0, 0, 3, 15, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 7, 3, 0, 7, 3, 15, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 0, 7, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 15, 6, 3, 15, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 2, 0, 0, 2, 15, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 7, 2, 0, 7, 2, 15, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 1, 2, 0, 7, 2, 0, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 1, 2, 15, 6, 2, 15, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 0, 1, 0, 0, 1, 15, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 7, 1, 0, 7, 1, 15, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 0, 7, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 15, 6, 1, 15, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 1, 1, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 1, 1, 6, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 1, 1, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 3, 1, 6, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 13, 1, 1, 14, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 1, 13, 6, 1, 14, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 13, 1, 3, 14, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 3, 13, 6, 3, 14, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 1, 6, 2, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 1, 6, 5, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 1, 9, 2, 3, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 1, 9, 5, 3, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 3, 2, 6, 4, 2, 6, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 3, 2, 9, 4, 2, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 2, 2, 7, 2, 2, 8, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 2, 7, 5, 2, 8, BASE_LIGHT, BASE_LIGHT, false);
-            this.placeBlock(world, LAMP_BLOCK, 2, 2, 5, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 5, 2, 5, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 2, 2, 10, boundingBox);
-            this.placeBlock(world, LAMP_BLOCK, 5, 2, 10, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 2, 3, 5, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 5, 3, 5, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 2, 3, 10, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 5, 3, 10, boundingBox);
+            this.generateBox(world, chunkBox, 0, 3, 0, 0, 3, 15, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 7, 3, 0, 7, 3, 15, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 0, 7, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 15, 6, 3, 15, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 2, 0, 0, 2, 15, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 7, 2, 0, 7, 2, 15, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 1, 2, 0, 7, 2, 0, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 1, 2, 15, 6, 2, 15, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 0, 1, 0, 0, 1, 15, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 7, 1, 0, 7, 1, 15, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 0, 7, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 15, 6, 1, 15, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 1, 1, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 1, 1, 6, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 1, 1, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 3, 1, 6, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 13, 1, 1, 14, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 1, 13, 6, 1, 14, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 13, 1, 3, 14, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 3, 13, 6, 3, 14, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 1, 6, 2, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 1, 6, 5, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 1, 9, 2, 3, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 1, 9, 5, 3, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 3, 2, 6, 4, 2, 6, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 3, 2, 9, 4, 2, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 2, 2, 7, 2, 2, 8, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 2, 7, 5, 2, 8, BASE_LIGHT, BASE_LIGHT, false);
+            this.placeBlock(world, LAMP_BLOCK, 2, 2, 5, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 5, 2, 5, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 2, 2, 10, chunkBox);
+            this.placeBlock(world, LAMP_BLOCK, 5, 2, 10, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 2, 3, 5, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 5, 3, 5, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 2, 3, 10, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 5, 3, 10, chunkBox);
             if (roomDefinition2.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 0, 4, 2, 0);
+                this.generateWaterBox(world, chunkBox, 3, 1, 0, 4, 2, 0);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 7, 1, 3, 7, 2, 4);
+                this.generateWaterBox(world, chunkBox, 7, 1, 3, 7, 2, 4);
             }
 
             if (roomDefinition2.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 3, 0, 2, 4);
+                this.generateWaterBox(world, chunkBox, 0, 1, 3, 0, 2, 4);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 15, 4, 2, 15);
+                this.generateWaterBox(world, chunkBox, 3, 1, 15, 4, 2, 15);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 11, 0, 2, 12);
+                this.generateWaterBox(world, chunkBox, 0, 1, 11, 0, 2, 12);
             }
 
             if (roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 7, 1, 11, 7, 2, 12);
+                this.generateWaterBox(world, chunkBox, 7, 1, 11, 7, 2, 12);
             }
 
-            return true;
         }
     }
 
@@ -1282,101 +1275,100 @@ public class WorldGenMonumentPieces {
             this.mainDesign = i & 1;
         }
 
-        public WorldGenMonumentPiece8(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiece8(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_WING_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             if (this.mainDesign == 0) {
                 for(int i = 0; i < 4; ++i) {
-                    this.generateBox(world, boundingBox, 10 - i, 3 - i, 20 - i, 12 + i, 3 - i, 20, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 10 - i, 3 - i, 20 - i, 12 + i, 3 - i, 20, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
-                this.generateBox(world, boundingBox, 7, 0, 6, 15, 0, 16, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 0, 6, 6, 3, 20, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 16, 0, 6, 16, 3, 20, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 1, 7, 7, 1, 20, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 15, 1, 7, 15, 1, 20, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 1, 6, 9, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 13, 1, 6, 15, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 8, 1, 7, 9, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 13, 1, 7, 14, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 9, 0, 5, 13, 0, 5, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 10, 0, 7, 12, 0, 7, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 8, 0, 10, 8, 0, 12, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 14, 0, 10, 14, 0, 12, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 7, 0, 6, 15, 0, 16, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 0, 6, 6, 3, 20, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 16, 0, 6, 16, 3, 20, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 1, 7, 7, 1, 20, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 15, 1, 7, 15, 1, 20, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 1, 6, 9, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 13, 1, 6, 15, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 8, 1, 7, 9, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 13, 1, 7, 14, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 9, 0, 5, 13, 0, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 10, 0, 7, 12, 0, 7, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 8, 0, 10, 8, 0, 12, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 14, 0, 10, 14, 0, 12, BASE_BLACK, BASE_BLACK, false);
 
                 for(int j = 18; j >= 7; j -= 3) {
-                    this.placeBlock(world, LAMP_BLOCK, 6, 3, j, boundingBox);
-                    this.placeBlock(world, LAMP_BLOCK, 16, 3, j, boundingBox);
+                    this.placeBlock(world, LAMP_BLOCK, 6, 3, j, chunkBox);
+                    this.placeBlock(world, LAMP_BLOCK, 16, 3, j, chunkBox);
                 }
 
-                this.placeBlock(world, LAMP_BLOCK, 10, 0, 10, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 12, 0, 10, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 10, 0, 12, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 12, 0, 12, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 8, 3, 6, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 14, 3, 6, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 4, 2, 4, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 4, 1, 4, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 4, 0, 4, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 18, 2, 4, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 18, 1, 4, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 18, 0, 4, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 4, 2, 18, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 4, 1, 18, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 4, 0, 18, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 18, 2, 18, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 18, 1, 18, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 18, 0, 18, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 9, 7, 20, boundingBox);
-                this.placeBlock(world, BASE_LIGHT, 13, 7, 20, boundingBox);
-                this.generateBox(world, boundingBox, 6, 0, 21, 7, 4, 21, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 15, 0, 21, 16, 4, 21, BASE_LIGHT, BASE_LIGHT, false);
-                this.spawnElder(world, boundingBox, 11, 2, 16);
+                this.placeBlock(world, LAMP_BLOCK, 10, 0, 10, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 12, 0, 10, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 10, 0, 12, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 12, 0, 12, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 8, 3, 6, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 14, 3, 6, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 4, 2, 4, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 4, 1, 4, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 4, 0, 4, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 18, 2, 4, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 18, 1, 4, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 18, 0, 4, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 4, 2, 18, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 4, 1, 18, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 4, 0, 18, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 18, 2, 18, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 18, 1, 18, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 18, 0, 18, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 9, 7, 20, chunkBox);
+                this.placeBlock(world, BASE_LIGHT, 13, 7, 20, chunkBox);
+                this.generateBox(world, chunkBox, 6, 0, 21, 7, 4, 21, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 15, 0, 21, 16, 4, 21, BASE_LIGHT, BASE_LIGHT, false);
+                this.spawnElder(world, chunkBox, 11, 2, 16);
             } else if (this.mainDesign == 1) {
-                this.generateBox(world, boundingBox, 9, 3, 18, 13, 3, 20, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 9, 0, 18, 9, 2, 18, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 13, 0, 18, 13, 2, 18, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 9, 3, 18, 13, 3, 20, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 9, 0, 18, 9, 2, 18, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 13, 0, 18, 13, 2, 18, BASE_LIGHT, BASE_LIGHT, false);
                 int k = 9;
                 int l = 20;
                 int m = 5;
 
                 for(int n = 0; n < 2; ++n) {
-                    this.placeBlock(world, BASE_LIGHT, k, 6, 20, boundingBox);
-                    this.placeBlock(world, LAMP_BLOCK, k, 5, 20, boundingBox);
-                    this.placeBlock(world, BASE_LIGHT, k, 4, 20, boundingBox);
+                    this.placeBlock(world, BASE_LIGHT, k, 6, 20, chunkBox);
+                    this.placeBlock(world, LAMP_BLOCK, k, 5, 20, chunkBox);
+                    this.placeBlock(world, BASE_LIGHT, k, 4, 20, chunkBox);
                     k = 13;
                 }
 
-                this.generateBox(world, boundingBox, 7, 3, 7, 15, 3, 14, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 3, 7, 15, 3, 14, BASE_LIGHT, BASE_LIGHT, false);
                 k = 10;
 
                 for(int o = 0; o < 2; ++o) {
-                    this.generateBox(world, boundingBox, k, 0, 10, k, 6, 10, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, 0, 12, k, 6, 12, BASE_LIGHT, BASE_LIGHT, false);
-                    this.placeBlock(world, LAMP_BLOCK, k, 0, 10, boundingBox);
-                    this.placeBlock(world, LAMP_BLOCK, k, 0, 12, boundingBox);
-                    this.placeBlock(world, LAMP_BLOCK, k, 4, 10, boundingBox);
-                    this.placeBlock(world, LAMP_BLOCK, k, 4, 12, boundingBox);
+                    this.generateBox(world, chunkBox, k, 0, 10, k, 6, 10, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, 0, 12, k, 6, 12, BASE_LIGHT, BASE_LIGHT, false);
+                    this.placeBlock(world, LAMP_BLOCK, k, 0, 10, chunkBox);
+                    this.placeBlock(world, LAMP_BLOCK, k, 0, 12, chunkBox);
+                    this.placeBlock(world, LAMP_BLOCK, k, 4, 10, chunkBox);
+                    this.placeBlock(world, LAMP_BLOCK, k, 4, 12, chunkBox);
                     k = 12;
                 }
 
                 k = 8;
 
                 for(int p = 0; p < 2; ++p) {
-                    this.generateBox(world, boundingBox, k, 0, 7, k, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, k, 0, 14, k, 2, 14, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, 0, 7, k, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, k, 0, 14, k, 2, 14, BASE_LIGHT, BASE_LIGHT, false);
                     k = 14;
                 }
 
-                this.generateBox(world, boundingBox, 8, 3, 8, 8, 3, 13, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 14, 3, 8, 14, 3, 13, BASE_BLACK, BASE_BLACK, false);
-                this.spawnElder(world, boundingBox, 11, 5, 13);
+                this.generateBox(world, chunkBox, 8, 3, 8, 8, 3, 13, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 14, 3, 8, 14, 3, 13, BASE_BLACK, BASE_BLACK, false);
+                this.spawnElder(world, chunkBox, 11, 5, 13);
             }
 
-            return true;
         }
     }
 
@@ -1385,34 +1377,33 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_ENTRY_ROOM, 1, orientation, setting, 1, 1, 1);
         }
 
-        public WorldGenMonumentPieceEntry(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPieceEntry(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_ENTRY_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 0, 3, 0, 2, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 2, 0, 1, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, 2, 0, 7, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 7, 1, 0, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 1, 7, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 0, 2, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 5, 1, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 0, 3, 0, 2, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 2, 0, 1, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, 2, 0, 7, 2, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 7, 1, 0, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 1, 7, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 0, 2, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 5, 1, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
             if (this.roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 7, 4, 2, 7);
+                this.generateWaterBox(world, chunkBox, 3, 1, 7, 4, 2, 7);
             }
 
             if (this.roomDefinition.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 0, 1, 3, 1, 2, 4);
+                this.generateWaterBox(world, chunkBox, 0, 1, 3, 1, 2, 4);
             }
 
             if (this.roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 6, 1, 3, 7, 2, 4);
+                this.generateWaterBox(world, chunkBox, 6, 1, 3, 7, 2, 4);
             }
 
-            return true;
         }
     }
 
@@ -1421,54 +1412,53 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_PENTHOUSE, orientation, 1, box);
         }
 
-        public WorldGenMonumentPiecePenthouse(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPiecePenthouse(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_PENTHOUSE, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-            this.generateBox(world, boundingBox, 2, -1, 2, 11, -1, 11, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, -1, 0, 1, -1, 11, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 12, -1, 0, 13, -1, 11, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 2, -1, 0, 11, -1, 1, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 2, -1, 12, 11, -1, 13, BASE_GRAY, BASE_GRAY, false);
-            this.generateBox(world, boundingBox, 0, 0, 0, 0, 0, 13, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 13, 0, 0, 13, 0, 13, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 0, 0, 12, 0, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 0, 13, 12, 0, 13, BASE_LIGHT, BASE_LIGHT, false);
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+            this.generateBox(world, chunkBox, 2, -1, 2, 11, -1, 11, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, -1, 0, 1, -1, 11, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 12, -1, 0, 13, -1, 11, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 2, -1, 0, 11, -1, 1, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 2, -1, 12, 11, -1, 13, BASE_GRAY, BASE_GRAY, false);
+            this.generateBox(world, chunkBox, 0, 0, 0, 0, 0, 13, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 13, 0, 0, 13, 0, 13, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 0, 0, 12, 0, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 0, 13, 12, 0, 13, BASE_LIGHT, BASE_LIGHT, false);
 
             for(int i = 2; i <= 11; i += 3) {
-                this.placeBlock(world, LAMP_BLOCK, 0, 0, i, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 13, 0, i, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, i, 0, 0, boundingBox);
+                this.placeBlock(world, LAMP_BLOCK, 0, 0, i, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 13, 0, i, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, i, 0, 0, chunkBox);
             }
 
-            this.generateBox(world, boundingBox, 2, 0, 3, 4, 0, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 9, 0, 3, 11, 0, 9, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 4, 0, 9, 9, 0, 11, BASE_LIGHT, BASE_LIGHT, false);
-            this.placeBlock(world, BASE_LIGHT, 5, 0, 8, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 8, 0, 8, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 10, 0, 10, boundingBox);
-            this.placeBlock(world, BASE_LIGHT, 3, 0, 10, boundingBox);
-            this.generateBox(world, boundingBox, 3, 0, 3, 3, 0, 7, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 10, 0, 3, 10, 0, 7, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 6, 0, 10, 7, 0, 10, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 2, 0, 3, 4, 0, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 9, 0, 3, 11, 0, 9, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 4, 0, 9, 9, 0, 11, BASE_LIGHT, BASE_LIGHT, false);
+            this.placeBlock(world, BASE_LIGHT, 5, 0, 8, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 8, 0, 8, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 10, 0, 10, chunkBox);
+            this.placeBlock(world, BASE_LIGHT, 3, 0, 10, chunkBox);
+            this.generateBox(world, chunkBox, 3, 0, 3, 3, 0, 7, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 10, 0, 3, 10, 0, 7, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 6, 0, 10, 7, 0, 10, BASE_BLACK, BASE_BLACK, false);
             int j = 3;
 
             for(int k = 0; k < 2; ++k) {
                 for(int l = 2; l <= 8; l += 3) {
-                    this.generateBox(world, boundingBox, j, 0, l, j, 2, l, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, j, 0, l, j, 2, l, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 j = 10;
             }
 
-            this.generateBox(world, boundingBox, 5, 0, 10, 5, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 8, 0, 10, 8, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 6, -1, 7, 7, -1, 8, BASE_BLACK, BASE_BLACK, false);
-            this.generateWaterBox(world, boundingBox, 6, -1, 3, 7, -1, 4);
-            this.spawnElder(world, boundingBox, 6, 1, 6);
-            return true;
+            this.generateBox(world, chunkBox, 5, 0, 10, 5, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 8, 0, 10, 8, 2, 10, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 6, -1, 7, 7, -1, 8, BASE_BLACK, BASE_BLACK, false);
+            this.generateWaterBox(world, chunkBox, 6, -1, 3, 7, -1, 4);
+            this.spawnElder(world, chunkBox, 6, 1, 6);
         }
     }
 
@@ -1595,162 +1585,161 @@ public class WorldGenMonumentPieces {
             this.mainDesign = random.nextInt(3);
         }
 
-        public WorldGenMonumentPieceSimple(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPieceSimple(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_SIMPLE_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 0, 0, this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             if (this.roomDefinition.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 4, 1, 6, 4, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 4, 1, 6, 4, 6, BASE_GRAY);
             }
 
             boolean bl = this.mainDesign != 0 && random.nextBoolean() && !this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()] && !this.roomDefinition.hasOpening[EnumDirection.UP.get3DDataValue()] && this.roomDefinition.countOpenings() > 1;
             if (this.mainDesign == 0) {
-                this.generateBox(world, boundingBox, 0, 1, 0, 2, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 3, 0, 2, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 2, 0, 0, 2, 2, BASE_GRAY, BASE_GRAY, false);
-                this.generateBox(world, boundingBox, 1, 2, 0, 2, 2, 0, BASE_GRAY, BASE_GRAY, false);
-                this.placeBlock(world, LAMP_BLOCK, 1, 2, 1, boundingBox);
-                this.generateBox(world, boundingBox, 5, 1, 0, 7, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 5, 3, 0, 7, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 2, 0, 7, 2, 2, BASE_GRAY, BASE_GRAY, false);
-                this.generateBox(world, boundingBox, 5, 2, 0, 6, 2, 0, BASE_GRAY, BASE_GRAY, false);
-                this.placeBlock(world, LAMP_BLOCK, 6, 2, 1, boundingBox);
-                this.generateBox(world, boundingBox, 0, 1, 5, 2, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 3, 5, 2, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 2, 5, 0, 2, 7, BASE_GRAY, BASE_GRAY, false);
-                this.generateBox(world, boundingBox, 1, 2, 7, 2, 2, 7, BASE_GRAY, BASE_GRAY, false);
-                this.placeBlock(world, LAMP_BLOCK, 1, 2, 6, boundingBox);
-                this.generateBox(world, boundingBox, 5, 1, 5, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 5, 3, 5, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 2, 5, 7, 2, 7, BASE_GRAY, BASE_GRAY, false);
-                this.generateBox(world, boundingBox, 5, 2, 7, 6, 2, 7, BASE_GRAY, BASE_GRAY, false);
-                this.placeBlock(world, LAMP_BLOCK, 6, 2, 6, boundingBox);
+                this.generateBox(world, chunkBox, 0, 1, 0, 2, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 3, 0, 2, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 2, 0, 0, 2, 2, BASE_GRAY, BASE_GRAY, false);
+                this.generateBox(world, chunkBox, 1, 2, 0, 2, 2, 0, BASE_GRAY, BASE_GRAY, false);
+                this.placeBlock(world, LAMP_BLOCK, 1, 2, 1, chunkBox);
+                this.generateBox(world, chunkBox, 5, 1, 0, 7, 1, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 5, 3, 0, 7, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 2, 0, 7, 2, 2, BASE_GRAY, BASE_GRAY, false);
+                this.generateBox(world, chunkBox, 5, 2, 0, 6, 2, 0, BASE_GRAY, BASE_GRAY, false);
+                this.placeBlock(world, LAMP_BLOCK, 6, 2, 1, chunkBox);
+                this.generateBox(world, chunkBox, 0, 1, 5, 2, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 3, 5, 2, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 2, 5, 0, 2, 7, BASE_GRAY, BASE_GRAY, false);
+                this.generateBox(world, chunkBox, 1, 2, 7, 2, 2, 7, BASE_GRAY, BASE_GRAY, false);
+                this.placeBlock(world, LAMP_BLOCK, 1, 2, 6, chunkBox);
+                this.generateBox(world, chunkBox, 5, 1, 5, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 5, 3, 5, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 2, 5, 7, 2, 7, BASE_GRAY, BASE_GRAY, false);
+                this.generateBox(world, chunkBox, 5, 2, 7, 6, 2, 7, BASE_GRAY, BASE_GRAY, false);
+                this.placeBlock(world, LAMP_BLOCK, 6, 2, 6, chunkBox);
                 if (this.roomDefinition.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 3, 3, 0, 4, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, 3, 0, 4, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, 3, 3, 0, 4, 3, 1, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 3, 2, 0, 4, 2, 0, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 3, 1, 0, 4, 1, 1, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, 3, 0, 4, 3, 1, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, 2, 0, 4, 2, 0, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 3, 1, 0, 4, 1, 1, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 3, 3, 7, 4, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, 3, 7, 4, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, 3, 3, 6, 4, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 3, 2, 7, 4, 2, 7, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 3, 1, 6, 4, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, 3, 6, 4, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 3, 2, 7, 4, 2, 7, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 3, 1, 6, 4, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 0, 3, 3, 0, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, 3, 3, 0, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, 0, 3, 3, 1, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 0, 2, 3, 0, 2, 4, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 0, 1, 3, 1, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, 3, 3, 1, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, 2, 3, 0, 2, 4, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 0, 1, 3, 1, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 7, 3, 3, 7, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 7, 3, 3, 7, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
                 } else {
-                    this.generateBox(world, boundingBox, 6, 3, 3, 7, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 7, 2, 3, 7, 2, 4, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 6, 1, 3, 7, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 6, 3, 3, 7, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 7, 2, 3, 7, 2, 4, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 6, 1, 3, 7, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
                 }
             } else if (this.mainDesign == 1) {
-                this.generateBox(world, boundingBox, 2, 1, 2, 2, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 2, 1, 5, 2, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 5, 1, 5, 5, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 5, 1, 2, 5, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
-                this.placeBlock(world, LAMP_BLOCK, 2, 2, 2, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 2, 2, 5, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 5, 2, 5, boundingBox);
-                this.placeBlock(world, LAMP_BLOCK, 5, 2, 2, boundingBox);
-                this.generateBox(world, boundingBox, 0, 1, 0, 1, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 1, 1, 0, 3, 1, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 1, 7, 1, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 1, 6, 0, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 1, 7, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 1, 6, 7, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 6, 1, 0, 7, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 1, 1, 7, 3, 1, BASE_LIGHT, BASE_LIGHT, false);
-                this.placeBlock(world, BASE_GRAY, 1, 2, 0, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 0, 2, 1, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 1, 2, 7, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 0, 2, 6, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 6, 2, 7, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 7, 2, 6, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 6, 2, 0, boundingBox);
-                this.placeBlock(world, BASE_GRAY, 7, 2, 1, boundingBox);
+                this.generateBox(world, chunkBox, 2, 1, 2, 2, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 2, 1, 5, 2, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 5, 1, 5, 5, 3, 5, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 5, 1, 2, 5, 3, 2, BASE_LIGHT, BASE_LIGHT, false);
+                this.placeBlock(world, LAMP_BLOCK, 2, 2, 2, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 2, 2, 5, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 5, 2, 5, chunkBox);
+                this.placeBlock(world, LAMP_BLOCK, 5, 2, 2, chunkBox);
+                this.generateBox(world, chunkBox, 0, 1, 0, 1, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 1, 1, 0, 3, 1, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 1, 7, 1, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 1, 6, 0, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 1, 7, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 1, 6, 7, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 6, 1, 0, 7, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 1, 1, 7, 3, 1, BASE_LIGHT, BASE_LIGHT, false);
+                this.placeBlock(world, BASE_GRAY, 1, 2, 0, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 0, 2, 1, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 1, 2, 7, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 0, 2, 6, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 6, 2, 7, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 7, 2, 6, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 6, 2, 0, chunkBox);
+                this.placeBlock(world, BASE_GRAY, 7, 2, 1, chunkBox);
                 if (!this.roomDefinition.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 1, 3, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 1, 2, 0, 6, 2, 0, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 1, 1, 0, 6, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 1, 3, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 1, 2, 0, 6, 2, 0, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 1, 1, 0, 6, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 if (!this.roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 1, 3, 7, 6, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 1, 2, 7, 6, 2, 7, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 1, 1, 7, 6, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 1, 3, 7, 6, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 1, 2, 7, 6, 2, 7, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 1, 1, 7, 6, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 if (!this.roomDefinition.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 0, 3, 1, 0, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 0, 2, 1, 0, 2, 6, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 0, 1, 1, 0, 1, 6, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, 3, 1, 0, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 0, 2, 1, 0, 2, 6, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 0, 1, 1, 0, 1, 6, BASE_LIGHT, BASE_LIGHT, false);
                 }
 
                 if (!this.roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                    this.generateBox(world, boundingBox, 7, 3, 1, 7, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
-                    this.generateBox(world, boundingBox, 7, 2, 1, 7, 2, 6, BASE_GRAY, BASE_GRAY, false);
-                    this.generateBox(world, boundingBox, 7, 1, 1, 7, 1, 6, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 7, 3, 1, 7, 3, 6, BASE_LIGHT, BASE_LIGHT, false);
+                    this.generateBox(world, chunkBox, 7, 2, 1, 7, 2, 6, BASE_GRAY, BASE_GRAY, false);
+                    this.generateBox(world, chunkBox, 7, 1, 1, 7, 1, 6, BASE_LIGHT, BASE_LIGHT, false);
                 }
             } else if (this.mainDesign == 2) {
-                this.generateBox(world, boundingBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 1, 0, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 1, 0, 6, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 1, 7, 6, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 2, 0, 0, 2, 7, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 7, 2, 0, 7, 2, 7, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 1, 2, 0, 6, 2, 0, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 1, 2, 7, 6, 2, 7, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 0, 3, 0, 0, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 7, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 3, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 1, 3, 7, 6, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 0, 1, 3, 0, 2, 4, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 7, 1, 3, 7, 2, 4, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 3, 1, 0, 4, 2, 0, BASE_BLACK, BASE_BLACK, false);
-                this.generateBox(world, boundingBox, 3, 1, 7, 4, 2, 7, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 1, 0, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 1, 0, 6, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 1, 7, 6, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 2, 0, 0, 2, 7, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 7, 2, 0, 7, 2, 7, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 1, 2, 0, 6, 2, 0, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 1, 2, 7, 6, 2, 7, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 0, 3, 0, 0, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 7, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 3, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 1, 3, 7, 6, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 0, 1, 3, 0, 2, 4, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 7, 1, 3, 7, 2, 4, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 3, 1, 0, 4, 2, 0, BASE_BLACK, BASE_BLACK, false);
+                this.generateBox(world, chunkBox, 3, 1, 7, 4, 2, 7, BASE_BLACK, BASE_BLACK, false);
                 if (this.roomDefinition.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                    this.generateWaterBox(world, boundingBox, 3, 1, 0, 4, 2, 0);
+                    this.generateWaterBox(world, chunkBox, 3, 1, 0, 4, 2, 0);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumDirection.NORTH.get3DDataValue()]) {
-                    this.generateWaterBox(world, boundingBox, 3, 1, 7, 4, 2, 7);
+                    this.generateWaterBox(world, chunkBox, 3, 1, 7, 4, 2, 7);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumDirection.WEST.get3DDataValue()]) {
-                    this.generateWaterBox(world, boundingBox, 0, 1, 3, 0, 2, 4);
+                    this.generateWaterBox(world, chunkBox, 0, 1, 3, 0, 2, 4);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumDirection.EAST.get3DDataValue()]) {
-                    this.generateWaterBox(world, boundingBox, 7, 1, 3, 7, 2, 4);
+                    this.generateWaterBox(world, chunkBox, 7, 1, 3, 7, 2, 4);
                 }
             }
 
             if (bl) {
-                this.generateBox(world, boundingBox, 3, 1, 3, 4, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
-                this.generateBox(world, boundingBox, 3, 2, 3, 4, 2, 4, BASE_GRAY, BASE_GRAY, false);
-                this.generateBox(world, boundingBox, 3, 3, 3, 4, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 3, 1, 3, 4, 1, 4, BASE_LIGHT, BASE_LIGHT, false);
+                this.generateBox(world, chunkBox, 3, 2, 3, 4, 2, 4, BASE_GRAY, BASE_GRAY, false);
+                this.generateBox(world, chunkBox, 3, 3, 3, 4, 3, 4, BASE_LIGHT, BASE_LIGHT, false);
             }
 
-            return true;
         }
     }
 
@@ -1759,18 +1748,18 @@ public class WorldGenMonumentPieces {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_SIMPLE_TOP_ROOM, 1, orientation, setting, 1, 1, 1);
         }
 
-        public WorldGenMonumentPieceSimpleT(WorldServer world, NBTTagCompound nbt) {
+        public WorldGenMonumentPieceSimpleT(NBTTagCompound nbt) {
             super(WorldGenFeatureStructurePieceType.OCEAN_MONUMENT_SIMPLE_TOP_ROOM, nbt);
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(world, boundingBox, 0, 0, this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
+                this.generateDefaultFloor(world, chunkBox, 0, 0, this.roomDefinition.hasOpening[EnumDirection.DOWN.get3DDataValue()]);
             }
 
             if (this.roomDefinition.connections[EnumDirection.UP.get3DDataValue()] == null) {
-                this.generateBoxOnFillOnly(world, boundingBox, 1, 4, 1, 6, 4, 6, BASE_GRAY);
+                this.generateBoxOnFillOnly(world, chunkBox, 1, 4, 1, 6, 4, 6, BASE_GRAY);
             }
 
             for(int i = 1; i <= 6; ++i) {
@@ -1778,32 +1767,31 @@ public class WorldGenMonumentPieces {
                     if (random.nextInt(3) != 0) {
                         int k = 2 + (random.nextInt(4) == 0 ? 0 : 1);
                         IBlockData blockState = Blocks.WET_SPONGE.getBlockData();
-                        this.generateBox(world, boundingBox, i, k, j, i, 3, j, blockState, blockState, false);
+                        this.generateBox(world, chunkBox, i, k, j, i, 3, j, blockState, blockState, false);
                     }
                 }
             }
 
-            this.generateBox(world, boundingBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 7, 1, 0, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 0, 6, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 1, 7, 6, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 2, 0, 0, 2, 7, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 7, 2, 0, 7, 2, 7, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 1, 2, 0, 6, 2, 0, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 1, 2, 7, 6, 2, 7, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 0, 3, 0, 0, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 7, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 1, 3, 7, 6, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
-            this.generateBox(world, boundingBox, 0, 1, 3, 0, 2, 4, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 7, 1, 3, 7, 2, 4, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 3, 1, 0, 4, 2, 0, BASE_BLACK, BASE_BLACK, false);
-            this.generateBox(world, boundingBox, 3, 1, 7, 4, 2, 7, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 0, 1, 0, 0, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 7, 1, 0, 7, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 0, 6, 1, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 1, 7, 6, 1, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 2, 0, 0, 2, 7, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 7, 2, 0, 7, 2, 7, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 1, 2, 0, 6, 2, 0, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 1, 2, 7, 6, 2, 7, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 0, 3, 0, 0, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 7, 3, 0, 7, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 0, 6, 3, 0, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 1, 3, 7, 6, 3, 7, BASE_LIGHT, BASE_LIGHT, false);
+            this.generateBox(world, chunkBox, 0, 1, 3, 0, 2, 4, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 7, 1, 3, 7, 2, 4, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 3, 1, 0, 4, 2, 0, BASE_BLACK, BASE_BLACK, false);
+            this.generateBox(world, chunkBox, 3, 1, 7, 4, 2, 7, BASE_BLACK, BASE_BLACK, false);
             if (this.roomDefinition.hasOpening[EnumDirection.SOUTH.get3DDataValue()]) {
-                this.generateWaterBox(world, boundingBox, 3, 1, 0, 4, 2, 0);
+                this.generateWaterBox(world, chunkBox, 3, 1, 0, 4, 2, 0);
             }
 
-            return true;
         }
     }
 

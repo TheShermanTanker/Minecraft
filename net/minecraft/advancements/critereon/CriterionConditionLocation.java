@@ -62,30 +62,34 @@ public class CriterionConditionLocation {
         return new CriterionConditionLocation(CriterionConditionValue.DoubleRange.ANY, CriterionConditionValue.DoubleRange.ANY, CriterionConditionValue.DoubleRange.ANY, (ResourceKey<BiomeBase>)null, feature, (ResourceKey<World>)null, (Boolean)null, CriterionConditionLight.ANY, CriterionConditionBlock.ANY, CriterionConditionFluid.ANY);
     }
 
-    public boolean matches(WorldServer serverLevel, double d, double e, double f) {
-        if (!this.x.matches(d)) {
+    public static CriterionConditionLocation atYLocation(CriterionConditionValue.DoubleRange y) {
+        return new CriterionConditionLocation(CriterionConditionValue.DoubleRange.ANY, y, CriterionConditionValue.DoubleRange.ANY, (ResourceKey<BiomeBase>)null, (StructureGenerator<?>)null, (ResourceKey<World>)null, (Boolean)null, CriterionConditionLight.ANY, CriterionConditionBlock.ANY, CriterionConditionFluid.ANY);
+    }
+
+    public boolean matches(WorldServer world, double x, double y, double z) {
+        if (!this.x.matches(x)) {
             return false;
-        } else if (!this.y.matches(e)) {
+        } else if (!this.y.matches(y)) {
             return false;
-        } else if (!this.z.matches(f)) {
+        } else if (!this.z.matches(z)) {
             return false;
-        } else if (this.dimension != null && this.dimension != serverLevel.getDimensionKey()) {
+        } else if (this.dimension != null && this.dimension != world.getDimensionKey()) {
             return false;
         } else {
-            BlockPosition blockPos = new BlockPosition(d, e, f);
-            boolean bl = serverLevel.isLoaded(blockPos);
-            Optional<ResourceKey<BiomeBase>> optional = serverLevel.registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY).getResourceKey(serverLevel.getBiome(blockPos));
+            BlockPosition blockPos = new BlockPosition(x, y, z);
+            boolean bl = world.isLoaded(blockPos);
+            Optional<ResourceKey<BiomeBase>> optional = world.registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY).getResourceKey(world.getBiome(blockPos));
             if (!optional.isPresent()) {
                 return false;
             } else if (this.biome == null || bl && this.biome == optional.get()) {
-                if (this.feature == null || bl && serverLevel.getStructureManager().getStructureAt(blockPos, true, this.feature).isValid()) {
-                    if (this.smokey == null || bl && this.smokey == BlockCampfire.isSmokeyPos(serverLevel, blockPos)) {
-                        if (!this.light.matches(serverLevel, blockPos)) {
+                if (this.feature == null || bl && world.getStructureManager().getStructureWithPieceAt(blockPos, this.feature).isValid()) {
+                    if (this.smokey == null || bl && this.smokey == BlockCampfire.isSmokeyPos(world, blockPos)) {
+                        if (!this.light.matches(world, blockPos)) {
                             return false;
-                        } else if (!this.block.matches(serverLevel, blockPos)) {
+                        } else if (!this.block.matches(world, blockPos)) {
                             return false;
                         } else {
-                            return this.fluid.matches(serverLevel, blockPos);
+                            return this.fluid.matches(world, blockPos);
                         }
                     } else {
                         return false;

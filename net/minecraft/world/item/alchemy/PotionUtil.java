@@ -153,7 +153,7 @@ public class PotionUtil {
         }
     }
 
-    public static void addPotionTooltip(ItemStack stack, List<IChatBaseComponent> list, float f) {
+    public static void addPotionTooltip(ItemStack stack, List<IChatBaseComponent> list, float durationMultiplier) {
         List<MobEffect> list2 = getEffects(stack);
         List<Pair<AttributeBase, AttributeModifier>> list3 = Lists.newArrayList();
         if (list2.isEmpty()) {
@@ -176,7 +176,7 @@ public class PotionUtil {
                 }
 
                 if (mobEffectInstance.getDuration() > 20) {
-                    mutableComponent = new ChatMessage("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
+                    mutableComponent = new ChatMessage("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, durationMultiplier));
                 }
 
                 list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
@@ -190,18 +190,18 @@ public class PotionUtil {
             for(Pair<AttributeBase, AttributeModifier> pair : list3) {
                 AttributeModifier attributeModifier3 = pair.getSecond();
                 double d = attributeModifier3.getAmount();
-                double g;
+                double f;
                 if (attributeModifier3.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE && attributeModifier3.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
-                    g = attributeModifier3.getAmount();
+                    f = attributeModifier3.getAmount();
                 } else {
-                    g = attributeModifier3.getAmount() * 100.0D;
+                    f = attributeModifier3.getAmount() * 100.0D;
                 }
 
                 if (d > 0.0D) {
-                    list.add((new ChatMessage("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(g), new ChatMessage(pair.getFirst().getName()))).withStyle(EnumChatFormat.BLUE));
+                    list.add((new ChatMessage("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(f), new ChatMessage(pair.getFirst().getName()))).withStyle(EnumChatFormat.BLUE));
                 } else if (d < 0.0D) {
-                    g = g * -1.0D;
-                    list.add((new ChatMessage("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(g), new ChatMessage(pair.getFirst().getName()))).withStyle(EnumChatFormat.RED));
+                    f = f * -1.0D;
+                    list.add((new ChatMessage("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(f), new ChatMessage(pair.getFirst().getName()))).withStyle(EnumChatFormat.RED));
                 }
             }
         }

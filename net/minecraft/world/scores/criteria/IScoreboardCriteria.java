@@ -63,8 +63,8 @@ public class IScoreboardCriteria {
             return Optional.of(objectiveCriteria);
         } else {
             int i = name.indexOf(58);
-            return i < 0 ? Optional.empty() : IRegistry.STAT_TYPE.getOptional(MinecraftKey.of(name.substring(0, i), '.')).flatMap((statType) -> {
-                return getStat(statType, MinecraftKey.of(name.substring(i + 1), '.'));
+            return i < 0 ? Optional.empty() : IRegistry.STAT_TYPE.getOptional(MinecraftKey.of(name.substring(0, i), '.')).flatMap((type) -> {
+                return getStat(type, MinecraftKey.of(name.substring(i + 1), '.'));
             });
         }
     }

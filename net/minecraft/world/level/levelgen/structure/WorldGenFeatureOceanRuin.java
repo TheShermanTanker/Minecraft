@@ -6,38 +6,24 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.IRegistryCustom;
 import net.minecraft.util.INamable;
-import net.minecraft.world.level.ChunkCoordIntPair;
-import net.minecraft.world.level.IWorldHeightAccess;
-import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.EnumBlockRotation;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureOceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class WorldGenFeatureOceanRuin extends StructureGenerator<WorldGenFeatureOceanRuinConfiguration> {
-    public WorldGenFeatureOceanRuin(Codec<WorldGenFeatureOceanRuinConfiguration> codec) {
-        super(codec);
+    public WorldGenFeatureOceanRuin(Codec<WorldGenFeatureOceanRuinConfiguration> configCodec) {
+        super(configCodec, PieceGeneratorSupplier.simple(PieceGeneratorSupplier.checkForBiomeOnTop(HeightMap.Type.OCEAN_FLOOR_WG), WorldGenFeatureOceanRuin::generatePieces));
     }
 
-    @Override
-    public StructureGenerator.StructureStartFactory<WorldGenFeatureOceanRuinConfiguration> getStartFactory() {
-        return WorldGenFeatureOceanRuin.OceanRuinStart::new;
-    }
-
-    public static class OceanRuinStart extends StructureStart<WorldGenFeatureOceanRuinConfiguration> {
-        public OceanRuinStart(StructureGenerator<WorldGenFeatureOceanRuinConfiguration> feature, ChunkCoordIntPair pos, int references, long seed) {
-            super(feature, pos, references, seed);
-        }
-
-        @Override
-        public void generatePieces(IRegistryCustom registryManager, ChunkGenerator chunkGenerator, DefinedStructureManager manager, ChunkCoordIntPair pos, BiomeBase biome, WorldGenFeatureOceanRuinConfiguration config, IWorldHeightAccess world) {
-            BlockPosition blockPos = new BlockPosition(pos.getMinBlockX(), 90, pos.getMinBlockZ());
-            EnumBlockRotation rotation = EnumBlockRotation.getRandom(this.random);
-            WorldGenFeatureOceanRuinPieces.addPieces(manager, blockPos, rotation, this, this.random, config);
-        }
+    private static void generatePieces(StructurePiecesBuilder collector, PieceGenerator.Context<WorldGenFeatureOceanRuinConfiguration> context) {
+        BlockPosition blockPos = new BlockPosition(context.chunkPos().getMinBlockX(), 90, context.chunkPos().getMinBlockZ());
+        EnumBlockRotation rotation = EnumBlockRotation.getRandom(context.random());
+        WorldGenFeatureOceanRuinPieces.addPieces(context.structureManager(), blockPos, rotation, collector, context.random(), context.config());
     }
 
     public static enum Temperature implements INamable {

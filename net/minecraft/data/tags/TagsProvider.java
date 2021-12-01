@@ -42,8 +42,8 @@ public abstract class TagsProvider<T> implements DebugReportProvider {
         this.builders.clear();
         this.addTags();
         this.builders.forEach((id, builder) -> {
-            List<Tag.BuilderEntry> list = builder.getEntries().filter((builderEntry) -> {
-                return !builderEntry.getEntry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey);
+            List<Tag.BuilderEntry> list = builder.getEntries().filter((tag) -> {
+                return !tag.getEntry().verifyIfPresent(this.registry::containsKey, this.builders::containsKey);
             }).collect(Collectors.toList());
             if (!list.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Couldn't define tag %s as it is missing following references: %s", id, list.stream().map(Objects::toString).collect(Collectors.joining(","))));

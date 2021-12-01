@@ -15,8 +15,8 @@ import net.minecraft.world.entity.EntityTypes;
 
 public class ArgumentEntitySummon implements ArgumentType<MinecraftKey> {
     private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:pig", "cow");
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ENTITY = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("entity.notFound", object);
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ENTITY = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("entity.notFound", id);
     });
 
     public static ArgumentEntitySummon id() {
@@ -27,19 +27,17 @@ public class ArgumentEntitySummon implements ArgumentType<MinecraftKey> {
         return verifyCanSummon(context.getArgument(name, MinecraftKey.class));
     }
 
-    private static MinecraftKey verifyCanSummon(MinecraftKey resourceLocation) throws CommandSyntaxException {
-        IRegistry.ENTITY_TYPE.getOptional(resourceLocation).filter(EntityTypes::canSummon).orElseThrow(() -> {
-            return ERROR_UNKNOWN_ENTITY.create(resourceLocation);
+    private static MinecraftKey verifyCanSummon(MinecraftKey id) throws CommandSyntaxException {
+        IRegistry.ENTITY_TYPE.getOptional(id).filter(EntityTypes::canSummon).orElseThrow(() -> {
+            return ERROR_UNKNOWN_ENTITY.create(id);
         });
-        return resourceLocation;
+        return id;
     }
 
-    @Override
     public MinecraftKey parse(StringReader stringReader) throws CommandSyntaxException {
         return verifyCanSummon(MinecraftKey.read(stringReader));
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

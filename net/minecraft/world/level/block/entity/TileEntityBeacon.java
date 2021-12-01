@@ -246,15 +246,14 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
         return (List<TileEntityBeacon.BeaconColorTracker>)(this.levels == 0 ? ImmutableList.of() : this.beamSections);
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 3, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     @Nullable
@@ -276,8 +275,8 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setInt("Primary", MobEffectBase.getId(this.primaryPower));
         nbt.setInt("Secondary", MobEffectBase.getId(this.secondaryPower));
         nbt.setInt("Levels", this.levels);
@@ -286,7 +285,6 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory {
         }
 
         this.lockKey.addToTag(nbt);
-        return nbt;
     }
 
     public void setCustomName(@Nullable IChatBaseComponent customName) {

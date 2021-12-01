@@ -17,7 +17,6 @@ public class DataConverterChunkStructuresTemplateRename extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE);
         OpticFinder<?> opticFinder = type.findField("Children");

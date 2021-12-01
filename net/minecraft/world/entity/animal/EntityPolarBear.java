@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.TimeRange;
 import net.minecraft.util.valueproviders.IntProviderUniform;
@@ -49,7 +50,6 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 
 public class EntityPolarBear extends EntityAnimal implements IEntityAngerable {
@@ -60,6 +60,7 @@ public class EntityPolarBear extends EntityAnimal implements IEntityAngerable {
     private int warningSoundTicks;
     private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
+    @Nullable
     private UUID persistentAngerTarget;
 
     public EntityPolarBear(EntityTypes<? extends EntityPolarBear> type, World world) {
@@ -102,7 +103,7 @@ public class EntityPolarBear extends EntityAnimal implements IEntityAngerable {
         if (!Objects.equals(optional, Optional.of(Biomes.FROZEN_OCEAN)) && !Objects.equals(optional, Optional.of(Biomes.DEEP_FROZEN_OCEAN))) {
             return checkAnimalSpawnRules(type, world, spawnReason, pos, random);
         } else {
-            return world.getLightLevel(pos, 0) > 8 && world.getType(pos.below()).is(Blocks.ICE);
+            return isBrightEnoughToSpawn(world, pos) && world.getType(pos.below()).is(TagsBlock.POLAR_BEARS_SPAWNABLE_ON_IN_FROZEN_OCEAN);
         }
     }
 
@@ -138,6 +139,7 @@ public class EntityPolarBear extends EntityAnimal implements IEntityAngerable {
         this.persistentAngerTarget = uuid;
     }
 
+    @Nullable
     @Override
     public UUID getAngerTarget() {
         return this.persistentAngerTarget;

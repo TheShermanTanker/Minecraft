@@ -43,7 +43,7 @@ public class DripstoneClusterConfiguration implements WorldGenFeatureConfigurati
     public final int maxDistanceFromEdgeAffectingChanceOfDripstoneColumn;
     public final int maxDistanceFromCenterAffectingHeightBias;
 
-    public DripstoneClusterConfiguration(int floorToCeilingSearchRange, IntProvider height, IntProvider radius, int maxStalagmiteStalactiteHeightDiff, int heightDeviation, IntProvider dripstoneBlockLayerThickness, FloatProvider density, FloatProvider wetness, float wetnessMean, int i, int j) {
+    public DripstoneClusterConfiguration(int floorToCeilingSearchRange, IntProvider height, IntProvider radius, int maxStalagmiteStalactiteHeightDiff, int heightDeviation, IntProvider dripstoneBlockLayerThickness, FloatProvider density, FloatProvider wetness, float wetnessMean, int maxDistanceFromCenterAffectingChanceOfDripstoneColumn, int maxDistanceFromCenterAffectingHeightBias) {
         this.floorToCeilingSearchRange = floorToCeilingSearchRange;
         this.height = height;
         this.radius = radius;
@@ -53,7 +53,7 @@ public class DripstoneClusterConfiguration implements WorldGenFeatureConfigurati
         this.density = density;
         this.wetness = wetness;
         this.chanceOfDripstoneColumnAtMaxDistanceFromCenter = wetnessMean;
-        this.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn = i;
-        this.maxDistanceFromCenterAffectingHeightBias = j;
+        this.maxDistanceFromEdgeAffectingChanceOfDripstoneColumn = maxDistanceFromCenterAffectingChanceOfDripstoneColumn;
+        this.maxDistanceFromCenterAffectingHeightBias = maxDistanceFromCenterAffectingHeightBias;
     }
 }

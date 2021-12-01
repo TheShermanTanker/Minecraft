@@ -43,7 +43,7 @@ public class PacketPlayOutScoreboardTeam implements Packet<PacketListenerPlayOut
     }
 
     public PacketPlayOutScoreboardTeam(PacketDataSerializer buf) {
-        this.name = buf.readUtf(16);
+        this.name = buf.readUtf();
         this.method = buf.readByte();
         if (shouldHaveParameters(this.method)) {
             this.parameters = Optional.of(new PacketPlayOutScoreboardTeam.Parameters(buf));

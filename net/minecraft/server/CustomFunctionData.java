@@ -126,7 +126,7 @@ public class CustomFunctionData {
         private final Deque<CustomFunctionData.QueuedCommand> commandQueue = Queues.newArrayDeque();
         private final List<CustomFunctionData.QueuedCommand> nestedCalls = Lists.newArrayList();
 
-        ExecutionContext(CustomFunctionData.TraceCallbacks tracer) {
+        ExecutionContext(@Nullable CustomFunctionData.TraceCallbacks tracer) {
             this.tracer = tracer;
         }
 

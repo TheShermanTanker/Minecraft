@@ -74,19 +74,21 @@ public class DripstoneUtils {
 
     }
 
-    protected static void growPointedDripstone(GeneratorAccessSeed world, BlockPosition pos, EnumDirection direction, int height, boolean merge) {
-        BlockPosition.MutableBlockPosition mutableBlockPos = pos.mutable();
-        buildBaseToTipColumn(direction, height, merge, (state) -> {
-            if (state.is(Blocks.POINTED_DRIPSTONE)) {
-                state = state.set(BlockDripstonePointed.WATERLOGGED, Boolean.valueOf(world.isWaterAt(mutableBlockPos)));
-            }
+    protected static void growPointedDripstone(GeneratorAccess world, BlockPosition pos, EnumDirection direction, int height, boolean merge) {
+        if (isDripstoneBase(world.getType(pos.relative(direction.opposite())))) {
+            BlockPosition.MutableBlockPosition mutableBlockPos = pos.mutable();
+            buildBaseToTipColumn(direction, height, merge, (state) -> {
+                if (state.is(Blocks.POINTED_DRIPSTONE)) {
+                    state = state.set(BlockDripstonePointed.WATERLOGGED, Boolean.valueOf(world.isWaterAt(mutableBlockPos)));
+                }
 
-            world.setTypeAndData(mutableBlockPos, state, 2);
-            mutableBlockPos.move(direction);
-        });
+                world.setTypeAndData(mutableBlockPos, state, 2);
+                mutableBlockPos.move(direction);
+            });
+        }
     }
 
-    protected static boolean placeDripstoneBlockIfPossible(GeneratorAccessSeed world, BlockPosition pos) {
+    protected static boolean placeDripstoneBlockIfPossible(GeneratorAccess world, BlockPosition pos) {
         IBlockData blockState = world.getType(pos);
         if (blockState.is(TagsBlock.DRIPSTONE_REPLACEABLE)) {
             world.setTypeAndData(pos, Blocks.DRIPSTONE_BLOCK.getBlockData(), 2);

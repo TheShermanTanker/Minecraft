@@ -13,7 +13,6 @@ import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.decoration.EntityItemFrame;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.IBlockAccess;
-import net.minecraft.world.level.TickListPriority;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityComparator;
@@ -25,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.BlockPropertyComparatorM
 import net.minecraft.world.level.block.state.properties.BlockStateEnum;
 import net.minecraft.world.phys.AxisAlignedBB;
 import net.minecraft.world.phys.MovingObjectPositionBlock;
+import net.minecraft.world.ticks.TickPriority;
 
 public class BlockRedstoneComparator extends BlockDiodeAbstract implements ITileEntity {
     public static final BlockStateEnum<BlockPropertyComparatorMode> MODE = BlockProperties.MODE_COMPARATOR;
@@ -119,13 +119,13 @@ public class BlockRedstoneComparator extends BlockDiodeAbstract implements ITile
 
     @Override
     protected void checkTickOnNeighbor(World world, BlockPosition pos, IBlockData state) {
-        if (!world.getBlockTickList().willTickThisTick(pos, this)) {
+        if (!world.getBlockTicks().willTickThisTick(pos, this)) {
             int i = this.calculateOutputSignal(world, pos, state);
             TileEntity blockEntity = world.getTileEntity(pos);
             int j = blockEntity instanceof TileEntityComparator ? ((TileEntityComparator)blockEntity).getOutputSignal() : 0;
             if (i != j || state.get(POWERED) != this.shouldTurnOn(world, pos, state)) {
-                TickListPriority tickPriority = this.shouldPrioritize(world, pos, state) ? TickListPriority.HIGH : TickListPriority.NORMAL;
-                world.getBlockTickList().scheduleTick(pos, this, 2, tickPriority);
+                TickPriority tickPriority = this.shouldPrioritize(world, pos, state) ? TickPriority.HIGH : TickPriority.NORMAL;
+                world.scheduleTick(pos, this, 2, tickPriority);
             }
 
         }

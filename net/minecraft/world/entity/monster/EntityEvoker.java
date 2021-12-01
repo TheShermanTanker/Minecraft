@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class EntityEvoker extends EntityIllagerWizard {
+    @Nullable
     private EntitySheep wololoTarget;
 
     public EntityEvoker(EntityTypes<? extends EntityEvoker> type, World world) {

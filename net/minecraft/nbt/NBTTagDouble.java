@@ -8,11 +8,21 @@ import net.minecraft.util.MathHelper;
 public class NBTTagDouble extends NBTNumber {
     private static final int SELF_SIZE_IN_BITS = 128;
     public static final NBTTagDouble ZERO = new NBTTagDouble(0.0D);
-    public static final NBTTagType<NBTTagDouble> TYPE = new NBTTagType<NBTTagDouble>() {
+    public static final NBTTagType<NBTTagDouble> TYPE = new TagType$StaticSize<NBTTagDouble>() {
         @Override
         public NBTTagDouble load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(128L);
             return NBTTagDouble.valueOf(dataInput.readDouble());
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            return visitor.visit(input.readDouble());
+        }
+
+        @Override
+        public int size() {
+            return 8;
         }
 
         @Override
@@ -113,5 +123,10 @@ public class NBTTagDouble extends NBTNumber {
     @Override
     public Number getAsNumber() {
         return this.data;
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visit(this.data);
     }
 }

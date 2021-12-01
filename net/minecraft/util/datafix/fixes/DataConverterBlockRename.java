@@ -19,7 +19,6 @@ public abstract class DataConverterBlockRename extends DataFix {
         this.name = name;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.BLOCK_NAME);
         Type<Pair<String, String>> type2 = DSL.named(DataConverterTypes.BLOCK_NAME.typeName(), DataConverterSchemaNamed.namespacedString());

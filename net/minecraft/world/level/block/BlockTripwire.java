@@ -140,7 +140,7 @@ public class BlockTripwire extends Block {
         }
 
         if (bl2) {
-            world.getBlockTickList().scheduleTick(new BlockPosition(pos), this, 10);
+            world.scheduleTick(new BlockPosition(pos), this, 10);
         }
 
     }

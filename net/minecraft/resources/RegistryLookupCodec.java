@@ -19,22 +19,18 @@ public final class RegistryLookupCodec<E> extends MapCodec<IRegistry<E>> {
         this.registryKey = registryKey;
     }
 
-    @Override
     public <T> RecordBuilder<T> encode(IRegistry<E> registry, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
         return recordBuilder;
     }
 
-    @Override
     public <T> DataResult<IRegistry<E>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
         return dynamicOps instanceof RegistryReadOps ? ((RegistryReadOps)dynamicOps).registry(this.registryKey) : DataResult.error("Not a registry ops");
     }
 
-    @Override
     public String toString() {
         return "RegistryLookupCodec[" + this.registryKey + "]";
     }
 
-    @Override
     public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
         return Stream.empty();
     }

@@ -50,52 +50,52 @@ public interface ICompletionProvider {
 
     boolean hasPermission(int level);
 
-    static <T> void filterResources(Iterable<T> candidates, String string, Function<T, MinecraftKey> identifier, Consumer<T> action) {
-        boolean bl = string.indexOf(58) > -1;
+    static <T> void filterResources(Iterable<T> candidates, String remaining, Function<T, MinecraftKey> identifier, Consumer<T> action) {
+        boolean bl = remaining.indexOf(58) > -1;
 
         for(T object : candidates) {
             MinecraftKey resourceLocation = identifier.apply(object);
             if (bl) {
-                String string2 = resourceLocation.toString();
-                if (matchesSubStr(string, string2)) {
+                String string = resourceLocation.toString();
+                if (matchesSubStr(remaining, string)) {
                     action.accept(object);
                 }
-            } else if (matchesSubStr(string, resourceLocation.getNamespace()) || resourceLocation.getNamespace().equals("minecraft") && matchesSubStr(string, resourceLocation.getKey())) {
+            } else if (matchesSubStr(remaining, resourceLocation.getNamespace()) || resourceLocation.getNamespace().equals("minecraft") && matchesSubStr(remaining, resourceLocation.getKey())) {
                 action.accept(object);
             }
         }
 
     }
 
-    static <T> void filterResources(Iterable<T> candidates, String string, String string2, Function<T, MinecraftKey> identifier, Consumer<T> action) {
-        if (string.isEmpty()) {
+    static <T> void filterResources(Iterable<T> candidates, String remaining, String prefix, Function<T, MinecraftKey> identifier, Consumer<T> action) {
+        if (remaining.isEmpty()) {
             candidates.forEach(action);
         } else {
-            String string3 = Strings.commonPrefix(string, string2);
-            if (!string3.isEmpty()) {
-                String string4 = string.substring(string3.length());
-                filterResources(candidates, string4, identifier, action);
+            String string = Strings.commonPrefix(remaining, prefix);
+            if (!string.isEmpty()) {
+                String string2 = remaining.substring(string.length());
+                filterResources(candidates, string2, identifier, action);
             }
         }
 
     }
 
-    static CompletableFuture<Suggestions> suggestResource(Iterable<MinecraftKey> candidates, SuggestionsBuilder builder, String string) {
-        String string2 = builder.getRemaining().toLowerCase(Locale.ROOT);
-        filterResources(candidates, string2, string, (resourceLocation) -> {
-            return resourceLocation;
-        }, (resourceLocation) -> {
-            builder.suggest(string + resourceLocation);
+    static CompletableFuture<Suggestions> suggestResource(Iterable<MinecraftKey> candidates, SuggestionsBuilder builder, String prefix) {
+        String string = builder.getRemaining().toLowerCase(Locale.ROOT);
+        filterResources(candidates, string, prefix, (id) -> {
+            return id;
+        }, (id) -> {
+            builder.suggest(prefix + id);
         });
         return builder.buildFuture();
     }
 
     static CompletableFuture<Suggestions> suggestResource(Iterable<MinecraftKey> candidates, SuggestionsBuilder builder) {
         String string = builder.getRemaining().toLowerCase(Locale.ROOT);
-        filterResources(candidates, string, (resourceLocation) -> {
-            return resourceLocation;
-        }, (resourceLocation) -> {
-            builder.suggest(resourceLocation.toString());
+        filterResources(candidates, string, (id) -> {
+            return id;
+        }, (id) -> {
+            builder.suggest(id.toString());
         });
         return builder.buildFuture();
     }
@@ -108,40 +108,40 @@ public interface ICompletionProvider {
         return builder.buildFuture();
     }
 
-    static CompletableFuture<Suggestions> suggestResource(Stream<MinecraftKey> stream, SuggestionsBuilder builder) {
-        return suggestResource(stream::iterator, builder);
+    static CompletableFuture<Suggestions> suggestResource(Stream<MinecraftKey> candidates, SuggestionsBuilder builder) {
+        return suggestResource(candidates::iterator, builder);
     }
 
     static <T> CompletableFuture<Suggestions> suggestResource(Stream<T> candidates, SuggestionsBuilder builder, Function<T, MinecraftKey> identifier, Function<T, Message> tooltip) {
         return suggestResource(candidates::iterator, builder, identifier, tooltip);
     }
 
-    static CompletableFuture<Suggestions> suggestCoordinates(String string, Collection<ICompletionProvider.TextCoordinates> candidates, SuggestionsBuilder builder, Predicate<String> predicate) {
+    static CompletableFuture<Suggestions> suggestCoordinates(String remaining, Collection<ICompletionProvider.TextCoordinates> candidates, SuggestionsBuilder builder, Predicate<String> predicate) {
         List<String> list = Lists.newArrayList();
-        if (Strings.isNullOrEmpty(string)) {
+        if (Strings.isNullOrEmpty(remaining)) {
             for(ICompletionProvider.TextCoordinates textCoordinates : candidates) {
-                String string2 = textCoordinates.x + " " + textCoordinates.y + " " + textCoordinates.z;
-                if (predicate.test(string2)) {
+                String string = textCoordinates.x + " " + textCoordinates.y + " " + textCoordinates.z;
+                if (predicate.test(string)) {
                     list.add(textCoordinates.x);
                     list.add(textCoordinates.x + " " + textCoordinates.y);
-                    list.add(string2);
+                    list.add(string);
                 }
             }
         } else {
-            String[] strings = string.split(" ");
+            String[] strings = remaining.split(" ");
             if (strings.length == 1) {
                 for(ICompletionProvider.TextCoordinates textCoordinates2 : candidates) {
-                    String string3 = strings[0] + " " + textCoordinates2.y + " " + textCoordinates2.z;
-                    if (predicate.test(string3)) {
+                    String string2 = strings[0] + " " + textCoordinates2.y + " " + textCoordinates2.z;
+                    if (predicate.test(string2)) {
                         list.add(strings[0] + " " + textCoordinates2.y);
-                        list.add(string3);
+                        list.add(string2);
                     }
                 }
             } else if (strings.length == 2) {
                 for(ICompletionProvider.TextCoordinates textCoordinates3 : candidates) {
-                    String string4 = strings[0] + " " + strings[1] + " " + textCoordinates3.z;
-                    if (predicate.test(string4)) {
-                        list.add(string4);
+                    String string3 = strings[0] + " " + strings[1] + " " + textCoordinates3.z;
+                    if (predicate.test(string3)) {
+                        list.add(string3);
                     }
                 }
             }
@@ -150,79 +150,79 @@ public interface ICompletionProvider {
         return suggest(list, builder);
     }
 
-    static CompletableFuture<Suggestions> suggest2DCoordinates(String string, Collection<ICompletionProvider.TextCoordinates> collection, SuggestionsBuilder suggestionsBuilder, Predicate<String> predicate) {
+    static CompletableFuture<Suggestions> suggest2DCoordinates(String remaining, Collection<ICompletionProvider.TextCoordinates> candidates, SuggestionsBuilder builder, Predicate<String> predicate) {
         List<String> list = Lists.newArrayList();
-        if (Strings.isNullOrEmpty(string)) {
-            for(ICompletionProvider.TextCoordinates textCoordinates : collection) {
-                String string2 = textCoordinates.x + " " + textCoordinates.z;
-                if (predicate.test(string2)) {
+        if (Strings.isNullOrEmpty(remaining)) {
+            for(ICompletionProvider.TextCoordinates textCoordinates : candidates) {
+                String string = textCoordinates.x + " " + textCoordinates.z;
+                if (predicate.test(string)) {
                     list.add(textCoordinates.x);
-                    list.add(string2);
+                    list.add(string);
                 }
             }
         } else {
-            String[] strings = string.split(" ");
+            String[] strings = remaining.split(" ");
             if (strings.length == 1) {
-                for(ICompletionProvider.TextCoordinates textCoordinates2 : collection) {
-                    String string3 = strings[0] + " " + textCoordinates2.z;
-                    if (predicate.test(string3)) {
-                        list.add(string3);
+                for(ICompletionProvider.TextCoordinates textCoordinates2 : candidates) {
+                    String string2 = strings[0] + " " + textCoordinates2.z;
+                    if (predicate.test(string2)) {
+                        list.add(string2);
                     }
                 }
             }
         }
 
-        return suggest(list, suggestionsBuilder);
+        return suggest(list, builder);
     }
 
-    static CompletableFuture<Suggestions> suggest(Iterable<String> iterable, SuggestionsBuilder suggestionsBuilder) {
-        String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+    static CompletableFuture<Suggestions> suggest(Iterable<String> candidates, SuggestionsBuilder builder) {
+        String string = builder.getRemaining().toLowerCase(Locale.ROOT);
 
-        for(String string2 : iterable) {
+        for(String string2 : candidates) {
             if (matchesSubStr(string, string2.toLowerCase(Locale.ROOT))) {
-                suggestionsBuilder.suggest(string2);
+                builder.suggest(string2);
             }
         }
 
-        return suggestionsBuilder.buildFuture();
+        return builder.buildFuture();
     }
 
-    static CompletableFuture<Suggestions> suggest(Stream<String> stream, SuggestionsBuilder suggestionsBuilder) {
-        String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
-        stream.filter((string2) -> {
-            return matchesSubStr(string, string2.toLowerCase(Locale.ROOT));
-        }).forEach(suggestionsBuilder::suggest);
-        return suggestionsBuilder.buildFuture();
+    static CompletableFuture<Suggestions> suggest(Stream<String> candidates, SuggestionsBuilder builder) {
+        String string = builder.getRemaining().toLowerCase(Locale.ROOT);
+        candidates.filter((candidate) -> {
+            return matchesSubStr(string, candidate.toLowerCase(Locale.ROOT));
+        }).forEach(builder::suggest);
+        return builder.buildFuture();
     }
 
-    static CompletableFuture<Suggestions> suggest(String[] strings, SuggestionsBuilder suggestionsBuilder) {
-        String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+    static CompletableFuture<Suggestions> suggest(String[] candidates, SuggestionsBuilder builder) {
+        String string = builder.getRemaining().toLowerCase(Locale.ROOT);
 
-        for(String string2 : strings) {
+        for(String string2 : candidates) {
             if (matchesSubStr(string, string2.toLowerCase(Locale.ROOT))) {
-                suggestionsBuilder.suggest(string2);
+                builder.suggest(string2);
             }
         }
 
-        return suggestionsBuilder.buildFuture();
+        return builder.buildFuture();
     }
 
-    static <T> CompletableFuture<Suggestions> suggest(Iterable<T> iterable, SuggestionsBuilder suggestionsBuilder, Function<T, String> function, Function<T, Message> function2) {
-        String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+    static <T> CompletableFuture<Suggestions> suggest(Iterable<T> candidates, SuggestionsBuilder builder, Function<T, String> suggestionText, Function<T, Message> tooltip) {
+        String string = builder.getRemaining().toLowerCase(Locale.ROOT);
 
-        for(T object : iterable) {
-            String string2 = function.apply(object);
+        for(T object : candidates) {
+            String string2 = suggestionText.apply(object);
             if (matchesSubStr(string, string2.toLowerCase(Locale.ROOT))) {
-                suggestionsBuilder.suggest(string2, function2.apply(object));
+                builder.suggest(string2, tooltip.apply(object));
             }
         }
 
-        return suggestionsBuilder.buildFuture();
+        return builder.buildFuture();
     }
 
-    static boolean matchesSubStr(String string, String string2) {
-        for(int i = 0; !string2.startsWith(string, i); ++i) {
-            i = string2.indexOf(95, i);
+    static boolean matchesSubStr(String remaining, String candidate) {
+        for(int i = 0; !candidate.startsWith(remaining, i); ++i) {
+            i = candidate.indexOf(95, i);
             if (i < 0) {
                 return false;
             }

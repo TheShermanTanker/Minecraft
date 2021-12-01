@@ -65,15 +65,15 @@ public class ArgumentRegistry {
     private static final Map<Class<?>, ArgumentRegistry.Entry<?>> BY_CLASS = Maps.newHashMap();
     private static final Map<MinecraftKey, ArgumentRegistry.Entry<?>> BY_NAME = Maps.newHashMap();
 
-    public static <T extends ArgumentType<?>> void register(String id, Class<T> class_, ArgumentSerializer<T> argumentSerializer) {
+    public static <T extends ArgumentType<?>> void register(String id, Class<T> argClass, ArgumentSerializer<T> serializer) {
         MinecraftKey resourceLocation = new MinecraftKey(id);
-        if (BY_CLASS.containsKey(class_)) {
-            throw new IllegalArgumentException("Class " + class_.getName() + " already has a serializer!");
+        if (BY_CLASS.containsKey(argClass)) {
+            throw new IllegalArgumentException("Class " + argClass.getName() + " already has a serializer!");
         } else if (BY_NAME.containsKey(resourceLocation)) {
             throw new IllegalArgumentException("'" + resourceLocation + "' is already a registered serializer!");
         } else {
-            ArgumentRegistry.Entry<T> entry = new ArgumentRegistry.Entry<>(class_, argumentSerializer, resourceLocation);
-            BY_CLASS.put(class_, entry);
+            ArgumentRegistry.Entry<T> entry = new ArgumentRegistry.Entry<>(argClass, serializer, resourceLocation);
+            BY_CLASS.put(argClass, entry);
             BY_NAME.put(resourceLocation, entry);
         }
     }
@@ -131,18 +131,18 @@ public class ArgumentRegistry {
     }
 
     @Nullable
-    private static ArgumentRegistry.Entry<?> get(ArgumentType<?> argumentType) {
-        return BY_CLASS.get(argumentType.getClass());
+    private static ArgumentRegistry.Entry<?> get(ArgumentType<?> type) {
+        return BY_CLASS.get(type.getClass());
     }
 
-    public static <T extends ArgumentType<?>> void serialize(PacketDataSerializer friendlyByteBuf, T argumentType) {
-        ArgumentRegistry.Entry<T> entry = get(argumentType);
+    public static <T extends ArgumentType<?>> void serialize(PacketDataSerializer buf, T type) {
+        ArgumentRegistry.Entry<T> entry = get(type);
         if (entry == null) {
-            LOGGER.error("Could not serialize {} ({}) - will not be sent to client!", argumentType, argumentType.getClass());
-            friendlyByteBuf.writeResourceLocation(new MinecraftKey(""));
+            LOGGER.error("Could not serialize {} ({}) - will not be sent to client!", type, type.getClass());
+            buf.writeResourceLocation(new MinecraftKey(""));
         } else {
-            friendlyByteBuf.writeResourceLocation(entry.name);
-            entry.serializer.serializeToNetwork(argumentType, friendlyByteBuf);
+            buf.writeResourceLocation(entry.name);
+            entry.serializer.serializeToNetwork(type, buf);
         }
     }
 
@@ -158,24 +158,24 @@ public class ArgumentRegistry {
         }
     }
 
-    private static <T extends ArgumentType<?>> void serializeToJson(JsonObject jsonObject, T argumentType) {
-        ArgumentRegistry.Entry<T> entry = get(argumentType);
+    private static <T extends ArgumentType<?>> void serializeToJson(JsonObject json, T type) {
+        ArgumentRegistry.Entry<T> entry = get(type);
         if (entry == null) {
-            LOGGER.error("Could not serialize argument {} ({})!", argumentType, argumentType.getClass());
-            jsonObject.addProperty("type", "unknown");
+            LOGGER.error("Could not serialize argument {} ({})!", type, type.getClass());
+            json.addProperty("type", "unknown");
         } else {
-            jsonObject.addProperty("type", "argument");
-            jsonObject.addProperty("parser", entry.name.toString());
-            JsonObject jsonObject2 = new JsonObject();
-            entry.serializer.serializeToJson(argumentType, jsonObject2);
-            if (jsonObject2.size() > 0) {
-                jsonObject.add("properties", jsonObject2);
+            json.addProperty("type", "argument");
+            json.addProperty("parser", entry.name.toString());
+            JsonObject jsonObject = new JsonObject();
+            entry.serializer.serializeToJson(type, jsonObject);
+            if (jsonObject.size() > 0) {
+                json.add("properties", jsonObject);
             }
         }
 
     }
 
-    public static <S> JsonObject serializeNodeToJson(CommandDispatcher<S> commandDispatcher, CommandNode<S> commandNode) {
+    public static <S> JsonObject serializeNodeToJson(CommandDispatcher<S> dispatcher, CommandNode<S> commandNode) {
         JsonObject jsonObject = new JsonObject();
         if (commandNode instanceof RootCommandNode) {
             jsonObject.addProperty("type", "root");
@@ -191,7 +191,7 @@ public class ArgumentRegistry {
         JsonObject jsonObject2 = new JsonObject();
 
         for(CommandNode<S> commandNode2 : commandNode.getChildren()) {
-            jsonObject2.add(commandNode2.getName(), serializeNodeToJson(commandDispatcher, commandNode2));
+            jsonObject2.add(commandNode2.getName(), serializeNodeToJson(dispatcher, commandNode2));
         }
 
         if (jsonObject2.size() > 0) {
@@ -203,7 +203,7 @@ public class ArgumentRegistry {
         }
 
         if (commandNode.getRedirect() != null) {
-            Collection<String> collection = commandDispatcher.getPath(commandNode.getRedirect());
+            Collection<String> collection = dispatcher.getPath(commandNode.getRedirect());
             if (!collection.isEmpty()) {
                 JsonArray jsonArray = new JsonArray();
 
@@ -218,8 +218,8 @@ public class ArgumentRegistry {
         return jsonObject;
     }
 
-    public static boolean isTypeRegistered(ArgumentType<?> argumentType) {
-        return get(argumentType) != null;
+    public static boolean isTypeRegistered(ArgumentType<?> type) {
+        return get(type) != null;
     }
 
     public static <T> Set<ArgumentType<?>> findUsedArgumentTypes(CommandNode<T> node) {
@@ -251,10 +251,10 @@ public class ArgumentRegistry {
         public final ArgumentSerializer<T> serializer;
         public final MinecraftKey name;
 
-        Entry(Class<T> class_, ArgumentSerializer<T> argumentSerializer, MinecraftKey resourceLocation) {
-            this.clazz = class_;
-            this.serializer = argumentSerializer;
-            this.name = resourceLocation;
+        Entry(Class<T> argClass, ArgumentSerializer<T> serializer, MinecraftKey id) {
+            this.clazz = argClass;
+            this.serializer = serializer;
+            this.name = id;
         }
     }
 }

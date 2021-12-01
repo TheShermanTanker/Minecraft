@@ -15,7 +15,9 @@ import net.minecraft.util.ChatDeserializer;
 public class CriterionConditionRange {
     public static final CriterionConditionRange ANY = new CriterionConditionRange((Float)null, (Float)null);
     public static final SimpleCommandExceptionType ERROR_INTS_ONLY = new SimpleCommandExceptionType(new ChatMessage("argument.range.ints"));
+    @Nullable
     private final Float min;
+    @Nullable
     private final Float max;
 
     public CriterionConditionRange(@Nullable Float min, @Nullable Float max) {

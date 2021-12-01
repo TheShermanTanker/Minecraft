@@ -7,7 +7,6 @@ import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.MathHelper;
@@ -31,6 +30,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureOceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
@@ -57,12 +57,12 @@ public class WorldGenFeatureOceanRuinPieces {
         return SystemUtils.getRandom(BIG_WARM_RUINS, random);
     }
 
-    public static void addPieces(DefinedStructureManager manager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor structurePieceAccessor, Random random, WorldGenFeatureOceanRuinConfiguration config) {
+    public static void addPieces(DefinedStructureManager manager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor holder, Random random, WorldGenFeatureOceanRuinConfiguration config) {
         boolean bl = random.nextFloat() <= config.largeProbability;
         float f = bl ? 0.9F : 0.8F;
-        addPiece(manager, pos, rotation, structurePieceAccessor, random, config, bl, f);
+        addPiece(manager, pos, rotation, holder, random, config, bl, f);
         if (bl && random.nextFloat() <= config.clusterProbability) {
-            addClusterRuins(manager, random, rotation, pos, config, structurePieceAccessor);
+            addClusterRuins(manager, random, rotation, pos, config, holder);
         }
 
     }
@@ -103,21 +103,21 @@ public class WorldGenFeatureOceanRuinPieces {
         return list;
     }
 
-    private static void addPiece(DefinedStructureManager manager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor structurePieceAccessor, Random random, WorldGenFeatureOceanRuinConfiguration config, boolean large, float integrity) {
+    private static void addPiece(DefinedStructureManager manager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor holder, Random random, WorldGenFeatureOceanRuinConfiguration config, boolean large, float integrity) {
         switch(config.biomeTemp) {
         case WARM:
         default:
             MinecraftKey resourceLocation = large ? getBigWarmRuin(random) : getSmallWarmRuin(random);
-            structurePieceAccessor.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocation, pos, rotation, integrity, config.biomeTemp, large));
+            holder.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocation, pos, rotation, integrity, config.biomeTemp, large));
             break;
         case COLD:
             MinecraftKey[] resourceLocations = large ? BIG_RUINS_BRICK : RUINS_BRICK;
             MinecraftKey[] resourceLocations2 = large ? BIG_RUINS_CRACKED : RUINS_CRACKED;
             MinecraftKey[] resourceLocations3 = large ? BIG_RUINS_MOSSY : RUINS_MOSSY;
             int i = random.nextInt(resourceLocations.length);
-            structurePieceAccessor.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocations[i], pos, rotation, integrity, config.biomeTemp, large));
-            structurePieceAccessor.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocations2[i], pos, rotation, 0.7F, config.biomeTemp, large));
-            structurePieceAccessor.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocations3[i], pos, rotation, 0.5F, config.biomeTemp, large));
+            holder.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocations[i], pos, rotation, integrity, config.biomeTemp, large));
+            holder.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocations2[i], pos, rotation, 0.7F, config.biomeTemp, large));
+            holder.addPiece(new WorldGenFeatureOceanRuinPieces.OceanRuinPiece(manager, resourceLocations3[i], pos, rotation, 0.5F, config.biomeTemp, large));
         }
 
     }
@@ -134,8 +134,8 @@ public class WorldGenFeatureOceanRuinPieces {
             this.isLarge = large;
         }
 
-        public OceanRuinPiece(WorldServer world, NBTTagCompound nbt) {
-            super(WorldGenFeatureStructurePieceType.OCEAN_RUIN, nbt, world, (resourceLocation) -> {
+        public OceanRuinPiece(DefinedStructureManager holder, NBTTagCompound nbt) {
+            super(WorldGenFeatureStructurePieceType.OCEAN_RUIN, nbt, holder, (resourceLocation) -> {
                 return makeSettings(EnumBlockRotation.valueOf(nbt.getString("Rot")));
             });
             this.integrity = nbt.getFloat("Integrity");
@@ -148,8 +148,8 @@ public class WorldGenFeatureOceanRuinPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setString("Rot", this.placeSettings.getRotation().name());
             nbt.setFloat("Integrity", this.integrity);
             nbt.setString("BiomeType", this.biomeType.toString());
@@ -180,13 +180,13 @@ public class WorldGenFeatureOceanRuinPieces {
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             this.placeSettings.clearProcessors().addProcessor(new DefinedStructureProcessorRotation(this.integrity)).addProcessor(DefinedStructureProcessorBlockIgnore.STRUCTURE_AND_AIR);
             int i = world.getHeight(HeightMap.Type.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
             this.templatePosition = new BlockPosition(this.templatePosition.getX(), i, this.templatePosition.getZ());
             BlockPosition blockPos = DefinedStructure.transform(new BlockPosition(this.template.getSize().getX() - 1, 0, this.template.getSize().getZ() - 1), EnumBlockMirror.NONE, this.placeSettings.getRotation(), BlockPosition.ZERO).offset(this.templatePosition);
             this.templatePosition = new BlockPosition(this.templatePosition.getX(), this.getHeight(this.templatePosition, world, blockPos), this.templatePosition.getZ());
-            return super.postProcess(world, structureAccessor, chunkGenerator, random, boundingBox, chunkPos, pos);
+            super.postProcess(world, structureAccessor, chunkGenerator, random, chunkBox, chunkPos, pos);
         }
 
         private int getHeight(BlockPosition start, IBlockAccess world, BlockPosition end) {

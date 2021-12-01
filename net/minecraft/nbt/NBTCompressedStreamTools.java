@@ -184,7 +184,31 @@ public class NBTCompressedStreamTools {
         writeUnnamedTag(compound, output);
     }
 
-    private static void writeUnnamedTag(NBTBase element, DataOutput output) throws IOException {
+    public static void parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+        NBTTagType<?> tagType = NBTTagTypes.getType(input.readByte());
+        if (tagType == NBTTagEnd.TYPE) {
+            if (visitor.visitRootEntry(NBTTagEnd.TYPE) == StreamTagVisitor.ValueResult.CONTINUE) {
+                visitor.visitEnd();
+            }
+
+        } else {
+            switch(visitor.visitRootEntry(tagType)) {
+            case HALT:
+            default:
+                break;
+            case BREAK:
+                NBTTagString.skipString(input);
+                tagType.skip(input);
+                break;
+            case CONTINUE:
+                NBTTagString.skipString(input);
+                tagType.parse(input, visitor);
+            }
+
+        }
+    }
+
+    public static void writeUnnamedTag(NBTBase element, DataOutput output) throws IOException {
         output.writeByte(element.getTypeId());
         if (element.getTypeId() != 0) {
             output.writeUTF("");
@@ -197,7 +221,7 @@ public class NBTCompressedStreamTools {
         if (b == 0) {
             return NBTTagEnd.INSTANCE;
         } else {
-            input.readUTF();
+            NBTTagString.skipString(input);
 
             try {
                 return NBTTagTypes.getType(b).load(input, depth, tracker);

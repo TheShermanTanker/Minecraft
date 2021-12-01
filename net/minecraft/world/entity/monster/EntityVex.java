@@ -43,6 +43,7 @@ public class EntityVex extends EntityMonster {
     public static final int TICKS_PER_FLAP = MathHelper.ceil(3.9269907F);
     protected static final DataWatcherObject<Byte> DATA_FLAGS_ID = DataWatcher.defineId(EntityVex.class, DataWatcherRegistry.BYTE);
     private static final int FLAG_IS_CHARGING = 1;
+    @Nullable
     EntityInsentient owner;
     @Nullable
     private BlockPosition boundOrigin;
@@ -130,6 +131,7 @@ public class EntityVex extends EntityMonster {
 
     }
 
+    @Nullable
     public EntityInsentient getOwner() {
         return this.owner;
     }
@@ -217,7 +219,7 @@ public class EntityVex extends EntityMonster {
 
         @Override
         public boolean canUse() {
-            if (EntityVex.this.getGoalTarget() != null && !EntityVex.this.getControllerMove().hasWanted() && EntityVex.this.random.nextInt(7) == 0) {
+            if (EntityVex.this.getGoalTarget() != null && !EntityVex.this.getControllerMove().hasWanted() && EntityVex.this.random.nextInt(reducedTickDelay(7)) == 0) {
                 return EntityVex.this.distanceToSqr(EntityVex.this.getGoalTarget()) > 4.0D;
             } else {
                 return false;
@@ -232,8 +234,11 @@ public class EntityVex extends EntityMonster {
         @Override
         public void start() {
             EntityLiving livingEntity = EntityVex.this.getGoalTarget();
-            Vec3D vec3 = livingEntity.getEyePosition();
-            EntityVex.this.moveControl.setWantedPosition(vec3.x, vec3.y, vec3.z, 1.0D);
+            if (livingEntity != null) {
+                Vec3D vec3 = livingEntity.getEyePosition();
+                EntityVex.this.moveControl.setWantedPosition(vec3.x, vec3.y, vec3.z, 1.0D);
+            }
+
             EntityVex.this.setCharging(true);
             EntityVex.this.playSound(SoundEffects.VEX_CHARGE, 1.0F, 1.0F);
         }
@@ -244,19 +249,26 @@ public class EntityVex extends EntityMonster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             EntityLiving livingEntity = EntityVex.this.getGoalTarget();
-            if (EntityVex.this.getBoundingBox().intersects(livingEntity.getBoundingBox())) {
-                EntityVex.this.attackEntity(livingEntity);
-                EntityVex.this.setCharging(false);
-            } else {
-                double d = EntityVex.this.distanceToSqr(livingEntity);
-                if (d < 9.0D) {
-                    Vec3D vec3 = livingEntity.getEyePosition();
-                    EntityVex.this.moveControl.setWantedPosition(vec3.x, vec3.y, vec3.z, 1.0D);
+            if (livingEntity != null) {
+                if (EntityVex.this.getBoundingBox().intersects(livingEntity.getBoundingBox())) {
+                    EntityVex.this.attackEntity(livingEntity);
+                    EntityVex.this.setCharging(false);
+                } else {
+                    double d = EntityVex.this.distanceToSqr(livingEntity);
+                    if (d < 9.0D) {
+                        Vec3D vec3 = livingEntity.getEyePosition();
+                        EntityVex.this.moveControl.setWantedPosition(vec3.x, vec3.y, vec3.z, 1.0D);
+                    }
                 }
-            }
 
+            }
         }
     }
 
@@ -317,7 +329,7 @@ public class EntityVex extends EntityMonster {
 
         @Override
         public boolean canUse() {
-            return !EntityVex.this.getControllerMove().hasWanted() && EntityVex.this.random.nextInt(7) == 0;
+            return !EntityVex.this.getControllerMove().hasWanted() && EntityVex.this.random.nextInt(reducedTickDelay(7)) == 0;
         }
 
         @Override

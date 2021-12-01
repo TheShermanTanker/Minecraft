@@ -12,6 +12,7 @@ public class PathfinderGoalUseItem<T extends EntityInsentient> extends Pathfinde
     private final T mob;
     private final ItemStack item;
     private final Predicate<? super T> canUseSelector;
+    @Nullable
     private final SoundEffect finishUsingSound;
 
     public PathfinderGoalUseItem(T actor, ItemStack item, @Nullable SoundEffect sound, Predicate<? super T> condition) {

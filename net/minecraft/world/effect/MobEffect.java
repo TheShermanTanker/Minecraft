@@ -49,9 +49,9 @@ public class MobEffect implements Comparable<MobEffect> {
         this.hiddenEffect = hiddenEffect;
     }
 
-    public MobEffect(MobEffect that) {
-        this.effect = that.effect;
-        this.setDetailsFrom(that);
+    public MobEffect(MobEffect toCopy) {
+        this.effect = toCopy.effect;
+        this.setDetailsFrom(toCopy);
     }
 
     void setDetailsFrom(MobEffect that) {

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import net.minecraft.network.protocol.EnumProtocolDirection;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -21,22 +22,26 @@ public class PacketDecoder extends ByteToMessageDecoder {
         this.flow = side;
     }
 
-    @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        if (byteBuf.readableBytes() != 0) {
+        int i = byteBuf.readableBytes();
+        if (i != 0) {
             PacketDataSerializer friendlyByteBuf = new PacketDataSerializer(byteBuf);
-            int i = friendlyByteBuf.readVarInt();
-            Packet<?> packet = channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get().createPacket(this.flow, i, friendlyByteBuf);
+            int j = friendlyByteBuf.readVarInt();
+            Packet<?> packet = channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get().createPacket(this.flow, j, friendlyByteBuf);
             if (packet == null) {
-                throw new IOException("Bad packet id " + i);
-            } else if (friendlyByteBuf.readableBytes() > 0) {
-                throw new IOException("Packet " + channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get().getId() + "/" + i + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + friendlyByteBuf.readableBytes() + " bytes extra whilst reading packet " + i);
+                throw new IOException("Bad packet id " + j);
             } else {
-                list.add(packet);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug(MARKER, " IN: [{}:{}] {}", channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get(), i, packet.getClass().getName());
-                }
+                int k = channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get().getId();
+                JvmProfiler.INSTANCE.onPacketReceived(k, j, channelHandlerContext.channel().remoteAddress(), i);
+                if (friendlyByteBuf.readableBytes() > 0) {
+                    throw new IOException("Packet " + channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get().getId() + "/" + j + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + friendlyByteBuf.readableBytes() + " bytes extra whilst reading packet " + j);
+                } else {
+                    list.add(packet);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug(MARKER, " IN: [{}:{}] {}", channelHandlerContext.channel().attr(NetworkManager.ATTRIBUTE_PROTOCOL).get(), j, packet.getClass().getName());
+                    }
 
+                }
             }
         }
     }

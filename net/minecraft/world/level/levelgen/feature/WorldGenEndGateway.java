@@ -27,11 +27,11 @@ public class WorldGenEndGateway extends WorldGenerator<WorldGenEndGatewayConfigu
             if (bl && bl2 && bl3) {
                 BlockPosition blockPos3 = blockPos2.immutableCopy();
                 this.setBlock(worldGenLevel, blockPos3, Blocks.END_GATEWAY.getBlockData());
-                endGatewayConfiguration.getExit().ifPresent((blockPos2x) -> {
+                endGatewayConfiguration.getExit().ifPresent((pos) -> {
                     TileEntity blockEntity = worldGenLevel.getTileEntity(blockPos3);
                     if (blockEntity instanceof TileEntityEndGateway) {
                         TileEntityEndGateway theEndGatewayBlockEntity = (TileEntityEndGateway)blockEntity;
-                        theEndGatewayBlockEntity.setExitPosition(blockPos2x, endGatewayConfiguration.isExitExact());
+                        theEndGatewayBlockEntity.setExitPosition(pos, endGatewayConfiguration.isExitExact());
                         blockEntity.update();
                     }
 

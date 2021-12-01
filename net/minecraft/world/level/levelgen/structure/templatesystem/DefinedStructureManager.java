@@ -32,7 +32,7 @@ public class DefinedStructureManager {
     private static final String STRUCTURE_DIRECTORY_NAME = "structures";
     private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
     private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
-    private final Map<MinecraftKey, Optional<DefinedStructure>> structureRepository = Maps.newConcurrentMap();
+    public final Map<MinecraftKey, Optional<DefinedStructure>> structureRepository = Maps.newConcurrentMap();
     private final DataFixer fixerUpper;
     private IResourceManager resourceManager;
     private final Path generatedDir;
@@ -66,7 +66,7 @@ public class DefinedStructureManager {
         this.structureRepository.clear();
     }
 
-    private Optional<DefinedStructure> loadFromResource(MinecraftKey id) {
+    public Optional<DefinedStructure> loadFromResource(MinecraftKey id) {
         MinecraftKey resourceLocation = new MinecraftKey(id.getNamespace(), "structures/" + id.getKey() + ".nbt");
 
         try {
@@ -100,7 +100,7 @@ public class DefinedStructureManager {
         }
     }
 
-    private Optional<DefinedStructure> loadFromGenerated(MinecraftKey id) {
+    public Optional<DefinedStructure> loadFromGenerated(MinecraftKey id) {
         if (!this.generatedDir.toFile().isDirectory()) {
             return Optional.empty();
         } else {
@@ -133,7 +133,7 @@ public class DefinedStructureManager {
         }
     }
 
-    private DefinedStructure readStructure(InputStream structureInputStream) throws IOException {
+    public DefinedStructure readStructure(InputStream structureInputStream) throws IOException {
         NBTTagCompound compoundTag = NBTCompressedStreamTools.readCompressed(structureInputStream);
         return this.readStructure(compoundTag);
     }
@@ -202,7 +202,7 @@ public class DefinedStructureManager {
         }
     }
 
-    private Path createAndValidatePathToStructure(MinecraftKey id, String extension) {
+    public Path createAndValidatePathToStructure(MinecraftKey id, String extension) {
         if (id.getKey().contains("//")) {
             throw new ResourceKeyInvalidException("Invalid resource path: " + id);
         } else {

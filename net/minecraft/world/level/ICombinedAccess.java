@@ -1,8 +1,7 @@
 package net.minecraft.world.level;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
@@ -23,8 +22,8 @@ public interface ICombinedAccess extends IEntityAccess, IWorldReader, VirtualWor
     }
 
     @Override
-    default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB box, Predicate<Entity> predicate) {
-        return IEntityAccess.super.getEntityCollisions(entity, box, predicate);
+    default List<VoxelShape> getEntityCollisions(@Nullable Entity entity, AxisAlignedBB box) {
+        return IEntityAccess.super.getEntityCollisions(entity, box);
     }
 
     @Override

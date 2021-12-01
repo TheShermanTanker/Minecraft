@@ -10,8 +10,8 @@ public class VariantProperties {
     public static final VariantProperty<VariantProperties.Rotation> Y_ROT = new VariantProperty<>("y", (rotation) -> {
         return new JsonPrimitive(rotation.value);
     });
-    public static final VariantProperty<MinecraftKey> MODEL = new VariantProperty<>("model", (resourceLocation) -> {
-        return new JsonPrimitive(resourceLocation.toString());
+    public static final VariantProperty<MinecraftKey> MODEL = new VariantProperty<>("model", (id) -> {
+        return new JsonPrimitive(id.toString());
     });
     public static final VariantProperty<Boolean> UV_LOCK = new VariantProperty<>("uvlock", JsonPrimitive::new);
     public static final VariantProperty<Integer> WEIGHT = new VariantProperty<>("weight", JsonPrimitive::new);

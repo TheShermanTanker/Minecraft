@@ -49,7 +49,7 @@ public class ArgumentTileLocation implements Predicate<ShapeDetectorBlock> {
                 return true;
             } else {
                 TileEntity blockEntity = blockInWorld.getEntity();
-                return blockEntity != null && GameProfileSerializer.compareNbt(this.tag, blockEntity.save(new NBTTagCompound()), true);
+                return blockEntity != null && GameProfileSerializer.compareNbt(this.tag, blockEntity.saveWithFullMetadata(), true);
             }
         }
     }
@@ -70,11 +70,7 @@ public class ArgumentTileLocation implements Predicate<ShapeDetectorBlock> {
             if (this.tag != null) {
                 TileEntity blockEntity = world.getTileEntity(pos);
                 if (blockEntity != null) {
-                    NBTTagCompound compoundTag = this.tag.c();
-                    compoundTag.setInt("x", pos.getX());
-                    compoundTag.setInt("y", pos.getY());
-                    compoundTag.setInt("z", pos.getZ());
-                    blockEntity.load(compoundTag);
+                    blockEntity.load(this.tag);
                 }
             }
 

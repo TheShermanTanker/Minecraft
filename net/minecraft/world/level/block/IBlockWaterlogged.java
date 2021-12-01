@@ -24,7 +24,7 @@ public interface IBlockWaterlogged extends IFluidSource, IFluidContainer {
         if (!state.get(BlockProperties.WATERLOGGED) && fluidState.getType() == FluidTypes.WATER) {
             if (!world.isClientSide()) {
                 world.setTypeAndData(pos, state.set(BlockProperties.WATERLOGGED, Boolean.valueOf(true)), 3);
-                world.getFluidTickList().scheduleTick(pos, fluidState.getType(), fluidState.getType().getTickDelay(world));
+                world.scheduleTick(pos, fluidState.getType(), fluidState.getType().getTickDelay(world));
             }
 
             return true;

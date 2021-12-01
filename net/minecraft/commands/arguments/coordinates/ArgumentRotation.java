@@ -22,7 +22,6 @@ public class ArgumentRotation implements ArgumentType<IVectorPosition> {
         return context.getArgument(name, IVectorPosition.class);
     }
 
-    @Override
     public IVectorPosition parse(StringReader stringReader) throws CommandSyntaxException {
         int i = stringReader.getCursor();
         if (!stringReader.canRead()) {
@@ -40,7 +39,6 @@ public class ArgumentRotation implements ArgumentType<IVectorPosition> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

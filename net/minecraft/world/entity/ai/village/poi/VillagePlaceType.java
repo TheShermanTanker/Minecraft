@@ -125,10 +125,10 @@ public class VillagePlaceType {
     }
 
     private static VillagePlaceType registerBlockStates(VillagePlaceType poiType) {
-        poiType.matchingStates.forEach((blockState) -> {
-            VillagePlaceType poiType2 = TYPE_BY_STATE.put(blockState, poiType);
+        poiType.matchingStates.forEach((state) -> {
+            VillagePlaceType poiType2 = TYPE_BY_STATE.put(state, poiType);
             if (poiType2 != null) {
-                throw (IllegalStateException)SystemUtils.pauseInIde(new IllegalStateException(String.format("%s is defined in too many tags", blockState)));
+                throw (IllegalStateException)SystemUtils.pauseInIde(new IllegalStateException(String.format("%s is defined in too many tags", state)));
             }
         });
         return poiType;

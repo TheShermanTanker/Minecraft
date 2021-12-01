@@ -25,11 +25,11 @@ public class ParticleParamBlock implements ParticleParam {
     private final Particle<ParticleParamBlock> type;
     private final IBlockData state;
 
-    public static Codec<ParticleParamBlock> codec(Particle<ParticleParamBlock> particleType) {
-        return IBlockData.CODEC.xmap((blockState) -> {
-            return new ParticleParamBlock(particleType, blockState);
-        }, (blockParticleOption) -> {
-            return blockParticleOption.state;
+    public static Codec<ParticleParamBlock> codec(Particle<ParticleParamBlock> type) {
+        return IBlockData.CODEC.xmap((state) -> {
+            return new ParticleParamBlock(type, state);
+        }, (effect) -> {
+            return effect.state;
         });
     }
 

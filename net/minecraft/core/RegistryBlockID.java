@@ -1,17 +1,18 @@
 package net.minecraft.core;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import java.util.IdentityHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
+import net.minecraft.SystemUtils;
 
 public class RegistryBlockID<T> implements Registry<T> {
-    public static final int DEFAULT = -1;
     private int nextId;
-    private final IdentityHashMap<T, Integer> tToId;
+    private final Object2IntMap<T> tToId;
     private final List<T> idToT;
 
     public RegistryBlockID() {
@@ -20,7 +21,8 @@ public class RegistryBlockID<T> implements Registry<T> {
 
     public RegistryBlockID(int initialSize) {
         this.idToT = Lists.newArrayListWithExpectedSize(initialSize);
-        this.tToId = new IdentityHashMap<>(initialSize);
+        this.tToId = new Object2IntOpenCustomHashMap<>(initialSize, SystemUtils.identityStrategy());
+        this.tToId.defaultReturnValue(-1);
     }
 
     public void addMapping(T value, int id) {
@@ -43,8 +45,7 @@ public class RegistryBlockID<T> implements Registry<T> {
 
     @Override
     public int getId(T entry) {
-        Integer integer = this.tToId.get(entry);
-        return integer == null ? -1 : integer;
+        return this.tToId.getInt(entry);
     }
 
     @Nullable
@@ -55,13 +56,14 @@ public class RegistryBlockID<T> implements Registry<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return Iterators.filter(this.idToT.iterator(), Predicates.notNull());
+        return Iterators.filter(this.idToT.iterator(), Objects::nonNull);
     }
 
     public boolean contains(int index) {
         return this.fromId(index) != null;
     }
 
+    @Override
     public int size() {
         return this.tToId.size();
     }

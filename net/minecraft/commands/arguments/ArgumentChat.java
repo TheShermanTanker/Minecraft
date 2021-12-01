@@ -27,12 +27,10 @@ public class ArgumentChat implements ArgumentType<ArgumentChat.Message> {
         return command.getArgument(name, ArgumentChat.Message.class).toComponent(command.getSource(), command.getSource().hasPermission(2));
     }
 
-    @Override
     public ArgumentChat.Message parse(StringReader stringReader) throws CommandSyntaxException {
         return ArgumentChat.Message.parseText(stringReader, true);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
@@ -54,8 +52,8 @@ public class ArgumentChat implements ArgumentType<ArgumentChat.Message> {
             return this.parts;
         }
 
-        public IChatBaseComponent toComponent(CommandListenerWrapper source, boolean bl) throws CommandSyntaxException {
-            if (this.parts.length != 0 && bl) {
+        public IChatBaseComponent toComponent(CommandListenerWrapper source, boolean canUseSelectors) throws CommandSyntaxException {
+            if (this.parts.length != 0 && canUseSelectors) {
                 IChatMutableComponent mutableComponent = new ChatComponentText(this.text.substring(0, this.parts[0].getStart()));
                 int i = this.parts[0].getStart();
 
@@ -73,7 +71,7 @@ public class ArgumentChat implements ArgumentType<ArgumentChat.Message> {
                 }
 
                 if (i < this.text.length()) {
-                    mutableComponent.append(this.text.substring(i, this.text.length()));
+                    mutableComponent.append(this.text.substring(i));
                 }
 
                 return mutableComponent;
@@ -82,9 +80,9 @@ public class ArgumentChat implements ArgumentType<ArgumentChat.Message> {
             }
         }
 
-        public static ArgumentChat.Message parseText(StringReader reader, boolean bl) throws CommandSyntaxException {
+        public static ArgumentChat.Message parseText(StringReader reader, boolean canUseSelectors) throws CommandSyntaxException {
             String string = reader.getString().substring(reader.getCursor(), reader.getTotalLength());
-            if (!bl) {
+            if (!canUseSelectors) {
                 reader.setCursor(reader.getTotalLength());
                 return new ArgumentChat.Message(string, new ArgumentChat.Part[0]);
             } else {
@@ -96,7 +94,7 @@ public class ArgumentChat implements ArgumentType<ArgumentChat.Message> {
                     EntitySelector entitySelector;
                     while(true) {
                         if (!reader.canRead()) {
-                            return new ArgumentChat.Message(string, list.toArray(new ArgumentChat.Part[list.size()]));
+                            return new ArgumentChat.Message(string, list.toArray(new ArgumentChat.Part[0]));
                         }
 
                         if (reader.peek() == '@') {

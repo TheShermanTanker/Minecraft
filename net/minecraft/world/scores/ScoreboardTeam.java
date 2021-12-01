@@ -13,7 +13,6 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.chat.IChatMutableComponent;
 
 public class ScoreboardTeam extends ScoreboardTeamBase {
-    public static final int MAX_NAME_LENGTH = 16;
     private static final int BIT_FRIENDLY_FIRE = 0;
     private static final int BIT_SEE_INVISIBLES = 1;
     private final Scoreboard scoreboard;

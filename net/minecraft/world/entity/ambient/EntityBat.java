@@ -34,6 +34,7 @@ public class EntityBat extends EntityAmbient {
     private static final DataWatcherObject<Byte> DATA_ID_FLAGS = DataWatcher.defineId(EntityBat.class, DataWatcherRegistry.BYTE);
     private static final int FLAG_RESTING = 1;
     private static final PathfinderTargetCondition BAT_RESTING_TARGETING = PathfinderTargetCondition.forNonCombat().range(4.0D);
+    @Nullable
     private BlockPosition targetPosition;
 
     public EntityBat(EntityTypes<? extends EntityBat> type, World world) {

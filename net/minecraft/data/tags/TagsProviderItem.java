@@ -70,12 +70,14 @@ public class TagsProviderItem extends TagsProvider<Item> {
         this.copy(TagsBlock.COAL_ORES, TagsItem.COAL_ORES);
         this.copy(TagsBlock.EMERALD_ORES, TagsItem.EMERALD_ORES);
         this.copy(TagsBlock.COPPER_ORES, TagsItem.COPPER_ORES);
+        this.copy(TagsBlock.DIRT, TagsItem.DIRT);
+        this.copy(TagsBlock.TERRACOTTA, TagsItem.TERRACOTTA);
         this.tag(TagsItem.BANNERS).add(Items.WHITE_BANNER, Items.ORANGE_BANNER, Items.MAGENTA_BANNER, Items.LIGHT_BLUE_BANNER, Items.YELLOW_BANNER, Items.LIME_BANNER, Items.PINK_BANNER, Items.GRAY_BANNER, Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER, Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER);
         this.tag(TagsItem.BOATS).add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT);
         this.tag(TagsItem.FISHES).add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH);
         this.copy(TagsBlock.STANDING_SIGNS, TagsItem.SIGNS);
         this.tag(TagsItem.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_13, Items.MUSIC_DISC_CAT, Items.MUSIC_DISC_BLOCKS, Items.MUSIC_DISC_CHIRP, Items.MUSIC_DISC_FAR, Items.MUSIC_DISC_MALL, Items.MUSIC_DISC_MELLOHI, Items.MUSIC_DISC_STAL, Items.MUSIC_DISC_STRAD, Items.MUSIC_DISC_WARD, Items.MUSIC_DISC_11, Items.MUSIC_DISC_WAIT);
-        this.tag(TagsItem.MUSIC_DISCS).addTag(TagsItem.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_PIGSTEP);
+        this.tag(TagsItem.MUSIC_DISCS).addTag(TagsItem.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_PIGSTEP).add(Items.MUSIC_DISC_OTHERSIDE);
         this.tag(TagsItem.COALS).add(Items.COAL, Items.CHARCOAL);
         this.tag(TagsItem.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
         this.tag(TagsItem.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);

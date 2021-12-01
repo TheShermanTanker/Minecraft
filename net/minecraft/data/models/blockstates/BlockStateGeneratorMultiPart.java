@@ -66,9 +66,9 @@ public class BlockStateGeneratorMultiPart implements IBlockStateGenerator {
     static class ConditionalEntry extends BlockStateGeneratorMultiPart.Entry {
         private final Condition condition;
 
-        ConditionalEntry(Condition condition, List<Variant> list) {
-            super(list);
-            this.condition = condition;
+        ConditionalEntry(Condition when, List<Variant> variants) {
+            super(variants);
+            this.condition = when;
         }
 
         @Override
@@ -85,8 +85,8 @@ public class BlockStateGeneratorMultiPart implements IBlockStateGenerator {
     static class Entry implements Supplier<JsonElement> {
         private final List<Variant> variants;
 
-        Entry(List<Variant> list) {
-            this.variants = list;
+        Entry(List<Variant> variants) {
+            this.variants = variants;
         }
 
         public void validate(BlockStateList<?, ?> stateManager) {

@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,8 +38,8 @@ public class VillagePlace extends RegionFileSection<VillagePlaceSection> {
     private final VillagePlace.DistanceTracker distanceTracker;
     private final LongSet loadedChunks = new LongOpenHashSet();
 
-    public VillagePlace(File directory, DataFixer dataFixer, boolean dsync, IWorldHeightAccess world) {
-        super(directory, VillagePlaceSection::codec, VillagePlaceSection::new, dataFixer, DataFixTypes.POI_CHUNK, dsync, world);
+    public VillagePlace(Path path, DataFixer dataFixer, boolean dsync, IWorldHeightAccess world) {
+        super(path, VillagePlaceSection::codec, VillagePlaceSection::new, dataFixer, DataFixTypes.POI_CHUNK, dsync, world);
         this.distanceTracker = new VillagePlace.DistanceTracker();
     }
 
@@ -79,11 +79,11 @@ public class VillagePlace extends RegionFileSection<VillagePlaceSection> {
     }
 
     @VisibleForDebug
-    public Stream<VillagePlaceRecord> getInChunk(Predicate<VillagePlaceType> predicate, ChunkCoordIntPair chunkPos, VillagePlace.Occupancy occupationStatus) {
+    public Stream<VillagePlaceRecord> getInChunk(Predicate<VillagePlaceType> typePredicate, ChunkCoordIntPair chunkPos, VillagePlace.Occupancy occupationStatus) {
         return IntStream.range(this.levelHeightAccessor.getMinSection(), this.levelHeightAccessor.getMaxSection()).boxed().map((integer) -> {
             return this.getOrLoad(SectionPosition.of(chunkPos, integer).asLong());
         }).filter(Optional::isPresent).flatMap((optional) -> {
-            return optional.get().getRecords(predicate, occupationStatus);
+            return optional.get().getRecords(typePredicate, occupationStatus);
         });
     }
 
@@ -107,9 +107,9 @@ public class VillagePlace extends RegionFileSection<VillagePlaceSection> {
         }));
     }
 
-    public Optional<BlockPosition> findClosest(Predicate<VillagePlaceType> predicate, Predicate<BlockPosition> predicate2, BlockPosition blockPos, int i, VillagePlace.Occupancy occupancy) {
-        return this.getInRange(predicate, blockPos, i, occupancy).map(VillagePlaceRecord::getPos).filter(predicate2).min(Comparator.comparingDouble((blockPos2) -> {
-            return blockPos2.distSqr(blockPos);
+    public Optional<BlockPosition> findClosest(Predicate<VillagePlaceType> typePredicate, Predicate<BlockPosition> posPredicate, BlockPosition pos, int radius, VillagePlace.Occupancy occupationStatus) {
+        return this.getInRange(typePredicate, pos, radius, occupationStatus).map(VillagePlaceRecord::getPos).filter(posPredicate).min(Comparator.comparingDouble((blockPos2) -> {
+            return blockPos2.distSqr(pos);
         }));
     }
 
@@ -125,36 +125,37 @@ public class VillagePlace extends RegionFileSection<VillagePlaceSection> {
     public Optional<BlockPosition> getRandom(Predicate<VillagePlaceType> typePredicate, Predicate<BlockPosition> positionPredicate, VillagePlace.Occupancy occupationStatus, BlockPosition pos, int radius, Random random) {
         List<VillagePlaceRecord> list = this.getInRange(typePredicate, pos, radius, occupationStatus).collect(Collectors.toList());
         Collections.shuffle(list, random);
-        return list.stream().filter((poiRecord) -> {
-            return positionPredicate.test(poiRecord.getPos());
+        return list.stream().filter((poi) -> {
+            return positionPredicate.test(poi.getPos());
         }).findFirst().map(VillagePlaceRecord::getPos);
     }
 
     public boolean release(BlockPosition pos) {
-        return this.getOrLoad(SectionPosition.asLong(pos)).map((poiSection) -> {
-            return poiSection.release(pos);
+        return this.getOrLoad(SectionPosition.asLong(pos)).map((poiSet) -> {
+            return poiSet.release(pos);
         }).orElseThrow(() -> {
             return SystemUtils.pauseInIde(new IllegalStateException("POI never registered at " + pos));
         });
     }
 
     public boolean exists(BlockPosition pos, Predicate<VillagePlaceType> predicate) {
-        return this.getOrLoad(SectionPosition.asLong(pos)).map((poiSection) -> {
-            return poiSection.exists(pos, predicate);
+        return this.getOrLoad(SectionPosition.asLong(pos)).map((poiSet) -> {
+            return poiSet.exists(pos, predicate);
         }).orElse(false);
     }
 
     public Optional<VillagePlaceType> getType(BlockPosition pos) {
-        return this.getOrLoad(SectionPosition.asLong(pos)).flatMap((poiSection) -> {
-            return poiSection.getType(pos);
+        return this.getOrLoad(SectionPosition.asLong(pos)).flatMap((poiSet) -> {
+            return poiSet.getType(pos);
         });
     }
 
+    /** @deprecated */
     @Deprecated
     @VisibleForDebug
-    public int getFreeTickets(BlockPosition blockPos) {
-        return this.getOrLoad(SectionPosition.asLong(blockPos)).map((poiSection) -> {
-            return poiSection.getFreeTickets(blockPos);
+    public int getFreeTickets(BlockPosition pos) {
+        return this.getOrLoad(SectionPosition.asLong(pos)).map((poiSet) -> {
+            return poiSet.getFreeTickets(pos);
         }).orElse(0);
     }
 
@@ -165,8 +166,8 @@ public class VillagePlace extends RegionFileSection<VillagePlaceSection> {
 
     boolean isVillageCenter(long pos) {
         Optional<VillagePlaceSection> optional = this.get(pos);
-        return optional == null ? false : optional.map((poiSection) -> {
-            return poiSection.getRecords(VillagePlaceType.ALL, VillagePlace.Occupancy.IS_OCCUPIED).count() > 0L;
+        return optional == null ? false : optional.map((poiSet) -> {
+            return poiSet.getRecords(VillagePlaceType.ALL, VillagePlace.Occupancy.IS_OCCUPIED).count() > 0L;
         }).orElse(false);
     }
 
@@ -187,33 +188,33 @@ public class VillagePlace extends RegionFileSection<VillagePlaceSection> {
         this.distanceTracker.update(pos, this.distanceTracker.getLevelFromSource(pos), false);
     }
 
-    public void checkConsistencyWithBlocks(ChunkCoordIntPair chunkPos, ChunkSection levelChunkSection) {
-        SectionPosition sectionPos = SectionPosition.of(chunkPos, SectionPosition.blockToSectionCoord(levelChunkSection.getYPosition()));
-        SystemUtils.ifElse(this.getOrLoad(sectionPos.asLong()), (poiSection) -> {
-            poiSection.refresh((biConsumer) -> {
-                if (mayHavePoi(levelChunkSection)) {
-                    this.updateFromSection(levelChunkSection, sectionPos, biConsumer);
+    public void checkConsistencyWithBlocks(ChunkCoordIntPair chunkPos, ChunkSection chunkSection) {
+        SectionPosition sectionPos = SectionPosition.of(chunkPos, SectionPosition.blockToSectionCoord(chunkSection.getYPosition()));
+        SystemUtils.ifElse(this.getOrLoad(sectionPos.asLong()), (poiSet) -> {
+            poiSet.refresh((biConsumer) -> {
+                if (mayHavePoi(chunkSection)) {
+                    this.updateFromSection(chunkSection, sectionPos, biConsumer);
                 }
 
             });
         }, () -> {
-            if (mayHavePoi(levelChunkSection)) {
+            if (mayHavePoi(chunkSection)) {
                 VillagePlaceSection poiSection = this.getOrCreate(sectionPos.asLong());
-                this.updateFromSection(levelChunkSection, sectionPos, poiSection::add);
+                this.updateFromSection(chunkSection, sectionPos, poiSection::add);
             }
 
         });
     }
 
-    private static boolean mayHavePoi(ChunkSection levelChunkSection) {
-        return levelChunkSection.maybeHas(VillagePlaceType.ALL_STATES::contains);
+    private static boolean mayHavePoi(ChunkSection chunkSection) {
+        return chunkSection.maybeHas(VillagePlaceType.ALL_STATES::contains);
     }
 
-    private void updateFromSection(ChunkSection levelChunkSection, SectionPosition sectionPos, BiConsumer<BlockPosition, VillagePlaceType> biConsumer) {
-        sectionPos.blocksInside().forEach((blockPos) -> {
-            IBlockData blockState = levelChunkSection.getType(SectionPosition.sectionRelative(blockPos.getX()), SectionPosition.sectionRelative(blockPos.getY()), SectionPosition.sectionRelative(blockPos.getZ()));
+    private void updateFromSection(ChunkSection chunkSection, SectionPosition sectionPos, BiConsumer<BlockPosition, VillagePlaceType> biConsumer) {
+        sectionPos.blocksInside().forEach((pos) -> {
+            IBlockData blockState = chunkSection.getType(SectionPosition.sectionRelative(pos.getX()), SectionPosition.sectionRelative(pos.getY()), SectionPosition.sectionRelative(pos.getZ()));
             VillagePlaceType.forState(blockState).ifPresent((poiType) -> {
-                biConsumer.accept(blockPos, poiType);
+                biConsumer.accept(pos, poiType);
             });
         });
     }

@@ -16,7 +16,6 @@ public class DataConverterWallProperty extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("WallPropertyFix", this.getInputSchema().getType(DataConverterTypes.BLOCK_STATE), (typed) -> {
             return typed.update(DSL.remainderFinder(), DataConverterWallProperty::upgradeBlockStateTag);

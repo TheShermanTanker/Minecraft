@@ -46,8 +46,8 @@ public class BehaviorPlay extends Behavior<EntityCreature> {
             if (optional.isPresent()) {
                 chaseKid(entity, optional.get());
             } else {
-                this.findSomeoneToChase(entity).ifPresent((livingEntityx) -> {
-                    chaseKid(entity, livingEntityx);
+                this.findSomeoneToChase(entity).ifPresent((target) -> {
+                    chaseKid(entity, target);
                 });
             }
         }

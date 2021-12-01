@@ -97,8 +97,8 @@ public class AdvancementsHusbandry implements Consumer<Consumer<Advancement>> {
     }
 
     private Advancement.SerializedAdvancement addCatVariants(Advancement.SerializedAdvancement task) {
-        EntityCat.TEXTURE_BY_TYPE.forEach((integer, resourceLocation) -> {
-            task.addCriterion(resourceLocation.getKey(), CriterionTriggerTamedAnimal.CriterionInstanceTrigger.tamedAnimal(CriterionConditionEntity.Builder.entity().of(resourceLocation).build()));
+        EntityCat.TEXTURE_BY_TYPE.forEach((type, id) -> {
+            task.addCriterion(id.getKey(), CriterionTriggerTamedAnimal.CriterionInstanceTrigger.tamedAnimal(CriterionConditionEntity.Builder.entity().of(id).build()));
         });
         return task;
     }

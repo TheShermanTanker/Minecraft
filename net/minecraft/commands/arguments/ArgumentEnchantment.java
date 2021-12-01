@@ -19,8 +19,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 public class ArgumentEnchantment implements ArgumentType<Enchantment> {
     private static final Collection<String> EXAMPLES = Arrays.asList("unbreaking", "silk_touch");
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ENCHANTMENT = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("enchantment.unknown", object);
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ENCHANTMENT = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("enchantment.unknown", id);
     });
 
     public static ArgumentEnchantment enchantment() {
@@ -31,7 +31,6 @@ public class ArgumentEnchantment implements ArgumentType<Enchantment> {
         return context.getArgument(name, Enchantment.class);
     }
 
-    @Override
     public Enchantment parse(StringReader stringReader) throws CommandSyntaxException {
         MinecraftKey resourceLocation = MinecraftKey.read(stringReader);
         return IRegistry.ENCHANTMENT.getOptional(resourceLocation).orElseThrow(() -> {
@@ -39,12 +38,10 @@ public class ArgumentEnchantment implements ArgumentType<Enchantment> {
         });
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggestResource(IRegistry.ENCHANTMENT.keySet(), suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

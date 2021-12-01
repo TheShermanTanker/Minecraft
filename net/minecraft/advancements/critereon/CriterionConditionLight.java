@@ -12,8 +12,8 @@ public class CriterionConditionLight {
     public static final CriterionConditionLight ANY = new CriterionConditionLight(CriterionConditionValue.IntegerRange.ANY);
     private final CriterionConditionValue.IntegerRange composite;
 
-    CriterionConditionLight(CriterionConditionValue.IntegerRange ints) {
-        this.composite = ints;
+    CriterionConditionLight(CriterionConditionValue.IntegerRange range) {
+        this.composite = range;
     }
 
     public boolean matches(WorldServer world, BlockPosition pos) {

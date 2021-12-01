@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemUtils;
@@ -94,7 +93,6 @@ public class Block extends BlockBase implements IMaterial {
     private static final int CACHE_SIZE = 2048;
     private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
         Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(2048, 0.25F) {
-            @Override
             protected void rehash(int i) {
             }
         };
@@ -126,7 +124,7 @@ public class Block extends BlockBase implements IMaterial {
             return to;
         } else {
             for(Entity entity : world.getEntities((Entity)null, voxelShape.getBoundingBox())) {
-                double d = VoxelShapes.collide(EnumDirection.EnumAxis.Y, entity.getBoundingBox().move(0.0D, 1.0D, 0.0D), Stream.of(voxelShape), -1.0D);
+                double d = VoxelShapes.collide(EnumDirection.EnumAxis.Y, entity.getBoundingBox().move(0.0D, 1.0D, 0.0D), List.of(voxelShape), -1.0D);
                 entity.enderTeleportTo(entity.locX(), entity.locY() + 1.0D + d, entity.locZ());
             }
 
@@ -289,8 +287,8 @@ public class Block extends BlockBase implements IMaterial {
 
     public static void dropItems(IBlockData state, World world, BlockPosition pos, @Nullable TileEntity blockEntity, Entity entity, ItemStack stack) {
         if (world instanceof WorldServer) {
-            getDrops(state, (WorldServer)world, pos, blockEntity, entity, stack).forEach((itemStack) -> {
-                popResource(world, pos, itemStack);
+            getDrops(state, (WorldServer)world, pos, blockEntity, entity, stack).forEach((stackx) -> {
+                popResource(world, pos, stackx);
             });
             state.dropNaturally((WorldServer)world, pos, stack);
         }
@@ -488,8 +486,8 @@ public class Block extends BlockBase implements IMaterial {
         return this;
     }
 
-    protected ImmutableMap<IBlockData, VoxelShape> getShapeForEachState(Function<IBlockData, VoxelShape> function) {
-        return this.stateDefinition.getPossibleStates().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), function));
+    protected ImmutableMap<IBlockData, VoxelShape> getShapeForEachState(Function<IBlockData, VoxelShape> stateToShape) {
+        return this.stateDefinition.getPossibleStates().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), stateToShape));
     }
 
     public static final class BlockStatePairKey {

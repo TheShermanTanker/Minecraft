@@ -10,7 +10,6 @@ public class DataConverterSchemaV1909 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
         schema.registerSimple(map, "minecraft:jigsaw");

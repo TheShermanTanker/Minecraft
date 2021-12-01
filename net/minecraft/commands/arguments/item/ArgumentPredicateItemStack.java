@@ -12,8 +12,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class ArgumentPredicateItemStack implements Predicate<ItemStack> {
-    private static final Dynamic2CommandExceptionType ERROR_STACK_TOO_BIG = new Dynamic2CommandExceptionType((object, object2) -> {
-        return new ChatMessage("arguments.item.overstacked", object, object2);
+    private static final Dynamic2CommandExceptionType ERROR_STACK_TOO_BIG = new Dynamic2CommandExceptionType((item, maxCount) -> {
+        return new ChatMessage("arguments.item.overstacked", item, maxCount);
     });
     private final Item item;
     @Nullable

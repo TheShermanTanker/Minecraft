@@ -88,7 +88,7 @@ public class BlockComposter extends Block implements IInventoryHolder {
         add(0.3F, Items.HANGING_ROOTS);
         add(0.5F, Items.DRIED_KELP_BLOCK);
         add(0.5F, Items.TALL_GRASS);
-        add(0.5F, Items.AZALEA_LEAVES_FLOWERS);
+        add(0.5F, Items.FLOWERING_AZALEA_LEAVES);
         add(0.5F, Items.CACTUS);
         add(0.5F, Items.SUGAR_CANE);
         add(0.5F, Items.VINE);
@@ -197,7 +197,7 @@ public class BlockComposter extends Block implements IInventoryHolder {
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         if (state.get(LEVEL) == 7) {
-            world.getBlockTickList().scheduleTick(pos, state.getBlock(), 20);
+            world.scheduleTick(pos, state.getBlock(), 20);
         }
 
     }
@@ -268,7 +268,7 @@ public class BlockComposter extends Block implements IInventoryHolder {
             IBlockData blockState = state.set(LEVEL, Integer.valueOf(j));
             world.setTypeAndData(pos, blockState, 3);
             if (j == 7) {
-                world.getBlockTickList().scheduleTick(pos, state.getBlock(), 20);
+                world.scheduleTick(pos, state.getBlock(), 20);
             }
 
             return blockState;

@@ -8,14 +8,6 @@ public class InventoryLargeChest implements IInventory {
     public final IInventory container2;
 
     public InventoryLargeChest(IInventory first, IInventory second) {
-        if (first == null) {
-            first = second;
-        }
-
-        if (second == null) {
-            second = first;
-        }
-
         this.container1 = first;
         this.container2 = second;
     }

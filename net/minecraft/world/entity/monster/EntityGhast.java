@@ -47,8 +47,8 @@ public class EntityGhast extends EntityFlying implements IMonster {
         this.goalSelector.addGoal(5, new EntityGhast.PathfinderGoalGhastIdleMove(this));
         this.goalSelector.addGoal(7, new EntityGhast.PathfinderGoalGhastMoveTowardsTarget(this));
         this.goalSelector.addGoal(7, new EntityGhast.PathfinderGoalGhastAttackTarget(this));
-        this.targetSelector.addGoal(1, new PathfinderGoalNearestAttackableTarget<>(this, EntityHuman.class, 10, true, false, (livingEntity) -> {
-            return Math.abs(livingEntity.locY() - this.locY()) <= 4.0D;
+        this.targetSelector.addGoal(1, new PathfinderGoalNearestAttackableTarget<>(this, EntityHuman.class, 10, true, false, (entity) -> {
+            return Math.abs(entity.locY() - this.locY()) <= 4.0D;
         }));
     }
 
@@ -210,36 +210,43 @@ public class EntityGhast extends EntityFlying implements IMonster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             EntityLiving livingEntity = this.ghast.getGoalTarget();
-            double d = 64.0D;
-            if (livingEntity.distanceToSqr(this.ghast) < 4096.0D && this.ghast.hasLineOfSight(livingEntity)) {
-                World level = this.ghast.level;
-                ++this.chargeTime;
-                if (this.chargeTime == 10 && !this.ghast.isSilent()) {
-                    level.triggerEffect((EntityHuman)null, 1015, this.ghast.getChunkCoordinates(), 0);
-                }
-
-                if (this.chargeTime == 20) {
-                    double e = 4.0D;
-                    Vec3D vec3 = this.ghast.getViewVector(1.0F);
-                    double f = livingEntity.locX() - (this.ghast.locX() + vec3.x * 4.0D);
-                    double g = livingEntity.getY(0.5D) - (0.5D + this.ghast.getY(0.5D));
-                    double h = livingEntity.locZ() - (this.ghast.locZ() + vec3.z * 4.0D);
-                    if (!this.ghast.isSilent()) {
-                        level.triggerEffect((EntityHuman)null, 1016, this.ghast.getChunkCoordinates(), 0);
+            if (livingEntity != null) {
+                double d = 64.0D;
+                if (livingEntity.distanceToSqr(this.ghast) < 4096.0D && this.ghast.hasLineOfSight(livingEntity)) {
+                    World level = this.ghast.level;
+                    ++this.chargeTime;
+                    if (this.chargeTime == 10 && !this.ghast.isSilent()) {
+                        level.triggerEffect((EntityHuman)null, 1015, this.ghast.getChunkCoordinates(), 0);
                     }
 
-                    EntityLargeFireball largeFireball = new EntityLargeFireball(level, this.ghast, f, g, h, this.ghast.getPower());
-                    largeFireball.setPosition(this.ghast.locX() + vec3.x * 4.0D, this.ghast.getY(0.5D) + 0.5D, largeFireball.locZ() + vec3.z * 4.0D);
-                    level.addEntity(largeFireball);
-                    this.chargeTime = -40;
-                }
-            } else if (this.chargeTime > 0) {
-                --this.chargeTime;
-            }
+                    if (this.chargeTime == 20) {
+                        double e = 4.0D;
+                        Vec3D vec3 = this.ghast.getViewVector(1.0F);
+                        double f = livingEntity.locX() - (this.ghast.locX() + vec3.x * 4.0D);
+                        double g = livingEntity.getY(0.5D) - (0.5D + this.ghast.getY(0.5D));
+                        double h = livingEntity.locZ() - (this.ghast.locZ() + vec3.z * 4.0D);
+                        if (!this.ghast.isSilent()) {
+                            level.triggerEffect((EntityHuman)null, 1016, this.ghast.getChunkCoordinates(), 0);
+                        }
 
-            this.ghast.setCharging(this.chargeTime > 10);
+                        EntityLargeFireball largeFireball = new EntityLargeFireball(level, this.ghast, f, g, h, this.ghast.getPower());
+                        largeFireball.setPosition(this.ghast.locX() + vec3.x * 4.0D, this.ghast.getY(0.5D) + 0.5D, largeFireball.locZ() + vec3.z * 4.0D);
+                        level.addEntity(largeFireball);
+                        this.chargeTime = -40;
+                    }
+                } else if (this.chargeTime > 0) {
+                    --this.chargeTime;
+                }
+
+                this.ghast.setCharging(this.chargeTime > 10);
+            }
         }
     }
 
@@ -290,6 +297,11 @@ public class EntityGhast extends EntityFlying implements IMonster {
 
         @Override
         public boolean canUse() {
+            return true;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
             return true;
         }
 

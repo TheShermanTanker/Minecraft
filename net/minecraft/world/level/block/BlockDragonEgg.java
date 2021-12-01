@@ -10,6 +10,7 @@ import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.pathfinder.PathMode;
 import net.minecraft.world.phys.MovingObjectPositionBlock;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -39,9 +40,11 @@ public class BlockDragonEgg extends BlockFalling {
     }
 
     private void teleport(IBlockData state, World world, BlockPosition pos) {
+        WorldBorder worldBorder = world.getWorldBorder();
+
         for(int i = 0; i < 1000; ++i) {
             BlockPosition blockPos = pos.offset(world.random.nextInt(16) - world.random.nextInt(16), world.random.nextInt(8) - world.random.nextInt(8), world.random.nextInt(16) - world.random.nextInt(16));
-            if (world.getType(blockPos).isAir()) {
+            if (world.getType(blockPos).isAir() && worldBorder.isWithinBounds(blockPos)) {
                 if (world.isClientSide) {
                     for(int j = 0; j < 128; ++j) {
                         double d = world.random.nextDouble();

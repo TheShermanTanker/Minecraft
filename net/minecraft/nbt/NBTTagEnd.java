@@ -14,6 +14,19 @@ public class NBTTagEnd implements NBTBase {
         }
 
         @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) {
+            return visitor.visitEnd();
+        }
+
+        @Override
+        public void skip(DataInput input, int count) {
+        }
+
+        @Override
+        public void skip(DataInput input) {
+        }
+
+        @Override
         public String getName() {
             return "END";
         }
@@ -60,5 +73,10 @@ public class NBTTagEnd implements NBTBase {
     @Override
     public void accept(TagVisitor visitor) {
         visitor.visitEnd(this);
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visitEnd();
     }
 }

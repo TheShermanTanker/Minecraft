@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemRecord;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GeneratorAccess;
@@ -33,12 +34,9 @@ public class BlockJukeBox extends BlockTileEntity {
     @Override
     public void postPlace(World world, BlockPosition pos, IBlockData state, @Nullable EntityLiving placer, ItemStack itemStack) {
         super.postPlace(world, pos, state, placer, itemStack);
-        NBTTagCompound compoundTag = itemStack.getOrCreateTag();
-        if (compoundTag.hasKey("BlockEntityTag")) {
-            NBTTagCompound compoundTag2 = compoundTag.getCompound("BlockEntityTag");
-            if (compoundTag2.hasKey("RecordItem")) {
-                world.setTypeAndData(pos, state.set(HAS_RECORD, Boolean.valueOf(true)), 2);
-            }
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(itemStack);
+        if (compoundTag != null && compoundTag.hasKey("RecordItem")) {
+            world.setTypeAndData(pos, state.set(HAS_RECORD, Boolean.valueOf(true)), 2);
         }
 
     }

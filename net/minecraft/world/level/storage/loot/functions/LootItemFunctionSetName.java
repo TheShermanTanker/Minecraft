@@ -26,10 +26,10 @@ public class LootItemFunctionSetName extends LootItemFunctionConditional {
     @Nullable
     final LootTableInfo.EntityTarget resolutionContext;
 
-    LootItemFunctionSetName(LootItemCondition[] conditions, @Nullable IChatBaseComponent component, @Nullable LootTableInfo.EntityTarget entityTarget) {
+    LootItemFunctionSetName(LootItemCondition[] conditions, @Nullable IChatBaseComponent name, @Nullable LootTableInfo.EntityTarget entity) {
         super(conditions);
-        this.name = component;
-        this.resolutionContext = entityTarget;
+        this.name = name;
+        this.resolutionContext = entity;
     }
 
     @Override

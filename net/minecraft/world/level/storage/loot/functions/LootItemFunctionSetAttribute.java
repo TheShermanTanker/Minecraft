@@ -32,9 +32,9 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 public class LootItemFunctionSetAttribute extends LootItemFunctionConditional {
     final List<LootItemFunctionSetAttribute.Modifier> modifiers;
 
-    LootItemFunctionSetAttribute(LootItemCondition[] conditions, List<LootItemFunctionSetAttribute.Modifier> list) {
+    LootItemFunctionSetAttribute(LootItemCondition[] conditions, List<LootItemFunctionSetAttribute.Modifier> attributes) {
         super(conditions);
-        this.modifiers = ImmutableList.copyOf(list);
+        this.modifiers = ImmutableList.copyOf(attributes);
     }
 
     @Override
@@ -102,13 +102,13 @@ public class LootItemFunctionSetAttribute extends LootItemFunctionConditional {
         final UUID id;
         final EnumItemSlot[] slots;
 
-        Modifier(String string, AttributeBase attribute, AttributeModifier.Operation operation, NumberProvider numberProvider, EnumItemSlot[] equipmentSlots, @Nullable UUID uUID) {
-            this.name = string;
+        Modifier(String name, AttributeBase attribute, AttributeModifier.Operation operation, NumberProvider amount, EnumItemSlot[] slots, @Nullable UUID id) {
+            this.name = name;
             this.attribute = attribute;
             this.operation = operation;
-            this.amount = numberProvider;
-            this.id = uUID;
-            this.slots = equipmentSlots;
+            this.amount = amount;
+            this.id = id;
+            this.slots = slots;
         }
 
         public JsonObject serialize(JsonSerializationContext context) {

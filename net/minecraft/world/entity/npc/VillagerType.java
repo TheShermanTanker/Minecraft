@@ -21,49 +21,33 @@ public final class VillagerType {
     private final String name;
     private static final Map<ResourceKey<BiomeBase>, VillagerType> BY_BIOME = SystemUtils.make(Maps.newHashMap(), (map) -> {
         map.put(Biomes.BADLANDS, DESERT);
-        map.put(Biomes.BADLANDS_PLATEAU, DESERT);
         map.put(Biomes.DESERT, DESERT);
-        map.put(Biomes.DESERT_HILLS, DESERT);
-        map.put(Biomes.DESERT_LAKES, DESERT);
         map.put(Biomes.ERODED_BADLANDS, DESERT);
-        map.put(Biomes.MODIFIED_BADLANDS_PLATEAU, DESERT);
-        map.put(Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU, DESERT);
-        map.put(Biomes.WOODED_BADLANDS_PLATEAU, DESERT);
+        map.put(Biomes.WOODED_BADLANDS, DESERT);
         map.put(Biomes.BAMBOO_JUNGLE, JUNGLE);
-        map.put(Biomes.BAMBOO_JUNGLE_HILLS, JUNGLE);
         map.put(Biomes.JUNGLE, JUNGLE);
-        map.put(Biomes.JUNGLE_EDGE, JUNGLE);
-        map.put(Biomes.JUNGLE_HILLS, JUNGLE);
-        map.put(Biomes.MODIFIED_JUNGLE, JUNGLE);
-        map.put(Biomes.MODIFIED_JUNGLE_EDGE, JUNGLE);
+        map.put(Biomes.SPARSE_JUNGLE, JUNGLE);
         map.put(Biomes.SAVANNA_PLATEAU, SAVANNA);
         map.put(Biomes.SAVANNA, SAVANNA);
-        map.put(Biomes.SHATTERED_SAVANNA, SAVANNA);
-        map.put(Biomes.SHATTERED_SAVANNA_PLATEAU, SAVANNA);
+        map.put(Biomes.WINDSWEPT_SAVANNA, SAVANNA);
         map.put(Biomes.DEEP_FROZEN_OCEAN, SNOW);
         map.put(Biomes.FROZEN_OCEAN, SNOW);
         map.put(Biomes.FROZEN_RIVER, SNOW);
         map.put(Biomes.ICE_SPIKES, SNOW);
         map.put(Biomes.SNOWY_BEACH, SNOW);
-        map.put(Biomes.SNOWY_MOUNTAINS, SNOW);
         map.put(Biomes.SNOWY_TAIGA, SNOW);
-        map.put(Biomes.SNOWY_TAIGA_HILLS, SNOW);
-        map.put(Biomes.SNOWY_TAIGA_MOUNTAINS, SNOW);
-        map.put(Biomes.SNOWY_TUNDRA, SNOW);
+        map.put(Biomes.SNOWY_PLAINS, SNOW);
+        map.put(Biomes.GROVE, SNOW);
+        map.put(Biomes.SNOWY_SLOPES, SNOW);
+        map.put(Biomes.FROZEN_PEAKS, SNOW);
+        map.put(Biomes.JAGGED_PEAKS, SNOW);
         map.put(Biomes.SWAMP, SWAMP);
-        map.put(Biomes.SWAMP_HILLS, SWAMP);
-        map.put(Biomes.GIANT_SPRUCE_TAIGA, TAIGA);
-        map.put(Biomes.GIANT_SPRUCE_TAIGA_HILLS, TAIGA);
-        map.put(Biomes.GIANT_TREE_TAIGA, TAIGA);
-        map.put(Biomes.GIANT_TREE_TAIGA_HILLS, TAIGA);
-        map.put(Biomes.GRAVELLY_MOUNTAINS, TAIGA);
-        map.put(Biomes.MODIFIED_GRAVELLY_MOUNTAINS, TAIGA);
-        map.put(Biomes.MOUNTAIN_EDGE, TAIGA);
-        map.put(Biomes.MOUNTAINS, TAIGA);
+        map.put(Biomes.OLD_GROWTH_SPRUCE_TAIGA, TAIGA);
+        map.put(Biomes.OLD_GROWTH_PINE_TAIGA, TAIGA);
+        map.put(Biomes.WINDSWEPT_GRAVELLY_HILLS, TAIGA);
+        map.put(Biomes.WINDSWEPT_HILLS, TAIGA);
         map.put(Biomes.TAIGA, TAIGA);
-        map.put(Biomes.TAIGA_HILLS, TAIGA);
-        map.put(Biomes.TAIGA_MOUNTAINS, TAIGA);
-        map.put(Biomes.WOODED_MOUNTAINS, TAIGA);
+        map.put(Biomes.WINDSWEPT_FOREST, TAIGA);
     });
 
     private VillagerType(String name) {
@@ -80,8 +64,8 @@ public final class VillagerType {
     }
 
     public static VillagerType byBiome(Optional<ResourceKey<BiomeBase>> biomeKey) {
-        return biomeKey.flatMap((resourceKey) -> {
-            return Optional.ofNullable(BY_BIOME.get(resourceKey));
+        return biomeKey.flatMap((biomeKeyx) -> {
+            return Optional.ofNullable(BY_BIOME.get(biomeKeyx));
         }).orElse(PLAINS);
     }
 }

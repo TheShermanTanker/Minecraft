@@ -6,6 +6,7 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3fa;
 import com.mojang.math.Vector4f;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public enum EnumDirection implements INamable {
     EAST(5, 4, 3, "east", EnumDirection.EnumAxisDirection.POSITIVE, EnumDirection.EnumAxis.X, new BaseBlockPosition(1, 0, 0));
 
     public static final Codec<EnumDirection> CODEC = INamable.fromEnum(EnumDirection::values, EnumDirection::byName);
+    public static final Codec<EnumDirection> VERTICAL_CODEC = CODEC.flatXmap(EnumDirection::verifyVertical, EnumDirection::verifyVertical);
     private final int data3d;
     private final int oppositeIndex;
     private final int data2d;
@@ -117,24 +119,34 @@ public enum EnumDirection implements INamable {
 
     public Quaternion getRotation() {
         Quaternion quaternion = Vector3fa.XP.rotationDegrees(90.0F);
+        Quaternion var10000;
         switch(this) {
         case DOWN:
-            return Vector3fa.XP.rotationDegrees(180.0F);
+            var10000 = Vector3fa.XP.rotationDegrees(180.0F);
+            break;
         case UP:
-            return Quaternion.ONE.copy();
+            var10000 = Quaternion.ONE.copy();
+            break;
         case NORTH:
             quaternion.mul(Vector3fa.ZP.rotationDegrees(180.0F));
-            return quaternion;
+            var10000 = quaternion;
+            break;
         case SOUTH:
-            return quaternion;
+            var10000 = quaternion;
+            break;
         case WEST:
             quaternion.mul(Vector3fa.ZP.rotationDegrees(90.0F));
-            return quaternion;
+            var10000 = quaternion;
+            break;
         case EAST:
-        default:
             quaternion.mul(Vector3fa.ZP.rotationDegrees(-90.0F));
-            return quaternion;
+            var10000 = quaternion;
+            break;
+        default:
+            throw new IncompatibleClassChangeError();
         }
+
+        return var10000;
     }
 
     public int get3DDataValue() {
@@ -150,15 +162,22 @@ public enum EnumDirection implements INamable {
     }
 
     public static EnumDirection getFacingAxis(Entity entity, EnumDirection.EnumAxis axis) {
+        EnumDirection var10000;
         switch(axis) {
         case X:
-            return EAST.isFacingAngle(entity.getViewYRot(1.0F)) ? EAST : WEST;
+            var10000 = EAST.isFacingAngle(entity.getViewYRot(1.0F)) ? EAST : WEST;
+            break;
         case Z:
-            return SOUTH.isFacingAngle(entity.getViewYRot(1.0F)) ? SOUTH : NORTH;
+            var10000 = SOUTH.isFacingAngle(entity.getViewYRot(1.0F)) ? SOUTH : NORTH;
+            break;
         case Y:
+            var10000 = entity.getViewXRot(1.0F) < 0.0F ? UP : DOWN;
+            break;
         default:
-            return entity.getViewXRot(1.0F) < 0.0F ? UP : DOWN;
+            throw new IncompatibleClassChangeError();
         }
+
+        return var10000;
     }
 
     public EnumDirection opposite() {
@@ -166,147 +185,175 @@ public enum EnumDirection implements INamable {
     }
 
     public EnumDirection getClockWise(EnumDirection.EnumAxis axis) {
+        EnumDirection var10000;
         switch(axis) {
         case X:
-            if (this != WEST && this != EAST) {
-                return this.getClockWiseX();
-            }
-
-            return this;
+            var10000 = this != WEST && this != EAST ? this.getClockWiseX() : this;
+            break;
         case Z:
-            if (this != NORTH && this != SOUTH) {
-                return this.getClockWiseZ();
-            }
-
-            return this;
+            var10000 = this != NORTH && this != SOUTH ? this.getClockWiseZ() : this;
+            break;
         case Y:
-            if (this != UP && this != DOWN) {
-                return this.getClockWise();
-            }
-
-            return this;
+            var10000 = this != UP && this != DOWN ? this.getClockWise() : this;
+            break;
         default:
-            throw new IllegalStateException("Unable to get CW facing for axis " + axis);
+            throw new IncompatibleClassChangeError();
         }
+
+        return var10000;
     }
 
     public EnumDirection getCounterClockWise(EnumDirection.EnumAxis axis) {
+        EnumDirection var10000;
         switch(axis) {
         case X:
-            if (this != WEST && this != EAST) {
-                return this.getCounterClockWiseX();
-            }
-
-            return this;
+            var10000 = this != WEST && this != EAST ? this.getCounterClockWiseX() : this;
+            break;
         case Z:
-            if (this != NORTH && this != SOUTH) {
-                return this.getCounterClockWiseZ();
-            }
-
-            return this;
+            var10000 = this != NORTH && this != SOUTH ? this.getCounterClockWiseZ() : this;
+            break;
         case Y:
-            if (this != UP && this != DOWN) {
-                return this.getCounterClockWise();
-            }
-
-            return this;
+            var10000 = this != UP && this != DOWN ? this.getCounterClockWise() : this;
+            break;
         default:
-            throw new IllegalStateException("Unable to get CW facing for axis " + axis);
+            throw new IncompatibleClassChangeError();
         }
+
+        return var10000;
     }
 
     public EnumDirection getClockWise() {
+        EnumDirection var10000;
         switch(this) {
         case NORTH:
-            return EAST;
+            var10000 = EAST;
+            break;
         case SOUTH:
-            return WEST;
+            var10000 = WEST;
+            break;
         case WEST:
-            return NORTH;
+            var10000 = NORTH;
+            break;
         case EAST:
-            return SOUTH;
+            var10000 = SOUTH;
+            break;
         default:
             throw new IllegalStateException("Unable to get Y-rotated facing of " + this);
         }
+
+        return var10000;
     }
 
     private EnumDirection getClockWiseX() {
+        EnumDirection var10000;
         switch(this) {
         case DOWN:
-            return SOUTH;
+            var10000 = SOUTH;
+            break;
         case UP:
-            return NORTH;
+            var10000 = NORTH;
+            break;
         case NORTH:
-            return DOWN;
+            var10000 = DOWN;
+            break;
         case SOUTH:
-            return UP;
+            var10000 = UP;
+            break;
         default:
             throw new IllegalStateException("Unable to get X-rotated facing of " + this);
         }
+
+        return var10000;
     }
 
     private EnumDirection getCounterClockWiseX() {
+        EnumDirection var10000;
         switch(this) {
         case DOWN:
-            return NORTH;
+            var10000 = NORTH;
+            break;
         case UP:
-            return SOUTH;
+            var10000 = SOUTH;
+            break;
         case NORTH:
-            return UP;
+            var10000 = UP;
+            break;
         case SOUTH:
-            return DOWN;
+            var10000 = DOWN;
+            break;
         default:
             throw new IllegalStateException("Unable to get X-rotated facing of " + this);
         }
+
+        return var10000;
     }
 
     private EnumDirection getClockWiseZ() {
+        EnumDirection var10000;
         switch(this) {
         case DOWN:
-            return WEST;
+            var10000 = WEST;
+            break;
         case UP:
-            return EAST;
+            var10000 = EAST;
+            break;
         case NORTH:
         case SOUTH:
         default:
             throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
         case WEST:
-            return UP;
+            var10000 = UP;
+            break;
         case EAST:
-            return DOWN;
+            var10000 = DOWN;
         }
+
+        return var10000;
     }
 
     private EnumDirection getCounterClockWiseZ() {
+        EnumDirection var10000;
         switch(this) {
         case DOWN:
-            return EAST;
+            var10000 = EAST;
+            break;
         case UP:
-            return WEST;
+            var10000 = WEST;
+            break;
         case NORTH:
         case SOUTH:
         default:
             throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
         case WEST:
-            return DOWN;
+            var10000 = DOWN;
+            break;
         case EAST:
-            return UP;
+            var10000 = UP;
         }
+
+        return var10000;
     }
 
     public EnumDirection getCounterClockWise() {
+        EnumDirection var10000;
         switch(this) {
         case NORTH:
-            return WEST;
+            var10000 = WEST;
+            break;
         case SOUTH:
-            return EAST;
+            var10000 = EAST;
+            break;
         case WEST:
-            return SOUTH;
+            var10000 = SOUTH;
+            break;
         case EAST:
-            return NORTH;
+            var10000 = NORTH;
+            break;
         default:
             throw new IllegalStateException("Unable to get CCW facing of " + this);
         }
+
+        return var10000;
     }
 
     public int getAdjacentX() {
@@ -361,15 +408,22 @@ public enum EnumDirection implements INamable {
     }
 
     public static EnumDirection fromAxisAndDirection(EnumDirection.EnumAxis axis, EnumDirection.EnumAxisDirection direction) {
+        EnumDirection var10000;
         switch(axis) {
         case X:
-            return direction == EnumDirection.EnumAxisDirection.POSITIVE ? EAST : WEST;
+            var10000 = direction == EnumDirection.EnumAxisDirection.POSITIVE ? EAST : WEST;
+            break;
         case Z:
-        default:
-            return direction == EnumDirection.EnumAxisDirection.POSITIVE ? SOUTH : NORTH;
+            var10000 = direction == EnumDirection.EnumAxisDirection.POSITIVE ? SOUTH : NORTH;
+            break;
         case Y:
-            return direction == EnumDirection.EnumAxisDirection.POSITIVE ? UP : DOWN;
+            var10000 = direction == EnumDirection.EnumAxisDirection.POSITIVE ? UP : DOWN;
+            break;
+        default:
+            throw new IncompatibleClassChangeError();
         }
+
+        return var10000;
     }
 
     public float toYRot() {
@@ -409,6 +463,10 @@ public enum EnumDirection implements INamable {
         return this.name;
     }
 
+    private static DataResult<EnumDirection> verifyVertical(EnumDirection direction) {
+        return direction.getAxis().isVertical() ? DataResult.success(direction) : DataResult.error("Expected a vertical direction");
+    }
+
     public static EnumDirection get(EnumDirection.EnumAxisDirection direction, EnumDirection.EnumAxis axis) {
         for(EnumDirection direction2 : VALUES) {
             if (direction2.getAxisDirection() == direction && direction2.getAxis() == axis) {
@@ -423,11 +481,11 @@ public enum EnumDirection implements INamable {
         return this.normal;
     }
 
-    public boolean isFacingAngle(float f) {
-        float g = f * ((float)Math.PI / 180F);
-        float h = -MathHelper.sin(g);
-        float i = MathHelper.cos(g);
-        return (float)this.normal.getX() * h + (float)this.normal.getZ() * i > 0.0F;
+    public boolean isFacingAngle(float yaw) {
+        float f = yaw * ((float)Math.PI / 180F);
+        float g = -MathHelper.sin(f);
+        float h = MathHelper.cos(f);
+        return (float)this.normal.getX() * g + (float)this.normal.getZ() * h > 0.0F;
     }
 
     public static enum EnumAxis implements INamable, Predicate<EnumDirection> {
@@ -472,8 +530,8 @@ public enum EnumDirection implements INamable {
         }));
         private final String name;
 
-        EnumAxis(String string2) {
-            this.name = string2;
+        EnumAxis(String name) {
+            this.name = name;
         }
 
         @Nullable
@@ -508,15 +566,20 @@ public enum EnumDirection implements INamable {
         }
 
         public EnumDirection.EnumDirectionLimit getPlane() {
+            EnumDirection.EnumDirectionLimit var10000;
             switch(this) {
             case X:
             case Z:
-                return EnumDirection.EnumDirectionLimit.HORIZONTAL;
+                var10000 = EnumDirection.EnumDirectionLimit.HORIZONTAL;
+                break;
             case Y:
-                return EnumDirection.EnumDirectionLimit.VERTICAL;
+                var10000 = EnumDirection.EnumDirectionLimit.VERTICAL;
+                break;
             default:
-                throw new Error("Someone's been tampering with the universe!");
+                throw new IncompatibleClassChangeError();
             }
+
+            return var10000;
         }
 
         @Override

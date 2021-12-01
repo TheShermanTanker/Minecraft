@@ -29,12 +29,10 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
     protected DynamicOpsNBT() {
     }
 
-    @Override
     public NBTBase empty() {
         return NBTTagEnd.INSTANCE;
     }
 
-    @Override
     public <U> U convertTo(DynamicOps<U> dynamicOps, NBTBase tag) {
         switch(tag.getTypeId()) {
         case 0:
@@ -68,100 +66,88 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public DataResult<Number> getNumberValue(NBTBase tag) {
         return tag instanceof NBTNumber ? DataResult.success(((NBTNumber)tag).getAsNumber()) : DataResult.error("Not a number");
     }
 
-    @Override
     public NBTBase createNumeric(Number number) {
         return NBTTagDouble.valueOf(number.doubleValue());
     }
 
-    @Override
     public NBTBase createByte(byte b) {
         return NBTTagByte.valueOf(b);
     }
 
-    @Override
     public NBTBase createShort(short s) {
         return NBTTagShort.valueOf(s);
     }
 
-    @Override
     public NBTBase createInt(int i) {
         return NBTTagInt.valueOf(i);
     }
 
-    @Override
     public NBTBase createLong(long l) {
         return NBTTagLong.valueOf(l);
     }
 
-    @Override
     public NBTBase createFloat(float f) {
         return NBTTagFloat.valueOf(f);
     }
 
-    @Override
     public NBTBase createDouble(double d) {
         return NBTTagDouble.valueOf(d);
     }
 
-    @Override
     public NBTBase createBoolean(boolean bl) {
         return NBTTagByte.valueOf(bl);
     }
 
-    @Override
     public DataResult<String> getStringValue(NBTBase tag) {
         return tag instanceof NBTTagString ? DataResult.success(tag.asString()) : DataResult.error("Not a string");
     }
 
-    @Override
     public NBTBase createString(String string) {
         return NBTTagString.valueOf(string);
     }
 
-    private static NBTList<?> createGenericList(byte b, byte c) {
-        if (typesMatch(b, c, (byte)4)) {
+    private static NBTList<?> createGenericList(byte knownType, byte valueType) {
+        if (typesMatch(knownType, valueType, (byte)4)) {
             return new NBTTagLongArray(new long[0]);
-        } else if (typesMatch(b, c, (byte)1)) {
+        } else if (typesMatch(knownType, valueType, (byte)1)) {
             return new NBTTagByteArray(new byte[0]);
         } else {
-            return (NBTList<?>)(typesMatch(b, c, (byte)3) ? new NBTTagIntArray(new int[0]) : new NBTTagList());
+            return (NBTList<?>)(typesMatch(knownType, valueType, (byte)3) ? new NBTTagIntArray(new int[0]) : new NBTTagList());
         }
     }
 
-    private static boolean typesMatch(byte b, byte c, byte d) {
-        return b == d && (c == d || c == 0);
+    private static boolean typesMatch(byte knownType, byte valueType, byte expectedType) {
+        return knownType == expectedType && (valueType == expectedType || valueType == 0);
     }
 
-    private static <T extends NBTBase> void fillOne(NBTList<T> collectionTag, NBTBase tag, NBTBase tag2) {
-        if (tag instanceof NBTList) {
-            NBTList<?> collectionTag2 = (NBTList)tag;
-            collectionTag2.forEach((tagx) -> {
-                collectionTag.add(tagx);
+    private static <T extends NBTBase> void fillOne(NBTList<T> destination, NBTBase source, NBTBase additionalValue) {
+        if (source instanceof NBTList) {
+            NBTList<?> collectionTag = (NBTList)source;
+            collectionTag.forEach((nbt) -> {
+                destination.add(nbt);
             });
         }
 
-        collectionTag.add(tag2);
+        destination.add(additionalValue);
     }
 
-    private static <T extends NBTBase> void fillMany(NBTList<T> collectionTag, NBTBase tag, List<NBTBase> list) {
-        if (tag instanceof NBTList) {
-            NBTList<?> collectionTag2 = (NBTList)tag;
-            collectionTag2.forEach((tagx) -> {
-                collectionTag.add(tagx);
+    private static <T extends NBTBase> void fillMany(NBTList<T> destination, NBTBase source, List<NBTBase> additionalValues) {
+        if (source instanceof NBTList) {
+            NBTList<?> collectionTag = (NBTList)source;
+            collectionTag.forEach((nbt) -> {
+                destination.add(nbt);
             });
         }
 
-        list.forEach((tagx) -> {
-            collectionTag.add(tagx);
+        additionalValues.forEach((nbt) -> {
+            destination.add(nbt);
         });
     }
 
-    @Override
     public DataResult<NBTBase> mergeToList(NBTBase tag, NBTBase tag2) {
         if (!(tag instanceof NBTList) && !(tag instanceof NBTTagEnd)) {
             return DataResult.error("mergeToList called with not a list: " + tag, tag);
@@ -172,7 +158,6 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public DataResult<NBTBase> mergeToList(NBTBase tag, List<NBTBase> list) {
         if (!(tag instanceof NBTList) && !(tag instanceof NBTTagEnd)) {
             return DataResult.error("mergeToList called with not a list: " + tag, tag);
@@ -183,7 +168,6 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public DataResult<NBTBase> mergeToMap(NBTBase tag, NBTBase tag2, NBTBase tag3) {
         if (!(tag instanceof NBTTagCompound) && !(tag instanceof NBTTagEnd)) {
             return DataResult.error("mergeToMap called with not a map: " + tag, tag);
@@ -193,8 +177,8 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
             NBTTagCompound compoundTag = new NBTTagCompound();
             if (tag instanceof NBTTagCompound) {
                 NBTTagCompound compoundTag2 = (NBTTagCompound)tag;
-                compoundTag2.getKeys().forEach((string) -> {
-                    compoundTag.set(string, compoundTag2.get(string));
+                compoundTag2.getKeys().forEach((key) -> {
+                    compoundTag.set(key, compoundTag2.get(key));
                 });
             }
 
@@ -203,7 +187,6 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public DataResult<NBTBase> mergeToMap(NBTBase tag, MapLike<NBTBase> mapLike) {
         if (!(tag instanceof NBTTagCompound) && !(tag instanceof NBTTagEnd)) {
             return DataResult.error("mergeToMap called with not a map: " + tag, tag);
@@ -229,33 +212,30 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public DataResult<Stream<Pair<NBTBase, NBTBase>>> getMapValues(NBTBase tag) {
         if (!(tag instanceof NBTTagCompound)) {
             return DataResult.error("Not a map: " + tag);
         } else {
             NBTTagCompound compoundTag = (NBTTagCompound)tag;
-            return DataResult.success(compoundTag.getKeys().stream().map((string) -> {
-                return Pair.of(this.createString(string), compoundTag.get(string));
+            return DataResult.success(compoundTag.getKeys().stream().map((key) -> {
+                return Pair.of(this.createString(key), compoundTag.get(key));
             }));
         }
     }
 
-    @Override
     public DataResult<Consumer<BiConsumer<NBTBase, NBTBase>>> getMapEntries(NBTBase tag) {
         if (!(tag instanceof NBTTagCompound)) {
             return DataResult.error("Not a map: " + tag);
         } else {
             NBTTagCompound compoundTag = (NBTTagCompound)tag;
-            return DataResult.success((biConsumer) -> {
-                compoundTag.getKeys().forEach((string) -> {
-                    biConsumer.accept(this.createString(string), compoundTag.get(string));
+            return DataResult.success((entryConsumer) -> {
+                compoundTag.getKeys().forEach((key) -> {
+                    entryConsumer.accept(this.createString(key), compoundTag.get(key));
                 });
             });
         }
     }
 
-    @Override
     public DataResult<MapLike<NBTBase>> getMap(NBTBase tag) {
         if (!(tag instanceof NBTTagCompound)) {
             return DataResult.error("Not a map: " + tag);
@@ -263,21 +243,18 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
             final NBTTagCompound compoundTag = (NBTTagCompound)tag;
             return DataResult.success(new MapLike<NBTBase>() {
                 @Nullable
-                @Override
                 public NBTBase get(NBTBase tag) {
                     return compoundTag.get(tag.asString());
                 }
 
                 @Nullable
-                @Override
                 public NBTBase get(String string) {
                     return compoundTag.get(string);
                 }
 
-                @Override
                 public Stream<Pair<NBTBase, NBTBase>> entries() {
-                    return compoundTag.getKeys().stream().map((string) -> {
-                        return Pair.of(DynamicOpsNBT.this.createString(string), compoundTag.get(string));
+                    return compoundTag.getKeys().stream().map((key) -> {
+                        return Pair.of(DynamicOpsNBT.this.createString(key), compoundTag.get(key));
                     });
                 }
 
@@ -289,23 +266,20 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public NBTBase createMap(Stream<Pair<NBTBase, NBTBase>> stream) {
         NBTTagCompound compoundTag = new NBTTagCompound();
-        stream.forEach((pair) -> {
-            compoundTag.set(pair.getFirst().asString(), pair.getSecond());
+        stream.forEach((entry) -> {
+            compoundTag.set(entry.getFirst().asString(), entry.getSecond());
         });
         return compoundTag;
     }
 
-    @Override
     public DataResult<Stream<NBTBase>> getStream(NBTBase tag) {
-        return tag instanceof NBTList ? DataResult.success(((NBTList)tag).stream().map((tagx) -> {
-            return tagx;
+        return tag instanceof NBTList ? DataResult.success(((NBTList)tag).stream().map((nbt) -> {
+            return nbt;
         })) : DataResult.error("Not a list");
     }
 
-    @Override
     public DataResult<Consumer<Consumer<NBTBase>>> getList(NBTBase tag) {
         if (tag instanceof NBTList) {
             NBTList<?> collectionTag = (NBTList)tag;
@@ -315,37 +289,30 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public DataResult<ByteBuffer> getByteBuffer(NBTBase tag) {
         return tag instanceof NBTTagByteArray ? DataResult.success(ByteBuffer.wrap(((NBTTagByteArray)tag).getBytes())) : DynamicOps.super.getByteBuffer(tag);
     }
 
-    @Override
     public NBTBase createByteList(ByteBuffer byteBuffer) {
         return new NBTTagByteArray(DataFixUtils.toArray(byteBuffer));
     }
 
-    @Override
     public DataResult<IntStream> getIntStream(NBTBase tag) {
         return tag instanceof NBTTagIntArray ? DataResult.success(Arrays.stream(((NBTTagIntArray)tag).getInts())) : DynamicOps.super.getIntStream(tag);
     }
 
-    @Override
     public NBTBase createIntList(IntStream intStream) {
         return new NBTTagIntArray(intStream.toArray());
     }
 
-    @Override
     public DataResult<LongStream> getLongStream(NBTBase tag) {
         return tag instanceof NBTTagLongArray ? DataResult.success(Arrays.stream(((NBTTagLongArray)tag).getLongs())) : DynamicOps.super.getLongStream(tag);
     }
 
-    @Override
     public NBTBase createLongList(LongStream longStream) {
         return new NBTTagLongArray(longStream.toArray());
     }
 
-    @Override
     public NBTBase createList(Stream<NBTBase> stream) {
         PeekingIterator<NBTBase> peekingIterator = Iterators.peekingIterator(stream.iterator());
         if (!peekingIterator.hasNext()) {
@@ -353,18 +320,18 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         } else {
             NBTBase tag = peekingIterator.peek();
             if (tag instanceof NBTTagByte) {
-                List<Byte> list = Lists.newArrayList(Iterators.transform(peekingIterator, (tagx) -> {
-                    return ((NBTTagByte)tagx).asByte();
+                List<Byte> list = Lists.newArrayList(Iterators.transform(peekingIterator, (nbt) -> {
+                    return ((NBTTagByte)nbt).asByte();
                 }));
                 return new NBTTagByteArray(list);
             } else if (tag instanceof NBTTagInt) {
-                List<Integer> list2 = Lists.newArrayList(Iterators.transform(peekingIterator, (tagx) -> {
-                    return ((NBTTagInt)tagx).asInt();
+                List<Integer> list2 = Lists.newArrayList(Iterators.transform(peekingIterator, (nbt) -> {
+                    return ((NBTTagInt)nbt).asInt();
                 }));
                 return new NBTTagIntArray(list2);
             } else if (tag instanceof NBTTagLong) {
-                List<Long> list3 = Lists.newArrayList(Iterators.transform(peekingIterator, (tagx) -> {
-                    return ((NBTTagLong)tagx).asLong();
+                List<Long> list3 = Lists.newArrayList(Iterators.transform(peekingIterator, (nbt) -> {
+                    return ((NBTTagLong)nbt).asLong();
                 }));
                 return new NBTTagLongArray(list3);
             } else {
@@ -382,7 +349,6 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         }
     }
 
-    @Override
     public NBTBase remove(NBTBase tag, String string) {
         if (tag instanceof NBTTagCompound) {
             NBTTagCompound compoundTag = (NBTTagCompound)tag;
@@ -403,7 +369,6 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
         return "NBT";
     }
 
-    @Override
     public RecordBuilder<NBTBase> mapBuilder() {
         return new DynamicOpsNBT.NBTRecordBuilder();
     }
@@ -413,18 +378,15 @@ public class DynamicOpsNBT implements DynamicOps<NBTBase> {
             super(DynamicOpsNBT.this);
         }
 
-        @Override
         protected NBTTagCompound initBuilder() {
             return new NBTTagCompound();
         }
 
-        @Override
         protected NBTTagCompound append(String string, NBTBase tag, NBTTagCompound compoundTag) {
             compoundTag.set(string, tag);
             return compoundTag;
         }
 
-        @Override
         protected DataResult<NBTBase> build(NBTTagCompound compoundTag, NBTBase tag) {
             if (tag != null && tag != NBTTagEnd.INSTANCE) {
                 if (!(tag instanceof NBTTagCompound)) {

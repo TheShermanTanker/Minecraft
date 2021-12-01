@@ -108,7 +108,7 @@ public class WorldDataServer implements IWorldDataServer, SaveData {
     }
 
     public WorldDataServer(WorldSettings levelInfo, GeneratorSettings generatorOptions, Lifecycle lifecycle) {
-        this((DataFixer)null, SharedConstants.getGameVersion().getWorldVersion(), (NBTTagCompound)null, false, 0, 0, 0, 0.0F, 0L, 0L, 19133, 0, 0, false, 0, false, false, false, WorldBorder.DEFAULT_SETTINGS, 0, 0, (UUID)null, Sets.newLinkedHashSet(), new CustomFunctionCallbackTimerQueue<>(CustomFunctionCallbackTimers.SERVER_CALLBACKS), (NBTTagCompound)null, new NBTTagCompound(), levelInfo.copy(), generatorOptions, lifecycle);
+        this((DataFixer)null, SharedConstants.getCurrentVersion().getWorldVersion(), (NBTTagCompound)null, false, 0, 0, 0, 0.0F, 0L, 0L, 19133, 0, 0, false, 0, false, false, false, WorldBorder.DEFAULT_SETTINGS, 0, 0, (UUID)null, Sets.newLinkedHashSet(), new CustomFunctionCallbackTimerQueue<>(CustomFunctionCallbackTimers.SERVER_CALLBACKS), (NBTTagCompound)null, new NBTTagCompound(), levelInfo.copy(), generatorOptions, lifecycle);
     }
 
     public static WorldDataServer parse(Dynamic<NBTBase> dynamic, DataFixer dataFixer, int dataVersion, @Nullable NBTTagCompound playerData, WorldSettings levelInfo, LevelVersion saveVersionInfo, GeneratorSettings generatorOptions, Lifecycle lifecycle) {
@@ -133,60 +133,61 @@ public class WorldDataServer implements IWorldDataServer, SaveData {
         return compoundTag;
     }
 
-    private void setTagData(IRegistryCustom registryManager, NBTTagCompound levelTag, @Nullable NBTTagCompound playerTag) {
+    private void setTagData(IRegistryCustom registryManager, NBTTagCompound levelNbt, @Nullable NBTTagCompound playerNbt) {
         NBTTagList listTag = new NBTTagList();
         this.knownServerBrands.stream().map(NBTTagString::valueOf).forEach(listTag::add);
-        levelTag.set("ServerBrands", listTag);
-        levelTag.setBoolean("WasModded", this.wasModded);
+        levelNbt.set("ServerBrands", listTag);
+        levelNbt.setBoolean("WasModded", this.wasModded);
         NBTTagCompound compoundTag = new NBTTagCompound();
-        compoundTag.setString("Name", SharedConstants.getGameVersion().getName());
-        compoundTag.setInt("Id", SharedConstants.getGameVersion().getWorldVersion());
-        compoundTag.setBoolean("Snapshot", !SharedConstants.getGameVersion().isStable());
-        levelTag.set("Version", compoundTag);
-        levelTag.setInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+        compoundTag.setString("Name", SharedConstants.getCurrentVersion().getName());
+        compoundTag.setInt("Id", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+        compoundTag.setBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
+        compoundTag.setString("Series", SharedConstants.getCurrentVersion().getDataVersion().getSeries());
+        levelNbt.set("Version", compoundTag);
+        levelNbt.setInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         RegistryWriteOps<NBTBase> registryWriteOps = RegistryWriteOps.create(DynamicOpsNBT.INSTANCE, registryManager);
         GeneratorSettings.CODEC.encodeStart(registryWriteOps, this.worldGenSettings).resultOrPartial(SystemUtils.prefix("WorldGenSettings: ", LOGGER::error)).ifPresent((tag) -> {
-            levelTag.set("WorldGenSettings", tag);
+            levelNbt.set("WorldGenSettings", tag);
         });
-        levelTag.setInt("GameType", this.settings.getGameType().getId());
-        levelTag.setInt("SpawnX", this.xSpawn);
-        levelTag.setInt("SpawnY", this.ySpawn);
-        levelTag.setInt("SpawnZ", this.zSpawn);
-        levelTag.setFloat("SpawnAngle", this.spawnAngle);
-        levelTag.setLong("Time", this.gameTime);
-        levelTag.setLong("DayTime", this.dayTime);
-        levelTag.setLong("LastPlayed", SystemUtils.getTimeMillis());
-        levelTag.setString("LevelName", this.settings.getLevelName());
-        levelTag.setInt("version", 19133);
-        levelTag.setInt("clearWeatherTime", this.clearWeatherTime);
-        levelTag.setInt("rainTime", this.rainTime);
-        levelTag.setBoolean("raining", this.raining);
-        levelTag.setInt("thunderTime", this.thunderTime);
-        levelTag.setBoolean("thundering", this.thundering);
-        levelTag.setBoolean("hardcore", this.settings.isHardcore());
-        levelTag.setBoolean("allowCommands", this.settings.allowCommands());
-        levelTag.setBoolean("initialized", this.initialized);
-        this.worldBorder.write(levelTag);
-        levelTag.setByte("Difficulty", (byte)this.settings.getDifficulty().getId());
-        levelTag.setBoolean("DifficultyLocked", this.difficultyLocked);
-        levelTag.set("GameRules", this.settings.getGameRules().createTag());
-        levelTag.set("DragonFight", this.endDragonFightData);
-        if (playerTag != null) {
-            levelTag.set("Player", playerTag);
+        levelNbt.setInt("GameType", this.settings.getGameType().getId());
+        levelNbt.setInt("SpawnX", this.xSpawn);
+        levelNbt.setInt("SpawnY", this.ySpawn);
+        levelNbt.setInt("SpawnZ", this.zSpawn);
+        levelNbt.setFloat("SpawnAngle", this.spawnAngle);
+        levelNbt.setLong("Time", this.gameTime);
+        levelNbt.setLong("DayTime", this.dayTime);
+        levelNbt.setLong("LastPlayed", SystemUtils.getTimeMillis());
+        levelNbt.setString("LevelName", this.settings.getLevelName());
+        levelNbt.setInt("version", 19133);
+        levelNbt.setInt("clearWeatherTime", this.clearWeatherTime);
+        levelNbt.setInt("rainTime", this.rainTime);
+        levelNbt.setBoolean("raining", this.raining);
+        levelNbt.setInt("thunderTime", this.thunderTime);
+        levelNbt.setBoolean("thundering", this.thundering);
+        levelNbt.setBoolean("hardcore", this.settings.isHardcore());
+        levelNbt.setBoolean("allowCommands", this.settings.allowCommands());
+        levelNbt.setBoolean("initialized", this.initialized);
+        this.worldBorder.write(levelNbt);
+        levelNbt.setByte("Difficulty", (byte)this.settings.getDifficulty().getId());
+        levelNbt.setBoolean("DifficultyLocked", this.difficultyLocked);
+        levelNbt.set("GameRules", this.settings.getGameRules().createTag());
+        levelNbt.set("DragonFight", this.endDragonFightData);
+        if (playerNbt != null) {
+            levelNbt.set("Player", playerNbt);
         }
 
         DataPackConfiguration.CODEC.encodeStart(DynamicOpsNBT.INSTANCE, this.settings.getDataPackConfig()).result().ifPresent((tag) -> {
-            levelTag.set("DataPacks", tag);
+            levelNbt.set("DataPacks", tag);
         });
         if (this.customBossEvents != null) {
-            levelTag.set("CustomBossEvents", this.customBossEvents);
+            levelNbt.set("CustomBossEvents", this.customBossEvents);
         }
 
-        levelTag.set("ScheduledEvents", this.scheduledEvents.store());
-        levelTag.setInt("WanderingTraderSpawnDelay", this.wanderingTraderSpawnDelay);
-        levelTag.setInt("WanderingTraderSpawnChance", this.wanderingTraderSpawnChance);
+        levelNbt.set("ScheduledEvents", this.scheduledEvents.store());
+        levelNbt.setInt("WanderingTraderSpawnDelay", this.wanderingTraderSpawnDelay);
+        levelNbt.setInt("WanderingTraderSpawnChance", this.wanderingTraderSpawnChance);
         if (this.wanderingTraderId != null) {
-            levelTag.putUUID("WanderingTraderId", this.wanderingTraderId);
+            levelNbt.putUUID("WanderingTraderId", this.wanderingTraderId);
         }
 
     }
@@ -223,7 +224,7 @@ public class WorldDataServer implements IWorldDataServer, SaveData {
 
     private void updatePlayerTag() {
         if (!this.upgradedPlayerTag && this.loadedPlayerTag != null) {
-            if (this.playerDataVersion < SharedConstants.getGameVersion().getWorldVersion()) {
+            if (this.playerDataVersion < SharedConstants.getCurrentVersion().getWorldVersion()) {
                 if (this.fixerUpper == null) {
                     throw (NullPointerException)SystemUtils.pauseInIde(new NullPointerException("Fixer Upper not set inside LevelData, and the player tag is not upgraded."));
                 }

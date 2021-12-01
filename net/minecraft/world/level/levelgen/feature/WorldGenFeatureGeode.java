@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.levelgen.GeodeBlockSettings;
 import net.minecraft.world.level.levelgen.GeodeCrackSettings;
 import net.minecraft.world.level.levelgen.GeodeLayerSettings;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.SeededRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.synth.NoiseGeneratorNormal;
@@ -41,7 +42,7 @@ public class WorldGenFeatureGeode extends WorldGenerator<GeodeConfiguration> {
         int j = geodeConfiguration.maxGenOffset;
         List<Pair<BlockPosition, Integer>> list = Lists.newLinkedList();
         int k = geodeConfiguration.distributionPoints.sample(random);
-        SeededRandom worldgenRandom = new SeededRandom(worldGenLevel.getSeed());
+        SeededRandom worldgenRandom = new SeededRandom(new LegacyRandomSource(worldGenLevel.getSeed()));
         NoiseGeneratorNormal normalNoise = NoiseGeneratorNormal.create(worldgenRandom, -4, 1.0D);
         List<BlockPosition> list2 = Lists.newLinkedList();
         double d = (double)k / (double)geodeConfiguration.outerWallDistance.getMaxValue();
@@ -118,7 +119,7 @@ public class WorldGenFeatureGeode extends WorldGenerator<GeodeConfiguration> {
                         BlockPosition blockPos5 = blockPos3.relative(direction);
                         Fluid fluidState = worldGenLevel.getFluid(blockPos5);
                         if (!fluidState.isEmpty()) {
-                            worldGenLevel.getFluidTickList().scheduleTick(blockPos5, fluidState.getType(), 0);
+                            worldGenLevel.scheduleTick(blockPos5, fluidState.getType(), 0);
                         }
                     }
                 } else if (u >= e) {

@@ -12,14 +12,12 @@ public class DataConverterSchemaV1125 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
         schema.registerSimple(map, "minecraft:bed");
         return map;
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         schema.registerType(false, DataConverterTypes.ADVANCEMENTS, () -> {

@@ -22,16 +22,16 @@ import net.minecraft.world.entity.player.EntityHuman;
 
 public class CommandDataAccessorEntity implements CommandDataAccessor {
     private static final SimpleCommandExceptionType ERROR_NO_PLAYERS = new SimpleCommandExceptionType(new ChatMessage("commands.data.entity.invalid"));
-    public static final Function<String, CommandData.DataProvider> PROVIDER = (string) -> {
+    public static final Function<String, CommandData.DataProvider> PROVIDER = (argumentName) -> {
         return new CommandData.DataProvider() {
             @Override
             public CommandDataAccessor access(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
-                return new CommandDataAccessorEntity(ArgumentEntity.getEntity(context, string));
+                return new CommandDataAccessorEntity(ArgumentEntity.getEntity(context, argumentName));
             }
 
             @Override
             public ArgumentBuilder<CommandListenerWrapper, ?> wrap(ArgumentBuilder<CommandListenerWrapper, ?> argument, Function<ArgumentBuilder<CommandListenerWrapper, ?>, ArgumentBuilder<CommandListenerWrapper, ?>> argumentAdder) {
-                return argument.then(CommandDispatcher.literal("entity").then(argumentAdder.apply(CommandDispatcher.argument(string, ArgumentEntity.entity()))));
+                return argument.then(CommandDispatcher.literal("entity").then(argumentAdder.apply(CommandDispatcher.argument(argumentName, ArgumentEntity.entity()))));
             }
         };
     };

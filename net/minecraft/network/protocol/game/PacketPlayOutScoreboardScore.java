@@ -25,9 +25,9 @@ public class PacketPlayOutScoreboardScore implements Packet<PacketListenerPlayOu
     }
 
     public PacketPlayOutScoreboardScore(PacketDataSerializer buf) {
-        this.owner = buf.readUtf(40);
+        this.owner = buf.readUtf();
         this.method = buf.readEnum(ScoreboardServer.Action.class);
-        String string = buf.readUtf(16);
+        String string = buf.readUtf();
         this.objectiveName = Objects.equals(string, "") ? null : string;
         if (this.method != ScoreboardServer.Action.REMOVE) {
             this.score = buf.readVarInt();

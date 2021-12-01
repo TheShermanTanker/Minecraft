@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.inventory.Container;
 import net.minecraft.world.item.EnumColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockActionContext;
@@ -124,11 +125,7 @@ public class BlockShulkerBox extends BlockTileEntity {
             TileEntityShulkerBox shulkerBoxBlockEntity = (TileEntityShulkerBox)blockEntity;
             if (!world.isClientSide && player.isCreative() && !shulkerBoxBlockEntity.isEmpty()) {
                 ItemStack itemStack = getColoredItemStack(this.getColor());
-                NBTTagCompound compoundTag = shulkerBoxBlockEntity.saveToTag(new NBTTagCompound());
-                if (!compoundTag.isEmpty()) {
-                    itemStack.addTagElement("BlockEntityTag", compoundTag);
-                }
-
+                blockEntity.saveToItem(itemStack);
                 if (shulkerBoxBlockEntity.hasCustomName()) {
                     itemStack.setHoverName(shulkerBoxBlockEntity.getCustomName());
                 }
@@ -149,7 +146,7 @@ public class BlockShulkerBox extends BlockTileEntity {
         TileEntity blockEntity = builder.getOptionalParameter(LootContextParameters.BLOCK_ENTITY);
         if (blockEntity instanceof TileEntityShulkerBox) {
             TileEntityShulkerBox shulkerBoxBlockEntity = (TileEntityShulkerBox)blockEntity;
-            builder = builder.withDynamicDrop(CONTENTS, (lootContext, consumer) -> {
+            builder = builder.withDynamicDrop(CONTENTS, (context, consumer) -> {
                 for(int i = 0; i < shulkerBoxBlockEntity.getSize(); ++i) {
                     consumer.accept(shulkerBoxBlockEntity.getItem(i));
                 }
@@ -186,7 +183,7 @@ public class BlockShulkerBox extends BlockTileEntity {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable IBlockAccess world, List<IChatBaseComponent> tooltip, TooltipFlag options) {
         super.appendHoverText(stack, world, tooltip, options);
-        NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
         if (compoundTag != null) {
             if (compoundTag.hasKeyOfType("LootTable", 8)) {
                 tooltip.add(new ChatComponentText("???????"));
@@ -242,12 +239,9 @@ public class BlockShulkerBox extends BlockTileEntity {
     @Override
     public ItemStack getCloneItemStack(IBlockAccess world, BlockPosition pos, IBlockData state) {
         ItemStack itemStack = super.getCloneItemStack(world, pos, state);
-        TileEntityShulkerBox shulkerBoxBlockEntity = (TileEntityShulkerBox)world.getTileEntity(pos);
-        NBTTagCompound compoundTag = shulkerBoxBlockEntity.saveToTag(new NBTTagCompound());
-        if (!compoundTag.isEmpty()) {
-            itemStack.addTagElement("BlockEntityTag", compoundTag);
-        }
-
+        world.getBlockEntity(pos, TileEntityTypes.SHULKER_BOX).ifPresent((blockEntity) -> {
+            blockEntity.saveToItem(itemStack);
+        });
         return itemStack;
     }
 

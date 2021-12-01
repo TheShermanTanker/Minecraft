@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.Chunk;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.MaterialColor$Brightness;
 import net.minecraft.world.level.material.MaterialMapColor;
 import net.minecraft.world.level.saveddata.maps.WorldMap;
 
@@ -171,32 +172,31 @@ public class ItemWorldMap extends ItemWorldMapBase {
                                 }
 
                                 w = w / (i * i);
-                                double f = (e - d) * 4.0D / (double)(i + 4) + ((double)(o + p & 1) - 0.5D) * 0.4D;
-                                int ac = 1;
-                                if (f > 0.6D) {
-                                    ac = 2;
-                                }
-
-                                if (f < -0.6D) {
-                                    ac = 0;
-                                }
-
                                 MaterialMapColor materialColor = Iterables.getFirst(Multisets.copyHighestCountFirst(multiset), MaterialMapColor.NONE);
+                                MaterialColor$Brightness brightness;
                                 if (materialColor == MaterialMapColor.WATER) {
-                                    f = (double)w * 0.1D + (double)(o + p & 1) * 0.2D;
-                                    ac = 1;
+                                    double f = (double)w * 0.1D + (double)(o + p & 1) * 0.2D;
                                     if (f < 0.5D) {
-                                        ac = 2;
+                                        brightness = MaterialColor$Brightness.HIGH;
+                                    } else if (f > 0.9D) {
+                                        brightness = MaterialColor$Brightness.LOW;
+                                    } else {
+                                        brightness = MaterialColor$Brightness.NORMAL;
                                     }
-
-                                    if (f > 0.9D) {
-                                        ac = 0;
+                                } else {
+                                    double g = (e - d) * 4.0D / (double)(i + 4) + ((double)(o + p & 1) - 0.5D) * 0.4D;
+                                    if (g > 0.6D) {
+                                        brightness = MaterialColor$Brightness.HIGH;
+                                    } else if (g < -0.6D) {
+                                        brightness = MaterialColor$Brightness.LOW;
+                                    } else {
+                                        brightness = MaterialColor$Brightness.NORMAL;
                                     }
                                 }
 
                                 d = e;
                                 if (p >= 0 && q * q + r * r < n * n && (!bl2 || (o + p & 1) != 0)) {
-                                    bl |= state.updateColor(o, p, (byte)(materialColor.id * 4 + ac));
+                                    bl |= state.updateColor(o, p, materialColor.getPackedId(brightness));
                                 }
                             }
                         }
@@ -212,8 +212,8 @@ public class ItemWorldMap extends ItemWorldMapBase {
         return !fluidState.isEmpty() && !state.isFaceSturdy(world, pos, EnumDirection.UP) ? fluidState.getBlockData() : state;
     }
 
-    private static boolean isLand(BiomeBase[] biomes, int scale, int x, int z) {
-        return biomes[x * scale + z * scale * 128 * scale].getDepth() >= 0.0F;
+    private static boolean isBiomeWatery(boolean[] biomes, int scale, int x, int z) {
+        return biomes[x * scale + z * scale * 128 * scale];
     }
 
     public static void applySepiaFilter(WorldServer world, ItemStack map) {
@@ -223,82 +223,88 @@ public class ItemWorldMap extends ItemWorldMapBase {
                 int i = 1 << mapItemSavedData.scale;
                 int j = mapItemSavedData.x;
                 int k = mapItemSavedData.z;
-                BiomeBase[] biomes = new BiomeBase[128 * i * 128 * i];
+                boolean[] bls = new boolean[128 * i * 128 * i];
 
                 for(int l = 0; l < 128 * i; ++l) {
                     for(int m = 0; m < 128 * i; ++m) {
-                        biomes[l * 128 * i + m] = world.getBiome(new BlockPosition((j / i - 64) * i + m, 0, (k / i - 64) * i + l));
+                        BiomeBase.Geography biomeCategory = world.getBiome(new BlockPosition((j / i - 64) * i + m, 0, (k / i - 64) * i + l)).getBiomeCategory();
+                        bls[l * 128 * i + m] = biomeCategory == BiomeBase.Geography.OCEAN || biomeCategory == BiomeBase.Geography.RIVER || biomeCategory == BiomeBase.Geography.SWAMP;
                     }
                 }
 
                 for(int n = 0; n < 128; ++n) {
                     for(int o = 0; o < 128; ++o) {
                         if (n > 0 && o > 0 && n < 127 && o < 127) {
-                            BiomeBase biome = biomes[n * i + o * i * 128 * i];
                             int p = 8;
-                            if (isLand(biomes, i, n - 1, o - 1)) {
+                            if (!isBiomeWatery(bls, i, n - 1, o - 1)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n - 1, o + 1)) {
+                            if (!isBiomeWatery(bls, i, n - 1, o + 1)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n - 1, o)) {
+                            if (!isBiomeWatery(bls, i, n - 1, o)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n + 1, o - 1)) {
+                            if (!isBiomeWatery(bls, i, n + 1, o - 1)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n + 1, o + 1)) {
+                            if (!isBiomeWatery(bls, i, n + 1, o + 1)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n + 1, o)) {
+                            if (!isBiomeWatery(bls, i, n + 1, o)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n, o - 1)) {
+                            if (!isBiomeWatery(bls, i, n, o - 1)) {
                                 --p;
                             }
 
-                            if (isLand(biomes, i, n, o + 1)) {
+                            if (!isBiomeWatery(bls, i, n, o + 1)) {
                                 --p;
                             }
 
-                            int q = 3;
+                            MaterialColor$Brightness brightness = MaterialColor$Brightness.LOWEST;
                             MaterialMapColor materialColor = MaterialMapColor.NONE;
-                            if (biome.getDepth() < 0.0F) {
+                            if (isBiomeWatery(bls, i, n, o)) {
                                 materialColor = MaterialMapColor.COLOR_ORANGE;
                                 if (p > 7 && o % 2 == 0) {
-                                    q = (n + (int)(MathHelper.sin((float)o + 0.0F) * 7.0F)) / 8 % 5;
-                                    if (q == 3) {
-                                        q = 1;
-                                    } else if (q == 4) {
-                                        q = 0;
+                                    switch((n + (int)(MathHelper.sin((float)o + 0.0F) * 7.0F)) / 8 % 5) {
+                                    case 0:
+                                    case 4:
+                                        brightness = MaterialColor$Brightness.LOW;
+                                        break;
+                                    case 1:
+                                    case 3:
+                                        brightness = MaterialColor$Brightness.NORMAL;
+                                        break;
+                                    case 2:
+                                        brightness = MaterialColor$Brightness.HIGH;
                                     }
                                 } else if (p > 7) {
                                     materialColor = MaterialMapColor.NONE;
                                 } else if (p > 5) {
-                                    q = 1;
+                                    brightness = MaterialColor$Brightness.NORMAL;
                                 } else if (p > 3) {
-                                    q = 0;
+                                    brightness = MaterialColor$Brightness.LOW;
                                 } else if (p > 1) {
-                                    q = 0;
+                                    brightness = MaterialColor$Brightness.LOW;
                                 }
                             } else if (p > 0) {
                                 materialColor = MaterialMapColor.COLOR_BROWN;
                                 if (p > 3) {
-                                    q = 1;
+                                    brightness = MaterialColor$Brightness.NORMAL;
                                 } else {
-                                    q = 3;
+                                    brightness = MaterialColor$Brightness.LOWEST;
                                 }
                             }
 
                             if (materialColor != MaterialMapColor.NONE) {
-                                mapItemSavedData.setColor(n, o, (byte)(materialColor.id * 4 + q));
+                                mapItemSavedData.setColor(n, o, materialColor.getPackedId(brightness));
                             }
                         }
                     }

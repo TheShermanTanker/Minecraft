@@ -20,9 +20,9 @@ public class WorldGenFeatureRandomChoice extends WorldGenerator<WorldGenFeatureR
         ChunkGenerator chunkGenerator = context.chunkGenerator();
         BlockPosition blockPos = context.origin();
 
-        for(WorldGenFeatureRandomChoiceConfigurationWeight weightedConfiguredFeature : randomFeatureConfiguration.features) {
-            if (random.nextFloat() < weightedConfiguredFeature.chance) {
-                return weightedConfiguredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
+        for(WeightedPlacedFeature weightedPlacedFeature : randomFeatureConfiguration.features) {
+            if (random.nextFloat() < weightedPlacedFeature.chance) {
+                return weightedPlacedFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
             }
         }
 

@@ -36,8 +36,8 @@ public class GameTestHarnessTestFunction {
         this.setupTicks = duration;
     }
 
-    public void run(GameTestHarnessHelper parameter) {
-        this.function.accept(parameter);
+    public void run(GameTestHarnessHelper context) {
+        this.function.accept(context);
     }
 
     public String getTestName() {

@@ -1,8 +1,12 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
@@ -10,6 +14,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsFluid;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityTypes;
@@ -18,8 +23,10 @@ import net.minecraft.world.entity.GroupDataEntity;
 import net.minecraft.world.item.EnumColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
+import net.minecraft.world.level.biome.Biomes;
 
 public class EntityTropicalFish extends EntityFishSchool {
     public static final String BUCKET_VARIANT_TAG = "BucketVariantTag";
@@ -198,18 +205,22 @@ public class EntityTropicalFish extends EntityFishSchool {
         }
     }
 
+    public static boolean checkTropicalFishSpawnRules(EntityTypes<EntityTropicalFish> type, GeneratorAccess world, EnumMobSpawn reason, BlockPosition pos, Random random) {
+        return world.getFluid(pos.below()).is(TagsFluid.WATER) && (Objects.equals(world.getBiomeName(pos), Optional.of(Biomes.LUSH_CAVES)) || EntityWaterAnimal.checkSurfaceWaterAnimalSpawnRules(type, world, reason, pos, random));
+    }
+
     static class TropicalFishGroupData extends EntityFishSchool.SchoolSpawnGroupData {
         final int base;
         final int pattern;
         final int baseColor;
         final int patternColor;
 
-        TropicalFishGroupData(EntityTropicalFish leader, int i, int j, int k, int l) {
+        TropicalFishGroupData(EntityTropicalFish leader, int shape, int pattern, int baseColor, int patternColor) {
             super(leader);
-            this.base = i;
-            this.pattern = j;
-            this.baseColor = k;
-            this.patternColor = l;
+            this.base = shape;
+            this.pattern = pattern;
+            this.baseColor = baseColor;
+            this.patternColor = patternColor;
         }
     }
 

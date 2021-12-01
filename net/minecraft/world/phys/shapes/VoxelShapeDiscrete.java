@@ -53,26 +53,26 @@ public abstract class VoxelShapeDiscrete {
 
     public abstract int lastFull(EnumDirection.EnumAxis axis);
 
-    public int firstFull(EnumDirection.EnumAxis axis, int i, int j) {
-        int k = this.getSize(axis);
-        if (i >= 0 && j >= 0) {
+    public int firstFull(EnumDirection.EnumAxis axis, int from, int to) {
+        int i = this.getSize(axis);
+        if (from >= 0 && to >= 0) {
             EnumDirection.EnumAxis axis2 = EnumAxisCycle.FORWARD.cycle(axis);
             EnumDirection.EnumAxis axis3 = EnumAxisCycle.BACKWARD.cycle(axis);
-            if (i < this.getSize(axis2) && j < this.getSize(axis3)) {
+            if (from < this.getSize(axis2) && to < this.getSize(axis3)) {
                 EnumAxisCycle axisCycle = EnumAxisCycle.between(EnumDirection.EnumAxis.X, axis);
 
-                for(int l = 0; l < k; ++l) {
-                    if (this.isFull(axisCycle, l, i, j)) {
-                        return l;
+                for(int j = 0; j < i; ++j) {
+                    if (this.isFull(axisCycle, j, from, to)) {
+                        return j;
                     }
                 }
 
-                return k;
+                return i;
             } else {
-                return k;
+                return i;
             }
         } else {
-            return k;
+            return i;
         }
     }
 

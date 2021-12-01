@@ -3,10 +3,14 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSyntaxException;
+import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.ChatDeserializer;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.storage.loot.LootCollector;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTableInfo;
@@ -15,11 +19,13 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class LootItemFunctionSetTable extends LootItemFunctionConditional {
     final MinecraftKey name;
     final long seed;
+    final TileEntityTypes<?> type;
 
-    LootItemFunctionSetTable(LootItemCondition[] conditions, MinecraftKey resourceLocation, long l) {
+    LootItemFunctionSetTable(LootItemCondition[] conditions, MinecraftKey id, long seed, TileEntityTypes<?> type) {
         super(conditions);
-        this.name = resourceLocation;
-        this.seed = l;
+        this.name = id;
+        this.seed = seed;
+        this.type = type;
     }
 
     @Override
@@ -32,13 +38,17 @@ public class LootItemFunctionSetTable extends LootItemFunctionConditional {
         if (stack.isEmpty()) {
             return stack;
         } else {
-            NBTTagCompound compoundTag = new NBTTagCompound();
+            NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
+            if (compoundTag == null) {
+                compoundTag = new NBTTagCompound();
+            }
+
             compoundTag.setString("LootTable", this.name.toString());
             if (this.seed != 0L) {
                 compoundTag.setLong("LootTableSeed", this.seed);
             }
 
-            stack.getOrCreateTag().set("BlockEntityTag", compoundTag);
+            ItemBlock.setBlockEntityData(stack, this.type, compoundTag);
             return stack;
         }
     }
@@ -59,15 +69,15 @@ public class LootItemFunctionSetTable extends LootItemFunctionConditional {
         }
     }
 
-    public static LootItemFunctionConditional.Builder<?> withLootTable(MinecraftKey id) {
+    public static LootItemFunctionConditional.Builder<?> withLootTable(TileEntityTypes<?> type, MinecraftKey id) {
         return simpleBuilder((conditions) -> {
-            return new LootItemFunctionSetTable(conditions, id, 0L);
+            return new LootItemFunctionSetTable(conditions, id, 0L, type);
         });
     }
 
-    public static LootItemFunctionConditional.Builder<?> withLootTable(MinecraftKey id, long seed) {
+    public static LootItemFunctionConditional.Builder<?> withLootTable(TileEntityTypes<?> type, MinecraftKey id, long seed) {
         return simpleBuilder((conditions) -> {
-            return new LootItemFunctionSetTable(conditions, id, seed);
+            return new LootItemFunctionSetTable(conditions, id, seed, type);
         });
     }
 
@@ -76,6 +86,7 @@ public class LootItemFunctionSetTable extends LootItemFunctionConditional {
         public void serialize(JsonObject json, LootItemFunctionSetTable object, JsonSerializationContext context) {
             super.serialize(json, object, context);
             json.addProperty("name", object.name.toString());
+            json.addProperty("type", IRegistry.BLOCK_ENTITY_TYPE.getKey(object.type).toString());
             if (object.seed != 0L) {
                 json.addProperty("seed", object.seed);
             }
@@ -86,7 +97,11 @@ public class LootItemFunctionSetTable extends LootItemFunctionConditional {
         public LootItemFunctionSetTable deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             MinecraftKey resourceLocation = new MinecraftKey(ChatDeserializer.getAsString(jsonObject, "name"));
             long l = ChatDeserializer.getAsLong(jsonObject, "seed", 0L);
-            return new LootItemFunctionSetTable(lootItemConditions, resourceLocation, l);
+            MinecraftKey resourceLocation2 = new MinecraftKey(ChatDeserializer.getAsString(jsonObject, "type"));
+            TileEntityTypes<?> blockEntityType = IRegistry.BLOCK_ENTITY_TYPE.getOptional(resourceLocation2).orElseThrow(() -> {
+                return new JsonSyntaxException("Unknown block entity type id '" + resourceLocation2 + "'");
+            });
+            return new LootItemFunctionSetTable(lootItemConditions, resourceLocation, l, blockEntityType);
         }
     }
 }

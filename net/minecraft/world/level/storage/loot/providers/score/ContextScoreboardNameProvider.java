@@ -17,8 +17,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParameter;
 public class ContextScoreboardNameProvider implements ScoreboardNameProvider {
     final LootTableInfo.EntityTarget target;
 
-    ContextScoreboardNameProvider(LootTableInfo.EntityTarget entityTarget) {
-        this.target = entityTarget;
+    ContextScoreboardNameProvider(LootTableInfo.EntityTarget target) {
+        this.target = target;
     }
 
     public static ScoreboardNameProvider forTarget(LootTableInfo.EntityTarget target) {

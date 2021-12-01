@@ -31,9 +31,9 @@ public class StructureUpdater implements DebugReportProviderStructureToNBT.Filte
     private static NBTTagCompound updateStructure(String name, NBTTagCompound nbt) {
         DefinedStructure structureTemplate = new DefinedStructure();
         int i = nbt.getInt("DataVersion");
-        int j = 2678;
-        if (i < 2678) {
-            LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", i, 2678, name);
+        int j = 2830;
+        if (i < 2830) {
+            LOGGER.warn("SNBT Too old, do not forget to update: {} < {}: {}", i, 2830, name);
         }
 
         NBTTagCompound compoundTag = GameProfileSerializer.update(DataConverterRegistry.getDataFixer(), DataFixTypes.STRUCTURE, nbt, i);

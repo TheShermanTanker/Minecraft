@@ -28,7 +28,9 @@ import net.minecraft.world.level.IMaterial;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class Advancement {
+    @Nullable
     private final Advancement parent;
+    @Nullable
     private final AdvancementDisplay display;
     private final AdvancementRewards rewards;
     private final MinecraftKey id;
@@ -131,11 +133,15 @@ public class Advancement {
     }
 
     public static class SerializedAdvancement {
+        @Nullable
         private MinecraftKey parentId;
+        @Nullable
         private Advancement parent;
+        @Nullable
         private AdvancementDisplay display;
         private AdvancementRewards rewards = AdvancementRewards.EMPTY;
         private Map<String, Criterion> criteria = Maps.newLinkedHashMap();
+        @Nullable
         private String[][] requirements;
         private AdvancementRequirements requirementsStrategy = AdvancementRequirements.AND;
 
@@ -204,8 +210,8 @@ public class Advancement {
             return this;
         }
 
-        public Advancement.SerializedAdvancement requirements(String[][] strings) {
-            this.requirements = strings;
+        public Advancement.SerializedAdvancement requirements(String[][] requirements) {
+            this.requirements = requirements;
             return this;
         }
 
@@ -282,6 +288,10 @@ public class Advancement {
         }
 
         public void serializeToNetwork(PacketDataSerializer buf) {
+            if (this.requirements == null) {
+                this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
+            }
+
             if (this.parentId == null) {
                 buf.writeBoolean(false);
             } else {

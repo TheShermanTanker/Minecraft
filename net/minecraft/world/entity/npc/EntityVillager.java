@@ -61,6 +61,7 @@ import net.minecraft.world.entity.ai.gossip.Reputation;
 import net.minecraft.world.entity.ai.gossip.ReputationType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.navigation.Navigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorGolemLastSeen;
@@ -328,6 +329,11 @@ public class EntityVillager extends EntityVillagerAbstract implements Reputation
         return true;
     }
 
+    @Override
+    public boolean isClientSide() {
+        return this.getLevel().isClientSide;
+    }
+
     public void restock() {
         this.updateDemand();
 
@@ -580,13 +586,12 @@ public class EntityVillager extends EntityVillagerAbstract implements Reputation
     }
 
     private void tellWitnessesThatIWasMurdered(Entity killer) {
-        if (this.level instanceof WorldServer) {
-            Optional<List<EntityLiving>> optional = this.brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-            if (optional.isPresent()) {
-                WorldServer serverLevel = (WorldServer)this.level;
-                optional.get().stream().filter((entity) -> {
-                    return entity instanceof ReputationHandler;
-                }).forEach((livingEntity) -> {
+        World optional = this.level;
+        if (optional instanceof WorldServer) {
+            WorldServer serverLevel = (WorldServer)optional;
+            Optional<NearestVisibleLivingEntities> optional = this.brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+            if (!optional.isEmpty()) {
+                optional.get().findAll(ReputationHandler.class::isInstance).forEach((livingEntity) -> {
                     serverLevel.onReputationEvent(ReputationEvent.VILLAGER_KILLED, killer, (ReputationHandler)livingEntity);
                 });
             }

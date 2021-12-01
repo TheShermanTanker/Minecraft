@@ -24,7 +24,6 @@ public class DataConverterVillagerLevelXp extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getChoiceType(DataConverterTypes.ENTITY, "minecraft:villager");
         OpticFinder<?> opticFinder = DSL.namedChoice("minecraft:villager", type);

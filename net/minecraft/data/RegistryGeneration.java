@@ -7,13 +7,14 @@ import java.util.function.Supplier;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryWritable;
 import net.minecraft.core.RegistryMaterials;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.NoiseData;
 import net.minecraft.data.worldgen.WorldGenCarvers;
 import net.minecraft.data.worldgen.WorldGenFeaturePieces;
 import net.minecraft.data.worldgen.WorldGenProcessorLists;
 import net.minecraft.data.worldgen.WorldGenStructureFeatures;
-import net.minecraft.data.worldgen.WorldGenSurfaceComposites;
 import net.minecraft.data.worldgen.biome.BiomeRegistry;
+import net.minecraft.data.worldgen.features.FeatureUtils;
+import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.BiomeBase;
@@ -22,8 +23,9 @@ import net.minecraft.world.level.levelgen.carver.WorldGenCarverWrapper;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
 import net.minecraft.world.level.levelgen.feature.structures.WorldGenFeatureDefinedStructurePoolTemplate;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorList;
-import net.minecraft.world.level.levelgen.surfacebuilders.WorldGenSurfaceComposite;
+import net.minecraft.world.level.levelgen.synth.NormalNoise$NoiseParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,18 +34,12 @@ public class RegistryGeneration {
     private static final Map<MinecraftKey, Supplier<?>> LOADERS = Maps.newLinkedHashMap();
     private static final IRegistryWritable<IRegistryWritable<?>> WRITABLE_REGISTRY = new RegistryMaterials<>(ResourceKey.createRegistryKey(new MinecraftKey("root")), Lifecycle.experimental());
     public static final IRegistry<? extends IRegistry<?>> REGISTRY = WRITABLE_REGISTRY;
-    public static final IRegistry<WorldGenSurfaceComposite<?>> CONFIGURED_SURFACE_BUILDER = registerSimple(IRegistry.CONFIGURED_SURFACE_BUILDER_REGISTRY, () -> {
-        return WorldGenSurfaceComposites.NOPE;
-    });
     public static final IRegistry<WorldGenCarverWrapper<?>> CONFIGURED_CARVER = registerSimple(IRegistry.CONFIGURED_CARVER_REGISTRY, () -> {
         return WorldGenCarvers.CAVE;
     });
-    public static final IRegistry<WorldGenFeatureConfigured<?, ?>> CONFIGURED_FEATURE = registerSimple(IRegistry.CONFIGURED_FEATURE_REGISTRY, () -> {
-        return WorldGenBiomeDecoratorGroups.OAK;
-    });
-    public static final IRegistry<StructureFeature<?, ?>> CONFIGURED_STRUCTURE_FEATURE = registerSimple(IRegistry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, () -> {
-        return WorldGenStructureFeatures.MINESHAFT;
-    });
+    public static final IRegistry<WorldGenFeatureConfigured<?, ?>> CONFIGURED_FEATURE = registerSimple(IRegistry.CONFIGURED_FEATURE_REGISTRY, FeatureUtils::bootstrap);
+    public static final IRegistry<StructureFeature<?, ?>> CONFIGURED_STRUCTURE_FEATURE = registerSimple(IRegistry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, WorldGenStructureFeatures::bootstrap);
+    public static final IRegistry<PlacedFeature> PLACED_FEATURE = registerSimple(IRegistry.PLACED_FEATURE_REGISTRY, PlacementUtils::bootstrap);
     public static final IRegistry<ProcessorList> PROCESSOR_LIST = registerSimple(IRegistry.PROCESSOR_LIST_REGISTRY, () -> {
         return WorldGenProcessorLists.ZOMBIE_PLAINS;
     });
@@ -52,6 +48,7 @@ public class RegistryGeneration {
         return BiomeRegistry.PLAINS;
     });
     public static final IRegistry<GeneratorSettingBase> NOISE_GENERATOR_SETTINGS = registerSimple(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY, GeneratorSettingBase::bootstrap);
+    public static final IRegistry<NormalNoise$NoiseParameters> NOISE = registerSimple(IRegistry.NOISE_REGISTRY, NoiseData::bootstrap);
 
     private static <T> IRegistry<T> registerSimple(ResourceKey<? extends IRegistry<T>> registryRef, Supplier<T> defaultValueSupplier) {
         return registerSimple(registryRef, Lifecycle.stable(), defaultValueSupplier);
@@ -73,20 +70,24 @@ public class RegistryGeneration {
     }
 
     public static <V, T extends V> T register(IRegistry<V> registry, MinecraftKey id, T object) {
-        return ((IRegistryWritable)registry).register(ResourceKey.create(registry.key(), id), object, Lifecycle.stable());
+        return register(registry, ResourceKey.create(registry.key(), id), object);
     }
 
-    public static <V, T extends V> T registerMapping(IRegistry<V> registry, int rawId, ResourceKey<V> key, T object) {
-        return ((IRegistryWritable)registry).registerMapping(rawId, key, object, Lifecycle.stable());
+    public static <V, T extends V> T register(IRegistry<V> registry, ResourceKey<V> key, T object) {
+        return ((IRegistryWritable)registry).register(key, object, Lifecycle.stable());
+    }
+
+    public static <V, T extends V> T registerMapping(IRegistry<V> registry, ResourceKey<V> key, T object) {
+        return ((IRegistryWritable)registry).register(key, object, Lifecycle.stable());
     }
 
     public static void bootstrap() {
     }
 
     static {
-        LOADERS.forEach((resourceLocation, supplier) -> {
+        LOADERS.forEach((id, supplier) -> {
             if (supplier.get() == null) {
-                LOGGER.error("Unable to bootstrap registry '{}'", (Object)resourceLocation);
+                LOGGER.error("Unable to bootstrap registry '{}'", (Object)id);
             }
 
         });

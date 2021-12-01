@@ -5,8 +5,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 public class MobEffectAttackDamage extends MobEffectBase {
     protected final double multiplier;
 
-    protected MobEffectAttackDamage(MobEffectInfo type, int color, double modifier) {
-        super(type, color);
+    protected MobEffectAttackDamage(MobEffectInfo category, int color, double modifier) {
+        super(category, color);
         this.multiplier = modifier;
     }
 

@@ -1,8 +1,8 @@
 package net.minecraft.world.effect;
 
 public class MobEffectInstant extends MobEffectBase {
-    public MobEffectInstant(MobEffectInfo type, int color) {
-        super(type, color);
+    public MobEffectInstant(MobEffectInfo category, int color) {
+        super(category, color);
     }
 
     @Override

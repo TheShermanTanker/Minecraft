@@ -26,7 +26,6 @@ import net.minecraft.advancements.critereon.CriterionTriggerKilledByCrossbow;
 import net.minecraft.advancements.critereon.CriterionTriggerLevitation;
 import net.minecraft.advancements.critereon.CriterionTriggerLightningStrike;
 import net.minecraft.advancements.critereon.CriterionTriggerLocation;
-import net.minecraft.advancements.critereon.CriterionTriggerNetherTravel;
 import net.minecraft.advancements.critereon.CriterionTriggerPlacedBlock;
 import net.minecraft.advancements.critereon.CriterionTriggerPlayerGeneratesContainerLoot;
 import net.minecraft.advancements.critereon.CriterionTriggerPlayerHurtEntity;
@@ -44,6 +43,7 @@ import net.minecraft.advancements.critereon.CriterionTriggerUseItem;
 import net.minecraft.advancements.critereon.CriterionTriggerUsedEnderEye;
 import net.minecraft.advancements.critereon.CriterionTriggerUsedTotem;
 import net.minecraft.advancements.critereon.CriterionTriggerVillagerTrade;
+import net.minecraft.advancements.critereon.DistanceTrigger;
 import net.minecraft.resources.MinecraftKey;
 
 public class CriterionTriggers {
@@ -76,7 +76,7 @@ public class CriterionTriggers {
     public static final CriterionTriggerConsumeItem CONSUME_ITEM = register(new CriterionTriggerConsumeItem());
     public static final CriterionTriggerEffectsChanged EFFECTS_CHANGED = register(new CriterionTriggerEffectsChanged());
     public static final CriterionTriggerUsedTotem USED_TOTEM = register(new CriterionTriggerUsedTotem());
-    public static final CriterionTriggerNetherTravel NETHER_TRAVEL = register(new CriterionTriggerNetherTravel());
+    public static final DistanceTrigger NETHER_TRAVEL = register(new DistanceTrigger(new MinecraftKey("nether_travel")));
     public static final CriterionTriggerFishingRodHooked FISHING_ROD_HOOKED = register(new CriterionTriggerFishingRodHooked());
     public static final CriterionTriggerChanneledLightning CHANNELED_LIGHTNING = register(new CriterionTriggerChanneledLightning());
     public static final CriterionTriggerShotCrossbow SHOT_CROSSBOW = register(new CriterionTriggerShotCrossbow());
@@ -93,6 +93,8 @@ public class CriterionTriggers {
     public static final CriterionTriggerStartRiding START_RIDING_TRIGGER = register(new CriterionTriggerStartRiding());
     public static final CriterionTriggerLightningStrike LIGHTNING_STRIKE = register(new CriterionTriggerLightningStrike());
     public static final CriterionTriggerUseItem USING_ITEM = register(new CriterionTriggerUseItem());
+    public static final DistanceTrigger FALL_FROM_HEIGHT = register(new DistanceTrigger(new MinecraftKey("fall_from_height")));
+    public static final DistanceTrigger RIDE_ENTITY_IN_LAVA_TRIGGER = register(new DistanceTrigger(new MinecraftKey("ride_entity_in_lava")));
 
     private static <T extends CriterionTrigger<?>> T register(T object) {
         if (CRITERIA.containsKey(object.getId())) {

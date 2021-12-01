@@ -5,10 +5,15 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import net.minecraft.util.ExtraCodecs;
 
 public class SimpleWeightedRandomList<E> extends WeightedRandomList<WeightedEntry.Wrapper<E>> {
+    public static <E> Codec<SimpleWeightedRandomList<E>> wrappedCodecAllowingEmpty(Codec<E> codec) {
+        return WeightedEntry.Wrapper.<E>codec(codec).listOf().xmap(SimpleWeightedRandomList::new, WeightedRandomList::unwrap);
+    }
+
     public static <E> Codec<SimpleWeightedRandomList<E>> wrappedCodec(Codec<E> dataCodec) {
-        return WeightedEntry.Wrapper.<E>codec(dataCodec).listOf().xmap(SimpleWeightedRandomList::new, WeightedRandomList::unwrap);
+        return ExtraCodecs.nonEmptyList(WeightedEntry.Wrapper.<E>codec(dataCodec).listOf()).xmap(SimpleWeightedRandomList::new, WeightedRandomList::unwrap);
     }
 
     SimpleWeightedRandomList(List<? extends WeightedEntry.Wrapper<E>> entries) {
@@ -17,6 +22,14 @@ public class SimpleWeightedRandomList<E> extends WeightedRandomList<WeightedEntr
 
     public static <E> SimpleWeightedRandomList.Builder<E> builder() {
         return new SimpleWeightedRandomList.Builder<>();
+    }
+
+    public static <E> SimpleWeightedRandomList<E> empty() {
+        return new SimpleWeightedRandomList<>(List.of());
+    }
+
+    public static <E> SimpleWeightedRandomList<E> single(E object) {
+        return new SimpleWeightedRandomList<>(List.of(WeightedEntry.wrap(object, 1)));
     }
 
     public Optional<E> getRandomValue(Random random) {

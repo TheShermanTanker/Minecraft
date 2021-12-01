@@ -14,7 +14,6 @@ public class DataConverterObjectiveDisplayName extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.OBJECTIVE);
         return this.fixTypeEverywhereTyped("ObjectiveDisplayNameFix", type, (typed) -> {

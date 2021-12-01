@@ -221,11 +221,6 @@ public abstract class EntityVillagerAbstract extends EntityAgeable implements In
         return i >= 0 && i < this.inventory.getSize() ? SlotAccess.forContainer(this.inventory, i) : super.getSlot(mappedIndex);
     }
 
-    @Override
-    public World getWorld() {
-        return this.level;
-    }
-
     protected abstract void updateTrades();
 
     protected void addOffersFromItemListings(MerchantRecipeList recipeList, VillagerTrades.IMerchantRecipeOption[] pool, int count) {
@@ -251,9 +246,14 @@ public abstract class EntityVillagerAbstract extends EntityAgeable implements In
     }
 
     @Override
-    public Vec3D getRopeHoldPosition(float f) {
-        float g = MathHelper.lerp(f, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180F);
+    public Vec3D getRopeHoldPosition(float delta) {
+        float f = MathHelper.lerp(delta, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180F);
         Vec3D vec3 = new Vec3D(0.0D, this.getBoundingBox().getYsize() - 1.0D, 0.2D);
-        return this.getPosition(f).add(vec3.yRot(-g));
+        return this.getPosition(delta).add(vec3.yRot(-f));
+    }
+
+    @Override
+    public boolean isClientSide() {
+        return this.level.isClientSide;
     }
 }

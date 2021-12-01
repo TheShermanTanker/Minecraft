@@ -355,8 +355,8 @@ public class EntitySheep extends EntityAnimal implements IShearable {
         EnumColor dyeColor = ((EntitySheep)firstParent).getColor();
         EnumColor dyeColor2 = ((EntitySheep)secondParent).getColor();
         InventoryCrafting craftingContainer = makeContainer(dyeColor, dyeColor2);
-        return this.level.getCraftingManager().craft(Recipes.CRAFTING, craftingContainer, this.level).map((craftingRecipe) -> {
-            return craftingRecipe.assemble(craftingContainer);
+        return this.level.getCraftingManager().craft(Recipes.CRAFTING, craftingContainer, this.level).map((recipe) -> {
+            return recipe.assemble(craftingContainer);
         }).map(ItemStack::getItem).filter(ItemDye.class::isInstance).map(ItemDye.class::cast).map(ItemDye::getDyeColor).orElseGet(() -> {
             return this.level.random.nextBoolean() ? dyeColor : dyeColor2;
         });

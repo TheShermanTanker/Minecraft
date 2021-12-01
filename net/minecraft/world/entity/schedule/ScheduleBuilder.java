@@ -19,12 +19,12 @@ public class ScheduleBuilder {
 
     public Schedule build() {
         this.transitions.stream().map(ScheduleBuilder.ActivityTransition::getActivity).collect(Collectors.toSet()).forEach(this.schedule::ensureTimelineExistsFor);
-        this.transitions.forEach((activityTransition) -> {
-            Activity activity = activityTransition.getActivity();
-            this.schedule.getAllTimelinesExceptFor(activity).forEach((timeline) -> {
-                timeline.addKeyframe(activityTransition.getTime(), 0.0F);
+        this.transitions.forEach((activity) -> {
+            Activity activity2 = activity.getActivity();
+            this.schedule.getAllTimelinesExceptFor(activity2).forEach((timeline) -> {
+                timeline.addKeyframe(activity.getTime(), 0.0F);
             });
-            this.schedule.getTimelineFor(activity).addKeyframe(activityTransition.getTime(), 1.0F);
+            this.schedule.getTimelineFor(activity2).addKeyframe(activity.getTime(), 1.0F);
         });
         return this.schedule;
     }

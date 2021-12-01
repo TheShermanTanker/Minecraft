@@ -17,7 +17,7 @@ public class IpBanEntry extends ExpirableListEntry<String> {
 
     @Override
     public IChatBaseComponent getDisplayName() {
-        return new ChatComponentText(this.getKey());
+        return new ChatComponentText(String.valueOf(this.getKey()));
     }
 
     public IpBanEntry(JsonObject json) {

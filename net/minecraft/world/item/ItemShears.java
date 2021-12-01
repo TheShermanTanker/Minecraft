@@ -1,10 +1,19 @@
 package net.minecraft.world.item;
 
+import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
+import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.sounds.EnumSoundCategory;
+import net.minecraft.sounds.SoundEffects;
 import net.minecraft.tags.TagsBlock;
+import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EnumItemSlot;
+import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.item.context.ItemActionContext;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BlockGrowingTop;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 
@@ -40,5 +49,35 @@ public class ItemShears extends Item {
         } else {
             return 15.0F;
         }
+    }
+
+    @Override
+    public EnumInteractionResult useOn(ItemActionContext context) {
+        World level = context.getWorld();
+        BlockPosition blockPos = context.getClickPosition();
+        IBlockData blockState = level.getType(blockPos);
+        Block block = blockState.getBlock();
+        if (block instanceof BlockGrowingTop) {
+            BlockGrowingTop growingPlantHeadBlock = (BlockGrowingTop)block;
+            if (!growingPlantHeadBlock.isMaxAge(blockState)) {
+                EntityHuman player = context.getEntity();
+                ItemStack itemStack = context.getItemStack();
+                if (player instanceof EntityPlayer) {
+                    CriterionTriggers.ITEM_USED_ON_BLOCK.trigger((EntityPlayer)player, blockPos, itemStack);
+                }
+
+                level.playSound(player, blockPos, SoundEffects.GROWING_PLANT_CROP, EnumSoundCategory.BLOCKS, 1.0F, 1.0F);
+                level.setTypeUpdate(blockPos, growingPlantHeadBlock.getMaxAgeState(blockState));
+                if (player != null) {
+                    itemStack.damage(1, player, (playerx) -> {
+                        playerx.broadcastItemBreak(context.getHand());
+                    });
+                }
+
+                return EnumInteractionResult.sidedSuccess(level.isClientSide);
+            }
+        }
+
+        return super.useOn(context);
     }
 }

@@ -7,13 +7,23 @@ import java.util.Objects;
 
 public class NBTTagString implements NBTBase {
     private static final int SELF_SIZE_IN_BITS = 288;
-    public static final NBTTagType<NBTTagString> TYPE = new NBTTagType<NBTTagString>() {
+    public static final NBTTagType<NBTTagString> TYPE = new TagType$VariableSize<NBTTagString>() {
         @Override
         public NBTTagString load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(288L);
             String string = dataInput.readUTF();
             nbtAccounter.accountBits((long)(16 * string.length()));
             return NBTTagString.valueOf(string);
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            return visitor.visit(input.readUTF());
+        }
+
+        @Override
+        public void skip(DataInput input) throws IOException {
+            NBTTagString.skipString(input);
         }
 
         @Override
@@ -37,6 +47,10 @@ public class NBTTagString implements NBTBase {
     private static final char ESCAPE = '\\';
     private static final char NOT_SET = '\u0000';
     private final String data;
+
+    public static void skipString(DataInput input) throws IOException {
+        input.skipBytes(input.readUnsignedShort());
+    }
 
     private NBTTagString(String value) {
         Objects.requireNonNull(value, "Null string not allowed");
@@ -124,5 +138,10 @@ public class NBTTagString implements NBTBase {
         stringBuilder.setCharAt(0, c);
         stringBuilder.append(c);
         return stringBuilder.toString();
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visit(this.data);
     }
 }

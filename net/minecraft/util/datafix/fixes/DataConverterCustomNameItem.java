@@ -38,7 +38,6 @@ public class DataConverterCustomNameItem extends DataFix {
         }
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.ITEM_STACK);
         OpticFinder<?> opticFinder = type.findField("tag");

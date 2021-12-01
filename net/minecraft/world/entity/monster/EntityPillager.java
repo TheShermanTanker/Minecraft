@@ -51,8 +51,6 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.IWorldReader;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.IBlockData;
 
 public class EntityPillager extends EntityIllagerAbstract implements ICrossbow, InventoryCarrier {
     private static final DataWatcherObject<Boolean> IS_CHARGING_CROSSBOW = DataWatcher.defineId(EntityPillager.class, DataWatcherRegistry.BOOLEAN);
@@ -152,8 +150,7 @@ public class EntityPillager extends EntityIllagerAbstract implements ICrossbow, 
 
     @Override
     public float getWalkTargetValue(BlockPosition pos, IWorldReader world) {
-        IBlockData blockState = world.getType(pos.below());
-        return !blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.SAND) ? 0.5F - world.getBrightness(pos) : 10.0F;
+        return 0.0F;
     }
 
     @Override

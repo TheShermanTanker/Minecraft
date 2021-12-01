@@ -11,10 +11,12 @@ import net.minecraft.world.entity.player.PlayerInventory;
 import net.minecraft.world.item.EnumColor;
 import net.minecraft.world.item.ItemBanner;
 import net.minecraft.world.item.ItemBannerPattern;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemDye;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.EnumBannerPatternType;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 
 public class ContainerLoom extends Container {
     private static final int INV_SLOT_START = 4;
@@ -138,8 +140,8 @@ public class ContainerLoom extends Container {
         ItemStack itemStack4 = this.resultSlot.getItem();
         if (itemStack4.isEmpty() || !itemStack.isEmpty() && !itemStack2.isEmpty() && this.selectedBannerPatternIndex.get() > 0 && (this.selectedBannerPatternIndex.get() < EnumBannerPatternType.COUNT - EnumBannerPatternType.PATTERN_ITEM_COUNT || !itemStack3.isEmpty())) {
             if (!itemStack3.isEmpty() && itemStack3.getItem() instanceof ItemBannerPattern) {
-                NBTTagCompound compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
-                boolean bl = compoundTag.hasKeyOfType("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
+                NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(itemStack);
+                boolean bl = compoundTag != null && compoundTag.hasKeyOfType("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
                 if (bl) {
                     this.selectedBannerPatternIndex.set(0);
                 } else {
@@ -230,12 +232,16 @@ public class ContainerLoom extends Container {
                 itemStack3.setCount(1);
                 EnumBannerPatternType bannerPattern = EnumBannerPatternType.values()[this.selectedBannerPatternIndex.get()];
                 EnumColor dyeColor = ((ItemDye)itemStack2.getItem()).getDyeColor();
-                NBTTagCompound compoundTag = itemStack3.getOrCreateTagElement("BlockEntityTag");
+                NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(itemStack3);
                 NBTTagList listTag;
-                if (compoundTag.hasKeyOfType("Patterns", 9)) {
+                if (compoundTag != null && compoundTag.hasKeyOfType("Patterns", 9)) {
                     listTag = compoundTag.getList("Patterns", 10);
                 } else {
                     listTag = new NBTTagList();
+                    if (compoundTag == null) {
+                        compoundTag = new NBTTagCompound();
+                    }
+
                     compoundTag.set("Patterns", listTag);
                 }
 
@@ -243,6 +249,7 @@ public class ContainerLoom extends Container {
                 compoundTag2.setString("Pattern", bannerPattern.getHashname());
                 compoundTag2.setInt("Color", dyeColor.getColorIndex());
                 listTag.add(compoundTag2);
+                ItemBlock.setBlockEntityData(itemStack3, TileEntityTypes.BANNER, compoundTag);
             }
 
             if (!ItemStack.matches(itemStack3, this.resultSlot.getItem())) {

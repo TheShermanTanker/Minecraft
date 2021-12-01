@@ -46,11 +46,11 @@ public class GameProfilerDisabled implements GameProfilerFillerActive {
     }
 
     @Override
-    public void incrementCounter(String marker) {
+    public void incrementCounter(String marker, int i) {
     }
 
     @Override
-    public void incrementCounter(Supplier<String> markerGetter) {
+    public void incrementCounter(Supplier<String> markerGetter, int i) {
     }
 
     @Override

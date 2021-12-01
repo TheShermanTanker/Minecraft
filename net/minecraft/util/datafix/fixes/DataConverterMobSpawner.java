@@ -47,7 +47,6 @@ public class DataConverterMobSpawner extends DataFix {
         }
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getOutputSchema().getType(DataConverterTypes.UNTAGGED_SPAWNER);
         return this.fixTypeEverywhereTyped("MobSpawnerEntityIdentifiersFix", this.getInputSchema().getType(DataConverterTypes.UNTAGGED_SPAWNER), type, (typed) -> {

@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.IBlockData;
 
 public class DefinedStructureTestBlock extends DefinedStructureRuleTest {
-    public static final Codec<DefinedStructureTestBlock> CODEC = IRegistry.BLOCK.fieldOf("block").xmap(DefinedStructureTestBlock::new, (blockMatchTest) -> {
+    public static final Codec<DefinedStructureTestBlock> CODEC = IRegistry.BLOCK.byNameCodec().fieldOf("block").xmap(DefinedStructureTestBlock::new, (blockMatchTest) -> {
         return blockMatchTest.block;
     }).codec();
     private final Block block;

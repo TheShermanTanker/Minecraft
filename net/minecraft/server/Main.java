@@ -1,6 +1,5 @@
 package net.minecraft.server;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
@@ -28,7 +27,6 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -41,10 +39,11 @@ import net.minecraft.server.packs.repository.ResourcePackSourceVanilla;
 import net.minecraft.server.players.UserCache;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.datafix.DataConverterRegistry;
+import net.minecraft.util.profiling.jfr.Environment;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.DataPackConfiguration;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldSettings;
 import net.minecraft.world.level.levelgen.GeneratorSettings;
 import net.minecraft.world.level.storage.Convertable;
@@ -75,7 +74,8 @@ public class Main {
         OptionSpec<String> optionSpec11 = optionParser.accepts("world").withRequiredArg();
         OptionSpec<Integer> optionSpec12 = optionParser.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(-1);
         OptionSpec<String> optionSpec13 = optionParser.accepts("serverId").withRequiredArg();
-        OptionSpec<String> optionSpec14 = optionParser.nonOptions();
+        OptionSpec<Void> optionSpec14 = optionParser.accepts("jfrProfile");
+        OptionSpec<String> optionSpec15 = optionParser.nonOptions();
 
         try {
             OptionSet optionSet = optionParser.parse(args);
@@ -85,6 +85,10 @@ public class Main {
             }
 
             CrashReport.preload();
+            if (optionSet.has(optionSpec14)) {
+                JvmProfiler.INSTANCE.start(Environment.SERVER);
+            }
+
             DispenserRegistry.init();
             DispenserRegistry.validate();
             SystemUtils.startTimerHackThread();
@@ -112,11 +116,17 @@ public class Main {
             String string = Optional.ofNullable(optionSet.valueOf(optionSpec11)).orElse(dedicatedServerSettings.getProperties().levelName);
             Convertable levelStorageSource = Convertable.createDefault(file.toPath());
             Convertable.ConversionSession levelStorageAccess = levelStorageSource.createAccess(string);
-            MinecraftServer.convertWorld(levelStorageAccess);
             WorldInfo levelSummary = levelStorageAccess.getSummary();
-            if (levelSummary != null && levelSummary.isIncompatibleWorldHeight()) {
-                LOGGER.info("Loading of worlds with extended height is disabled.");
-                return;
+            if (levelSummary != null) {
+                if (levelSummary.requiresManualConversion()) {
+                    LOGGER.info("This world must be opened in an older version (like 1.6.4) to be safely converted");
+                    return;
+                }
+
+                if (!levelSummary.isCompatible()) {
+                    LOGGER.info("This world was created by an incompatible version.");
+                    return;
+                }
             }
 
             DataPackConfiguration dataPackConfig = levelStorageAccess.getDataPacks();
@@ -132,8 +142,8 @@ public class Main {
             DataPackResources serverResources;
             try {
                 serverResources = completableFuture.get();
-            } catch (Exception var42) {
-                LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var42);
+            } catch (Exception var43) {
+                LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var43);
                 packRepository.close();
                 return;
             }
@@ -158,9 +168,9 @@ public class Main {
             }
 
             if (optionSet.has(optionSpec5)) {
-                convertWorld(levelStorageAccess, DataConverterRegistry.getDataFixer(), optionSet.has(optionSpec6), () -> {
+                forceUpgrade(levelStorageAccess, DataConverterRegistry.getDataFixer(), optionSet.has(optionSpec6), () -> {
                     return true;
-                }, worldData.getGeneratorSettings().levels());
+                }, worldData.getGeneratorSettings());
             }
 
             levelStorageAccess.saveDataTag(registryHolder, worldData);
@@ -171,7 +181,7 @@ public class Main {
                 dedicatedServer.setPort(optionSet.valueOf(optionSpec12));
                 dedicatedServer.setDemo(optionSet.has(optionSpec3));
                 dedicatedServer.setId(optionSet.valueOf(optionSpec13));
-                boolean bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec14).contains("nogui");
+                boolean bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec15).contains("nogui");
                 if (bl && !GraphicsEnvironment.isHeadless()) {
                     dedicatedServer.showGui();
                 }
@@ -186,15 +196,15 @@ public class Main {
             };
             thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
             Runtime.getRuntime().addShutdownHook(thread);
-        } catch (Exception var43) {
-            LOGGER.fatal("Failed to start the minecraft server", (Throwable)var43);
+        } catch (Exception var44) {
+            LOGGER.fatal("Failed to start the minecraft server", (Throwable)var44);
         }
 
     }
 
-    public static void convertWorld(Convertable.ConversionSession session, DataFixer dataFixer, boolean eraseCache, BooleanSupplier booleanSupplier, ImmutableSet<ResourceKey<World>> worlds) {
+    public static void forceUpgrade(Convertable.ConversionSession session, DataFixer dataFixer, boolean eraseCache, BooleanSupplier continueCheck, GeneratorSettings generatorOptions) {
         LOGGER.info("Forcing world upgrade!");
-        WorldUpgrader worldUpgrader = new WorldUpgrader(session, dataFixer, worlds, eraseCache);
+        WorldUpgrader worldUpgrader = new WorldUpgrader(session, dataFixer, generatorOptions, eraseCache);
         IChatBaseComponent component = null;
 
         while(!worldUpgrader.isFinished()) {
@@ -210,7 +220,7 @@ public class Main {
                 LOGGER.info("{}% completed ({} / {} chunks)...", MathHelper.floor((float)j / (float)i * 100.0F), j, i);
             }
 
-            if (!booleanSupplier.getAsBoolean()) {
+            if (!continueCheck.getAsBoolean()) {
                 worldUpgrader.cancel();
             } else {
                 try {

@@ -1,7 +1,6 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPosition;
@@ -9,6 +8,7 @@ import net.minecraft.core.SectionPosition;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.biome.BiomeBase;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.IChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
 
@@ -23,7 +23,7 @@ public class WorldGenCaves extends WorldGenCarverAbstract<CaveCarverConfiguratio
     }
 
     @Override
-    public boolean carve(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, Random random, Aquifer aquifer, ChunkCoordIntPair pos, BitSet carvingMask) {
+    public boolean carve(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, Random random, Aquifer aquiferSampler, ChunkCoordIntPair pos, CarvingMask mask) {
         int i = SectionPosition.sectionToBlockCoord(this.getRange() * 2 - 1);
         int j = random.nextInt(random.nextInt(random.nextInt(this.getCaveBound()) + 1) + 1);
 
@@ -41,7 +41,7 @@ public class WorldGenCaves extends WorldGenCarverAbstract<CaveCarverConfiguratio
             if (random.nextInt(4) == 0) {
                 double n = (double)config.yScale.sample(random);
                 float o = 1.0F + random.nextFloat() * 6.0F;
-                this.createRoom(context, config, chunk, posToBiome, random.nextLong(), aquifer, d, e, f, o, n, carvingMask, carveSkipChecker);
+                this.createRoom(context, config, chunk, posToBiome, aquiferSampler, d, e, f, o, n, mask, carveSkipChecker);
                 m += random.nextInt(4);
             }
 
@@ -51,7 +51,7 @@ public class WorldGenCaves extends WorldGenCarverAbstract<CaveCarverConfiguratio
                 float s = this.getThickness(random);
                 int t = i - random.nextInt(i / 4);
                 int u = 0;
-                this.createTunnel(context, config, chunk, posToBiome, random.nextLong(), aquifer, d, e, f, g, h, s, q, r, 0, t, this.getYScale(), carvingMask, carveSkipChecker);
+                this.createTunnel(context, config, chunk, posToBiome, random.nextLong(), aquiferSampler, d, e, f, g, h, s, q, r, 0, t, this.getYScale(), mask, carveSkipChecker);
             }
         }
 
@@ -75,13 +75,13 @@ public class WorldGenCaves extends WorldGenCarverAbstract<CaveCarverConfiguratio
         return 1.0D;
     }
 
-    protected void createRoom(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, long seed, Aquifer aquifer, double x, double y, double z, float yaw, double yawPitchRatio, BitSet carvingMask, WorldGenCarverAbstract.CarveSkipChecker skipPredicate) {
-        double d = 1.5D + (double)(MathHelper.sin(((float)Math.PI / 2F)) * yaw);
-        double e = d * yawPitchRatio;
-        this.carveEllipsoid(context, config, chunk, posToBiome, seed, aquifer, x + 1.0D, y, z, d, e, carvingMask, skipPredicate);
+    protected void createRoom(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, Aquifer aquiferSampler, double d, double e, double f, float g, double h, CarvingMask mask, WorldGenCarverAbstract.CarveSkipChecker skipPredicate) {
+        double i = 1.5D + (double)(MathHelper.sin(((float)Math.PI / 2F)) * g);
+        double j = i * h;
+        this.carveEllipsoid(context, config, chunk, posToBiome, aquiferSampler, d + 1.0D, e, f, i, j, mask, skipPredicate);
     }
 
-    protected void createTunnel(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, long seed, Aquifer aquifer, double x, double y, double z, double horizontalScale, double verticalScale, float width, float yaw, float pitch, int branchStartIndex, int branchCount, double yawPitchRatio, BitSet carvingMask, WorldGenCarverAbstract.CarveSkipChecker skipPredicate) {
+    protected void createTunnel(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, long seed, Aquifer aquiferSampler, double x, double y, double z, double horizontalScale, double verticalScale, float width, float yaw, float pitch, int branchStartIndex, int branchCount, double yawPitchRatio, CarvingMask mask, WorldGenCarverAbstract.CarveSkipChecker skipPredicate) {
         Random random = new Random(seed);
         int i = random.nextInt(branchCount / 2) + branchCount / 4;
         boolean bl = random.nextInt(6) == 0;
@@ -103,8 +103,8 @@ public class WorldGenCaves extends WorldGenCarverAbstract<CaveCarverConfiguratio
             g = g + (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
             f = f + (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
             if (j == i && width > 1.0F) {
-                this.createTunnel(context, config, chunk, posToBiome, random.nextLong(), aquifer, x, y, z, horizontalScale, verticalScale, random.nextFloat() * 0.5F + 0.5F, yaw - ((float)Math.PI / 2F), pitch / 3.0F, j, branchCount, 1.0D, carvingMask, skipPredicate);
-                this.createTunnel(context, config, chunk, posToBiome, random.nextLong(), aquifer, x, y, z, horizontalScale, verticalScale, random.nextFloat() * 0.5F + 0.5F, yaw + ((float)Math.PI / 2F), pitch / 3.0F, j, branchCount, 1.0D, carvingMask, skipPredicate);
+                this.createTunnel(context, config, chunk, posToBiome, random.nextLong(), aquiferSampler, x, y, z, horizontalScale, verticalScale, random.nextFloat() * 0.5F + 0.5F, yaw - ((float)Math.PI / 2F), pitch / 3.0F, j, branchCount, 1.0D, mask, skipPredicate);
+                this.createTunnel(context, config, chunk, posToBiome, random.nextLong(), aquiferSampler, x, y, z, horizontalScale, verticalScale, random.nextFloat() * 0.5F + 0.5F, yaw + ((float)Math.PI / 2F), pitch / 3.0F, j, branchCount, 1.0D, mask, skipPredicate);
                 return;
             }
 
@@ -113,7 +113,7 @@ public class WorldGenCaves extends WorldGenCarverAbstract<CaveCarverConfiguratio
                     return;
                 }
 
-                this.carveEllipsoid(context, config, chunk, posToBiome, seed, aquifer, x, y, z, d * horizontalScale, e * verticalScale, carvingMask, skipPredicate);
+                this.carveEllipsoid(context, config, chunk, posToBiome, aquiferSampler, x, y, z, d * horizontalScale, e * verticalScale, mask, skipPredicate);
             }
         }
 

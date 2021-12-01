@@ -31,7 +31,7 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<GlobalPos> MEETING_POINT = register("meeting_point", GlobalPos.CODEC);
     public static final MemoryModuleType<List<GlobalPos>> SECONDARY_JOB_SITE = register("secondary_job_site");
     public static final MemoryModuleType<List<EntityLiving>> NEAREST_LIVING_ENTITIES = register("mobs");
-    public static final MemoryModuleType<List<EntityLiving>> NEAREST_VISIBLE_LIVING_ENTITIES = register("visible_mobs");
+    public static final MemoryModuleType<NearestVisibleLivingEntities> NEAREST_VISIBLE_LIVING_ENTITIES = register("visible_mobs");
     public static final MemoryModuleType<List<EntityLiving>> VISIBLE_VILLAGER_BABIES = register("visible_villager_babies");
     public static final MemoryModuleType<List<EntityHuman>> NEAREST_PLAYERS = register("nearest_players");
     public static final MemoryModuleType<EntityHuman> NEAREST_VISIBLE_PLAYER = register("nearest_visible_player");

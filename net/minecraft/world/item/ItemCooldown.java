@@ -57,7 +57,7 @@ public class ItemCooldown {
     protected void onCooldownEnded(Item item) {
     }
 
-    public class Info {
+    public static class Info {
         final int startTime;
         public final int endTime;
 

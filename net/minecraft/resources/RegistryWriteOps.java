@@ -6,7 +6,6 @@ import com.mojang.serialization.DynamicOps;
 import java.util.Optional;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryCustom;
-import net.minecraft.core.IRegistryWritable;
 
 public class RegistryWriteOps<T> extends DynamicOpsWrapper<T> {
     private final IRegistryCustom registryAccess;
@@ -21,10 +20,10 @@ public class RegistryWriteOps<T> extends DynamicOpsWrapper<T> {
     }
 
     protected <E> DataResult<T> encode(E input, T prefix, ResourceKey<? extends IRegistry<E>> registryReference, Codec<E> codec) {
-        Optional<IRegistryWritable<E>> optional = this.registryAccess.ownedRegistry(registryReference);
+        Optional<? extends IRegistry<E>> optional = this.registryAccess.ownedRegistry(registryReference);
         if (optional.isPresent()) {
-            IRegistryWritable<E> writableRegistry = optional.get();
-            Optional<ResourceKey<E>> optional2 = writableRegistry.getResourceKey(input);
+            IRegistry<E> registry = optional.get();
+            Optional<ResourceKey<E>> optional2 = registry.getResourceKey(input);
             if (optional2.isPresent()) {
                 ResourceKey<E> resourceKey = optional2.get();
                 return MinecraftKey.CODEC.encode(resourceKey.location(), this.delegate, prefix);

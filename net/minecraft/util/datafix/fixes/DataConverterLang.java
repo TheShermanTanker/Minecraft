@@ -12,7 +12,6 @@ public class DataConverterLang extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("OptionsLowerCaseLanguageFix", this.getInputSchema().getType(DataConverterTypes.OPTIONS), (typed) -> {
             return typed.update(DSL.remainderFinder(), (dynamic) -> {

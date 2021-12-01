@@ -89,8 +89,8 @@ public class AttributeDefaults {
             return entityType.getCategory() != EnumCreatureType.MISC;
         }).filter((entityType) -> {
             return !hasSupplier(entityType);
-        }).map(IRegistry.ENTITY_TYPE::getKey).forEach((resourceLocation) -> {
-            SystemUtils.logAndPauseIfInIde("Entity " + resourceLocation + " has no attributes");
+        }).map(IRegistry.ENTITY_TYPE::getKey).forEach((id) -> {
+            SystemUtils.logAndPauseIfInIde("Entity " + id + " has no attributes");
         });
     }
 }

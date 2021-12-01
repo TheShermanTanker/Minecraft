@@ -11,10 +11,10 @@ import org.apache.logging.log4j.Logger;
 
 public class TrapezoidHeight extends HeightProvider {
     public static final Codec<TrapezoidHeight> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter((trapezoidHeight) -> {
-            return trapezoidHeight.minInclusive;
-        }), VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter((trapezoidHeight) -> {
-            return trapezoidHeight.maxInclusive;
+        return instance.group(VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter((provider) -> {
+            return provider.minInclusive;
+        }), VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter((provider) -> {
+            return provider.maxInclusive;
         }), Codec.INT.optionalFieldOf("plateau", Integer.valueOf(0)).forGetter((trapezoidHeight) -> {
             return trapezoidHeight.plateau;
         })).apply(instance, TrapezoidHeight::new);

@@ -98,8 +98,8 @@ public class TileEntityBeehive extends TileEntity {
 
     private List<Entity> releaseBees(IBlockData state, TileEntityBeehive.ReleaseStatus beeState) {
         List<Entity> list = Lists.newArrayList();
-        this.stored.removeIf((beeData) -> {
-            return releaseBee(this.level, this.worldPosition, state, beeData, list, beeState, this.savedFlowerPos);
+        this.stored.removeIf((bee) -> {
+            return releaseBee(this.level, this.worldPosition, state, bee, list, beeState, this.savedFlowerPos);
         });
         return list;
     }
@@ -282,14 +282,13 @@ public class TileEntityBeehive extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.set("Bees", this.writeBees());
         if (this.hasSavedFlowerPos()) {
             nbt.set("FlowerPos", GameProfileSerializer.writeBlockPos(this.savedFlowerPos));
         }
 
-        return nbt;
     }
 
     public NBTTagList writeBees() {
@@ -312,11 +311,11 @@ public class TileEntityBeehive extends TileEntity {
         int ticksInHive;
         final int minOccupationTicks;
 
-        HiveBee(NBTTagCompound compoundTag, int i, int j) {
-            TileEntityBeehive.removeIgnoredBeeTags(compoundTag);
-            this.entityData = compoundTag;
-            this.ticksInHive = i;
-            this.minOccupationTicks = j;
+        HiveBee(NBTTagCompound entityData, int ticksInHive, int minOccupationTicks) {
+            TileEntityBeehive.removeIgnoredBeeTags(entityData);
+            this.entityData = entityData;
+            this.ticksInHive = ticksInHive;
+            this.minOccupationTicks = minOccupationTicks;
         }
     }
 

@@ -1,10 +1,8 @@
 package net.minecraft.world.level.block.entity;
 
-import javax.annotation.Nullable;
 import net.minecraft.commands.CommandListenerWrapper;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.CommandBlockListenerAbstract;
@@ -19,7 +17,6 @@ public class TileEntityCommand extends TileEntity {
     private boolean powered;
     private boolean auto;
     private boolean conditionMet;
-    private boolean sendToClient;
     private final CommandBlockListenerAbstract commandBlock = new CommandBlockListenerAbstract() {
         @Override
         public void setCommand(String command) {
@@ -54,13 +51,12 @@ public class TileEntityCommand extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         this.commandBlock.save(nbt);
         nbt.setBoolean("powered", this.isPowered());
         nbt.setBoolean("conditionMet", this.wasConditionMet());
         nbt.setBoolean("auto", this.isAutomatic());
-        return nbt;
     }
 
     @Override
@@ -70,18 +66,6 @@ public class TileEntityCommand extends TileEntity {
         this.powered = nbt.getBoolean("powered");
         this.conditionMet = nbt.getBoolean("conditionMet");
         this.setAutomatic(nbt.getBoolean("auto"));
-    }
-
-    @Nullable
-    @Override
-    public PacketPlayOutTileEntityData getUpdatePacket() {
-        if (this.isSendToClient()) {
-            this.setSendToClient(false);
-            NBTTagCompound compoundTag = this.save(new NBTTagCompound());
-            return new PacketPlayOutTileEntityData(this.worldPosition, 2, compoundTag);
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -126,7 +110,7 @@ public class TileEntityCommand extends TileEntity {
         Block block = this.getBlock().getBlock();
         if (block instanceof BlockCommand) {
             this.markConditionMet();
-            this.level.getBlockTickList().scheduleTick(this.worldPosition, block, 1);
+            this.level.scheduleTick(this.worldPosition, block, 1);
         }
 
     }
@@ -148,14 +132,6 @@ public class TileEntityCommand extends TileEntity {
         }
 
         return this.conditionMet;
-    }
-
-    public boolean isSendToClient() {
-        return this.sendToClient;
-    }
-
-    public void setSendToClient(boolean needsUpdatePacket) {
-        this.sendToClient = needsUpdatePacket;
     }
 
     public TileEntityCommand.Type getMode() {

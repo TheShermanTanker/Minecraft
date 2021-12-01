@@ -17,7 +17,7 @@ public interface DefinedStructureStructureProcessorType<P extends DefinedStructu
     DefinedStructureStructureProcessorType<DefinedStructureProcessorBlackstoneReplace> BLACKSTONE_REPLACE = register("blackstone_replace", DefinedStructureProcessorBlackstoneReplace.CODEC);
     DefinedStructureStructureProcessorType<DefinedStructureProcessorLavaSubmergedBlock> LAVA_SUBMERGED_BLOCK = register("lava_submerged_block", DefinedStructureProcessorLavaSubmergedBlock.CODEC);
     DefinedStructureStructureProcessorType<ProtectedBlockProcessor> PROTECTED_BLOCKS = register("protected_blocks", ProtectedBlockProcessor.CODEC);
-    Codec<DefinedStructureProcessor> SINGLE_CODEC = IRegistry.STRUCTURE_PROCESSOR.dispatch("processor_type", DefinedStructureProcessor::getType, DefinedStructureStructureProcessorType::codec);
+    Codec<DefinedStructureProcessor> SINGLE_CODEC = IRegistry.STRUCTURE_PROCESSOR.byNameCodec().dispatch("processor_type", DefinedStructureProcessor::getType, DefinedStructureStructureProcessorType::codec);
     Codec<ProcessorList> LIST_OBJECT_CODEC = SINGLE_CODEC.listOf().xmap(ProcessorList::new, ProcessorList::list);
     Codec<ProcessorList> DIRECT_CODEC = Codec.either(LIST_OBJECT_CODEC.fieldOf("processors").codec(), LIST_OBJECT_CODEC).xmap((either) -> {
         return either.map((structureProcessorList) -> {

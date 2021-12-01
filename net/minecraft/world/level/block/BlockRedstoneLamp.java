@@ -31,7 +31,7 @@ public class BlockRedstoneLamp extends Block {
             boolean bl = state.get(LIT);
             if (bl != world.isBlockIndirectlyPowered(pos)) {
                 if (bl) {
-                    world.getBlockTickList().scheduleTick(pos, this, 4);
+                    world.scheduleTick(pos, this, 4);
                 } else {
                     world.setTypeAndData(pos, state.cycle(LIT), 2);
                 }

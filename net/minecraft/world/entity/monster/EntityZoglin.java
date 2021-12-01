@@ -38,6 +38,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtil;
 import net.minecraft.world.entity.ai.behavior.BehaviorWalkAwayOutOfRange;
 import net.minecraft.world.entity.ai.behavior.BehavorMove;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.hoglin.IOglin;
@@ -97,12 +98,12 @@ public class EntityZoglin extends EntityMonster implements IMonster, IOglin {
     }
 
     private Optional<? extends EntityLiving> findNearestValidAttackTarget() {
-        return this.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of()).stream().filter(this::isTargetable).findFirst();
+        return this.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty()).findClosest(this::isTargetable);
     }
 
-    private boolean isTargetable(EntityLiving livingEntity) {
-        EntityTypes<?> entityType = livingEntity.getEntityType();
-        return entityType != EntityTypes.ZOGLIN && entityType != EntityTypes.CREEPER && Sensor.isEntityAttackable(this, livingEntity);
+    private boolean isTargetable(EntityLiving entity) {
+        EntityTypes<?> entityType = entity.getEntityType();
+        return entityType != EntityTypes.ZOGLIN && entityType != EntityTypes.CREEPER && Sensor.isEntityAttackable(this, entity);
     }
 
     @Override

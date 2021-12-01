@@ -48,7 +48,7 @@ public abstract class CriterionTriggerAbstract<T extends CriterionInstanceAbstra
         return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
-    protected void trigger(EntityPlayer player, Predicate<T> tester) {
+    protected void trigger(EntityPlayer player, Predicate<T> predicate) {
         AdvancementDataPlayer playerAdvancements = player.getAdvancementData();
         Set<CriterionTrigger.Listener<T>> set = this.players.get(playerAdvancements);
         if (set != null && !set.isEmpty()) {
@@ -57,7 +57,7 @@ public abstract class CriterionTriggerAbstract<T extends CriterionInstanceAbstra
 
             for(CriterionTrigger.Listener<T> listener : set) {
                 T abstractCriterionTriggerInstance = listener.getTriggerInstance();
-                if (tester.test(abstractCriterionTriggerInstance) && abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext)) {
+                if (predicate.test(abstractCriterionTriggerInstance) && abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext)) {
                     if (list == null) {
                         list = Lists.newArrayList();
                     }

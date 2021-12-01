@@ -21,24 +21,21 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.World;
 
 public class ArgumentDimension implements ArgumentType<MinecraftKey> {
-    private static final Collection<String> EXAMPLES = Stream.of(World.OVERWORLD, World.NETHER).map((resourceKey) -> {
-        return resourceKey.location().toString();
+    private static final Collection<String> EXAMPLES = Stream.of(World.OVERWORLD, World.NETHER).map((key) -> {
+        return key.location().toString();
     }).collect(Collectors.toList());
-    private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.dimension.invalid", object);
+    private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("argument.dimension.invalid", id);
     });
 
-    @Override
     public MinecraftKey parse(StringReader stringReader) throws CommandSyntaxException {
         return MinecraftKey.read(stringReader);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return commandContext.getSource() instanceof ICompletionProvider ? ICompletionProvider.suggestResource(((ICompletionProvider)commandContext.getSource()).levels().stream().map(ResourceKey::location), suggestionsBuilder) : Suggestions.empty();
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

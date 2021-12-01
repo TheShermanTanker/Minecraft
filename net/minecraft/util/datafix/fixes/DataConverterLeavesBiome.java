@@ -15,7 +15,6 @@ public class DataConverterLeavesBiome extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.CHUNK);
         OpticFinder<?> opticFinder = type.findField("Level");
@@ -23,26 +22,30 @@ public class DataConverterLeavesBiome extends DataFix {
             return typed.updateTyped(opticFinder, (typedx) -> {
                 return typedx.update(DSL.remainderFinder(), (dynamic) -> {
                     Optional<IntStream> optional = dynamic.get("Biomes").asIntStreamOpt().result();
-                    if (!optional.isPresent()) {
+                    if (optional.isEmpty()) {
                         return dynamic;
                     } else {
                         int[] is = optional.get().toArray();
-                        int[] js = new int[1024];
+                        if (is.length != 256) {
+                            return dynamic;
+                        } else {
+                            int[] js = new int[1024];
 
-                        for(int i = 0; i < 4; ++i) {
-                            for(int j = 0; j < 4; ++j) {
-                                int k = (j << 2) + 2;
-                                int l = (i << 2) + 2;
-                                int m = l << 4 | k;
-                                js[i << 2 | j] = m < is.length ? is[m] : -1;
+                            for(int i = 0; i < 4; ++i) {
+                                for(int j = 0; j < 4; ++j) {
+                                    int k = (j << 2) + 2;
+                                    int l = (i << 2) + 2;
+                                    int m = l << 4 | k;
+                                    js[i << 2 | j] = is[m];
+                                }
                             }
-                        }
 
-                        for(int n = 1; n < 64; ++n) {
-                            System.arraycopy(js, 0, js, n * 16, 16);
-                        }
+                            for(int n = 1; n < 64; ++n) {
+                                System.arraycopy(js, 0, js, n * 16, 16);
+                            }
 
-                        return dynamic.set("Biomes", dynamic.createIntList(Arrays.stream(js)));
+                            return dynamic.set("Biomes", dynamic.createIntList(Arrays.stream(js)));
+                        }
                     }
                 });
             });

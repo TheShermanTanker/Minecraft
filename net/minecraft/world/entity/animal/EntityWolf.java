@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal;
 
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.TimeRange;
 import net.minecraft.util.valueproviders.IntProviderUniform;
@@ -26,6 +28,7 @@ import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntitySize;
 import net.minecraft.world.entity.EntityTameableAnimal;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.IEntityAngerable;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
@@ -58,6 +61,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDye;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -80,6 +84,7 @@ public class EntityWolf extends EntityTameableAnimal implements IEntityAngerable
     private float shakeAnim;
     private float shakeAnimO;
     private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
+    @Nullable
     private UUID persistentAngerTarget;
 
     public EntityWolf(EntityTypes<? extends EntityWolf> type, World world) {
@@ -516,6 +521,10 @@ public class EntityWolf extends EntityTameableAnimal implements IEntityAngerable
     @Override
     public Vec3D getLeashOffset() {
         return new Vec3D(0.0D, (double)(0.6F * this.getHeadHeight()), (double)(this.getWidth() * 0.4F));
+    }
+
+    public static boolean checkWolfSpawnRules(EntityTypes<EntityWolf> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
+        return world.getType(pos.below()).is(TagsBlock.WOLVES_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
     }
 
     class WolfAvoidEntityGoal<T extends EntityLiving> extends PathfinderGoalAvoidTarget<T> {

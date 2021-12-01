@@ -98,8 +98,10 @@ import net.minecraft.server.commands.CommandWeather;
 import net.minecraft.server.commands.CommandWhitelist;
 import net.minecraft.server.commands.CommandWorldBorder;
 import net.minecraft.server.commands.CommandXp;
+import net.minecraft.server.commands.JfrCommand;
 import net.minecraft.server.commands.data.CommandData;
 import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -168,6 +170,10 @@ public class CommandDispatcher {
         CommandTrigger.register(this.dispatcher);
         CommandWeather.register(this.dispatcher);
         CommandWorldBorder.register(this.dispatcher);
+        if (JvmProfiler.INSTANCE.isAvailable()) {
+            JfrCommand.register(this.dispatcher);
+        }
+
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             GameTestHarnessTestCommand.register(this.dispatcher);
         }

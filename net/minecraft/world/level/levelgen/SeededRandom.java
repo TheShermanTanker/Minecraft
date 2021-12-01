@@ -3,13 +3,12 @@ package net.minecraft.world.level.levelgen;
 import java.util.Random;
 
 public class SeededRandom extends Random implements RandomSource {
+    private final RandomSource randomSource;
     private int count;
 
-    public SeededRandom() {
-    }
-
-    public SeededRandom(long seed) {
-        super(seed);
+    public SeededRandom(RandomSource baseRandom) {
+        super(0L);
+        this.randomSource = baseRandom;
     }
 
     public int getCount() {
@@ -17,15 +16,32 @@ public class SeededRandom extends Random implements RandomSource {
     }
 
     @Override
-    public int next(int i) {
-        ++this.count;
-        return super.next(i);
+    public RandomSource fork() {
+        return this.randomSource.fork();
     }
 
-    public long setBaseChunkSeed(int chunkX, int chunkZ) {
-        long l = (long)chunkX * 341873128712L + (long)chunkZ * 132897987541L;
-        this.setSeed(l);
-        return l;
+    @Override
+    public PositionalRandomFactory forkPositional() {
+        return this.randomSource.forkPositional();
+    }
+
+    @Override
+    public int next(int i) {
+        ++this.count;
+        RandomSource var3 = this.randomSource;
+        if (var3 instanceof LegacyRandomSource) {
+            LegacyRandomSource legacyRandomSource = (LegacyRandomSource)var3;
+            return legacyRandomSource.next(i);
+        } else {
+            return (int)(this.randomSource.nextLong() >>> 64 - i);
+        }
+    }
+
+    @Override
+    public synchronized void setSeed(long seed) {
+        if (this.randomSource != null) {
+            this.randomSource.setSeed(seed);
+        }
     }
 
     public long setDecorationSeed(long worldSeed, int blockX, int blockZ) {
@@ -37,35 +53,22 @@ public class SeededRandom extends Random implements RandomSource {
         return n;
     }
 
-    public long setFeatureSeed(long populationSeed, int index, int step) {
+    public void setFeatureSeed(long populationSeed, int index, int step) {
         long l = populationSeed + (long)index + (long)(10000 * step);
         this.setSeed(l);
-        return l;
     }
 
-    public long setLargeFeatureSeed(long worldSeed, int chunkX, int chunkZ) {
+    public void setLargeFeatureSeed(long worldSeed, int chunkX, int chunkZ) {
         this.setSeed(worldSeed);
         long l = this.nextLong();
         long m = this.nextLong();
         long n = (long)chunkX * l ^ (long)chunkZ * m ^ worldSeed;
         this.setSeed(n);
-        return n;
     }
 
-    public long setBaseStoneSeed(long worldSeed, int x, int y, int z) {
-        this.setSeed(worldSeed);
-        long l = this.nextLong();
-        long m = this.nextLong();
-        long n = this.nextLong();
-        long o = (long)x * l ^ (long)y * m ^ (long)z * n ^ worldSeed;
-        this.setSeed(o);
-        return o;
-    }
-
-    public long setLargeFeatureWithSalt(long worldSeed, int regionX, int regionZ, int salt) {
+    public void setLargeFeatureWithSalt(long worldSeed, int regionX, int regionZ, int salt) {
         long l = (long)regionX * 341873128712L + (long)regionZ * 132897987541L + worldSeed + (long)salt;
         this.setSeed(l);
-        return l;
     }
 
     public static Random seedSlimeChunk(int chunkX, int chunkZ, long worldSeed, long scrambler) {

@@ -22,12 +22,12 @@ public class BlockFalling extends Block implements Fallable {
 
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
-        world.getBlockTickList().scheduleTick(pos, this, this.getDelayAfterPlace());
+        world.scheduleTick(pos, this, this.getDelayAfterPlace());
     }
 
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
-        world.getBlockTickList().scheduleTick(pos, this, this.getDelayAfterPlace());
+        world.scheduleTick(pos, this, this.getDelayAfterPlace());
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
     }
 

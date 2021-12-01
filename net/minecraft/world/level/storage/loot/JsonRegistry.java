@@ -17,8 +17,8 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.ChatDeserializer;
 
 public class JsonRegistry {
-    public static <E, T extends LootSerializerType<E>> JsonRegistry.Builder<E, T> builder(IRegistry<T> registry, String rootFieldName, String idFieldName, Function<E, T> typeIdentification) {
-        return new JsonRegistry.Builder<>(registry, rootFieldName, idFieldName, typeIdentification);
+    public static <E, T extends LootSerializerType<E>> JsonRegistry.Builder<E, T> builder(IRegistry<T> registry, String rootFieldName, String idFieldName, Function<E, T> typeGetter) {
+        return new JsonRegistry.Builder<>(registry, rootFieldName, idFieldName, typeGetter);
     }
 
     public static class Builder<E, T extends LootSerializerType<E>> {
@@ -38,13 +38,13 @@ public class JsonRegistry {
             this.typeGetter = typeIdentification;
         }
 
-        public JsonRegistry.Builder<E, T> withInlineSerializer(T serializerType, JsonRegistry.InlineSerializer<? extends E> inlineSerializer) {
-            this.inlineType = Pair.of(serializerType, inlineSerializer);
+        public JsonRegistry.Builder<E, T> withInlineSerializer(T type, JsonRegistry.InlineSerializer<? extends E> serializer) {
+            this.inlineType = Pair.of(type, serializer);
             return this;
         }
 
-        public JsonRegistry.Builder<E, T> withDefaultType(T serializerType) {
-            this.defaultType = serializerType;
+        public JsonRegistry.Builder<E, T> withDefaultType(T defaultType) {
+            this.defaultType = defaultType;
             return this;
         }
 
@@ -69,12 +69,12 @@ public class JsonRegistry {
         @Nullable
         private final Pair<T, JsonRegistry.InlineSerializer<? extends E>> inlineType;
 
-        JsonAdapter(IRegistry<T> registry, String rootFieldName, String idFieldName, Function<E, T> typeIdentification, @Nullable T serializerType, @Nullable Pair<T, JsonRegistry.InlineSerializer<? extends E>> elementSerializer) {
+        JsonAdapter(IRegistry<T> registry, String rootFieldName, String idFieldName, Function<E, T> typeGetter, @Nullable T defaultType, @Nullable Pair<T, JsonRegistry.InlineSerializer<? extends E>> elementSerializer) {
             this.registry = registry;
             this.elementName = rootFieldName;
             this.typeKey = idFieldName;
-            this.typeGetter = typeIdentification;
-            this.defaultType = serializerType;
+            this.typeGetter = typeGetter;
+            this.defaultType = defaultType;
             this.inlineType = elementSerializer;
         }
 

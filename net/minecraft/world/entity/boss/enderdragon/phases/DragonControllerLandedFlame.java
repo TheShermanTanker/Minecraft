@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.util.MathHelper;
@@ -15,6 +16,7 @@ public class DragonControllerLandedFlame extends DragonControllerLandedAbstract 
     private static final int WARMUP_TIME = 10;
     private int flameTicks;
     private int flameCount;
+    @Nullable
     private EntityAreaEffectCloud flame;
 
     public DragonControllerLandedFlame(EntityEnderDragon dragon) {

@@ -4,60 +4,49 @@ import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import net.minecraft.core.IRegistryCustom;
+import net.minecraft.core.BlockPosition;
+import net.minecraft.core.QuartPos;
 import net.minecraft.util.INamable;
-import net.minecraft.world.level.ChunkCoordIntPair;
-import net.minecraft.world.level.IWorldHeightAccess;
-import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.WorldChunkManager;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.HeightMap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.SeededRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenMineshaftConfiguration;
-import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.WorldGenMineshaftPieces;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class WorldGenMineshaft extends StructureGenerator<WorldGenMineshaftConfiguration> {
-    public WorldGenMineshaft(Codec<WorldGenMineshaftConfiguration> codec) {
-        super(codec);
+    public WorldGenMineshaft(Codec<WorldGenMineshaftConfiguration> configCodec) {
+        super(configCodec, PieceGeneratorSupplier.simple(WorldGenMineshaft::checkLocation, WorldGenMineshaft::generatePieces));
     }
 
-    @Override
-    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, WorldChunkManager biomeSource, long worldSeed, SeededRandom random, ChunkCoordIntPair pos, BiomeBase biome, ChunkCoordIntPair chunkPos, WorldGenMineshaftConfiguration config, IWorldHeightAccess world) {
-        random.setLargeFeatureSeed(worldSeed, pos.x, pos.z);
-        double d = (double)config.probability;
-        return random.nextDouble() < d;
+    private static boolean checkLocation(PieceGeneratorSupplier.Context<WorldGenMineshaftConfiguration> context) {
+        SeededRandom worldgenRandom = new SeededRandom(new LegacyRandomSource(0L));
+        worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+        double d = (double)(context.config()).probability;
+        return worldgenRandom.nextDouble() >= d ? false : context.validBiome().test(context.chunkGenerator().getBiome(QuartPos.fromBlock(context.chunkPos().getMiddleBlockX()), QuartPos.fromBlock(50), QuartPos.fromBlock(context.chunkPos().getMiddleBlockZ())));
     }
 
-    @Override
-    public StructureGenerator.StructureStartFactory<WorldGenMineshaftConfiguration> getStartFactory() {
-        return WorldGenMineshaft.MineShaftStart::new;
-    }
-
-    public static class MineShaftStart extends StructureStart<WorldGenMineshaftConfiguration> {
-        public MineShaftStart(StructureGenerator<WorldGenMineshaftConfiguration> feature, ChunkCoordIntPair pos, int references, long seed) {
-            super(feature, pos, references, seed);
+    private static void generatePieces(StructurePiecesBuilder collector, PieceGenerator.Context<WorldGenMineshaftConfiguration> context) {
+        WorldGenMineshaftPieces.WorldGenMineshaftRoom mineShaftRoom = new WorldGenMineshaftPieces.WorldGenMineshaftRoom(0, context.random(), context.chunkPos().getBlockX(2), context.chunkPos().getBlockZ(2), (context.config()).type);
+        collector.addPiece(mineShaftRoom);
+        mineShaftRoom.addChildren(mineShaftRoom, collector, context.random());
+        int i = context.chunkGenerator().getSeaLevel();
+        if ((context.config()).type == WorldGenMineshaft.Type.MESA) {
+            BlockPosition blockPos = collector.getBoundingBox().getCenter();
+            int j = context.chunkGenerator().getBaseHeight(blockPos.getX(), blockPos.getZ(), HeightMap.Type.WORLD_SURFACE_WG, context.heightAccessor());
+            int k = j <= i ? i : MathHelper.randomBetweenInclusive(context.random(), i, j);
+            int l = k - blockPos.getY();
+            collector.offsetPiecesVertically(l);
+        } else {
+            collector.moveBelowSeaLevel(i, context.chunkGenerator().getMinY(), context.random(), 10);
         }
 
-        @Override
-        public void generatePieces(IRegistryCustom registryManager, ChunkGenerator chunkGenerator, DefinedStructureManager manager, ChunkCoordIntPair pos, BiomeBase biome, WorldGenMineshaftConfiguration config, IWorldHeightAccess world) {
-            WorldGenMineshaftPieces.WorldGenMineshaftRoom mineShaftRoom = new WorldGenMineshaftPieces.WorldGenMineshaftRoom(0, this.random, pos.getBlockX(2), pos.getBlockZ(2), config.type);
-            this.addPiece(mineShaftRoom);
-            mineShaftRoom.addChildren(mineShaftRoom, this, this.random);
-            if (config.type == WorldGenMineshaft.Type.MESA) {
-                int i = -5;
-                StructureBoundingBox boundingBox = this.getBoundingBox();
-                int j = chunkGenerator.getSeaLevel() - boundingBox.maxY() + boundingBox.getYSpan() / 2 - -5;
-                this.offsetPiecesVertically(j);
-            } else {
-                this.moveBelowSeaLevel(chunkGenerator.getSeaLevel(), chunkGenerator.getMinY(), this.random, 10);
-            }
-
-        }
     }
 
     public static enum Type implements INamable {

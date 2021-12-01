@@ -9,6 +9,7 @@ import net.minecraft.world.level.levelgen.feature.WorldGenEndTrophy;
 import net.minecraft.world.phys.Vec3D;
 
 public class DragonControllerLanding extends DragonControllerAbstract {
+    @Nullable
     private Vec3D targetLocation;
 
     public DragonControllerLanding(EntityEnderDragon dragon) {

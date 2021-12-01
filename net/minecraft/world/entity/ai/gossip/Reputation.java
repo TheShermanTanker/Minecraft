@@ -87,17 +87,17 @@ public class Reputation {
     }
 
     private Reputation.EntityGossips getOrCreate(UUID target) {
-        return this.gossips.computeIfAbsent(target, (uUID) -> {
+        return this.gossips.computeIfAbsent(target, (uuid) -> {
             return new Reputation.EntityGossips();
         });
     }
 
     public void transferFrom(Reputation from, Random random, int count) {
         Collection<Reputation.GossipEntry> collection = from.selectGossipsForTransfer(random, count);
-        collection.forEach((gossipEntry) -> {
-            int i = gossipEntry.value - gossipEntry.type.decayPerTransfer;
+        collection.forEach((gossip) -> {
+            int i = gossip.value - gossip.type.decayPerTransfer;
             if (i >= 2) {
-                this.getOrCreate(gossipEntry.target).entries.mergeInt(gossipEntry.type, i, Reputation::mergeValuesForTransfer);
+                this.getOrCreate(gossip.target).entries.mergeInt(gossip.type, i, Reputation::mergeValuesForTransfer);
             }
 
         });
@@ -108,16 +108,16 @@ public class Reputation {
         return entityGossips != null ? entityGossips.weightedValue(gossipTypeFilter) : 0;
     }
 
-    public long getCountForType(ReputationType gossipType, DoublePredicate doublePredicate) {
+    public long getCountForType(ReputationType type, DoublePredicate predicate) {
         return this.gossips.values().stream().filter((entityGossips) -> {
-            return doublePredicate.test((double)(entityGossips.entries.getOrDefault(gossipType, 0) * gossipType.weight));
+            return predicate.test((double)(entityGossips.entries.getOrDefault(type, 0) * type.weight));
         }).count();
     }
 
     public void add(UUID target, ReputationType type, int value) {
         Reputation.EntityGossips entityGossips = this.getOrCreate(target);
-        entityGossips.entries.mergeInt(type, value, (integer, integer2) -> {
-            return this.mergeValuesForAddition(type, integer, integer2);
+        entityGossips.entries.mergeInt(type, value, (left, right) -> {
+            return this.mergeValuesForAddition(type, left, right);
         });
         entityGossips.makeSureValueIsntTooLowOrTooHigh(type);
         if (entityGossips.isEmpty()) {
@@ -126,27 +126,27 @@ public class Reputation {
 
     }
 
-    public void remove(UUID uUID, ReputationType gossipType, int i) {
-        this.add(uUID, gossipType, -i);
+    public void remove(UUID target, ReputationType type, int value) {
+        this.add(target, type, -value);
     }
 
-    public void remove(UUID uUID, ReputationType gossipType) {
-        Reputation.EntityGossips entityGossips = this.gossips.get(uUID);
+    public void remove(UUID target, ReputationType type) {
+        Reputation.EntityGossips entityGossips = this.gossips.get(target);
         if (entityGossips != null) {
-            entityGossips.remove(gossipType);
+            entityGossips.remove(type);
             if (entityGossips.isEmpty()) {
-                this.gossips.remove(uUID);
+                this.gossips.remove(target);
             }
         }
 
     }
 
-    public void remove(ReputationType gossipType) {
+    public void remove(ReputationType type) {
         Iterator<Reputation.EntityGossips> iterator = this.gossips.values().iterator();
 
         while(iterator.hasNext()) {
             Reputation.EntityGossips entityGossips = iterator.next();
-            entityGossips.remove(gossipType);
+            entityGossips.remove(type);
             if (entityGossips.isEmpty()) {
                 iterator.remove();
             }

@@ -63,7 +63,7 @@ public abstract class EntityIllagerWizard extends EntityIllagerAbstract {
         this.entityData.set(DATA_SPELL_CASTING_ID, (byte)spell.id);
     }
 
-    public EntityIllagerWizard.Spell getSpell() {
+    protected EntityIllagerWizard.Spell getSpell() {
         return !this.level.isClientSide ? this.currentSpell : EntityIllagerWizard.Spell.byId(this.entityData.get(DATA_SPELL_CASTING_ID));
     }
 
@@ -125,7 +125,7 @@ public abstract class EntityIllagerWizard extends EntityIllagerAbstract {
 
         @Override
         public void start() {
-            this.attackWarmupDelay = this.getCastWarmupTime();
+            this.attackWarmupDelay = this.adjustedTickDelay(this.getCastWarmupTime());
             EntityIllagerWizard.this.spellCastingTickCount = this.getCastingTime();
             this.nextAttackTickCount = EntityIllagerWizard.this.tickCount + this.getCastingInterval();
             SoundEffect soundEvent = this.getSpellPrepareSound();

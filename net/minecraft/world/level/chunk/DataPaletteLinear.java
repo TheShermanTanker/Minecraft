@@ -1,27 +1,42 @@
 package net.minecraft.world.level.chunk;
 
-import java.util.function.Function;
+import java.util.List;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import net.minecraft.core.RegistryBlockID;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.core.Registry;
 import net.minecraft.network.PacketDataSerializer;
+import org.apache.commons.lang3.Validate;
 
 public class DataPaletteLinear<T> implements DataPalette<T> {
-    private final RegistryBlockID<T> registry;
+    private final Registry<T> registry;
     private final T[] values;
     private final DataPaletteExpandable<T> resizeHandler;
-    private final Function<NBTTagCompound, T> reader;
     private final int bits;
     private int size;
 
-    public DataPaletteLinear(RegistryBlockID<T> idList, int integer, DataPaletteExpandable<T> resizeListener, Function<NBTTagCompound, T> valueDeserializer) {
+    private DataPaletteLinear(Registry<T> idList, int bits, DataPaletteExpandable<T> listener, List<T> list) {
         this.registry = idList;
-        this.values = (T[])(new Object[1 << integer]);
-        this.bits = integer;
-        this.resizeHandler = resizeListener;
-        this.reader = valueDeserializer;
+        this.values = (T[])(new Object[1 << bits]);
+        this.bits = bits;
+        this.resizeHandler = listener;
+        Validate.isTrue(list.size() <= this.values.length, "Can't initialize LinearPalette of size %d with %d entries", this.values.length, list.size());
+
+        for(int i = 0; i < list.size(); ++i) {
+            this.values[i] = list.get(i);
+        }
+
+        this.size = list.size();
+    }
+
+    private DataPaletteLinear(Registry<T> idMap, T[] objects, DataPaletteExpandable<T> paletteResize, int i, int j) {
+        this.registry = idMap;
+        this.values = objects;
+        this.resizeHandler = paletteResize;
+        this.bits = i;
+        this.size = j;
+    }
+
+    public static <A> DataPalette<A> create(int bits, Registry<A> idList, DataPaletteExpandable<A> listener, List<A> list) {
+        return new DataPaletteLinear<>(idList, bits, listener, list);
     }
 
     @Override
@@ -53,10 +68,13 @@ public class DataPaletteLinear<T> implements DataPalette<T> {
         return false;
     }
 
-    @Nullable
     @Override
-    public T valueFor(int index) {
-        return (T)(index >= 0 && index < this.size ? this.values[index] : null);
+    public T valueFor(int id) {
+        if (id >= 0 && id < this.size) {
+            return this.values[id];
+        } else {
+            throw new MissingPaletteEntryException(id);
+        }
     }
 
     @Override
@@ -96,11 +114,7 @@ public class DataPaletteLinear<T> implements DataPalette<T> {
     }
 
     @Override
-    public void read(NBTTagList nbt) {
-        for(int i = 0; i < nbt.size(); ++i) {
-            this.values[i] = this.reader.apply(nbt.getCompound(i));
-        }
-
-        this.size = nbt.size();
+    public DataPalette<T> copy() {
+        return new DataPaletteLinear<>(this.registry, (T[])((Object[])this.values.clone()), this.resizeHandler, this.bits, this.size);
     }
 }

@@ -71,7 +71,7 @@ public class BlockRedstoneTorch extends BlockTorch {
                 world.setTypeAndData(pos, state.set(LIT, Boolean.valueOf(false)), 3);
                 if (isToggledTooFrequently(world, pos, true)) {
                     world.triggerEffect(1502, pos, 0);
-                    world.getBlockTicks().scheduleTick(pos, world.getType(pos).getBlock(), 160);
+                    world.scheduleTick(pos, world.getType(pos).getBlock(), 160);
                 }
             }
         } else if (!bl && !isToggledTooFrequently(world, pos, false)) {
@@ -82,8 +82,8 @@ public class BlockRedstoneTorch extends BlockTorch {
 
     @Override
     public void doPhysics(IBlockData state, World world, BlockPosition pos, Block block, BlockPosition fromPos, boolean notify) {
-        if (state.get(LIT) == this.hasNeighborSignal(world, pos, state) && !world.getBlockTickList().willTickThisTick(pos, this)) {
-            world.getBlockTickList().scheduleTick(pos, this, 2);
+        if (state.get(LIT) == this.hasNeighborSignal(world, pos, state) && !world.getBlockTicks().willTickThisTick(pos, this)) {
+            world.scheduleTick(pos, this, 2);
         }
 
     }

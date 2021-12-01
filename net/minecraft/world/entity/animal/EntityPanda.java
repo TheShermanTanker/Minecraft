@@ -335,14 +335,15 @@ public class EntityPanda extends EntityAnimal {
             }
         }
 
-        if (this.getGoalTarget() == null) {
+        EntityLiving livingEntity = this.getGoalTarget();
+        if (livingEntity == null) {
             this.gotBamboo = false;
             this.didBite = false;
         }
 
         if (this.getUnhappyCounter() > 0) {
-            if (this.getGoalTarget() != null) {
-                this.lookAt(this.getGoalTarget(), 90.0F, 90.0F);
+            if (livingEntity != null) {
+                this.lookAt(livingEntity, 90.0F, 90.0F);
             }
 
             if (this.getUnhappyCounter() == 29 || this.getUnhappyCounter() == 14) {
@@ -782,7 +783,7 @@ public class EntityPanda extends EntityAnimal {
         }
     }
 
-    class PandaBreedGoal extends PathfinderGoalBreed {
+    static class PandaBreedGoal extends PathfinderGoalBreed {
         private final EntityPanda panda;
         private int unhappyCooldown;
 
@@ -871,13 +872,13 @@ public class EntityPanda extends EntityAnimal {
 
         @Override
         public boolean canUse() {
-            return this.cooldown < this.panda.tickCount && this.panda.isLazy() && this.panda.canPerformAction() && this.panda.random.nextInt(400) == 1;
+            return this.cooldown < this.panda.tickCount && this.panda.isLazy() && this.panda.canPerformAction() && this.panda.random.nextInt(reducedTickDelay(400)) == 1;
         }
 
         @Override
         public boolean canContinueToUse() {
-            if (!this.panda.isInWater() && (this.panda.isLazy() || this.panda.random.nextInt(600) != 1)) {
-                return this.panda.random.nextInt(2000) != 1;
+            if (!this.panda.isInWater() && (this.panda.isLazy() || this.panda.random.nextInt(reducedTickDelay(600)) != 1)) {
+                return this.panda.random.nextInt(reducedTickDelay(2000)) != 1;
             } else {
                 return false;
             }
@@ -970,7 +971,7 @@ public class EntityPanda extends EntityAnimal {
             if (!this.panda.isBurning()) {
                 return false;
             } else {
-                BlockPosition blockPos = this.lookForWater(this.mob.level, this.mob, 5, 4);
+                BlockPosition blockPos = this.lookForWater(this.mob.level, this.mob, 5);
                 if (blockPos != null) {
                     this.posX = (double)blockPos.getX();
                     this.posY = (double)blockPos.getY();
@@ -1022,10 +1023,10 @@ public class EntityPanda extends EntityAnimal {
 
                     if (this.panda.level.getType(this.panda.getChunkCoordinates().offset(i, -1, j)).isAir()) {
                         return true;
-                    } else if (this.panda.isPlayful() && this.panda.random.nextInt(60) == 1) {
+                    } else if (this.panda.isPlayful() && this.panda.random.nextInt(reducedTickDelay(60)) == 1) {
                         return true;
                     } else {
-                        return this.panda.random.nextInt(500) == 1;
+                        return this.panda.random.nextInt(reducedTickDelay(500)) == 1;
                     }
                 }
             } else {
@@ -1068,8 +1069,8 @@ public class EntityPanda extends EntityAnimal {
 
         @Override
         public boolean canContinueToUse() {
-            if (!EntityPanda.this.isInWater() && (EntityPanda.this.isLazy() || EntityPanda.this.random.nextInt(600) != 1)) {
-                return EntityPanda.this.random.nextInt(2000) != 1;
+            if (!EntityPanda.this.isInWater() && (EntityPanda.this.isLazy() || EntityPanda.this.random.nextInt(reducedTickDelay(600)) != 1)) {
+                return EntityPanda.this.random.nextInt(reducedTickDelay(2000)) != 1;
             } else {
                 return false;
             }
@@ -1119,10 +1120,10 @@ public class EntityPanda extends EntityAnimal {
         @Override
         public boolean canUse() {
             if (this.panda.isBaby() && this.panda.canPerformAction()) {
-                if (this.panda.isWeak() && this.panda.random.nextInt(500) == 1) {
+                if (this.panda.isWeak() && this.panda.random.nextInt(reducedTickDelay(500)) == 1) {
                     return true;
                 } else {
-                    return this.panda.random.nextInt(6000) == 1;
+                    return this.panda.random.nextInt(reducedTickDelay(6000)) == 1;
                 }
             } else {
                 return false;

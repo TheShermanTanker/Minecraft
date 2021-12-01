@@ -1,17 +1,19 @@
 package net.minecraft.world.level.chunk;
 
+import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.core.RegistryBlockID;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.core.Registry;
 import net.minecraft.network.PacketDataSerializer;
 
 public class DataPaletteGlobal<T> implements DataPalette<T> {
-    private final RegistryBlockID<T> registry;
-    private final T defaultValue;
+    private final Registry<T> registry;
 
-    public DataPaletteGlobal(RegistryBlockID<T> idList, T defaultValue) {
+    public DataPaletteGlobal(Registry<T> idList) {
         this.registry = idList;
-        this.defaultValue = defaultValue;
+    }
+
+    public static <A> DataPalette<A> create(int bits, Registry<A> idList, DataPaletteExpandable<A> listener, List<A> list) {
+        return new DataPaletteGlobal<>(idList);
     }
 
     @Override
@@ -26,9 +28,13 @@ public class DataPaletteGlobal<T> implements DataPalette<T> {
     }
 
     @Override
-    public T valueFor(int index) {
-        T object = this.registry.fromId(index);
-        return (T)(object == null ? this.defaultValue : object);
+    public T valueFor(int id) {
+        T object = this.registry.fromId(id);
+        if (object == null) {
+            throw new MissingPaletteEntryException(id);
+        } else {
+            return object;
+        }
     }
 
     @Override
@@ -50,6 +56,7 @@ public class DataPaletteGlobal<T> implements DataPalette<T> {
     }
 
     @Override
-    public void read(NBTTagList nbt) {
+    public DataPalette<T> copy() {
+        return this;
     }
 }

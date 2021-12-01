@@ -21,6 +21,7 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumHand;
@@ -486,9 +487,13 @@ public class EntityAxolotl extends EntityAnimal implements LerpingModel, IBucket
         return !this.isFromBucket() && !this.hasCustomName();
     }
 
+    public static boolean checkAxolotlSpawnRules(EntityTypes<? extends EntityLiving> type, WorldAccess world, EnumMobSpawn reason, BlockPosition pos, Random random) {
+        return world.getType(pos.below()).is(TagsBlock.AXOLOTLS_SPAWNABLE_ON);
+    }
+
     class ControllerLookAxolotl extends ControllerLookSmoothSwim {
-        public ControllerLookAxolotl(EntityAxolotl axolotl, int maxYawDifference) {
-            super(axolotl, maxYawDifference);
+        public ControllerLookAxolotl(EntityAxolotl axolotl, int yawAdjustThreshold) {
+            super(axolotl, yawAdjustThreshold);
         }
 
         @Override
@@ -588,9 +593,9 @@ public class EntityAxolotl extends EntityAnimal implements LerpingModel, IBucket
             return getSpawnVariant(random, false);
         }
 
-        private static EntityAxolotl.Variant getSpawnVariant(Random random, boolean includeUnnatural) {
+        private static EntityAxolotl.Variant getSpawnVariant(Random random, boolean natural) {
             EntityAxolotl.Variant[] variants = Arrays.stream(BY_ID).filter((variant) -> {
-                return variant.common == includeUnnatural;
+                return variant.common == natural;
             }).toArray((i) -> {
                 return new EntityAxolotl.Variant[i];
             });

@@ -15,7 +15,6 @@ public class DataConverterMapId extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.SAVED_DATA);
         OpticFinder<?> opticFinder = type.findField("data");

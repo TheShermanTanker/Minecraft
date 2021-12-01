@@ -41,14 +41,14 @@ public class DebugReportProviderLootTable implements DebugReportProvider {
     public void run(HashCache cache) {
         Path path = this.generator.getOutputFolder();
         Map<MinecraftKey, LootTable> map = Maps.newHashMap();
-        this.subProviders.forEach((pair) -> {
-            pair.getFirst().get().accept((resourceLocation, builder) -> {
-                if (map.put(resourceLocation, builder.setParamSet(pair.getSecond()).build()) != null) {
-                    throw new IllegalStateException("Duplicate loot table " + resourceLocation);
+        this.subProviders.forEach((generator) -> {
+            generator.getFirst().get().accept((id, builder) -> {
+                if (map.put(id, builder.setParamSet(generator.getSecond()).build()) != null) {
+                    throw new IllegalStateException("Duplicate loot table " + id);
                 }
             });
         });
-        LootCollector validationContext = new LootCollector(LootContextParameterSets.ALL_PARAMS, (resourceLocationx) -> {
+        LootCollector validationContext = new LootCollector(LootContextParameterSets.ALL_PARAMS, (id) -> {
             return null;
         }, map::get);
 
@@ -56,21 +56,21 @@ public class DebugReportProviderLootTable implements DebugReportProvider {
             validationContext.reportProblem("Missing built-in table: " + resourceLocation);
         }
 
-        map.forEach((resourceLocationx, lootTable) -> {
-            LootTableRegistry.validate(validationContext, resourceLocationx, lootTable);
+        map.forEach((id, table) -> {
+            LootTableRegistry.validate(validationContext, id, table);
         });
         Multimap<String, String> multimap = validationContext.getProblems();
         if (!multimap.isEmpty()) {
-            multimap.forEach((string, string2) -> {
-                LOGGER.warn("Found validation problem in {}: {}", string, string2);
+            multimap.forEach((name, message) -> {
+                LOGGER.warn("Found validation problem in {}: {}", name, message);
             });
             throw new IllegalStateException("Failed to validate loot tables, see logs");
         } else {
-            map.forEach((resourceLocationx, lootTable) -> {
-                Path path2 = createPath(path, resourceLocationx);
+            map.forEach((id, table) -> {
+                Path path2 = createPath(path, id);
 
                 try {
-                    DebugReportProvider.save(GSON, cache, LootTableRegistry.serialize(lootTable), path2);
+                    DebugReportProvider.save(GSON, cache, LootTableRegistry.serialize(table), path2);
                 } catch (IOException var6) {
                     LOGGER.error("Couldn't save loot table {}", path2, var6);
                 }

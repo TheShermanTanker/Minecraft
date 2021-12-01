@@ -50,6 +50,7 @@ import net.minecraft.world.entity.ai.goal.PathfinderGoalPanic;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomLookaround;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStrollLand;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalTame;
+import net.minecraft.world.entity.ai.goal.PathfinderGoalTempt;
 import net.minecraft.world.entity.ai.targeting.PathfinderTargetCondition;
 import net.minecraft.world.entity.animal.EntityAnimal;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -126,6 +127,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
 
     protected void addBehaviourGoals() {
         this.goalSelector.addGoal(0, new PathfinderGoalFloat(this));
+        this.goalSelector.addGoal(3, new PathfinderGoalTempt(this, 1.25D, RecipeItemStack.of(Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE), false));
     }
 
     @Override
@@ -1009,13 +1011,13 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
     }
 
     @Nullable
-    private Vec3D getDismountLocationInDirection(Vec3D vec3, EntityLiving livingEntity) {
-        double d = this.locX() + vec3.x;
+    private Vec3D getDismountLocationInDirection(Vec3D offset, EntityLiving passenger) {
+        double d = this.locX() + offset.x;
         double e = this.getBoundingBox().minY;
-        double f = this.locZ() + vec3.z;
+        double f = this.locZ() + offset.z;
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
 
-        for(EntityPose pose : livingEntity.getDismountPoses()) {
+        for(EntityPose pose : passenger.getDismountPoses()) {
             mutableBlockPos.set(d, e, f);
             double g = this.getBoundingBox().maxY + 0.75D;
 
@@ -1026,11 +1028,11 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
                 }
 
                 if (DismountUtil.isBlockFloorValid(h)) {
-                    AxisAlignedBB aABB = livingEntity.getLocalBoundsForPose(pose);
-                    Vec3D vec32 = new Vec3D(d, (double)mutableBlockPos.getY() + h, f);
-                    if (DismountUtil.canDismountTo(this.level, livingEntity, aABB.move(vec32))) {
-                        livingEntity.setPose(pose);
-                        return vec32;
+                    AxisAlignedBB aABB = passenger.getLocalBoundsForPose(pose);
+                    Vec3D vec3 = new Vec3D(d, (double)mutableBlockPos.getY() + h, f);
+                    if (DismountUtil.canDismountTo(this.level, passenger, aABB.move(vec3))) {
+                        passenger.setPose(pose);
+                        return vec3;
                     }
                 }
 
@@ -1071,7 +1073,7 @@ public abstract class EntityHorseAbstract extends EntityAnimal implements IInven
         return super.prepare(world, difficulty, spawnReason, entityData, entityNbt);
     }
 
-    public boolean hasInventoryChanged(IInventory container) {
-        return this.inventory != container;
+    public boolean hasInventoryChanged(IInventory inventory) {
+        return this.inventory != inventory;
     }
 }

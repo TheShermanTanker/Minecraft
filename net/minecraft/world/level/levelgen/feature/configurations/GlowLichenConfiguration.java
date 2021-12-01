@@ -3,12 +3,11 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.minecraft.core.EnumDirection;
+import net.minecraft.core.IRegistry;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.IBlockData;
 
 public class GlowLichenConfiguration implements WorldGenFeatureConfiguration {
     public static final Codec<GlowLichenConfiguration> CODEC = RecordCodecBuilder.create((instance) -> {
@@ -22,8 +21,8 @@ public class GlowLichenConfiguration implements WorldGenFeatureConfiguration {
             return glowLichenConfiguration.canPlaceOnWall;
         }), Codec.floatRange(0.0F, 1.0F).fieldOf("chance_of_spreading").orElse(0.5F).forGetter((glowLichenConfiguration) -> {
             return glowLichenConfiguration.chanceOfSpreading;
-        }), IBlockData.CODEC.listOf().fieldOf("can_be_placed_on").forGetter((glowLichenConfiguration) -> {
-            return new ArrayList<>(glowLichenConfiguration.canBePlacedOn);
+        }), IRegistry.BLOCK.byNameCodec().listOf().fieldOf("can_be_placed_on").forGetter((glowLichenConfiguration) -> {
+            return glowLichenConfiguration.canBePlacedOn;
         })).apply(instance, GlowLichenConfiguration::new);
     });
     public final int searchRange;
@@ -31,10 +30,10 @@ public class GlowLichenConfiguration implements WorldGenFeatureConfiguration {
     public final boolean canPlaceOnCeiling;
     public final boolean canPlaceOnWall;
     public final float chanceOfSpreading;
-    public final List<IBlockData> canBePlacedOn;
+    public final List<Block> canBePlacedOn;
     public final List<EnumDirection> validDirections;
 
-    public GlowLichenConfiguration(int searchRange, boolean placeOnFloor, boolean placeOnCeiling, boolean placeOnWalls, float spreadChance, List<IBlockData> canPlaceOn) {
+    public GlowLichenConfiguration(int searchRange, boolean placeOnFloor, boolean placeOnCeiling, boolean placeOnWalls, float spreadChance, List<Block> canPlaceOn) {
         this.searchRange = searchRange;
         this.canPlaceOnFloor = placeOnFloor;
         this.canPlaceOnCeiling = placeOnCeiling;
@@ -55,11 +54,5 @@ public class GlowLichenConfiguration implements WorldGenFeatureConfiguration {
         }
 
         this.validDirections = Collections.unmodifiableList(list);
-    }
-
-    public boolean canBePlacedOn(Block block) {
-        return this.canBePlacedOn.stream().anyMatch((state) -> {
-            return state.is(block);
-        });
     }
 }

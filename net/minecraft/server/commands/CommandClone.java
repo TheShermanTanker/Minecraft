@@ -105,7 +105,7 @@ public class CommandClone {
                                 if (filter.test(blockInWorld)) {
                                     TileEntity blockEntity = serverLevel.getTileEntity(blockPos3);
                                     if (blockEntity != null) {
-                                        NBTTagCompound compoundTag = blockEntity.save(new NBTTagCompound());
+                                        NBTTagCompound compoundTag = blockEntity.saveWithoutMetadata();
                                         list2.add(new CommandClone.CommandCloneStoredTileEntity(blockPos4, blockState, compoundTag));
                                         deque.addLast(blockPos3);
                                     } else if (!blockState.isSolidRender(serverLevel, blockPos3) && !blockState.isCollisionShapeFullBlock(serverLevel, blockPos3)) {
@@ -155,9 +155,6 @@ public class CommandClone {
                     for(CommandClone.CommandCloneStoredTileEntity cloneBlockInfo3 : list2) {
                         TileEntity blockEntity4 = serverLevel.getTileEntity(cloneBlockInfo3.pos);
                         if (cloneBlockInfo3.tag != null && blockEntity4 != null) {
-                            cloneBlockInfo3.tag.setInt("x", cloneBlockInfo3.pos.getX());
-                            cloneBlockInfo3.tag.setInt("y", cloneBlockInfo3.pos.getY());
-                            cloneBlockInfo3.tag.setInt("z", cloneBlockInfo3.pos.getZ());
                             blockEntity4.load(cloneBlockInfo3.tag);
                             blockEntity4.update();
                         }
@@ -169,7 +166,7 @@ public class CommandClone {
                         serverLevel.update(cloneBlockInfo4.pos, cloneBlockInfo4.state.getBlock());
                     }
 
-                    serverLevel.getBlockTicks().copy(boundingBox, blockPos2);
+                    serverLevel.getBlockTicks().copyArea(boundingBox, blockPos2);
                     if (m == 0) {
                         throw ERROR_FAILED.create();
                     } else {

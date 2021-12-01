@@ -25,7 +25,6 @@ public class DataConverterSavedDataFeaturePoolElement extends DataFix {
         super(outputSchema, false);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.writeFixAndRead("SavedDataFeaturePoolElementFix", this.getInputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE), this.getOutputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE), DataConverterSavedDataFeaturePoolElement::fixTag);
     }
@@ -45,13 +44,9 @@ public class DataConverterSavedDataFeaturePoolElement extends DataFix {
                 return child;
             } else {
                 OptionalDynamic<?> optionalDynamic = child.get("pool_element");
-                if (!optionalDynamic.get("element_type").asString("").equals("minecraft:feature_pool_element")) {
-                    return child;
-                } else {
-                    return !optionalDynamic.get("feature").get("name").result().isPresent() ? child : child.update("pool_element", (poolElement) -> {
-                        return poolElement.update("feature", DataConverterSavedDataFeaturePoolElement::fixFeature);
-                    });
-                }
+                return !optionalDynamic.get("element_type").asString("").equals("minecraft:feature_pool_element") ? child : child.update("pool_element", (poolElement) -> {
+                    return poolElement.update("feature", DataConverterSavedDataFeaturePoolElement::fixFeature);
+                });
             }
         });
     }

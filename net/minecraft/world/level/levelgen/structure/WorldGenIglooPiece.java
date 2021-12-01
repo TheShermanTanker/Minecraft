@@ -6,7 +6,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
@@ -34,17 +34,17 @@ public class WorldGenIglooPiece {
     static final Map<MinecraftKey, BlockPosition> PIVOTS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, new BlockPosition(3, 5, 5), STRUCTURE_LOCATION_LADDER, new BlockPosition(1, 3, 1), STRUCTURE_LOCATION_LABORATORY, new BlockPosition(3, 6, 7));
     static final Map<MinecraftKey, BlockPosition> OFFSETS = ImmutableMap.of(STRUCTURE_LOCATION_IGLOO, BlockPosition.ZERO, STRUCTURE_LOCATION_LADDER, new BlockPosition(2, -3, 4), STRUCTURE_LOCATION_LABORATORY, new BlockPosition(0, -3, -2));
 
-    public static void addPieces(DefinedStructureManager manager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor structurePieceAccessor, Random random) {
+    public static void addPieces(DefinedStructureManager manager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor holder, Random random) {
         if (random.nextDouble() < 0.5D) {
             int i = random.nextInt(8) + 4;
-            structurePieceAccessor.addPiece(new WorldGenIglooPiece.IglooPiece(manager, STRUCTURE_LOCATION_LABORATORY, pos, rotation, i * 3));
+            holder.addPiece(new WorldGenIglooPiece.IglooPiece(manager, STRUCTURE_LOCATION_LABORATORY, pos, rotation, i * 3));
 
             for(int j = 0; j < i - 1; ++j) {
-                structurePieceAccessor.addPiece(new WorldGenIglooPiece.IglooPiece(manager, STRUCTURE_LOCATION_LADDER, pos, rotation, j * 3));
+                holder.addPiece(new WorldGenIglooPiece.IglooPiece(manager, STRUCTURE_LOCATION_LADDER, pos, rotation, j * 3));
             }
         }
 
-        structurePieceAccessor.addPiece(new WorldGenIglooPiece.IglooPiece(manager, STRUCTURE_LOCATION_IGLOO, pos, rotation, 0));
+        holder.addPiece(new WorldGenIglooPiece.IglooPiece(manager, STRUCTURE_LOCATION_IGLOO, pos, rotation, 0));
     }
 
     public static class IglooPiece extends DefinedStructurePiece {
@@ -52,8 +52,8 @@ public class WorldGenIglooPiece {
             super(WorldGenFeatureStructurePieceType.IGLOO, 0, manager, identifier, identifier.toString(), makeSettings(rotation, identifier), makePosition(identifier, pos, yOffset));
         }
 
-        public IglooPiece(WorldServer world, NBTTagCompound nbt) {
-            super(WorldGenFeatureStructurePieceType.IGLOO, nbt, world, (resourceLocation) -> {
+        public IglooPiece(DefinedStructureManager manager, NBTTagCompound nbt) {
+            super(WorldGenFeatureStructurePieceType.IGLOO, nbt, manager, (resourceLocation) -> {
                 return makeSettings(EnumBlockRotation.valueOf(nbt.getString("Rot")), resourceLocation);
             });
         }
@@ -67,8 +67,8 @@ public class WorldGenIglooPiece {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setString("Rot", this.placeSettings.getRotation().name());
         }
 
@@ -85,7 +85,7 @@ public class WorldGenIglooPiece {
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             MinecraftKey resourceLocation = new MinecraftKey(this.templateName);
             DefinedStructureInfo structurePlaceSettings = makeSettings(this.placeSettings.getRotation(), resourceLocation);
             BlockPosition blockPos = WorldGenIglooPiece.OFFSETS.get(resourceLocation);
@@ -93,7 +93,7 @@ public class WorldGenIglooPiece {
             int i = world.getHeight(HeightMap.Type.WORLD_SURFACE_WG, blockPos2.getX(), blockPos2.getZ());
             BlockPosition blockPos3 = this.templatePosition;
             this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-            boolean bl = super.postProcess(world, structureAccessor, chunkGenerator, random, boundingBox, chunkPos, pos);
+            super.postProcess(world, structureAccessor, chunkGenerator, random, chunkBox, chunkPos, pos);
             if (resourceLocation.equals(WorldGenIglooPiece.STRUCTURE_LOCATION_IGLOO)) {
                 BlockPosition blockPos4 = this.templatePosition.offset(DefinedStructure.calculateRelativePosition(structurePlaceSettings, new BlockPosition(3, 0, 5)));
                 IBlockData blockState = world.getType(blockPos4.below());
@@ -103,7 +103,6 @@ public class WorldGenIglooPiece {
             }
 
             this.templatePosition = blockPos3;
-            return bl;
         }
     }
 }

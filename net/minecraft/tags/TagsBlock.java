@@ -57,6 +57,7 @@ public final class TagsBlock {
     public static final Tag.Named<Block> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
     public static final Tag.Named<Block> CANDLES = bind("candles");
     public static final Tag.Named<Block> DIRT = bind("dirt");
+    public static final Tag.Named<Block> TERRACOTTA = bind("terracotta");
     public static final Tag.Named<Block> FLOWER_POTS = bind("flower_pots");
     public static final Tag.Named<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
     public static final Tag.Named<Block> ICE = bind("ice");
@@ -111,7 +112,9 @@ public final class TagsBlock {
     public static final Tag.Named<Block> CAVE_VINES = bind("cave_vines");
     public static final Tag.Named<Block> MOSS_REPLACEABLE = bind("moss_replaceable");
     public static final Tag.Named<Block> LUSH_GROUND_REPLACEABLE = bind("lush_ground_replaceable");
+    public static final Tag.Named<Block> AZALEA_ROOT_REPLACEABLE = bind("azalea_root_replaceable");
     public static final Tag.Named<Block> SMALL_DRIPLEAF_PLACEABLE = bind("small_dripleaf_placeable");
+    public static final Tag.Named<Block> BIG_DRIPLEAF_PLACEABLE = bind("big_dripleaf_placeable");
     public static final Tag.Named<Block> SNOW = bind("snow");
     public static final Tag.Named<Block> MINEABLE_WITH_AXE = bind("mineable/axe");
     public static final Tag.Named<Block> MINEABLE_WITH_HOE = bind("mineable/hoe");
@@ -121,8 +124,19 @@ public final class TagsBlock {
     public static final Tag.Named<Block> NEEDS_IRON_TOOL = bind("needs_iron_tool");
     public static final Tag.Named<Block> NEEDS_STONE_TOOL = bind("needs_stone_tool");
     public static final Tag.Named<Block> FEATURES_CANNOT_REPLACE = bind("features_cannot_replace");
-    public static final Tag.Named<Block> LAVA_POOL_STONE_CANNOT_REPLACE = bind("lava_pool_stone_replaceables");
+    public static final Tag.Named<Block> LAVA_POOL_STONE_CANNOT_REPLACE = bind("lava_pool_stone_cannot_replace");
     public static final Tag.Named<Block> GEODE_INVALID_BLOCKS = bind("geode_invalid_blocks");
+    public static final Tag.Named<Block> ANIMALS_SPAWNABLE_ON = bind("animals_spawnable_on");
+    public static final Tag.Named<Block> AXOLOTLS_SPAWNABLE_ON = bind("axolotls_spawnable_on");
+    public static final Tag.Named<Block> GOATS_SPAWNABLE_ON = bind("goats_spawnable_on");
+    public static final Tag.Named<Block> MOOSHROOMS_SPAWNABLE_ON = bind("mooshrooms_spawnable_on");
+    public static final Tag.Named<Block> PARROTS_SPAWNABLE_ON = bind("parrots_spawnable_on");
+    public static final Tag.Named<Block> POLAR_BEARS_SPAWNABLE_ON_IN_FROZEN_OCEAN = bind("polar_bears_spawnable_on_in_frozen_ocean");
+    public static final Tag.Named<Block> RABBITS_SPAWNABLE_ON = bind("rabbits_spawnable_on");
+    public static final Tag.Named<Block> FOXES_SPAWNABLE_ON = bind("foxes_spawnable_on");
+    public static final Tag.Named<Block> WOLVES_SPAWNABLE_ON = bind("wolves_spawnable_on");
+    public static final Tag.Named<Block> AZALEA_GROWS_ON = bind("azalea_grows_on");
+    public static final Tag.Named<Block> REPLACEABLE_PLANTS = bind("replaceable_plants");
 
     private TagsBlock() {
     }

@@ -21,7 +21,6 @@ public class DefinedStructureInfo {
     private boolean keepLiquids = true;
     @Nullable
     private Random random;
-    @Nullable
     private int palette;
     private final List<DefinedStructureProcessor> processors = Lists.newArrayList();
     private boolean knownShape;
@@ -148,8 +147,8 @@ public class DefinedStructureInfo {
         }
     }
 
-    public DefinedStructureInfo setFinalizeEntities(boolean bl) {
-        this.finalizeEntities = bl;
+    public DefinedStructureInfo setFinalizeEntities(boolean initializeMobs) {
+        this.finalizeEntities = initializeMobs;
         return this;
     }
 

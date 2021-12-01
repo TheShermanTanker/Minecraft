@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.IRegistry;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.SeededRandom;
 import net.minecraft.world.level.levelgen.synth.NoiseGenerator3Handler;
 
@@ -42,7 +43,7 @@ public class WorldChunkManagerTheEnd extends WorldChunkManager {
         this.midlands = midlandsBiome;
         this.islands = smallIslandsBiome;
         this.barrens = barrensBiome;
-        SeededRandom worldgenRandom = new SeededRandom(seed);
+        SeededRandom worldgenRandom = new SeededRandom(new LegacyRandomSource(seed));
         worldgenRandom.consumeCount(17292);
         this.islandNoise = new NoiseGenerator3Handler(worldgenRandom);
     }
@@ -58,9 +59,9 @@ public class WorldChunkManagerTheEnd extends WorldChunkManager {
     }
 
     @Override
-    public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
-        int i = biomeX >> 2;
-        int j = biomeZ >> 2;
+    public BiomeBase getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
+        int i = x >> 2;
+        int j = z >> 2;
         if ((long)i * (long)i + (long)j * (long)j <= 4096L) {
             return this.end;
         } else {

@@ -61,7 +61,7 @@ public class WorldGenFeatureGlowLichen extends WorldGenerator<GlowLichenConfigur
 
         for(EnumDirection direction : directions) {
             IBlockData blockState = world.getType(mutableBlockPos.setWithOffset(pos, direction));
-            if (config.canBePlacedOn(blockState.getBlock())) {
+            if (config.canBePlacedOn.contains(blockState.getBlock())) {
                 GlowLichenBlock glowLichenBlock = (GlowLichenBlock)Blocks.GLOW_LICHEN;
                 IBlockData blockState2 = glowLichenBlock.getStateForPlacement(state, world, pos, direction);
                 if (blockState2 == null) {

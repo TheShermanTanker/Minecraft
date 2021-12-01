@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundTrack;
 import net.minecraft.util.INamable;
@@ -184,8 +185,8 @@ public class BiomeFog {
             return this;
         }
 
-        public BiomeFog.Builder backgroundMusic(SoundTrack music) {
-            this.backgroundMusic = Optional.of(music);
+        public BiomeFog.Builder backgroundMusic(@Nullable SoundTrack music) {
+            this.backgroundMusic = Optional.ofNullable(music);
             return this;
         }
 
@@ -231,8 +232,8 @@ public class BiomeFog {
 
         public abstract int modifyColor(double x, double z, int color);
 
-        GrassColor(String string2) {
-            this.name = string2;
+        GrassColor(String name) {
+            this.name = name;
         }
 
         public String getName() {

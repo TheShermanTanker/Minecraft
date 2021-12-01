@@ -20,7 +20,6 @@ public abstract class DataConverterNamedEntity extends DataFix {
         this.entityName = choiceName;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         OpticFinder<?> opticFinder = DSL.namedChoice(this.entityName, this.getInputSchema().getChoiceType(this.type, this.entityName));
         return this.fixTypeEverywhereTyped(this.name, this.getInputSchema().getType(this.type), this.getOutputSchema().getType(this.type), (typed) -> {

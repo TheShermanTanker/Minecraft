@@ -16,9 +16,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class LootSelectorLootTable extends LootSelectorEntry {
     final MinecraftKey name;
 
-    LootSelectorLootTable(MinecraftKey resourceLocation, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
+    LootSelectorLootTable(MinecraftKey id, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
         super(weight, quality, conditions, functions);
-        this.name = resourceLocation;
+        this.name = id;
     }
 
     @Override

@@ -57,8 +57,8 @@ public class WorldGenFeatureVegetationPatch extends WorldGenerator<VegetationPat
                         mutableBlockPos.move(direction);
                     }
 
-                    for(int var25 = 0; world.isStateAtPosition(mutableBlockPos, (blockStatex) -> {
-                        return !blockStatex.isAir();
+                    for(int var25 = 0; world.isStateAtPosition(mutableBlockPos, (state) -> {
+                        return !state.isAir();
                     }) && var25 < config.verticalRange; ++var25) {
                         mutableBlockPos.move(direction2);
                     }

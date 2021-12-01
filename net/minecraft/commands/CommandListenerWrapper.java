@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
@@ -47,6 +48,7 @@ public class CommandListenerWrapper implements ICompletionProvider {
     private final boolean silent;
     @Nullable
     private final Entity entity;
+    @Nullable
     private final ResultConsumer<CommandListenerWrapper> consumer;
     private final ArgumentAnchor.Anchor anchor;
     private final Vec2F rotation;
@@ -56,7 +58,7 @@ public class CommandListenerWrapper implements ICompletionProvider {
         }, ArgumentAnchor.Anchor.FEET);
     }
 
-    protected CommandListenerWrapper(ICommandListener output, Vec3D pos, Vec2F rot, WorldServer world, int level, String name, IChatBaseComponent displayName, MinecraftServer server, @Nullable Entity entity, boolean silent, ResultConsumer<CommandListenerWrapper> consumer, ArgumentAnchor.Anchor entityAnchor) {
+    protected CommandListenerWrapper(ICommandListener output, Vec3D pos, Vec2F rot, WorldServer world, int level, String name, IChatBaseComponent displayName, MinecraftServer server, @Nullable Entity entity, boolean silent, @Nullable ResultConsumer<CommandListenerWrapper> consumer, ArgumentAnchor.Anchor entityAnchor) {
         this.source = output;
         this.worldPosition = pos;
         this.level = world;
@@ -88,7 +90,7 @@ public class CommandListenerWrapper implements ICompletionProvider {
     }
 
     public CommandListenerWrapper withCallback(ResultConsumer<CommandListenerWrapper> consumer) {
-        return this.consumer.equals(consumer) ? this : new CommandListenerWrapper(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, consumer, this.anchor);
+        return Objects.equals(this.consumer, consumer) ? this : new CommandListenerWrapper(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel, this.textName, this.displayName, this.server, this.entity, this.silent, consumer, this.anchor);
     }
 
     public CommandListenerWrapper withCallback(ResultConsumer<CommandListenerWrapper> consumer, BinaryOperator<ResultConsumer<CommandListenerWrapper>> merger) {

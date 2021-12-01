@@ -45,7 +45,6 @@ import net.minecraft.world.entity.ai.goal.PathfinderGoalFollowOwner;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalLookAtPlayer;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalPanic;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalPerch;
-import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomFly;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalSit;
 import net.minecraft.world.entity.ai.navigation.NavigationAbstract;
 import net.minecraft.world.entity.ai.navigation.NavigationFlying;
@@ -114,6 +113,7 @@ public class EntityParrot extends EntityPerchable implements EntityBird {
     private float flapping = 1.0F;
     private float nextFlap = 1.0F;
     private boolean partyParrot;
+    @Nullable
     private BlockPosition jukebox;
 
     public EntityParrot(EntityTypes<? extends EntityParrot> type, World world) {
@@ -147,7 +147,7 @@ public class EntityParrot extends EntityPerchable implements EntityBird {
         this.goalSelector.addGoal(1, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 8.0F));
         this.goalSelector.addGoal(2, new PathfinderGoalSit(this));
         this.goalSelector.addGoal(2, new PathfinderGoalFollowOwner(this, 1.0D, 5.0F, 1.0F, true));
-        this.goalSelector.addGoal(2, new PathfinderGoalRandomFly(this, 1.0D));
+        this.goalSelector.addGoal(2, new Parrot$ParrotWanderGoal(this, 1.0D));
         this.goalSelector.addGoal(3, new PathfinderGoalPerch(this));
         this.goalSelector.addGoal(3, new PathfinderGoalFollowEntity(this, 1.0D, 3.0F, 7.0F));
     }
@@ -281,8 +281,7 @@ public class EntityParrot extends EntityPerchable implements EntityBird {
     }
 
     public static boolean checkParrotSpawnRules(EntityTypes<EntityParrot> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        IBlockData blockState = world.getType(pos.below());
-        return (blockState.is(TagsBlock.LEAVES) || blockState.is(Blocks.GRASS_BLOCK) || blockState.is(TagsBlock.LOGS) || blockState.is(Blocks.AIR)) && world.getLightLevel(pos, 0) > 8;
+        return world.getType(pos.below()).is(TagsBlock.PARROTS_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
     }
 
     @Override

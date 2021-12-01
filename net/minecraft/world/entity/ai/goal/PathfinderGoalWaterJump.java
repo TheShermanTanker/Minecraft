@@ -17,7 +17,7 @@ public class PathfinderGoalWaterJump extends PathfinderGoalWaterJumpAbstract {
 
     public PathfinderGoalWaterJump(EntityDolphin dolphin, int chance) {
         this.dolphin = dolphin;
-        this.interval = chance;
+        this.interval = reducedTickDelay(chance);
     }
 
     @Override

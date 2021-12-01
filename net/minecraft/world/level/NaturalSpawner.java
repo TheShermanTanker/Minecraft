@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.IRegistry;
-import net.minecraft.core.SectionPosition;
+import net.minecraft.core.QuartPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.tags.TagsBlock;
@@ -31,7 +31,6 @@ import net.minecraft.world.entity.GroupDataEntity;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.BiomeSettingsMobs;
-import net.minecraft.world.level.biome.GenLayerZoomerBiome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.Chunk;
@@ -39,6 +38,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.IChunkAccess;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
+import net.minecraft.world.level.levelgen.feature.WorldGenNether;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.PathMode;
 import net.minecraft.world.phys.Vec3D;
@@ -60,20 +60,20 @@ public final class NaturalSpawner {
     private NaturalSpawner() {
     }
 
-    public static NaturalSpawner.SpawnState createState(int spawningChunkCount, Iterable<Entity> entities, NaturalSpawner.ChunkGetter chunkSource) {
+    public static NaturalSpawner.SpawnState createState(int spawningChunkCount, Iterable<Entity> entities, NaturalSpawner.ChunkGetter chunkSource, LocalMobCapCalculator localMobCapCalculator) {
         NaturalSpawnerPotentials potentialCalculator = new NaturalSpawnerPotentials();
         Object2IntOpenHashMap<EnumCreatureType> object2IntOpenHashMap = new Object2IntOpenHashMap<>();
-        Iterator var5 = entities.iterator();
+        Iterator var6 = entities.iterator();
 
         while(true) {
             Entity entity;
             EntityInsentient mob;
             do {
-                if (!var5.hasNext()) {
-                    return new NaturalSpawner.SpawnState(spawningChunkCount, object2IntOpenHashMap, potentialCalculator);
+                if (!var6.hasNext()) {
+                    return new NaturalSpawner.SpawnState(spawningChunkCount, object2IntOpenHashMap, potentialCalculator, localMobCapCalculator);
                 }
 
-                entity = (Entity)var5.next();
+                entity = (Entity)var6.next();
                 if (!(entity instanceof EntityInsentient)) {
                     break;
                 }
@@ -84,11 +84,14 @@ public final class NaturalSpawner {
             EnumCreatureType mobCategory = entity.getEntityType().getCategory();
             if (mobCategory != EnumCreatureType.MISC) {
                 BlockPosition blockPos = entity.getChunkCoordinates();
-                long l = ChunkCoordIntPair.pair(SectionPosition.blockToSectionCoord(blockPos.getX()), SectionPosition.blockToSectionCoord(blockPos.getZ()));
-                chunkSource.query(l, (chunk) -> {
-                    BiomeSettingsMobs.MobSpawnCost mobSpawnCost = getRoughBiome(blockPos, chunk).getMobSettings().getMobSpawnCost(entity.getEntityType());
+                chunkSource.query(ChunkCoordIntPair.asLong(blockPos), (levelChunk) -> {
+                    BiomeSettingsMobs.MobSpawnCost mobSpawnCost = getRoughBiome(blockPos, levelChunk).getMobSettings().getMobSpawnCost(entity.getEntityType());
                     if (mobSpawnCost != null) {
                         potentialCalculator.addCharge(entity.getChunkCoordinates(), mobSpawnCost.getCharge());
+                    }
+
+                    if (entity instanceof EntityInsentient) {
+                        localMobCapCalculator.addMob(levelChunk.getPos(), mobCategory);
                     }
 
                     object2IntOpenHashMap.addTo(mobCategory, 1);
@@ -98,14 +101,14 @@ public final class NaturalSpawner {
     }
 
     static BiomeBase getRoughBiome(BlockPosition pos, IChunkAccess chunk) {
-        return GenLayerZoomerBiome.INSTANCE.getBiome(0L, pos.getX(), pos.getY(), pos.getZ(), chunk.getBiomeIndex());
+        return chunk.getBiome(QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
     }
 
     public static void spawnForChunk(WorldServer world, Chunk chunk, NaturalSpawner.SpawnState info, boolean spawnAnimals, boolean spawnMonsters, boolean rareSpawn) {
         world.getMethodProfiler().enter("spawner");
 
         for(EnumCreatureType mobCategory : SPAWNING_CATEGORIES) {
-            if ((spawnAnimals || !mobCategory.isFriendly()) && (spawnMonsters || mobCategory.isFriendly()) && (rareSpawn || !mobCategory.isPersistent()) && info.canSpawnForCategory(mobCategory)) {
+            if ((spawnAnimals || !mobCategory.isFriendly()) && (spawnMonsters || mobCategory.isFriendly()) && (rareSpawn || !mobCategory.isPersistent()) && info.canSpawnForCategory(mobCategory, chunk.getPos())) {
                 spawnCategoryForChunk(mobCategory, world, chunk, info::canSpawn, info::afterSpawn);
             }
         }
@@ -158,7 +161,7 @@ public final class NaturalSpawner {
                         if (isRightDistanceToPlayerAndSpawnPoint(world, chunk, mutableBlockPos, f)) {
                             if (spawnerData == null) {
                                 Optional<BiomeSettingsMobs.SpawnerData> optional = getRandomSpawnMobAt(world, structureFeatureManager, chunkGenerator, group, world.random, mutableBlockPos);
-                                if (!optional.isPresent()) {
+                                if (optional.isEmpty()) {
                                     break;
                                 }
 
@@ -259,7 +262,11 @@ public final class NaturalSpawner {
     }
 
     private static WeightedRandomList<BiomeSettingsMobs.SpawnerData> mobsAt(WorldServer world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, EnumCreatureType spawnGroup, BlockPosition pos, @Nullable BiomeBase biome) {
-        return spawnGroup == EnumCreatureType.MONSTER && world.getType(pos.below()).is(Blocks.NETHER_BRICKS) && structureAccessor.getStructureAt(pos, false, StructureGenerator.NETHER_BRIDGE).isValid() ? StructureGenerator.NETHER_BRIDGE.getSpecialEnemies() : chunkGenerator.getMobsFor(biome != null ? biome : world.getBiome(pos), structureAccessor, spawnGroup, pos);
+        return isInNetherFortressBounds(pos, world, spawnGroup, structureAccessor) ? WorldGenNether.FORTRESS_ENEMIES : chunkGenerator.getMobsFor(biome != null ? biome : world.getBiome(pos), structureAccessor, spawnGroup, pos);
+    }
+
+    public static boolean isInNetherFortressBounds(BlockPosition pos, WorldServer world, EnumCreatureType spawnGroup, StructureManager structureAccessor) {
+        return spawnGroup == EnumCreatureType.MONSTER && world.getType(pos.below()).is(Blocks.NETHER_BRICKS) && structureAccessor.getStructureAt(pos, StructureGenerator.NETHER_BRIDGE).isValid();
     }
 
     private static BlockPosition getRandomPosition(World world, Chunk chunk) {
@@ -295,7 +302,7 @@ public final class NaturalSpawner {
             BlockPosition blockPos2 = pos.below();
             switch(location) {
             case IN_WATER:
-                return fluidState.is(TagsFluid.WATER) && world.getFluid(blockPos2).is(TagsFluid.WATER) && !world.getType(blockPos).isOccluding(world, blockPos);
+                return fluidState.is(TagsFluid.WATER) && !world.getType(blockPos).isOccluding(world, blockPos);
             case IN_LAVA:
                 return fluidState.is(TagsFluid.LAVA);
             case ON_GROUND:
@@ -418,16 +425,18 @@ public final class NaturalSpawner {
         private final Object2IntOpenHashMap<EnumCreatureType> mobCategoryCounts;
         private final NaturalSpawnerPotentials spawnPotential;
         private final Object2IntMap<EnumCreatureType> unmodifiableMobCategoryCounts;
+        private final LocalMobCapCalculator localMobCapCalculator;
         @Nullable
         private BlockPosition lastCheckedPos;
         @Nullable
         private EntityTypes<?> lastCheckedType;
         private double lastCharge;
 
-        SpawnState(int spawningChunkCount, Object2IntOpenHashMap<EnumCreatureType> groupToCount, NaturalSpawnerPotentials densityField) {
+        SpawnState(int spawningChunkCount, Object2IntOpenHashMap<EnumCreatureType> groupToCount, NaturalSpawnerPotentials densityField, LocalMobCapCalculator densityCapper) {
             this.spawnableChunkCount = spawningChunkCount;
             this.mobCategoryCounts = groupToCount;
             this.spawnPotential = densityField;
+            this.localMobCapCalculator = densityCapper;
             this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(groupToCount);
         }
 
@@ -462,7 +471,9 @@ public final class NaturalSpawner {
             }
 
             this.spawnPotential.addCharge(blockPos, d);
-            this.mobCategoryCounts.addTo(entityType.getCategory(), 1);
+            EnumCreatureType mobCategory = entityType.getCategory();
+            this.mobCategoryCounts.addTo(mobCategory, 1);
+            this.localMobCapCalculator.addMob(new ChunkCoordIntPair(blockPos), mobCategory);
         }
 
         public int getSpawnableChunkCount() {
@@ -473,9 +484,13 @@ public final class NaturalSpawner {
             return this.unmodifiableMobCategoryCounts;
         }
 
-        boolean canSpawnForCategory(EnumCreatureType group) {
+        boolean canSpawnForCategory(EnumCreatureType group, ChunkCoordIntPair chunkPos) {
             int i = group.getMaxInstancesPerChunk() * this.spawnableChunkCount / NaturalSpawner.MAGIC_NUMBER;
-            return this.mobCategoryCounts.getInt(group) < i;
+            if (this.mobCategoryCounts.getInt(group) >= i) {
+                return false;
+            } else {
+                return this.localMobCapCalculator.canSpawn(group, chunkPos);
+            }
         }
     }
 }

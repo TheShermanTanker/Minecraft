@@ -143,7 +143,7 @@ public class BlockBamboo extends Block implements IBlockFragilePlantElement {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (!state.canPlace(world, pos)) {
-            world.getBlockTickList().scheduleTick(pos, this, 1);
+            world.scheduleTick(pos, this, 1);
         }
 
         if (direction == EnumDirection.UP && neighborState.is(Blocks.BAMBOO) && neighborState.get(AGE) > state.get(AGE)) {

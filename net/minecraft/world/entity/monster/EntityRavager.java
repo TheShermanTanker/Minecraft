@@ -76,7 +76,9 @@ public class EntityRavager extends EntityRaider {
         this.goalSelector.addGoal(10, new PathfinderGoalLookAtPlayer(this, EntityInsentient.class, 8.0F));
         this.targetSelector.addGoal(2, (new PathfinderGoalHurtByTarget(this, EntityRaider.class)).setAlertOthers());
         this.targetSelector.addGoal(3, new PathfinderGoalNearestAttackableTarget<>(this, EntityHuman.class, true));
-        this.targetSelector.addGoal(4, new PathfinderGoalNearestAttackableTarget<>(this, EntityVillagerAbstract.class, true));
+        this.targetSelector.addGoal(4, new PathfinderGoalNearestAttackableTarget<>(this, EntityVillagerAbstract.class, true, (entity) -> {
+            return !entity.isBaby();
+        }));
         this.targetSelector.addGoal(4, new PathfinderGoalNearestAttackableTarget<>(this, EntityIronGolem.class, true));
     }
 

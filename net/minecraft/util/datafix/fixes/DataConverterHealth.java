@@ -34,7 +34,6 @@ public class DataConverterHealth extends DataFix {
         return dynamic.set("Health", dynamic.createFloat(f));
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("EntityHealthFix", this.getInputSchema().getType(DataConverterTypes.ENTITY), (typed) -> {
             return typed.update(DSL.remainderFinder(), this::fixTag);

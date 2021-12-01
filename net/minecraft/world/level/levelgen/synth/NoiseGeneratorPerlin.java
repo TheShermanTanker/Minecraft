@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.levelgen.RandomSource;
 
@@ -33,6 +34,7 @@ public final class NoiseGeneratorPerlin {
         return this.noise(x, y, z, 0.0D, 0.0D);
     }
 
+    /** @deprecated */
     @Deprecated
     public double noise(double x, double y, double z, double yScale, double yMax) {
         double d = x + this.xo;
@@ -153,5 +155,10 @@ public final class NoiseGeneratorPerlin {
         ds[1] += am;
         ds[2] += an;
         return MathHelper.lerp3(z, aa, ab, d, e, f, g, h, w, x, y);
+    }
+
+    @VisibleForTesting
+    public void parityConfigString(StringBuilder info) {
+        NoiseUtils.parityNoiseOctaveConfigString(info, this.xo, this.yo, this.zo, this.p);
     }
 }

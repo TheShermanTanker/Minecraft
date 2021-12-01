@@ -15,9 +15,9 @@ public class UniformGenerator implements NumberProvider {
     final NumberProvider min;
     final NumberProvider max;
 
-    UniformGenerator(NumberProvider numberProvider, NumberProvider numberProvider2) {
-        this.min = numberProvider;
-        this.max = numberProvider2;
+    UniformGenerator(NumberProvider min, NumberProvider max) {
+        this.min = min;
+        this.max = max;
     }
 
     @Override

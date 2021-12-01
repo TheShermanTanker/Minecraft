@@ -3,9 +3,9 @@ package net.minecraft.server.level;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
@@ -24,8 +24,8 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
+import net.minecraft.world.level.IWorldHeightAccess;
 import net.minecraft.world.level.StructureManager;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
@@ -48,24 +48,26 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidType;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.AxisAlignedBB;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.WorldGenTickAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<IChunkAccess> cache;
-    private final ChunkCoordIntPair center;
+    private final IChunkAccess center;
     private final int size;
     private final WorldServer level;
     private final long seed;
     private final WorldData levelData;
     private final Random random;
     private final DimensionManager dimensionType;
-    private final TickList<Block> blockTicks = new TickListWorldGen<>((pos) -> {
+    private final WorldGenTickAccess<Block> blockTicks = new WorldGenTickAccess<>((pos) -> {
         return this.getChunk(pos).getBlockTicks();
     });
-    private final TickList<FluidType> liquidTicks = new TickListWorldGen<>((pos) -> {
-        return this.getChunk(pos).getLiquidTicks();
+    private final WorldGenTickAccess<FluidType> fluidTicks = new WorldGenTickAccess<>((pos) -> {
+        return this.getChunk(pos).getFluidTicks();
     });
     private final BiomeManager biomeManager;
     private final ChunkCoordIntPair firstPos;
@@ -75,36 +77,37 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     private final int writeRadiusCutoff;
     @Nullable
     private Supplier<String> currentlyGenerating;
+    private final AtomicLong subTickCount = new AtomicLong();
 
-    public RegionLimitedWorldAccess(WorldServer world, List<IChunkAccess> list, ChunkStatus chunkStatus, int i) {
-        this.generatingStatus = chunkStatus;
-        this.writeRadiusCutoff = i;
-        int j = MathHelper.floor(Math.sqrt((double)list.size()));
-        if (j * j != list.size()) {
+    public RegionLimitedWorldAccess(WorldServer world, List<IChunkAccess> chunks, ChunkStatus status, int placementRadius) {
+        this.generatingStatus = status;
+        this.writeRadiusCutoff = placementRadius;
+        int i = MathHelper.floor(Math.sqrt((double)chunks.size()));
+        if (i * i != chunks.size()) {
             throw (IllegalStateException)SystemUtils.pauseInIde(new IllegalStateException("Cache size is not a square."));
         } else {
-            ChunkCoordIntPair chunkPos = list.get(list.size() / 2).getPos();
-            this.cache = list;
-            this.center = chunkPos;
-            this.size = j;
+            this.cache = chunks;
+            this.center = chunks.get(chunks.size() / 2);
+            this.size = i;
             this.level = world;
             this.seed = world.getSeed();
             this.levelData = world.getWorldData();
             this.random = world.getRandom();
             this.dimensionType = world.getDimensionManager();
-            this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed), world.getDimensionManager().getGenLayerZoomer());
-            this.firstPos = list.get(0).getPos();
-            this.lastPos = list.get(list.size() - 1).getPos();
+            this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed));
+            this.firstPos = chunks.get(0).getPos();
+            this.lastPos = chunks.get(chunks.size() - 1).getPos();
             this.structureFeatureManager = world.getStructureManager().forWorldGenRegion(this);
         }
     }
 
     public ChunkCoordIntPair getCenter() {
-        return this.center;
+        return this.center.getPos();
     }
 
-    public void setCurrentlyGenerating(@Nullable Supplier<String> supplier) {
-        this.currentlyGenerating = supplier;
+    @Override
+    public void setCurrentlyGenerating(@Nullable Supplier<String> structureName) {
+        this.currentlyGenerating = structureName;
     }
 
     @Override
@@ -237,15 +240,23 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     }
 
     @Override
-    public boolean ensureCanWrite(BlockPosition blockPos) {
-        int i = SectionPosition.blockToSectionCoord(blockPos.getX());
-        int j = SectionPosition.blockToSectionCoord(blockPos.getZ());
-        int k = Math.abs(this.center.x - i);
-        int l = Math.abs(this.center.z - j);
+    public boolean ensureCanWrite(BlockPosition pos) {
+        int i = SectionPosition.blockToSectionCoord(pos.getX());
+        int j = SectionPosition.blockToSectionCoord(pos.getZ());
+        ChunkCoordIntPair chunkPos = this.getCenter();
+        int k = Math.abs(chunkPos.x - i);
+        int l = Math.abs(chunkPos.z - j);
         if (k <= this.writeRadiusCutoff && l <= this.writeRadiusCutoff) {
+            if (this.center.isUpgrading()) {
+                IWorldHeightAccess levelHeightAccessor = this.center.getHeightAccessorForGeneration();
+                if (pos.getY() < levelHeightAccessor.getMinBuildHeight() || pos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
+                    return false;
+                }
+            }
+
             return true;
         } else {
-            SystemUtils.logAndPauseIfInIde("Detected setBlock in a far chunk [" + i + ", " + j + "], pos: " + blockPos + ", status: " + this.generatingStatus + (this.currentlyGenerating == null ? "" : ", currently generating: " + (String)this.currentlyGenerating.get()));
+            SystemUtils.logAndPauseIfInIde("Detected setBlock in a far chunk [" + i + ", " + j + "], pos: " + pos + ", status: " + this.generatingStatus + (this.currentlyGenerating == null ? "" : ", currently generating: " + (String)this.currentlyGenerating.get()));
             return false;
         }
     }
@@ -316,6 +327,7 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
         return false;
     }
 
+    /** @deprecated */
     @Deprecated
     @Override
     public WorldServer getLevel() {
@@ -358,13 +370,13 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     }
 
     @Override
-    public TickList<Block> getBlockTickList() {
+    public LevelTickAccess<Block> getBlockTicks() {
         return this.blockTicks;
     }
 
     @Override
-    public TickList<FluidType> getFluidTickList() {
-        return this.liquidTicks;
+    public LevelTickAccess<FluidType> getFluidTicks() {
+        return this.fluidTicks;
     }
 
     @Override
@@ -429,7 +441,7 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     }
 
     @Override
-    public Stream<? extends StructureStart<?>> startsForFeature(SectionPosition pos, StructureGenerator<?> feature) {
+    public List<? extends StructureStart<?>> startsForFeature(SectionPosition pos, StructureGenerator<?> feature) {
         return this.structureFeatureManager.startsForFeature(pos, feature);
     }
 
@@ -441,5 +453,10 @@ public class RegionLimitedWorldAccess implements GeneratorAccessSeed {
     @Override
     public int getHeight() {
         return this.level.getHeight();
+    }
+
+    @Override
+    public long nextSubTickCount() {
+        return this.subTickCount.getAndIncrement();
     }
 }

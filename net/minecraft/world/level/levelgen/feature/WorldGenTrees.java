@@ -81,20 +81,16 @@ public class WorldGenTrees extends WorldGenerator<WorldGenFeatureTreeConfigurati
         int k = i - j;
         int l = config.foliagePlacer.foliageRadius(random, k);
         if (pos.getY() >= world.getMinBuildHeight() + 1 && pos.getY() + i + 1 <= world.getMaxBuildHeight()) {
-            if (!config.saplingProvider.getState(random, pos).canPlace(world, pos)) {
-                return false;
+            OptionalInt optionalInt = config.minimumSize.minClippedHeight();
+            int m = this.getMaxFreeTreeHeight(world, i, pos, config);
+            if (m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt()) {
+                List<WorldGenFoilagePlacer.FoliageAttachment> list = config.trunkPlacer.placeTrunk(world, trunkReplacer, random, m, pos, config);
+                list.forEach((node) -> {
+                    config.foliagePlacer.createFoliage(world, foliageReplacer, random, config, m, node, j, l);
+                });
+                return true;
             } else {
-                OptionalInt optionalInt = config.minimumSize.minClippedHeight();
-                int m = this.getMaxFreeTreeHeight(world, i, pos, config);
-                if (m >= i || optionalInt.isPresent() && m >= optionalInt.getAsInt()) {
-                    List<WorldGenFoilagePlacer.FoliageAttachment> list = config.trunkPlacer.placeTrunk(world, trunkReplacer, random, m, pos, config);
-                    list.forEach((foliageAttachment) -> {
-                        config.foliagePlacer.createFoliage(world, foliageReplacer, random, config, m, foliageAttachment, j, l);
-                    });
-                    return true;
-                } else {
-                    return false;
-                }
+                return false;
             }
         } else {
             return false;
@@ -153,8 +149,8 @@ public class WorldGenTrees extends WorldGenerator<WorldGenFeatureTreeConfigurati
                 List<BlockPosition> list2 = Lists.newArrayList(set2);
                 list.sort(Comparator.comparingInt(BaseBlockPosition::getY));
                 list2.sort(Comparator.comparingInt(BaseBlockPosition::getY));
-                treeConfiguration.decorators.forEach((treeDecorator) -> {
-                    treeDecorator.place(worldGenLevel, biConsumer3, random, list, list2);
+                treeConfiguration.decorators.forEach((decorator) -> {
+                    decorator.place(worldGenLevel, biConsumer3, random, list, list2);
                 });
             }
 

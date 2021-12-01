@@ -54,27 +54,27 @@ public final class Quaternion {
         this.r = other.r;
     }
 
-    public static Quaternion fromYXZ(float f, float g, float h) {
+    public static Quaternion fromYXZ(float x, float y, float z) {
         Quaternion quaternion = ONE.copy();
-        quaternion.mul(new Quaternion(0.0F, (float)Math.sin((double)(f / 2.0F)), 0.0F, (float)Math.cos((double)(f / 2.0F))));
-        quaternion.mul(new Quaternion((float)Math.sin((double)(g / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(g / 2.0F))));
-        quaternion.mul(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(h / 2.0F)), (float)Math.cos((double)(h / 2.0F))));
+        quaternion.mul(new Quaternion(0.0F, (float)Math.sin((double)(x / 2.0F)), 0.0F, (float)Math.cos((double)(x / 2.0F))));
+        quaternion.mul(new Quaternion((float)Math.sin((double)(y / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(y / 2.0F))));
+        quaternion.mul(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(z / 2.0F)), (float)Math.cos((double)(z / 2.0F))));
         return quaternion;
     }
 
-    public static Quaternion fromXYZDegrees(Vector3fa vector3f) {
-        return fromXYZ((float)Math.toRadians((double)vector3f.x()), (float)Math.toRadians((double)vector3f.y()), (float)Math.toRadians((double)vector3f.z()));
+    public static Quaternion fromXYZDegrees(Vector3fa vector) {
+        return fromXYZ((float)Math.toRadians((double)vector.x()), (float)Math.toRadians((double)vector.y()), (float)Math.toRadians((double)vector.z()));
     }
 
-    public static Quaternion fromXYZ(Vector3fa vector3f) {
-        return fromXYZ(vector3f.x(), vector3f.y(), vector3f.z());
+    public static Quaternion fromXYZ(Vector3fa vector) {
+        return fromXYZ(vector.x(), vector.y(), vector.z());
     }
 
-    public static Quaternion fromXYZ(float f, float g, float h) {
+    public static Quaternion fromXYZ(float x, float y, float z) {
         Quaternion quaternion = ONE.copy();
-        quaternion.mul(new Quaternion((float)Math.sin((double)(f / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(f / 2.0F))));
-        quaternion.mul(new Quaternion(0.0F, (float)Math.sin((double)(g / 2.0F)), 0.0F, (float)Math.cos((double)(g / 2.0F))));
-        quaternion.mul(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(h / 2.0F)), (float)Math.cos((double)(h / 2.0F))));
+        quaternion.mul(new Quaternion((float)Math.sin((double)(x / 2.0F)), 0.0F, 0.0F, (float)Math.cos((double)(x / 2.0F))));
+        quaternion.mul(new Quaternion(0.0F, (float)Math.sin((double)(y / 2.0F)), 0.0F, (float)Math.cos((double)(y / 2.0F))));
+        quaternion.mul(new Quaternion(0.0F, 0.0F, (float)Math.sin((double)(z / 2.0F)), (float)Math.cos((double)(z / 2.0F))));
         return quaternion;
     }
 

@@ -13,10 +13,11 @@ import net.minecraft.data.advancements.DebugReportProviderAdvancement;
 import net.minecraft.data.info.DebugReportProviderBlockList;
 import net.minecraft.data.info.DebugReportProviderCommands;
 import net.minecraft.data.info.DebugReportProviderRegistryDump;
+import net.minecraft.data.info.WorldgenRegistryDumpReport;
 import net.minecraft.data.loot.DebugReportProviderLootTable;
 import net.minecraft.data.models.DebugReportProviderModel;
 import net.minecraft.data.recipes.DebugReportProviderRecipe;
-import net.minecraft.data.structures.DebugReportProviderNBT;
+import net.minecraft.data.structures.DebugReportProviderStructureFromNBT;
 import net.minecraft.data.structures.DebugReportProviderStructureToNBT;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.data.tags.TagsProviderBlock;
@@ -24,7 +25,6 @@ import net.minecraft.data.tags.TagsProviderEntityType;
 import net.minecraft.data.tags.TagsProviderFluid;
 import net.minecraft.data.tags.TagsProviderGameEvent;
 import net.minecraft.data.tags.TagsProviderItem;
-import net.minecraft.data.worldgen.biome.DebugReportProviderBiome;
 import net.minecraft.obfuscate.DontObfuscate;
 
 public class Main {
@@ -82,14 +82,14 @@ public class Main {
         }
 
         if (includeDev) {
-            dataGenerator.addProvider(new DebugReportProviderNBT(dataGenerator));
+            dataGenerator.addProvider(new DebugReportProviderStructureFromNBT(dataGenerator));
         }
 
         if (includeReports) {
             dataGenerator.addProvider(new DebugReportProviderBlockList(dataGenerator));
             dataGenerator.addProvider(new DebugReportProviderRegistryDump(dataGenerator));
             dataGenerator.addProvider(new DebugReportProviderCommands(dataGenerator));
-            dataGenerator.addProvider(new DebugReportProviderBiome(dataGenerator));
+            dataGenerator.addProvider(new WorldgenRegistryDumpReport(dataGenerator));
         }
 
         return dataGenerator;

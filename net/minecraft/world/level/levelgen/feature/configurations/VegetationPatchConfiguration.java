@@ -5,9 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Supplier;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
 import net.minecraft.world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProvider;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class VegetationPatchConfiguration implements WorldGenFeatureConfiguration {
     public static final Codec<VegetationPatchConfiguration> CODEC = RecordCodecBuilder.create((instance) -> {
@@ -15,7 +15,7 @@ public class VegetationPatchConfiguration implements WorldGenFeatureConfiguratio
             return vegetationPatchConfiguration.replaceable;
         }), WorldGenFeatureStateProvider.CODEC.fieldOf("ground_state").forGetter((vegetationPatchConfiguration) -> {
             return vegetationPatchConfiguration.groundState;
-        }), WorldGenFeatureConfigured.CODEC.fieldOf("vegetation_feature").forGetter((vegetationPatchConfiguration) -> {
+        }), PlacedFeature.CODEC.fieldOf("vegetation_feature").forGetter((vegetationPatchConfiguration) -> {
             return vegetationPatchConfiguration.vegetationFeature;
         }), CaveSurface.CODEC.fieldOf("surface").forGetter((vegetationPatchConfiguration) -> {
             return vegetationPatchConfiguration.surface;
@@ -35,7 +35,7 @@ public class VegetationPatchConfiguration implements WorldGenFeatureConfiguratio
     });
     public final MinecraftKey replaceable;
     public final WorldGenFeatureStateProvider groundState;
-    public final Supplier<WorldGenFeatureConfigured<?, ?>> vegetationFeature;
+    public final Supplier<PlacedFeature> vegetationFeature;
     public final CaveSurface surface;
     public final IntProvider depth;
     public final float extraBottomBlockChance;
@@ -44,7 +44,7 @@ public class VegetationPatchConfiguration implements WorldGenFeatureConfiguratio
     public final IntProvider xzRadius;
     public final float extraEdgeColumnChance;
 
-    public VegetationPatchConfiguration(MinecraftKey replaceable, WorldGenFeatureStateProvider groundState, Supplier<WorldGenFeatureConfigured<?, ?>> vegetationFeature, CaveSurface surface, IntProvider depth, float extraBottomBlockChance, int verticalRange, float vegetationChance, IntProvider horizontalRadius, float extraEdgeColumnChance) {
+    public VegetationPatchConfiguration(MinecraftKey replaceable, WorldGenFeatureStateProvider groundState, Supplier<PlacedFeature> vegetationFeature, CaveSurface surface, IntProvider depth, float extraBottomBlockChance, int verticalRange, float vegetationChance, IntProvider horizontalRadius, float extraEdgeColumnChance) {
         this.replaceable = replaceable;
         this.groundState = groundState;
         this.vegetationFeature = vegetationFeature;

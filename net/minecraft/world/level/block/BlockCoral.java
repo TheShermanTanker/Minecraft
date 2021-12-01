@@ -32,7 +32,7 @@ public class BlockCoral extends Block {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (!this.scanForWater(world, pos)) {
-            world.getBlockTickList().scheduleTick(pos, this, 60 + world.getRandom().nextInt(40));
+            world.scheduleTick(pos, this, 60 + world.getRandom().nextInt(40));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -53,7 +53,7 @@ public class BlockCoral extends Block {
     @Override
     public IBlockData getPlacedState(BlockActionContext ctx) {
         if (!this.scanForWater(ctx.getWorld(), ctx.getClickPosition())) {
-            ctx.getWorld().getBlockTickList().scheduleTick(ctx.getClickPosition(), this, 60 + ctx.getWorld().getRandom().nextInt(40));
+            ctx.getWorld().scheduleTick(ctx.getClickPosition(), this, 60 + ctx.getWorld().getRandom().nextInt(40));
         }
 
         return this.getBlockData();

@@ -137,7 +137,7 @@ public class DebugReportProviderStructureToNBT implements DebugReportProvider {
             Path path = DUMP_SNBT_TO.resolve(data.name + ".snbt");
 
             try {
-                DebugReportProviderNBT.writeSnbt(path, data.snbtPayload);
+                DebugReportProviderStructureFromNBT.writeSnbt(path, data.snbtPayload);
             } catch (IOException var9) {
                 LOGGER.error("Couldn't write structure SNBT {} at {}", data.name, path, var9);
             }

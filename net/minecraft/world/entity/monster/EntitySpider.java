@@ -184,6 +184,7 @@ public class EntitySpider extends EntityMonster {
     }
 
     public static class GroupDataSpider implements GroupDataEntity {
+        @Nullable
         public MobEffectBase effect;
 
         public void setRandomEffect(Random random) {

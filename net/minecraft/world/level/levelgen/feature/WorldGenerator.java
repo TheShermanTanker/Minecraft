@@ -15,13 +15,15 @@ import net.minecraft.world.level.VirtualWorldReadable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GlowLichenConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.GrowingPlantConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig;
+import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallDripstoneConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig;
 import net.minecraft.world.level.levelgen.feature.configurations.UnderwaterMagmaConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.VegetationPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenDecoratorFrequencyConfiguration;
@@ -31,7 +33,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeature
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureBlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureChoiceConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureCircleConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureCompositeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureConfigurationChance;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureDeltaConfiguration;
@@ -52,8 +53,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeature
 public abstract class WorldGenerator<FC extends WorldGenFeatureConfiguration> {
     public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> NO_OP = register("no_op", new WorldGenFeatureEmpty(WorldGenFeatureEmptyConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureTreeConfiguration> TREE = register("tree", new WorldGenTrees(WorldGenFeatureTreeConfiguration.CODEC));
-    public static final WorldGenFlowers<WorldGenFeatureRandomPatchConfiguration> FLOWER = register("flower", new WorldGenFeatureFlower(WorldGenFeatureRandomPatchConfiguration.CODEC));
-    public static final WorldGenFlowers<WorldGenFeatureRandomPatchConfiguration> NO_BONEMEAL_FLOWER = register("no_bonemeal_flower", new WorldGenFeatureFlower(WorldGenFeatureRandomPatchConfiguration.CODEC));
+    public static final WorldGenerator<WorldGenFeatureRandomPatchConfiguration> FLOWER = register("flower", new WorldGenFeatureRandomPatch(WorldGenFeatureRandomPatchConfiguration.CODEC));
+    public static final WorldGenerator<WorldGenFeatureRandomPatchConfiguration> NO_BONEMEAL_FLOWER = register("no_bonemeal_flower", new WorldGenFeatureRandomPatch(WorldGenFeatureRandomPatchConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureRandomPatchConfiguration> RANDOM_PATCH = register("random_patch", new WorldGenFeatureRandomPatch(WorldGenFeatureRandomPatchConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureBlockPileConfiguration> BLOCK_PILE = register("block_pile", new WorldGenFeatureBlockPile(WorldGenFeatureBlockPileConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureHellFlowingLavaConfiguration> SPRING = register("spring_feature", new WorldGenLiquids(WorldGenFeatureHellFlowingLavaConfiguration.CODEC));
@@ -68,7 +69,7 @@ public abstract class WorldGenerator<FC extends WorldGenFeatureConfiguration> {
     public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> GLOWSTONE_BLOB = register("glowstone_blob", new WorldGenLightStone1(WorldGenFeatureEmptyConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> FREEZE_TOP_LAYER = register("freeze_top_layer", new WorldGenFeatureIceSnow(WorldGenFeatureEmptyConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> VINES = register("vines", new WorldGenVines(WorldGenFeatureEmptyConfiguration.CODEC));
-    public static final WorldGenerator<GrowingPlantConfiguration> GROWING_PLANT = register("growing_plant", new WorldGenFeatureGrowingPlant(GrowingPlantConfiguration.CODEC));
+    public static final WorldGenerator<BlockColumnConfiguration> BLOCK_COLUMN = register("block_column", new BlockColumnFeature(BlockColumnConfiguration.CODEC));
     public static final WorldGenerator<VegetationPatchConfiguration> VEGETATION_PATCH = register("vegetation_patch", new WorldGenFeatureVegetationPatch(VegetationPatchConfiguration.CODEC));
     public static final WorldGenerator<VegetationPatchConfiguration> WATERLOGGED_VEGETATION_PATCH = register("waterlogged_vegetation_patch", new WorldGenFeatureWaterloggedVegetationPatch(VegetationPatchConfiguration.CODEC));
     public static final WorldGenerator<RootSystemConfiguration> ROOT_SYSTEM = register("root_system", new WorldGenFeatureRootSystem(RootSystemConfiguration.CODEC));
@@ -80,7 +81,7 @@ public abstract class WorldGenerator<FC extends WorldGenFeatureConfiguration> {
     public static final WorldGenerator<WorldGenFeatureLakeConfiguration> FOREST_ROCK = register("forest_rock", new WorldGenTaigaStructure(WorldGenFeatureLakeConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureCircleConfiguration> DISK = register("disk", new WorldGenFeatureCircle(WorldGenFeatureCircleConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureCircleConfiguration> ICE_PATCH = register("ice_patch", new WorldGenPackedIce1(WorldGenFeatureCircleConfiguration.CODEC));
-    public static final WorldGenerator<WorldGenFeatureLakeConfiguration> LAKE = register("lake", new WorldGenLakes(WorldGenFeatureLakeConfiguration.CODEC));
+    public static final WorldGenerator<LakeFeature$Configuration> LAKE = register("lake", new WorldGenLakes(LakeFeature$Configuration.CODEC));
     public static final WorldGenerator<WorldGenFeatureOreConfiguration> ORE = register("ore", new WorldGenMinable(WorldGenFeatureOreConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureEndSpikeConfiguration> END_SPIKE = register("end_spike", new WorldGenEnder(WorldGenFeatureEndSpikeConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> END_ISLAND = register("end_island", new WorldGenEndIsland(WorldGenFeatureEmptyConfiguration.CODEC));
@@ -94,9 +95,9 @@ public abstract class WorldGenerator<FC extends WorldGenFeatureConfiguration> {
     public static final WorldGenerator<WorldGenFeatureBlockConfiguration> SIMPLE_BLOCK = register("simple_block", new WorldGenFeatureBlock(WorldGenFeatureBlockConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureConfigurationChance> BAMBOO = register("bamboo", new WorldGenFeatureBamboo(WorldGenFeatureConfigurationChance.CODEC));
     public static final WorldGenerator<WorldGenFeatureHugeFungiConfiguration> HUGE_FUNGUS = register("huge_fungus", new WorldGenFeatureHugeFungi(WorldGenFeatureHugeFungiConfiguration.CODEC));
-    public static final WorldGenerator<WorldGenFeatureBlockPileConfiguration> NETHER_FOREST_VEGETATION = register("nether_forest_vegetation", new WorldGenFeatureNetherForestVegetation(WorldGenFeatureBlockPileConfiguration.CODEC));
+    public static final WorldGenerator<NetherForestVegetationConfig> NETHER_FOREST_VEGETATION = register("nether_forest_vegetation", new WorldGenFeatureNetherForestVegetation(NetherForestVegetationConfig.CODEC));
     public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> WEEPING_VINES = register("weeping_vines", new WorldGenFeatureWeepingVines(WorldGenFeatureEmptyConfiguration.CODEC));
-    public static final WorldGenerator<WorldGenFeatureEmptyConfiguration> TWISTING_VINES = register("twisting_vines", new WorldGenFeatureTwistingVines(WorldGenFeatureEmptyConfiguration.CODEC));
+    public static final WorldGenerator<TwistingVinesConfig> TWISTING_VINES = register("twisting_vines", new WorldGenFeatureTwistingVines(TwistingVinesConfig.CODEC));
     public static final WorldGenerator<WorldGenFeatureBasaltColumnsConfiguration> BASALT_COLUMNS = register("basalt_columns", new WorldGenFeatureBasaltColumns(WorldGenFeatureBasaltColumnsConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureDeltaConfiguration> DELTA_FEATURE = register("delta_feature", new WorldGenFeatureDelta(WorldGenFeatureDeltaConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureRadiusConfiguration> REPLACE_BLOBS = register("netherrack_replace_blobs", new WorldGenFeatureNetherrackReplaceBlobs(WorldGenFeatureRadiusConfiguration.CODEC));
@@ -107,11 +108,10 @@ public abstract class WorldGenerator<FC extends WorldGenFeatureConfiguration> {
     public static final WorldGenerator<WorldGenFeatureRandomChoiceConfiguration> RANDOM_SELECTOR = register("random_selector", new WorldGenFeatureRandomChoice(WorldGenFeatureRandomChoiceConfiguration.CODEC));
     public static final WorldGenerator<WorldGenFeatureRandom2> SIMPLE_RANDOM_SELECTOR = register("simple_random_selector", new WorldGenFeatureRandom2Configuration(WorldGenFeatureRandom2.CODEC));
     public static final WorldGenerator<WorldGenFeatureChoiceConfiguration> RANDOM_BOOLEAN_SELECTOR = register("random_boolean_selector", new WorldGenFeatureChoice(WorldGenFeatureChoiceConfiguration.CODEC));
-    public static final WorldGenerator<WorldGenFeatureCompositeConfiguration> DECORATED = register("decorated", new WorldGenFeatureComposite(WorldGenFeatureCompositeConfiguration.CODEC));
     public static final WorldGenerator<GeodeConfiguration> GEODE = register("geode", new WorldGenFeatureGeode(GeodeConfiguration.CODEC));
     public static final WorldGenerator<DripstoneClusterConfiguration> DRIPSTONE_CLUSTER = register("dripstone_cluster", new WorldGenFeatureDripstoneCluster(DripstoneClusterConfiguration.CODEC));
     public static final WorldGenerator<LargeDripstoneConfiguration> LARGE_DRIPSTONE = register("large_dripstone", new WorldGenFeatureDripstoneLarge(LargeDripstoneConfiguration.CODEC));
-    public static final WorldGenerator<SmallDripstoneConfiguration> SMALL_DRIPSTONE = register("small_dripstone", new WorldGenFeatureDripstoneSmall(SmallDripstoneConfiguration.CODEC));
+    public static final WorldGenerator<PointedDripstoneConfiguration> POINTED_DRIPSTONE = register("pointed_dripstone", new PointedDripstoneFeature(PointedDripstoneConfiguration.CODEC));
     private final Codec<WorldGenFeatureConfigured<FC, WorldGenerator<FC>>> configuredCodec;
 
     private static <C extends WorldGenFeatureConfiguration, F extends WorldGenerator<C>> F register(String name, F feature) {

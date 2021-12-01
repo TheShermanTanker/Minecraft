@@ -22,8 +22,8 @@ public class ContainerWorkbench extends ContainerRecipeBook<InventoryCrafting> {
     private static final int INV_SLOT_END = 37;
     private static final int USE_ROW_SLOT_START = 37;
     private static final int USE_ROW_SLOT_END = 46;
-    private final InventoryCrafting craftSlots = new InventoryCrafting(this, 3, 3);
-    private final InventoryCraftResult resultSlots = new InventoryCraftResult();
+    public final InventoryCrafting craftSlots = new InventoryCrafting(this, 3, 3);
+    public final InventoryCraftResult resultSlots = new InventoryCraftResult();
     public final ContainerAccess access;
     private final EntityHuman player;
 

@@ -1,44 +1,45 @@
 package net.minecraft.network.protocol.game;
 
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
+import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.level.block.entity.TileEntity;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 
 public class PacketPlayOutTileEntityData implements Packet<PacketListenerPlayOut> {
-    public static final int TYPE_MOB_SPAWNER = 1;
-    public static final int TYPE_ADV_COMMAND = 2;
-    public static final int TYPE_BEACON = 3;
-    public static final int TYPE_SKULL = 4;
-    public static final int TYPE_CONDUIT = 5;
-    public static final int TYPE_BANNER = 6;
-    public static final int TYPE_STRUCT_COMMAND = 7;
-    public static final int TYPE_END_GATEWAY = 8;
-    public static final int TYPE_SIGN = 9;
-    public static final int TYPE_BED = 11;
-    public static final int TYPE_JIGSAW = 12;
-    public static final int TYPE_CAMPFIRE = 13;
-    public static final int TYPE_BEEHIVE = 14;
     private final BlockPosition pos;
-    private final int type;
+    private final TileEntityTypes<?> type;
+    @Nullable
     private final NBTTagCompound tag;
 
-    public PacketPlayOutTileEntityData(BlockPosition pos, int blockEntityType, NBTTagCompound nbt) {
+    public static PacketPlayOutTileEntityData create(TileEntity blockEntity, Function<TileEntity, NBTTagCompound> nbtGetter) {
+        return new PacketPlayOutTileEntityData(blockEntity.getPosition(), blockEntity.getTileType(), nbtGetter.apply(blockEntity));
+    }
+
+    public static PacketPlayOutTileEntityData create(TileEntity blockEntity) {
+        return create(blockEntity, TileEntity::getUpdateTag);
+    }
+
+    private PacketPlayOutTileEntityData(BlockPosition pos, TileEntityTypes<?> blockEntityType, NBTTagCompound nbt) {
         this.pos = pos;
         this.type = blockEntityType;
-        this.tag = nbt;
+        this.tag = nbt.isEmpty() ? null : nbt;
     }
 
     public PacketPlayOutTileEntityData(PacketDataSerializer buf) {
         this.pos = buf.readBlockPos();
-        this.type = buf.readUnsignedByte();
+        this.type = IRegistry.BLOCK_ENTITY_TYPE.fromId(buf.readVarInt());
         this.tag = buf.readNbt();
     }
 
     @Override
     public void write(PacketDataSerializer buf) {
         buf.writeBlockPos(this.pos);
-        buf.writeByte((byte)this.type);
+        buf.writeVarInt(IRegistry.BLOCK_ENTITY_TYPE.getId(this.type));
         buf.writeNbt(this.tag);
     }
 
@@ -51,10 +52,11 @@ public class PacketPlayOutTileEntityData implements Packet<PacketListenerPlayOut
         return this.pos;
     }
 
-    public int getType() {
+    public TileEntityTypes<?> getType() {
         return this.type;
     }
 
+    @Nullable
     public NBTTagCompound getTag() {
         return this.tag;
     }

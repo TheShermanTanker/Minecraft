@@ -26,8 +26,8 @@ public class SystemReport {
     private final Map<String, String> entries = Maps.newLinkedHashMap();
 
     public SystemReport() {
-        this.setDetail("Minecraft Version", SharedConstants.getGameVersion().getName());
-        this.setDetail("Minecraft Version ID", SharedConstants.getGameVersion().getId());
+        this.setDetail("Minecraft Version", SharedConstants.getCurrentVersion().getName());
+        this.setDetail("Minecraft Version ID", SharedConstants.getCurrentVersion().getId());
         this.setDetail("Operating System", OPERATING_SYSTEM);
         this.setDetail("Java Version", JAVA_VERSION);
         this.setDetail("Java VM Version", JAVA_VM_VERSION);

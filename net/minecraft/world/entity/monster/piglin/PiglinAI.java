@@ -296,30 +296,30 @@ public class PiglinAI {
         throwItemsTowardRandomPos(piglin, Collections.singletonList(itemStack));
     }
 
-    private static void throwItems(EntityPiglin piglin, List<ItemStack> list) {
+    private static void throwItems(EntityPiglin piglin, List<ItemStack> items) {
         Optional<EntityHuman> optional = piglin.getBehaviorController().getMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
         if (optional.isPresent()) {
-            throwItemsTowardPlayer(piglin, optional.get(), list);
+            throwItemsTowardPlayer(piglin, optional.get(), items);
         } else {
-            throwItemsTowardRandomPos(piglin, list);
+            throwItemsTowardRandomPos(piglin, items);
         }
 
     }
 
-    private static void throwItemsTowardRandomPos(EntityPiglin piglin, List<ItemStack> list) {
-        throwItemsTowardPos(piglin, list, getRandomNearbyPos(piglin));
+    private static void throwItemsTowardRandomPos(EntityPiglin piglin, List<ItemStack> items) {
+        throwItemsTowardPos(piglin, items, getRandomNearbyPos(piglin));
     }
 
-    private static void throwItemsTowardPlayer(EntityPiglin piglin, EntityHuman player, List<ItemStack> list) {
-        throwItemsTowardPos(piglin, list, player.getPositionVector());
+    private static void throwItemsTowardPlayer(EntityPiglin piglin, EntityHuman player, List<ItemStack> items) {
+        throwItemsTowardPos(piglin, items, player.getPositionVector());
     }
 
-    private static void throwItemsTowardPos(EntityPiglin piglin, List<ItemStack> list, Vec3D vec3) {
-        if (!list.isEmpty()) {
+    private static void throwItemsTowardPos(EntityPiglin piglin, List<ItemStack> items, Vec3D pos) {
+        if (!items.isEmpty()) {
             piglin.swingHand(EnumHand.OFF_HAND);
 
-            for(ItemStack itemStack : list) {
-                BehaviorUtil.throwItem(piglin, itemStack, vec3.add(0.0D, 1.0D, 0.0D));
+            for(ItemStack itemStack : items) {
+                BehaviorUtil.throwItem(piglin, itemStack, pos.add(0.0D, 1.0D, 0.0D));
             }
         }
 

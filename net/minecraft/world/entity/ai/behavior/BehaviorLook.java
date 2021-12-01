@@ -13,8 +13,8 @@ public class BehaviorLook extends Behavior<EntityInsentient> {
 
     @Override
     protected boolean canStillUse(WorldServer serverLevel, EntityInsentient mob, long l) {
-        return mob.getBehaviorController().getMemory(MemoryModuleType.LOOK_TARGET).filter((positionTracker) -> {
-            return positionTracker.isVisibleBy(mob);
+        return mob.getBehaviorController().getMemory(MemoryModuleType.LOOK_TARGET).filter((lookTarget) -> {
+            return lookTarget.isVisibleBy(mob);
         }).isPresent();
     }
 
@@ -25,8 +25,8 @@ public class BehaviorLook extends Behavior<EntityInsentient> {
 
     @Override
     protected void tick(WorldServer serverLevel, EntityInsentient mob, long l) {
-        mob.getBehaviorController().getMemory(MemoryModuleType.LOOK_TARGET).ifPresent((positionTracker) -> {
-            mob.getControllerLook().setLookAt(positionTracker.currentPosition());
+        mob.getBehaviorController().getMemory(MemoryModuleType.LOOK_TARGET).ifPresent((lookTarget) -> {
+            mob.getControllerLook().setLookAt(lookTarget.currentPosition());
         });
     }
 }

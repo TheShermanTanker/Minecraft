@@ -1,32 +1,39 @@
 package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.util.BitSet;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.core.BlockPosition;
+import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkCoordIntPair;
+import net.minecraft.world.level.biome.BiomeBase;
+import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.WorldGenStage;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidType;
-import net.minecraft.world.level.material.FluidTypes;
+import net.minecraft.world.ticks.BlackholeTickAccess;
+import net.minecraft.world.ticks.TickContainerAccess;
 
 public class ProtoChunkExtension extends ProtoChunk {
     private final Chunk wrapped;
+    private final boolean allowWrites;
 
-    public ProtoChunkExtension(Chunk wrapped) {
-        super(wrapped.getPos(), ChunkConverter.EMPTY, wrapped);
+    public ProtoChunkExtension(Chunk wrapped, boolean bl) {
+        super(wrapped.getPos(), ChunkConverter.EMPTY, wrapped.levelHeightAccessor, wrapped.getWorld().registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY), wrapped.getBlendingData());
         this.wrapped = wrapped;
+        this.allowWrites = bl;
     }
 
     @Nullable
@@ -35,7 +42,6 @@ public class ProtoChunkExtension extends ProtoChunk {
         return this.wrapped.getTileEntity(pos);
     }
 
-    @Nullable
     @Override
     public IBlockData getType(BlockPosition pos) {
         return this.wrapped.getType(pos);
@@ -51,22 +57,39 @@ public class ProtoChunkExtension extends ProtoChunk {
         return this.wrapped.getMaxLightLevel();
     }
 
+    @Override
+    public ChunkSection getSection(int yIndex) {
+        return this.allowWrites ? this.wrapped.getSection(yIndex) : super.getSection(yIndex);
+    }
+
     @Nullable
     @Override
     public IBlockData setType(BlockPosition pos, IBlockData state, boolean moved) {
-        return null;
+        return this.allowWrites ? this.wrapped.setType(pos, state, moved) : null;
     }
 
     @Override
     public void setTileEntity(TileEntity blockEntity) {
+        if (this.allowWrites) {
+            this.wrapped.setTileEntity(blockEntity);
+        }
+
     }
 
     @Override
     public void addEntity(Entity entity) {
+        if (this.allowWrites) {
+            this.wrapped.addEntity(entity);
+        }
+
     }
 
     @Override
     public void setStatus(ChunkStatus status) {
+        if (this.allowWrites) {
+            super.setStatus(status);
+        }
+
     }
 
     @Override
@@ -87,13 +110,18 @@ public class ProtoChunkExtension extends ProtoChunk {
     }
 
     @Override
+    public HeightMap getOrCreateHeightmapUnprimed(HeightMap.Type type) {
+        return this.wrapped.getOrCreateHeightmapUnprimed(type);
+    }
+
+    @Override
     public int getHighestBlock(HeightMap.Type type, int x, int z) {
         return this.wrapped.getHighestBlock(this.fixType(type), x, z);
     }
 
     @Override
-    public BlockPosition getHeighestPosition(HeightMap.Type types) {
-        return this.wrapped.getHeighestPosition(this.fixType(types));
+    public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
+        return this.wrapped.getBiome(biomeX, biomeY, biomeZ);
     }
 
     @Override
@@ -139,11 +167,6 @@ public class ProtoChunkExtension extends ProtoChunk {
     }
 
     @Override
-    public BiomeStorage getBiomeIndex() {
-        return this.wrapped.getBiomeIndex();
-    }
-
-    @Override
     public void setNeedsSaving(boolean shouldSave) {
     }
 
@@ -182,36 +205,52 @@ public class ProtoChunkExtension extends ProtoChunk {
     }
 
     @Override
-    public void setBiomes(BiomeStorage biomes) {
-    }
-
-    @Override
     public Stream<BlockPosition> getLights() {
         return this.wrapped.getLights();
     }
 
     @Override
-    public ProtoChunkTickList<Block> getBlockTicks() {
-        return new ProtoChunkTickList<>((block) -> {
-            return block.getBlockData().isAir();
-        }, this.getPos(), this);
+    public TickContainerAccess<Block> getBlockTicks() {
+        return this.allowWrites ? this.wrapped.getBlockTicks() : BlackholeTickAccess.emptyContainer();
     }
 
     @Override
-    public ProtoChunkTickList<FluidType> getLiquidTicks() {
-        return new ProtoChunkTickList<>((fluid) -> {
-            return fluid == FluidTypes.EMPTY;
-        }, this.getPos(), this);
+    public TickContainerAccess<FluidType> getFluidTicks() {
+        return this.allowWrites ? this.wrapped.getFluidTicks() : BlackholeTickAccess.emptyContainer();
     }
 
     @Override
-    public BitSet getCarvingMask(WorldGenStage.Features carver) {
-        throw (UnsupportedOperationException)SystemUtils.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
+    public ChunkAccess$TicksToSave getTicksForSerialization() {
+        return this.wrapped.getTicksForSerialization();
+    }
+
+    @Nullable
+    @Override
+    public BlendingData getBlendingData() {
+        return this.wrapped.getBlendingData();
     }
 
     @Override
-    public BitSet getOrCreateCarvingMask(WorldGenStage.Features carver) {
-        throw (UnsupportedOperationException)SystemUtils.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
+    public void setBlendingData(BlendingData blender) {
+        this.wrapped.setBlendingData(blender);
+    }
+
+    @Override
+    public CarvingMask getCarvingMask(WorldGenStage.Features carver) {
+        if (this.allowWrites) {
+            return super.getCarvingMask(carver);
+        } else {
+            throw (UnsupportedOperationException)SystemUtils.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
+        }
+    }
+
+    @Override
+    public CarvingMask getOrCreateCarvingMask(WorldGenStage.Features carver) {
+        if (this.allowWrites) {
+            return super.getOrCreateCarvingMask(carver);
+        } else {
+            throw (UnsupportedOperationException)SystemUtils.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
+        }
     }
 
     public Chunk getWrapped() {
@@ -226,5 +265,13 @@ public class ProtoChunkExtension extends ProtoChunk {
     @Override
     public void setLightCorrect(boolean lightOn) {
         this.wrapped.setLightCorrect(lightOn);
+    }
+
+    @Override
+    public void fillBiomesFromNoise(BiomeResolver biomeSupplier, Climate.Sampler sampler) {
+        if (this.allowWrites) {
+            this.wrapped.fillBiomesFromNoise(biomeSupplier, sampler);
+        }
+
     }
 }

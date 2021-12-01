@@ -11,7 +11,7 @@ public class ControllerLook implements Control {
     protected final EntityInsentient mob;
     protected float yMaxRotSpeed;
     protected float xMaxRotAngle;
-    protected boolean hasWanted;
+    protected int lookAtCooldown;
     protected double wantedX;
     protected double wantedY;
     protected double wantedZ;
@@ -28,21 +28,21 @@ public class ControllerLook implements Control {
         this.setLookAt(entity.locX(), getWantedY(entity), entity.locZ());
     }
 
-    public void setLookAt(Entity entity, float yawSpeed, float pitchSpeed) {
-        this.setLookAt(entity.locX(), getWantedY(entity), entity.locZ(), yawSpeed, pitchSpeed);
+    public void setLookAt(Entity entity, float maxYawChange, float maxPitchChange) {
+        this.setLookAt(entity.locX(), getWantedY(entity), entity.locZ(), maxYawChange, maxPitchChange);
     }
 
     public void setLookAt(double x, double y, double z) {
         this.setLookAt(x, y, z, (float)this.mob.getHeadRotSpeed(), (float)this.mob.getMaxHeadXRot());
     }
 
-    public void setLookAt(double x, double y, double z, float yawSpeed, float pitchSpeed) {
+    public void setLookAt(double x, double y, double z, float maxYawChange, float maxPitchChange) {
         this.wantedX = x;
         this.wantedY = y;
         this.wantedZ = z;
-        this.yMaxRotSpeed = yawSpeed;
-        this.xMaxRotAngle = pitchSpeed;
-        this.hasWanted = true;
+        this.yMaxRotSpeed = maxYawChange;
+        this.xMaxRotAngle = maxPitchChange;
+        this.lookAtCooldown = 2;
     }
 
     public void tick() {
@@ -50,13 +50,13 @@ public class ControllerLook implements Control {
             this.mob.setXRot(0.0F);
         }
 
-        if (this.hasWanted) {
-            this.hasWanted = false;
-            this.getYRotD().ifPresent((float_) -> {
-                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, float_, this.yMaxRotSpeed);
+        if (this.lookAtCooldown > 0) {
+            --this.lookAtCooldown;
+            this.getYRotD().ifPresent((yaw) -> {
+                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, yaw, this.yMaxRotSpeed);
             });
-            this.getXRotD().ifPresent((float_) -> {
-                this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), float_, this.xMaxRotAngle));
+            this.getXRotD().ifPresent((pitch) -> {
+                this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), pitch, this.xMaxRotAngle));
             });
         } else {
             this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, this.mob.yBodyRot, 10.0F);
@@ -76,8 +76,8 @@ public class ControllerLook implements Control {
         return true;
     }
 
-    public boolean isHasWanted() {
-        return this.hasWanted;
+    public boolean isLookingAtTarget() {
+        return this.lookAtCooldown > 0;
     }
 
     public double getWantedX() {

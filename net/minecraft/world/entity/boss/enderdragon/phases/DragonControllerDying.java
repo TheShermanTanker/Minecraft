@@ -9,6 +9,7 @@ import net.minecraft.world.level.levelgen.feature.WorldGenEndTrophy;
 import net.minecraft.world.phys.Vec3D;
 
 public class DragonControllerDying extends DragonControllerAbstract {
+    @Nullable
     private Vec3D targetLocation;
     private int time;
 

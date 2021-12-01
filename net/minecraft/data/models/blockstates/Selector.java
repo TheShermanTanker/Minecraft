@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.properties.IBlockState;
 public final class Selector {
     private static final Selector EMPTY = new Selector(ImmutableList.of());
     private static final Comparator<IBlockState.Value<?>> COMPARE_BY_NAME = Comparator.comparing((value) -> {
-        return value.getProperty().getName();
+        return value.property().getName();
     });
     private final List<IBlockState.Value<?>> values;
 

@@ -90,20 +90,20 @@ public class BlockDripstonePointed extends Block implements Fallable, IBlockWate
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         if (direction != EnumDirection.UP && direction != EnumDirection.DOWN) {
             return state;
         } else {
             EnumDirection direction2 = state.get(TIP_DIRECTION);
-            if (direction2 == EnumDirection.DOWN && world.getBlockTickList().hasScheduledTick(pos, this)) {
+            if (direction2 == EnumDirection.DOWN && world.getBlockTicks().hasScheduledTick(pos, this)) {
                 return state;
             } else if (direction == direction2.opposite() && !this.canPlace(state, world, pos)) {
                 if (direction2 == EnumDirection.DOWN) {
                     this.scheduleStalactiteFallTicks(state, world, pos);
                 } else {
-                    world.getBlockTickList().scheduleTick(pos, this, 1);
+                    world.scheduleTick(pos, this, 1);
                 }
 
                 return state;
@@ -192,7 +192,7 @@ public class BlockDripstonePointed extends Block implements Fallable, IBlockWate
                             int i = blockPos.getY() - blockPos2.getY();
                             int j = 50 + i;
                             IBlockData blockState = world.getType(blockPos2);
-                            world.getBlockTicks().scheduleTick(blockPos2, blockState.getBlock(), j);
+                            world.scheduleTick(blockPos2, blockState.getBlock(), j);
                         }
                     }
                 }
@@ -292,9 +292,17 @@ public class BlockDripstonePointed extends Block implements Fallable, IBlockWate
         BlockPosition blockPos = findTip(state, world, pos, Integer.MAX_VALUE, true);
         if (blockPos != null) {
             BlockPosition.MutableBlockPosition mutableBlockPos = blockPos.mutable();
+            mutableBlockPos.move(EnumDirection.DOWN);
+            IBlockData blockState = world.getType(mutableBlockPos);
+            if (blockState.getCollisionShape(world, mutableBlockPos, VoxelShapeCollision.empty()).max(EnumDirection.EnumAxis.Y) >= 1.0D || blockState.is(Blocks.POWDER_SNOW)) {
+                world.destroyBlock(blockPos, true);
+                mutableBlockPos.move(EnumDirection.UP);
+            }
+
+            mutableBlockPos.move(EnumDirection.UP);
 
             while(isStalactite(world.getType(mutableBlockPos))) {
-                world.getBlockTickList().scheduleTick(mutableBlockPos, this, 2);
+                world.scheduleTick(mutableBlockPos, this, 2);
                 mutableBlockPos.move(EnumDirection.UP);
             }
 

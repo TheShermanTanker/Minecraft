@@ -65,7 +65,7 @@ public interface PacketListenerPlayOut extends PacketListener {
 
     void handleKeepAlive(PacketPlayOutKeepAlive packet);
 
-    void handleLevelChunk(PacketPlayOutMapChunk packet);
+    void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket packet);
 
     void handleForgetLevelChunk(PacketPlayOutUnloadChunk packet);
 
@@ -181,7 +181,7 @@ public interface PacketListenerPlayOut extends PacketListener {
 
     void handleTagQueryPacket(PacketPlayOutNBTQuery packet);
 
-    void handleLightUpdatePacked(PacketPlayOutLightUpdate packet);
+    void handleLightUpdatePacket(PacketPlayOutLightUpdate packet);
 
     void handleOpenBook(PacketPlayOutOpenBook packet);
 
@@ -190,6 +190,8 @@ public interface PacketListenerPlayOut extends PacketListener {
     void handleMerchantOffers(PacketPlayOutOpenWindowMerchant packet);
 
     void handleSetChunkCacheRadius(PacketPlayOutViewDistance packet);
+
+    void handleSetSimulationDistance(ClientboundSetSimulationDistancePacket packet);
 
     void handleSetChunkCacheCenter(PacketPlayOutViewCentre packet);
 

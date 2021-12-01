@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
 
 public abstract class PosRuleTest {
-    public static final Codec<PosRuleTest> CODEC = IRegistry.POS_RULE_TEST.dispatch("predicate_type", PosRuleTest::getType, PosRuleTestType::codec);
+    public static final Codec<PosRuleTest> CODEC = IRegistry.POS_RULE_TEST.byNameCodec().dispatch("predicate_type", PosRuleTest::getType, PosRuleTestType::codec);
 
     public abstract boolean test(BlockPosition blockPos, BlockPosition blockPos2, BlockPosition pivot, Random random);
 

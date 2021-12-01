@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPosition;
@@ -37,45 +38,48 @@ public class TrunkPlacerForking extends TrunkPlacer {
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
         int k = startPos.getX();
         int l = startPos.getZ();
-        int m = 0;
+        OptionalInt optionalInt = OptionalInt.empty();
 
-        for(int n = 0; n < height; ++n) {
-            int o = startPos.getY() + n;
-            if (n >= i && j > 0) {
+        for(int m = 0; m < height; ++m) {
+            int n = startPos.getY() + m;
+            if (m >= i && j > 0) {
                 k += direction.getAdjacentX();
                 l += direction.getAdjacentZ();
                 --j;
             }
 
-            if (placeLog(world, replacer, random, mutableBlockPos.set(k, o, l), config)) {
-                m = o + 1;
+            if (placeLog(world, replacer, random, mutableBlockPos.set(k, n, l), config)) {
+                optionalInt = OptionalInt.of(n + 1);
             }
         }
 
-        list.add(new WorldGenFoilagePlacer.FoliageAttachment(new BlockPosition(k, m, l), 1, false));
+        if (optionalInt.isPresent()) {
+            list.add(new WorldGenFoilagePlacer.FoliageAttachment(new BlockPosition(k, optionalInt.getAsInt(), l), 1, false));
+        }
+
         k = startPos.getX();
         l = startPos.getZ();
         EnumDirection direction2 = EnumDirection.EnumDirectionLimit.HORIZONTAL.getRandomDirection(random);
         if (direction2 != direction) {
-            int p = i - random.nextInt(2) - 1;
-            int q = 1 + random.nextInt(3);
-            m = 0;
+            int o = i - random.nextInt(2) - 1;
+            int p = 1 + random.nextInt(3);
+            optionalInt = OptionalInt.empty();
 
-            for(int r = p; r < height && q > 0; --q) {
-                if (r >= 1) {
-                    int s = startPos.getY() + r;
+            for(int q = o; q < height && p > 0; --p) {
+                if (q >= 1) {
+                    int r = startPos.getY() + q;
                     k += direction2.getAdjacentX();
                     l += direction2.getAdjacentZ();
-                    if (placeLog(world, replacer, random, mutableBlockPos.set(k, s, l), config)) {
-                        m = s + 1;
+                    if (placeLog(world, replacer, random, mutableBlockPos.set(k, r, l), config)) {
+                        optionalInt = OptionalInt.of(r + 1);
                     }
                 }
 
-                ++r;
+                ++q;
             }
 
-            if (m > 1) {
-                list.add(new WorldGenFoilagePlacer.FoliageAttachment(new BlockPosition(k, m, l), 0, false));
+            if (optionalInt.isPresent()) {
+                list.add(new WorldGenFoilagePlacer.FoliageAttachment(new BlockPosition(k, optionalInt.getAsInt(), l), 0, false));
             }
         }
 

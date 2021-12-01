@@ -9,7 +9,6 @@ public class DataConverterBlockEntityUUID extends DataConverterUUIDBase {
         super(outputSchema, DataConverterTypes.BLOCK_ENTITY);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("BlockEntityUUIDFix", this.getInputSchema().getType(this.typeReference), (typed) -> {
             typed = this.updateNamedChoice(typed, "minecraft:conduit", this::updateConduit);

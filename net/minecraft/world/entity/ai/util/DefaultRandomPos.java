@@ -26,8 +26,8 @@ public class DefaultRandomPos {
     }
 
     @Nullable
-    public static Vec3D getPosAway(EntityCreature entity, int horizontalRange, int verticalRange, Vec3D direction) {
-        Vec3D vec3 = entity.getPositionVector().subtract(direction);
+    public static Vec3D getPosAway(EntityCreature entity, int horizontalRange, int verticalRange, Vec3D start) {
+        Vec3D vec3 = entity.getPositionVector().subtract(start);
         boolean bl = PathfinderGoalUtil.mobRestricted(entity, horizontalRange);
         return RandomPositionGenerator.generateRandomPos(entity, () -> {
             BlockPosition blockPos = RandomPositionGenerator.generateRandomDirectionWithinRadians(entity.getRandom(), horizontalRange, verticalRange, 0, vec3.x, vec3.z, (double)((float)Math.PI / 2F));

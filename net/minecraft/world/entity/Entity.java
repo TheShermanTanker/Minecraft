@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList.Builder;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ import net.minecraft.commands.ICommandListener;
 import net.minecraft.commands.arguments.ArgumentAnchor;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
+import net.minecraft.core.SectionPosition;
 import net.minecraft.core.particles.ParticleParamBlock;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,7 +61,6 @@ import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsEntity;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.StreamAccumulator;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.INamableTileEntity;
@@ -75,7 +76,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.IMaterial;
-import net.minecraft.world.level.IWorldReader;
 import net.minecraft.world.level.RayTrace;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.Block;
@@ -86,6 +86,7 @@ import net.minecraft.world.level.block.EnumBlockMirror;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.block.EnumRenderType;
 import net.minecraft.world.level.block.SoundEffectType;
+import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.block.state.properties.BlockProperties;
 import net.minecraft.world.level.border.WorldBorder;
@@ -145,6 +146,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     public double zo;
     private Vec3D position;
     private BlockPosition blockPosition;
+    private ChunkCoordIntPair chunkPosition;
     private Vec3D deltaMovement = Vec3D.ZERO;
     private float yRot;
     private float xRot;
@@ -154,6 +156,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     protected boolean onGround;
     public boolean horizontalCollision;
     public boolean verticalCollision;
+    public boolean minorHorizontalCollision;
     public boolean hurtMarked;
     protected Vec3D stuckSpeedMultiplier = Vec3D.ZERO;
     @Nullable
@@ -220,6 +223,8 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     private float crystalSoundIntensity;
     private int lastCrystalSoundPlayTick;
     public boolean hasVisualFire;
+    @Nullable
+    private IBlockData feetBlockState = null;
 
     public Entity(EntityTypes<?> type, World world) {
         this.type = type;
@@ -227,6 +232,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
         this.dimensions = type.getDimensions();
         this.position = Vec3D.ZERO;
         this.blockPosition = BlockPosition.ZERO;
+        this.chunkPosition = ChunkCoordIntPair.ZERO;
         this.packetCoordinates = Vec3D.ZERO;
         this.entityData = new DataWatcher(this);
         this.entityData.register(DATA_SHARED_FLAGS_ID, (byte)0);
@@ -402,6 +408,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
 
     public void entityBaseTick() {
         this.level.getMethodProfiler().enter("entityBaseTick");
+        this.feetBlockState = null;
         if (this.isPassenger() && this.getVehicle().isRemoved()) {
             this.stopRiding();
         }
@@ -572,6 +579,12 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
             this.level.getMethodProfiler().enter("rest");
             this.horizontalCollision = !MathHelper.equal(movement.x, vec3.x) || !MathHelper.equal(movement.z, vec3.z);
             this.verticalCollision = movement.y != vec3.y;
+            if (this.horizontalCollision) {
+                this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec3);
+            } else {
+                this.minorHorizontalCollision = false;
+            }
+
             this.onGround = this.verticalCollision && movement.y < 0.0D;
             BlockPosition blockPos = this.getOnPos();
             IBlockData blockState = this.level.getType(blockPos);
@@ -660,6 +673,10 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 this.level.getMethodProfiler().exit();
             }
         }
+    }
+
+    protected boolean isHorizontalCollisionMinor(Vec3D adjustedMovement) {
+        return false;
     }
 
     protected void tryCheckInsideBlocks() {
@@ -762,112 +779,81 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
 
     private Vec3D collide(Vec3D movement) {
         AxisAlignedBB aABB = this.getBoundingBox();
-        VoxelShapeCollision collisionContext = VoxelShapeCollision.of(this);
-        VoxelShape voxelShape = this.level.getWorldBorder().getCollisionShape();
-        Stream<VoxelShape> stream = VoxelShapes.joinIsNotEmpty(voxelShape, VoxelShapes.create(aABB.shrink(1.0E-7D)), OperatorBoolean.AND) ? Stream.empty() : Stream.of(voxelShape);
-        Stream<VoxelShape> stream2 = this.level.getEntityCollisions(this, aABB.expandTowards(movement), (entity) -> {
-            return true;
-        });
-        StreamAccumulator<VoxelShape> rewindableStream = new StreamAccumulator<>(Stream.concat(stream2, stream));
-        Vec3D vec3 = movement.lengthSqr() == 0.0D ? movement : collideBoundingBoxHeuristically(this, movement, aABB, this.level, collisionContext, rewindableStream);
+        List<VoxelShape> list = this.level.getEntityCollisions(this, aABB.expandTowards(movement));
+        Vec3D vec3 = movement.lengthSqr() == 0.0D ? movement : collideBoundingBox(this, movement, aABB, this.level, list);
         boolean bl = movement.x != vec3.x;
         boolean bl2 = movement.y != vec3.y;
         boolean bl3 = movement.z != vec3.z;
         boolean bl4 = this.onGround || bl2 && movement.y < 0.0D;
         if (this.maxUpStep > 0.0F && bl4 && (bl || bl3)) {
-            Vec3D vec32 = collideBoundingBoxHeuristically(this, new Vec3D(movement.x, (double)this.maxUpStep, movement.z), aABB, this.level, collisionContext, rewindableStream);
-            Vec3D vec33 = collideBoundingBoxHeuristically(this, new Vec3D(0.0D, (double)this.maxUpStep, 0.0D), aABB.expandTowards(movement.x, 0.0D, movement.z), this.level, collisionContext, rewindableStream);
+            Vec3D vec32 = collideBoundingBox(this, new Vec3D(movement.x, (double)this.maxUpStep, movement.z), aABB, this.level, list);
+            Vec3D vec33 = collideBoundingBox(this, new Vec3D(0.0D, (double)this.maxUpStep, 0.0D), aABB.expandTowards(movement.x, 0.0D, movement.z), this.level, list);
             if (vec33.y < (double)this.maxUpStep) {
-                Vec3D vec34 = collideBoundingBoxHeuristically(this, new Vec3D(movement.x, 0.0D, movement.z), aABB.move(vec33), this.level, collisionContext, rewindableStream).add(vec33);
+                Vec3D vec34 = collideBoundingBox(this, new Vec3D(movement.x, 0.0D, movement.z), aABB.move(vec33), this.level, list).add(vec33);
                 if (vec34.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
                     vec32 = vec34;
                 }
             }
 
             if (vec32.horizontalDistanceSqr() > vec3.horizontalDistanceSqr()) {
-                return vec32.add(collideBoundingBoxHeuristically(this, new Vec3D(0.0D, -vec32.y + movement.y, 0.0D), aABB.move(vec32), this.level, collisionContext, rewindableStream));
+                return vec32.add(collideBoundingBox(this, new Vec3D(0.0D, -vec32.y + movement.y, 0.0D), aABB.move(vec32), this.level, list));
             }
         }
 
         return vec3;
     }
 
-    public static Vec3D collideBoundingBoxHeuristically(@Nullable Entity entity, Vec3D movement, AxisAlignedBB entityBoundingBox, World world, VoxelShapeCollision context, StreamAccumulator<VoxelShape> collisions) {
-        boolean bl = movement.x == 0.0D;
-        boolean bl2 = movement.y == 0.0D;
-        boolean bl3 = movement.z == 0.0D;
-        if ((!bl || !bl2) && (!bl || !bl3) && (!bl2 || !bl3)) {
-            StreamAccumulator<VoxelShape> rewindableStream = new StreamAccumulator<>(Stream.concat(collisions.getStream(), world.getBlockCollisions(entity, entityBoundingBox.expandTowards(movement))));
-            return collideBoundingBoxLegacy(movement, entityBoundingBox, rewindableStream);
+    public static Vec3D collideBoundingBox(@Nullable Entity entity, Vec3D movement, AxisAlignedBB entityBoundingBox, World world, List<VoxelShape> collisions) {
+        Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(collisions.size() + 1);
+        if (!collisions.isEmpty()) {
+            builder.addAll(collisions);
+        }
+
+        WorldBorder worldBorder = world.getWorldBorder();
+        boolean bl = entity != null && worldBorder.isInsideCloseToBorder(entity, entityBoundingBox.expandTowards(movement));
+        if (bl) {
+            builder.add(worldBorder.getCollisionShape());
+        }
+
+        builder.addAll(world.getBlockCollisions(entity, entityBoundingBox.expandTowards(movement)));
+        return collideWithShapes(movement, entityBoundingBox, builder.build());
+    }
+
+    private static Vec3D collideWithShapes(Vec3D movement, AxisAlignedBB entityBoundingBox, List<VoxelShape> collisions) {
+        if (collisions.isEmpty()) {
+            return movement;
         } else {
-            return collideBoundingBox(movement, entityBoundingBox, world, context, collisions);
-        }
-    }
-
-    public static Vec3D collideBoundingBoxLegacy(Vec3D movement, AxisAlignedBB entityBoundingBox, StreamAccumulator<VoxelShape> collisions) {
-        double d = movement.x;
-        double e = movement.y;
-        double f = movement.z;
-        if (e != 0.0D) {
-            e = VoxelShapes.collide(EnumDirection.EnumAxis.Y, entityBoundingBox, collisions.getStream(), e);
+            double d = movement.x;
+            double e = movement.y;
+            double f = movement.z;
             if (e != 0.0D) {
-                entityBoundingBox = entityBoundingBox.move(0.0D, e, 0.0D);
+                e = VoxelShapes.collide(EnumDirection.EnumAxis.Y, entityBoundingBox, collisions, e);
+                if (e != 0.0D) {
+                    entityBoundingBox = entityBoundingBox.move(0.0D, e, 0.0D);
+                }
             }
-        }
 
-        boolean bl = Math.abs(d) < Math.abs(f);
-        if (bl && f != 0.0D) {
-            f = VoxelShapes.collide(EnumDirection.EnumAxis.Z, entityBoundingBox, collisions.getStream(), f);
-            if (f != 0.0D) {
-                entityBoundingBox = entityBoundingBox.move(0.0D, 0.0D, f);
+            boolean bl = Math.abs(d) < Math.abs(f);
+            if (bl && f != 0.0D) {
+                f = VoxelShapes.collide(EnumDirection.EnumAxis.Z, entityBoundingBox, collisions, f);
+                if (f != 0.0D) {
+                    entityBoundingBox = entityBoundingBox.move(0.0D, 0.0D, f);
+                }
             }
-        }
 
-        if (d != 0.0D) {
-            d = VoxelShapes.collide(EnumDirection.EnumAxis.X, entityBoundingBox, collisions.getStream(), d);
-            if (!bl && d != 0.0D) {
-                entityBoundingBox = entityBoundingBox.move(d, 0.0D, 0.0D);
+            if (d != 0.0D) {
+                d = VoxelShapes.collide(EnumDirection.EnumAxis.X, entityBoundingBox, collisions, d);
+                if (!bl && d != 0.0D) {
+                    entityBoundingBox = entityBoundingBox.move(d, 0.0D, 0.0D);
+                }
             }
-        }
 
-        if (!bl && f != 0.0D) {
-            f = VoxelShapes.collide(EnumDirection.EnumAxis.Z, entityBoundingBox, collisions.getStream(), f);
-        }
-
-        return new Vec3D(d, e, f);
-    }
-
-    public static Vec3D collideBoundingBox(Vec3D movement, AxisAlignedBB entityBoundingBox, IWorldReader world, VoxelShapeCollision context, StreamAccumulator<VoxelShape> collisions) {
-        double d = movement.x;
-        double e = movement.y;
-        double f = movement.z;
-        if (e != 0.0D) {
-            e = VoxelShapes.collide(EnumDirection.EnumAxis.Y, entityBoundingBox, world, e, context, collisions.getStream());
-            if (e != 0.0D) {
-                entityBoundingBox = entityBoundingBox.move(0.0D, e, 0.0D);
+            if (!bl && f != 0.0D) {
+                f = VoxelShapes.collide(EnumDirection.EnumAxis.Z, entityBoundingBox, collisions, f);
             }
-        }
 
-        boolean bl = Math.abs(d) < Math.abs(f);
-        if (bl && f != 0.0D) {
-            f = VoxelShapes.collide(EnumDirection.EnumAxis.Z, entityBoundingBox, world, f, context, collisions.getStream());
-            if (f != 0.0D) {
-                entityBoundingBox = entityBoundingBox.move(0.0D, 0.0D, f);
-            }
+            return new Vec3D(d, e, f);
         }
-
-        if (d != 0.0D) {
-            d = VoxelShapes.collide(EnumDirection.EnumAxis.X, entityBoundingBox, world, d, context, collisions.getStream());
-            if (!bl && d != 0.0D) {
-                entityBoundingBox = entityBoundingBox.move(d, 0.0D, 0.0D);
-            }
-        }
-
-        if (!bl && f != 0.0D) {
-            f = VoxelShapes.collide(EnumDirection.EnumAxis.Z, entityBoundingBox, world, f, context, collisions.getStream());
-        }
-
-        return new Vec3D(d, e, f);
     }
 
     protected float nextStep() {
@@ -1005,7 +991,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 }
             }
 
-            this.fallDistance = 0.0F;
+            this.resetFallDistance();
         } else if (heightDifference < 0.0D) {
             this.fallDistance = (float)((double)this.fallDistance - heightDifference);
         }
@@ -1080,7 +1066,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 this.doWaterSplashEffect();
             }
 
-            this.fallDistance = 0.0F;
+            this.resetFallDistance();
             this.wasTouchingWater = true;
             this.extinguish();
         } else {
@@ -1668,11 +1654,13 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
         if (this.noPhysics) {
             return false;
         } else {
+            Vec3D vec3 = this.getEyePosition();
             float f = this.dimensions.width * 0.8F;
-            AxisAlignedBB aABB = AxisAlignedBB.ofSize(this.getEyePosition(), (double)f, 1.0E-6D, (double)f);
-            return this.level.getBlockCollisions(this, aABB, (state, pos) -> {
-                return state.isSuffocating(this.level, pos);
-            }).findAny().isPresent();
+            AxisAlignedBB aABB = AxisAlignedBB.ofSize(vec3, (double)f, 1.0E-6D, (double)f);
+            return this.level.getBlockStates(aABB).filter(Predicate.not(BlockBase.BlockData::isAir)).anyMatch((state) -> {
+                BlockPosition blockPos = new BlockPosition(vec3);
+                return state.isSuffocating(this.level, blockPos) && VoxelShapes.joinIsNotEmpty(state.getCollisionShape(this.level, blockPos).move(vec3.x, vec3.y, vec3.z), VoxelShapes.create(aABB), OperatorBoolean.AND);
+            });
         }
     }
 
@@ -1744,10 +1732,10 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 this.setPose(EntityPose.STANDING);
                 this.vehicle = entity;
                 this.vehicle.addPassenger(this);
-                entity.getIndirectPassengersStream().filter((entityx) -> {
-                    return entityx instanceof EntityPlayer;
-                }).forEach((entityx) -> {
-                    CriterionTriggers.START_RIDING_TRIGGER.trigger((EntityPlayer)entityx);
+                entity.getIndirectPassengersStream().filter((passenger) -> {
+                    return passenger instanceof EntityPlayer;
+                }).forEach((player) -> {
+                    CriterionTriggers.START_RIDING_TRIGGER.trigger((EntityPlayer)player);
                 });
                 return true;
             } else {
@@ -2121,10 +2109,14 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
         }
 
         this.setMot(vec3.x, d, vec3.z);
-        this.fallDistance = 0.0F;
+        this.resetFallDistance();
     }
 
     public void killed(WorldServer world, EntityLiving other) {
+    }
+
+    public void resetFallDistance() {
+        this.fallDistance = 0.0F;
     }
 
     protected void moveTowardsClosestSpace(double x, double y, double z) {
@@ -2160,7 +2152,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     }
 
     public void makeStuckInBlock(IBlockData state, Vec3D multiplier) {
-        this.fallDistance = 0.0F;
+        this.resetFallDistance();
         this.stuckSpeedMultiplier = multiplier;
     }
 
@@ -2208,7 +2200,8 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
 
     @Override
     public String toString() {
-        return String.format(Locale.ROOT, "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f]", this.getClass().getSimpleName(), this.getDisplayName().getString(), this.id, this.level == null ? "~NULL~" : this.level.toString(), this.locX(), this.locY(), this.locZ());
+        String string = this.level == null ? "~NULL~" : this.level.toString();
+        return this.removalReason != null ? String.format(Locale.ROOT, "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f, removed=%s]", this.getClass().getSimpleName(), this.getDisplayName().getString(), this.id, string, this.locX(), this.locY(), this.locZ(), this.removalReason) : String.format(Locale.ROOT, "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f]", this.getClass().getSimpleName(), this.getDisplayName().getString(), this.id, string, this.locX(), this.locY(), this.locZ());
     }
 
     public boolean isInvulnerable(DamageSource damageSource) {
@@ -2283,13 +2276,9 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 return null;
             } else {
                 WorldBorder worldBorder = destination.getWorldBorder();
-                double d = Math.max(-2.9999872E7D, worldBorder.getMinX() + 16.0D);
-                double e = Math.max(-2.9999872E7D, worldBorder.getMinZ() + 16.0D);
-                double f = Math.min(2.9999872E7D, worldBorder.getMaxX() - 16.0D);
-                double g = Math.min(2.9999872E7D, worldBorder.getMaxZ() - 16.0D);
-                double h = DimensionManager.getTeleportationScale(this.level.getDimensionManager(), destination.getDimensionManager());
-                BlockPosition blockPos3 = new BlockPosition(MathHelper.clamp(this.locX() * h, d, f), this.locY(), MathHelper.clamp(this.locZ() * h, e, g));
-                return this.findOrCreatePortal(destination, blockPos3, bl3).map((rect) -> {
+                double d = DimensionManager.getTeleportationScale(this.level.getDimensionManager(), destination.getDimensionManager());
+                BlockPosition blockPos3 = worldBorder.clampToBounds(this.locX() * d, this.locY(), this.locZ() * d);
+                return this.getExitPortal(destination, blockPos3, bl3, worldBorder).map((rect) -> {
                     IBlockData blockState = this.level.getType(this.portalEntrancePos);
                     EnumDirection.EnumAxis axis;
                     Vec3D vec3;
@@ -2323,8 +2312,8 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
         return BlockPortalShape.getRelativePosition(portalRect, portalAxis, this.getPositionVector(), this.getDimensions(this.getPose()));
     }
 
-    protected Optional<BlockUtil.Rectangle> findOrCreatePortal(WorldServer destWorld, BlockPosition destPos, boolean destIsNether) {
-        return destWorld.getTravelAgent().findPortal(destPos, destIsNether);
+    protected Optional<BlockUtil.Rectangle> getExitPortal(WorldServer destWorld, BlockPosition destPos, boolean destIsNether, WorldBorder worldBorder) {
+        return destWorld.getTravelAgent().findPortalAround(destPos, destIsNether, worldBorder);
     }
 
     public boolean canPortal() {
@@ -2759,7 +2748,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
         this.yRotO = this.getYRot();
     }
 
-    public boolean updateFluidHeightAndDoFluidPushing(Tag<FluidType> tag, double d) {
+    public boolean updateFluidHeightAndDoFluidPushing(Tag<FluidType> tag, double speed) {
         if (this.touchingUnloadedChunk()) {
             return false;
         } else {
@@ -2770,7 +2759,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
             int l = MathHelper.ceil(aABB.maxY);
             int m = MathHelper.floor(aABB.minZ);
             int n = MathHelper.ceil(aABB.maxZ);
-            double e = 0.0D;
+            double d = 0.0D;
             boolean bl = this.isPushedByFluid();
             boolean bl2 = false;
             Vec3D vec3 = Vec3D.ZERO;
@@ -2783,14 +2772,14 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                         mutableBlockPos.set(p, q, r);
                         Fluid fluidState = this.level.getFluid(mutableBlockPos);
                         if (fluidState.is(tag)) {
-                            double f = (double)((float)q + fluidState.getHeight(this.level, mutableBlockPos));
-                            if (f >= aABB.minY) {
+                            double e = (double)((float)q + fluidState.getHeight(this.level, mutableBlockPos));
+                            if (e >= aABB.minY) {
                                 bl2 = true;
-                                e = Math.max(f - aABB.minY, e);
+                                d = Math.max(e - aABB.minY, d);
                                 if (bl) {
                                     Vec3D vec32 = fluidState.getFlow(this.level, mutableBlockPos);
-                                    if (e < 0.4D) {
-                                        vec32 = vec32.scale(e);
+                                    if (d < 0.4D) {
+                                        vec32 = vec32.scale(d);
                                     }
 
                                     vec3 = vec3.add(vec32);
@@ -2812,8 +2801,8 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 }
 
                 Vec3D vec33 = this.getMot();
-                vec3 = vec3.scale(d * 1.0D);
-                double g = 0.003D;
+                vec3 = vec3.scale(speed * 1.0D);
+                double f = 0.003D;
                 if (Math.abs(vec33.x) < 0.003D && Math.abs(vec33.z) < 0.003D && vec3.length() < 0.0045000000000000005D) {
                     vec3 = vec3.normalize().scale(0.0045000000000000005D);
                 }
@@ -2821,7 +2810,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
                 this.setMot(this.getMot().add(vec3));
             }
 
-            this.fluidHeight.put(tag, e);
+            this.fluidHeight.put(tag, d);
             return bl2;
         }
     }
@@ -2867,7 +2856,11 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     }
 
     public IBlockData getFeetBlockState() {
-        return this.level.getType(this.getChunkCoordinates());
+        if (this.feetBlockState == null) {
+            this.feetBlockState = this.level.getType(this.getChunkCoordinates());
+        }
+
+        return this.feetBlockState;
     }
 
     public BlockPosition eyeBlockPosition() {
@@ -2875,7 +2868,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     }
 
     public ChunkCoordIntPair chunkPosition() {
-        return new ChunkCoordIntPair(this.blockPosition);
+        return this.chunkPosition;
     }
 
     public Vec3D getMot() {
@@ -2950,6 +2943,10 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
             int k = MathHelper.floor(z);
             if (i != this.blockPosition.getX() || j != this.blockPosition.getY() || k != this.blockPosition.getZ()) {
                 this.blockPosition = new BlockPosition(i, j, k);
+                this.feetBlockState = null;
+                if (SectionPosition.blockToSectionCoord(i) != this.chunkPosition.x || SectionPosition.blockToSectionCoord(k) != this.chunkPosition.z) {
+                    this.chunkPosition = new ChunkCoordIntPair(this.blockPosition);
+                }
             }
 
             this.levelCallback.onMove();
@@ -2964,8 +2961,8 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     public void checkDespawn() {
     }
 
-    public Vec3D getRopeHoldPosition(float f) {
-        return this.getPosition(f).add(0.0D, (double)this.eyeHeight * 0.7D, 0.0D);
+    public Vec3D getRopeHoldPosition(float delta) {
+        return this.getPosition(delta).add(0.0D, (double)this.eyeHeight * 0.7D, 0.0D);
     }
 
     public void recreateFromPacket(PacketPlayOutSpawnEntity packet) {
@@ -3028,7 +3025,7 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
     }
 
     @Override
-    public final void setRemoved(Entity.RemovalReason reason) {
+    public void setRemoved(Entity.RemovalReason reason) {
         if (this.removalReason == null) {
             this.removalReason = reason;
         }
@@ -3068,6 +3065,10 @@ public abstract class Entity implements INamableTileEntity, EntityAccess, IComma
 
     public boolean mayInteract(World world, BlockPosition pos) {
         return true;
+    }
+
+    public World getLevel() {
+        return this.level;
     }
 
     @FunctionalInterface

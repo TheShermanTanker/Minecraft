@@ -54,9 +54,9 @@ public class ShapeDetector {
 
     @Nullable
     @VisibleForTesting
-    public ShapeDetector.ShapeDetectorCollection matches(IWorldReader levelReader, BlockPosition blockPos, EnumDirection direction, EnumDirection direction2) {
-        LoadingCache<BlockPosition, ShapeDetectorBlock> loadingCache = createLevelCache(levelReader, false);
-        return this.matches(blockPos, direction, direction2, loadingCache);
+    public ShapeDetector.ShapeDetectorCollection matches(IWorldReader world, BlockPosition frontTopLeft, EnumDirection forwards, EnumDirection up) {
+        LoadingCache<BlockPosition, ShapeDetectorBlock> loadingCache = createLevelCache(world, false);
+        return this.matches(frontTopLeft, forwards, up, loadingCache);
     }
 
     @Nullable

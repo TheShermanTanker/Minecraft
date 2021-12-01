@@ -54,11 +54,11 @@ public class BlockCobbleWall extends Block implements IBlockWaterlogged {
         this.collisionShapeByIndex = this.makeShapes(4.0F, 3.0F, 24.0F, 0.0F, 24.0F, 24.0F);
     }
 
-    private static VoxelShape applyWallShape(VoxelShape voxelShape, BlockPropertyWallHeight wallSide, VoxelShape voxelShape2, VoxelShape voxelShape3) {
-        if (wallSide == BlockPropertyWallHeight.TALL) {
-            return VoxelShapes.or(voxelShape, voxelShape3);
+    private static VoxelShape applyWallShape(VoxelShape base, BlockPropertyWallHeight wallShape, VoxelShape tall, VoxelShape low) {
+        if (wallShape == BlockPropertyWallHeight.TALL) {
+            return VoxelShapes.or(base, low);
         } else {
-            return wallSide == BlockPropertyWallHeight.LOW ? VoxelShapes.or(voxelShape, voxelShape2) : voxelShape;
+            return wallShape == BlockPropertyWallHeight.LOW ? VoxelShapes.or(base, tall) : base;
         }
     }
 
@@ -151,7 +151,7 @@ public class BlockCobbleWall extends Block implements IBlockWaterlogged {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         if (direction == EnumDirection.DOWN) {
@@ -161,48 +161,48 @@ public class BlockCobbleWall extends Block implements IBlockWaterlogged {
         }
     }
 
-    private static boolean isConnected(IBlockData blockState, IBlockState<BlockPropertyWallHeight> property) {
-        return blockState.get(property) != BlockPropertyWallHeight.NONE;
+    private static boolean isConnected(IBlockData state, IBlockState<BlockPropertyWallHeight> property) {
+        return state.get(property) != BlockPropertyWallHeight.NONE;
     }
 
-    private static boolean isCovered(VoxelShape voxelShape, VoxelShape voxelShape2) {
-        return !VoxelShapes.joinIsNotEmpty(voxelShape2, voxelShape, OperatorBoolean.ONLY_FIRST);
+    private static boolean isCovered(VoxelShape aboveShape, VoxelShape tallShape) {
+        return !VoxelShapes.joinIsNotEmpty(tallShape, aboveShape, OperatorBoolean.ONLY_FIRST);
     }
 
-    private IBlockData topUpdate(IWorldReader levelReader, IBlockData blockState, BlockPosition blockPos, IBlockData blockState2) {
-        boolean bl = isConnected(blockState, NORTH_WALL);
-        boolean bl2 = isConnected(blockState, EAST_WALL);
-        boolean bl3 = isConnected(blockState, SOUTH_WALL);
-        boolean bl4 = isConnected(blockState, WEST_WALL);
-        return this.updateShape(levelReader, blockState, blockPos, blockState2, bl, bl2, bl3, bl4);
+    private IBlockData topUpdate(IWorldReader world, IBlockData state, BlockPosition pos, IBlockData aboveState) {
+        boolean bl = isConnected(state, NORTH_WALL);
+        boolean bl2 = isConnected(state, EAST_WALL);
+        boolean bl3 = isConnected(state, SOUTH_WALL);
+        boolean bl4 = isConnected(state, WEST_WALL);
+        return this.updateShape(world, state, pos, aboveState, bl, bl2, bl3, bl4);
     }
 
-    private IBlockData sideUpdate(IWorldReader levelReader, BlockPosition blockPos, IBlockData blockState, BlockPosition blockPos2, IBlockData blockState2, EnumDirection direction) {
+    private IBlockData sideUpdate(IWorldReader world, BlockPosition pos, IBlockData state, BlockPosition neighborPos, IBlockData neighborState, EnumDirection direction) {
         EnumDirection direction2 = direction.opposite();
-        boolean bl = direction == EnumDirection.NORTH ? this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos2, direction2), direction2) : isConnected(blockState, NORTH_WALL);
-        boolean bl2 = direction == EnumDirection.EAST ? this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos2, direction2), direction2) : isConnected(blockState, EAST_WALL);
-        boolean bl3 = direction == EnumDirection.SOUTH ? this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos2, direction2), direction2) : isConnected(blockState, SOUTH_WALL);
-        boolean bl4 = direction == EnumDirection.WEST ? this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos2, direction2), direction2) : isConnected(blockState, WEST_WALL);
-        BlockPosition blockPos3 = blockPos.above();
-        IBlockData blockState3 = levelReader.getType(blockPos3);
-        return this.updateShape(levelReader, blockState, blockPos3, blockState3, bl, bl2, bl3, bl4);
+        boolean bl = direction == EnumDirection.NORTH ? this.connectsTo(neighborState, neighborState.isFaceSturdy(world, neighborPos, direction2), direction2) : isConnected(state, NORTH_WALL);
+        boolean bl2 = direction == EnumDirection.EAST ? this.connectsTo(neighborState, neighborState.isFaceSturdy(world, neighborPos, direction2), direction2) : isConnected(state, EAST_WALL);
+        boolean bl3 = direction == EnumDirection.SOUTH ? this.connectsTo(neighborState, neighborState.isFaceSturdy(world, neighborPos, direction2), direction2) : isConnected(state, SOUTH_WALL);
+        boolean bl4 = direction == EnumDirection.WEST ? this.connectsTo(neighborState, neighborState.isFaceSturdy(world, neighborPos, direction2), direction2) : isConnected(state, WEST_WALL);
+        BlockPosition blockPos = pos.above();
+        IBlockData blockState = world.getType(blockPos);
+        return this.updateShape(world, state, blockPos, blockState, bl, bl2, bl3, bl4);
     }
 
-    private IBlockData updateShape(IWorldReader levelReader, IBlockData blockState, BlockPosition blockPos, IBlockData blockState2, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
-        VoxelShape voxelShape = blockState2.getCollisionShape(levelReader, blockPos).getFaceShape(EnumDirection.DOWN);
-        IBlockData blockState3 = this.updateSides(blockState, bl, bl2, bl3, bl4, voxelShape);
-        return blockState3.set(UP, Boolean.valueOf(this.shouldRaisePost(blockState3, blockState2, voxelShape)));
+    private IBlockData updateShape(IWorldReader world, IBlockData state, BlockPosition pos, IBlockData aboveState, boolean north, boolean east, boolean south, boolean west) {
+        VoxelShape voxelShape = aboveState.getCollisionShape(world, pos).getFaceShape(EnumDirection.DOWN);
+        IBlockData blockState = this.updateSides(state, north, east, south, west, voxelShape);
+        return blockState.set(UP, Boolean.valueOf(this.shouldRaisePost(blockState, aboveState, voxelShape)));
     }
 
-    private boolean shouldRaisePost(IBlockData blockState, IBlockData blockState2, VoxelShape voxelShape) {
-        boolean bl = blockState2.getBlock() instanceof BlockCobbleWall && blockState2.get(UP);
+    private boolean shouldRaisePost(IBlockData state, IBlockData aboveState, VoxelShape aboveShape) {
+        boolean bl = aboveState.getBlock() instanceof BlockCobbleWall && aboveState.get(UP);
         if (bl) {
             return true;
         } else {
-            BlockPropertyWallHeight wallSide = blockState.get(NORTH_WALL);
-            BlockPropertyWallHeight wallSide2 = blockState.get(SOUTH_WALL);
-            BlockPropertyWallHeight wallSide3 = blockState.get(EAST_WALL);
-            BlockPropertyWallHeight wallSide4 = blockState.get(WEST_WALL);
+            BlockPropertyWallHeight wallSide = state.get(NORTH_WALL);
+            BlockPropertyWallHeight wallSide2 = state.get(SOUTH_WALL);
+            BlockPropertyWallHeight wallSide3 = state.get(EAST_WALL);
+            BlockPropertyWallHeight wallSide4 = state.get(WEST_WALL);
             boolean bl2 = wallSide2 == BlockPropertyWallHeight.NONE;
             boolean bl3 = wallSide4 == BlockPropertyWallHeight.NONE;
             boolean bl4 = wallSide3 == BlockPropertyWallHeight.NONE;
@@ -215,19 +215,19 @@ public class BlockCobbleWall extends Block implements IBlockWaterlogged {
                 if (bl7) {
                     return false;
                 } else {
-                    return blockState2.is(TagsBlock.WALL_POST_OVERRIDE) || isCovered(voxelShape, POST_TEST);
+                    return aboveState.is(TagsBlock.WALL_POST_OVERRIDE) || isCovered(aboveShape, POST_TEST);
                 }
             }
         }
     }
 
-    private IBlockData updateSides(IBlockData blockState, boolean bl, boolean bl2, boolean bl3, boolean bl4, VoxelShape voxelShape) {
-        return blockState.set(NORTH_WALL, this.makeWallState(bl, voxelShape, NORTH_TEST)).set(EAST_WALL, this.makeWallState(bl2, voxelShape, EAST_TEST)).set(SOUTH_WALL, this.makeWallState(bl3, voxelShape, SOUTH_TEST)).set(WEST_WALL, this.makeWallState(bl4, voxelShape, WEST_TEST));
+    private IBlockData updateSides(IBlockData state, boolean north, boolean east, boolean south, boolean west, VoxelShape aboveShape) {
+        return state.set(NORTH_WALL, this.makeWallState(north, aboveShape, NORTH_TEST)).set(EAST_WALL, this.makeWallState(east, aboveShape, EAST_TEST)).set(SOUTH_WALL, this.makeWallState(south, aboveShape, SOUTH_TEST)).set(WEST_WALL, this.makeWallState(west, aboveShape, WEST_TEST));
     }
 
-    private BlockPropertyWallHeight makeWallState(boolean bl, VoxelShape voxelShape, VoxelShape voxelShape2) {
-        if (bl) {
-            return isCovered(voxelShape, voxelShape2) ? BlockPropertyWallHeight.TALL : BlockPropertyWallHeight.LOW;
+    private BlockPropertyWallHeight makeWallState(boolean connected, VoxelShape aboveShape, VoxelShape tallShape) {
+        if (connected) {
+            return isCovered(aboveShape, tallShape) ? BlockPropertyWallHeight.TALL : BlockPropertyWallHeight.LOW;
         } else {
             return BlockPropertyWallHeight.NONE;
         }

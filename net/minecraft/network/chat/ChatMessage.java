@@ -1,10 +1,12 @@
 package net.minecraft.network.chat;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -20,7 +22,7 @@ public class ChatMessage extends ChatBaseComponent implements ChatComponentConte
     private final Object[] args;
     @Nullable
     private LocaleLanguage decomposedWith;
-    private final List<IChatFormatted> decomposedParts = Lists.newArrayList();
+    private List<IChatFormatted> decomposedParts = ImmutableList.of();
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
     public ChatMessage(String key) {
@@ -37,20 +39,20 @@ public class ChatMessage extends ChatBaseComponent implements ChatComponentConte
         LocaleLanguage language = LocaleLanguage.getInstance();
         if (language != this.decomposedWith) {
             this.decomposedWith = language;
-            this.decomposedParts.clear();
             String string = language.getOrDefault(this.key);
 
             try {
-                this.decomposeTemplate(string);
+                Builder<IChatFormatted> builder = ImmutableList.builder();
+                this.decomposeTemplate(string, builder::add);
+                this.decomposedParts = builder.build();
             } catch (ChatMessageException var4) {
-                this.decomposedParts.clear();
-                this.decomposedParts.add(IChatFormatted.of(string));
+                this.decomposedParts = ImmutableList.of(IChatFormatted.of(string));
             }
 
         }
     }
 
-    private void decomposeTemplate(String translation) {
+    private void decomposeTemplate(String translation, Consumer<IChatFormatted> partsConsumer) {
         Matcher matcher = FORMAT_PATTERN.matcher(translation);
 
         try {
@@ -67,13 +69,13 @@ public class ChatMessage extends ChatBaseComponent implements ChatComponentConte
                         throw new IllegalArgumentException();
                     }
 
-                    this.decomposedParts.add(IChatFormatted.of(string));
+                    partsConsumer.accept(IChatFormatted.of(string));
                 }
 
                 String string2 = matcher.group(2);
                 String string3 = translation.substring(k, l);
                 if ("%".equals(string2) && "%%".equals(string3)) {
-                    this.decomposedParts.add(TEXT_PERCENT);
+                    partsConsumer.accept(TEXT_PERCENT);
                 } else {
                     if (!"s".equals(string2)) {
                         throw new ChatMessageException(this, "Unsupported format: '" + string3 + "'");
@@ -82,7 +84,7 @@ public class ChatMessage extends ChatBaseComponent implements ChatComponentConte
                     String string4 = matcher.group(1);
                     int m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
                     if (m < this.args.length) {
-                        this.decomposedParts.add(this.getArgument(m));
+                        partsConsumer.accept(this.getArgument(m));
                     }
                 }
             }
@@ -93,11 +95,11 @@ public class ChatMessage extends ChatBaseComponent implements ChatComponentConte
                     throw new IllegalArgumentException();
                 }
 
-                this.decomposedParts.add(IChatFormatted.of(string5));
+                partsConsumer.accept(IChatFormatted.of(string5));
             }
 
-        } catch (IllegalArgumentException var11) {
-            throw new ChatMessageException(this, var11);
+        } catch (IllegalArgumentException var12) {
+            throw new ChatMessageException(this, var12);
         }
     }
 

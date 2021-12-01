@@ -18,7 +18,6 @@ public class DataConverterSettingRename extends DataFix {
         this.fieldTo = newName;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped(this.fixName, this.getInputSchema().getType(DataConverterTypes.OPTIONS), (typed) -> {
             return typed.update(DSL.remainderFinder(), (dynamic) -> {

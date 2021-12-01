@@ -148,9 +148,9 @@ public class ContainerMerchant extends Container {
     }
 
     private void playTradeSound() {
-        if (!this.trader.getWorld().isClientSide) {
+        if (!this.trader.isClientSide()) {
             Entity entity = (Entity)this.trader;
-            this.trader.getWorld().playLocalSound(entity.locX(), entity.locY(), entity.locZ(), this.trader.getTradeSound(), EnumSoundCategory.NEUTRAL, 1.0F, 1.0F, false);
+            entity.getLevel().playLocalSound(entity.locX(), entity.locY(), entity.locZ(), this.trader.getTradeSound(), EnumSoundCategory.NEUTRAL, 1.0F, 1.0F, false);
         }
 
     }
@@ -159,7 +159,7 @@ public class ContainerMerchant extends Container {
     public void removed(EntityHuman player) {
         super.removed(player);
         this.trader.setTradingPlayer((EntityHuman)null);
-        if (!this.trader.getWorld().isClientSide) {
+        if (!this.trader.isClientSide()) {
             if (!player.isAlive() || player instanceof EntityPlayer && ((EntityPlayer)player).hasDisconnected()) {
                 ItemStack itemStack = this.tradeContainer.splitWithoutUpdate(0);
                 if (!itemStack.isEmpty()) {

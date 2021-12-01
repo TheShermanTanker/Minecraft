@@ -177,7 +177,7 @@ public class ContainerEnchantTable extends Container {
                         itemStack3 = new ItemStack(Items.ENCHANTED_BOOK);
                         NBTTagCompound compoundTag = itemStack.getTag();
                         if (compoundTag != null) {
-                            itemStack3.setTag(compoundTag.c());
+                            itemStack3.setTag(compoundTag.copy());
                         }
 
                         this.enchantSlots.setItem(0, itemStack3);

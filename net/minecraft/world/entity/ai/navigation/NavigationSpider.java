@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.navigation;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
@@ -7,6 +8,7 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.level.pathfinder.PathEntity;
 
 public class NavigationSpider extends Navigation {
+    @Nullable
     private BlockPosition pathToPosition;
 
     public NavigationSpider(EntityInsentient mob, World world) {

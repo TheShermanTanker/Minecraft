@@ -30,15 +30,15 @@ public class BehaviorStrollInside extends Behavior<EntityCreature> {
         BlockPosition blockPos = entity.getChunkCoordinates();
         List<BlockPosition> list = BlockPosition.betweenClosedStream(blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1)).map(BlockPosition::immutableCopy).collect(Collectors.toList());
         Collections.shuffle(list);
-        Optional<BlockPosition> optional = list.stream().filter((blockPosx) -> {
-            return !world.canSeeSky(blockPosx);
-        }).filter((blockPosx) -> {
-            return world.loadedAndEntityCanStandOn(blockPosx, entity);
+        Optional<BlockPosition> optional = list.stream().filter((pos) -> {
+            return !world.canSeeSky(pos);
+        }).filter((pos) -> {
+            return world.loadedAndEntityCanStandOn(pos, entity);
         }).filter((blockPosx) -> {
             return world.getCubes(entity);
         }).findFirst();
-        optional.ifPresent((blockPosx) -> {
-            entity.getBehaviorController().setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(blockPosx, this.speedModifier, 0));
+        optional.ifPresent((pos) -> {
+            entity.getBehaviorController().setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(pos, this.speedModifier, 0));
         });
     }
 }

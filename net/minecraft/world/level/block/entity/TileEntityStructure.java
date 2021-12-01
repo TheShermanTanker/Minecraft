@@ -56,8 +56,8 @@ public class TileEntityStructure extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setString("name", this.getStructureName());
         nbt.setString("author", this.author);
         nbt.setString("metadata", this.metaData);
@@ -76,7 +76,6 @@ public class TileEntityStructure extends TileEntity {
         nbt.setBoolean("showboundingbox", this.showBoundingBox);
         nbt.setFloat("integrity", this.integrity);
         nbt.setLong("seed", this.seed);
-        return nbt;
     }
 
     @Override
@@ -137,15 +136,14 @@ public class TileEntityStructure extends TileEntity {
         }
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 7, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     public boolean usedBy(EntityHuman player) {
@@ -270,12 +268,12 @@ public class TileEntityStructure extends TileEntity {
             BlockPosition blockPos2 = new BlockPosition(blockPos.getX() - 80, this.level.getMinBuildHeight(), blockPos.getZ() - 80);
             BlockPosition blockPos3 = new BlockPosition(blockPos.getX() + 80, this.level.getMaxBuildHeight() - 1, blockPos.getZ() + 80);
             Stream<BlockPosition> stream = this.getRelatedCorners(blockPos2, blockPos3);
-            return calculateEnclosingBoundingBox(blockPos, stream).filter((boundingBox) -> {
-                int i = boundingBox.maxX() - boundingBox.minX();
-                int j = boundingBox.maxY() - boundingBox.minY();
-                int k = boundingBox.maxZ() - boundingBox.minZ();
+            return calculateEnclosingBoundingBox(blockPos, stream).filter((box) -> {
+                int i = box.maxX() - box.minX();
+                int j = box.maxY() - box.minY();
+                int k = box.maxZ() - box.minZ();
                 if (i > 1 && j > 1 && k > 1) {
-                    this.structurePos = new BlockPosition(boundingBox.minX() - blockPos.getX() + 1, boundingBox.minY() - blockPos.getY() + 1, boundingBox.minZ() - blockPos.getZ() + 1);
+                    this.structurePos = new BlockPosition(box.minX() - blockPos.getX() + 1, box.minY() - blockPos.getY() + 1, box.minZ() - blockPos.getZ() + 1);
                     this.structureSize = new BaseBlockPosition(i - 1, j - 1, k - 1);
                     this.update();
                     IBlockData blockState = this.level.getType(blockPos);
@@ -375,13 +373,13 @@ public class TileEntityStructure extends TileEntity {
         }
     }
 
-    public boolean loadStructure(WorldServer world, boolean bl, DefinedStructure structureTemplate) {
+    public boolean loadStructure(WorldServer world, boolean bl, DefinedStructure structure) {
         BlockPosition blockPos = this.getPosition();
-        if (!UtilColor.isNullOrEmpty(structureTemplate.getAuthor())) {
-            this.author = structureTemplate.getAuthor();
+        if (!UtilColor.isNullOrEmpty(structure.getAuthor())) {
+            this.author = structure.getAuthor();
         }
 
-        BaseBlockPosition vec3i = structureTemplate.getSize();
+        BaseBlockPosition vec3i = structure.getSize();
         boolean bl2 = this.structureSize.equals(vec3i);
         if (!bl2) {
             this.structureSize = vec3i;
@@ -399,7 +397,7 @@ public class TileEntityStructure extends TileEntity {
             }
 
             BlockPosition blockPos2 = blockPos.offset(this.structurePos);
-            structureTemplate.placeInWorld(world, blockPos2, blockPos2, structurePlaceSettings, createRandom(this.seed), 2);
+            structure.placeInWorld(world, blockPos2, blockPos2, structurePlaceSettings, createRandom(this.seed), 2);
             return true;
         }
     }

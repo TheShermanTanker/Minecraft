@@ -15,14 +15,14 @@ public class MojangsonParser {
     public static final SimpleCommandExceptionType ERROR_TRAILING_DATA = new SimpleCommandExceptionType(new ChatMessage("argument.nbt.trailing"));
     public static final SimpleCommandExceptionType ERROR_EXPECTED_KEY = new SimpleCommandExceptionType(new ChatMessage("argument.nbt.expected.key"));
     public static final SimpleCommandExceptionType ERROR_EXPECTED_VALUE = new SimpleCommandExceptionType(new ChatMessage("argument.nbt.expected.value"));
-    public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_LIST = new Dynamic2CommandExceptionType((object, object2) -> {
-        return new ChatMessage("argument.nbt.list.mixed", object, object2);
+    public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_LIST = new Dynamic2CommandExceptionType((receivedType, expectedType) -> {
+        return new ChatMessage("argument.nbt.list.mixed", receivedType, expectedType);
     });
-    public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_ARRAY = new Dynamic2CommandExceptionType((object, object2) -> {
-        return new ChatMessage("argument.nbt.array.mixed", object, object2);
+    public static final Dynamic2CommandExceptionType ERROR_INSERT_MIXED_ARRAY = new Dynamic2CommandExceptionType((receivedType, expectedType) -> {
+        return new ChatMessage("argument.nbt.array.mixed", receivedType, expectedType);
     });
-    public static final DynamicCommandExceptionType ERROR_INVALID_ARRAY = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.nbt.array.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_INVALID_ARRAY = new DynamicCommandExceptionType((type) -> {
+        return new ChatMessage("argument.nbt.array.invalid", type);
     });
     public static final char ELEMENT_SEPARATOR = ',';
     public static final char NAME_VALUE_SEPARATOR = ':';

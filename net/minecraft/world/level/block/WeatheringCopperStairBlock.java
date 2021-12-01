@@ -9,9 +9,9 @@ import net.minecraft.world.level.block.state.IBlockData;
 public class WeatheringCopperStairBlock extends BlockStairs implements WeatheringCopper {
     private final WeatheringCopper.WeatherState weatherState;
 
-    public WeatheringCopperStairBlock(WeatheringCopper.WeatherState oxidizationLevel, IBlockData baseBlockState, BlockBase.Info settings) {
+    public WeatheringCopperStairBlock(WeatheringCopper.WeatherState oxidationLevel, IBlockData baseBlockState, BlockBase.Info settings) {
         super(baseBlockState, settings);
-        this.weatherState = oxidizationLevel;
+        this.weatherState = oxidationLevel;
     }
 
     @Override

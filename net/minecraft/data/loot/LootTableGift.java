@@ -2,16 +2,15 @@ package net.minecraft.data.loot;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import net.minecraft.SystemUtils;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.storage.loot.LootSelector;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionSetCount;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionSetTag;
+import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
@@ -25,33 +24,7 @@ public class LootTableGift implements Consumer<BiConsumer<MinecraftKey, LootTabl
         biConsumer.accept(LootTables.CLERIC_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.REDSTONE)).add(LootItem.lootTableItem(Items.LAPIS_LAZULI))));
         biConsumer.accept(LootTables.FARMER_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.BREAD)).add(LootItem.lootTableItem(Items.PUMPKIN_PIE)).add(LootItem.lootTableItem(Items.COOKIE))));
         biConsumer.accept(LootTables.FISHERMAN_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.COD)).add(LootItem.lootTableItem(Items.SALMON))));
-        biConsumer.accept(LootTables.FLETCHER_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.ARROW).setWeight(26)).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:swiftness");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:slowness");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:strength");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:healing");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:harming");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:leaping");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:regeneration");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:fire_resistance");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:water_breathing");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:invisibility");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:night_vision");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:weakness");
-        })))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:poison");
-        }))))));
+        biConsumer.accept(LootTables.FLETCHER_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.ARROW).setWeight(26)).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.SWIFTNESS))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.SLOWNESS))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.STRENGTH))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.HEALING))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.HARMING))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.LEAPING))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.REGENERATION))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.FIRE_RESISTANCE))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.WATER_BREATHING))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.INVISIBILITY))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.NIGHT_VISION))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.WEAKNESS))).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(SetPotionFunction.setPotion(Potions.POISON)))));
         biConsumer.accept(LootTables.LEATHERWORKER_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.LEATHER))));
         biConsumer.accept(LootTables.LIBRARIAN_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.BOOK))));
         biConsumer.accept(LootTables.MASON_GIFT, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.CLAY))));

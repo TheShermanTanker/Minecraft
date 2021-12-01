@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenCustomHashMap;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ThreadFactory;
@@ -26,8 +27,10 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.storage.IChunkLoader;
 import net.minecraft.world.level.chunk.storage.RegionFile;
+import net.minecraft.world.level.levelgen.GeneratorSettings;
 import net.minecraft.world.level.storage.Convertable;
 import net.minecraft.world.level.storage.WorldPersistentData;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +39,7 @@ import org.apache.logging.log4j.Logger;
 public class WorldUpgrader {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ThreadFactory THREAD_FACTORY = (new ThreadFactoryBuilder()).setDaemon(true).build();
-    private final ImmutableSet<ResourceKey<World>> levels;
+    private final GeneratorSettings worldGenSettings;
     private final boolean eraseCache;
     private final Convertable.ConversionSession levelStorage;
     private final Thread thread;
@@ -52,12 +55,12 @@ public class WorldUpgrader {
     public static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
     private final WorldPersistentData overworldDataStorage;
 
-    public WorldUpgrader(Convertable.ConversionSession session, DataFixer dataFixer, ImmutableSet<ResourceKey<World>> worlds, boolean eraseCache) {
-        this.levels = worlds;
+    public WorldUpgrader(Convertable.ConversionSession session, DataFixer dataFixer, GeneratorSettings generatorOptions, boolean eraseCache) {
+        this.worldGenSettings = generatorOptions;
         this.eraseCache = eraseCache;
         this.dataFixer = dataFixer;
         this.levelStorage = session;
-        this.overworldDataStorage = new WorldPersistentData(new File(this.levelStorage.getDimensionPath(World.OVERWORLD), "data"), dataFixer);
+        this.overworldDataStorage = new WorldPersistentData(this.levelStorage.getDimensionPath(World.OVERWORLD).resolve("data").toFile(), dataFixer);
         this.thread = THREAD_FACTORY.newThread(this::work);
         this.thread.setUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.error("Error upgrading world", throwable);
@@ -80,8 +83,9 @@ public class WorldUpgrader {
     private void work() {
         this.totalChunks = 0;
         Builder<ResourceKey<World>, ListIterator<ChunkCoordIntPair>> builder = ImmutableMap.builder();
+        ImmutableSet<ResourceKey<World>> immutableSet = this.worldGenSettings.levels();
 
-        for(ResourceKey<World> resourceKey : this.levels) {
+        for(ResourceKey<World> resourceKey : immutableSet) {
             List<ChunkCoordIntPair> list = this.getAllChunkPos(resourceKey);
             builder.put(resourceKey, list.listIterator());
             this.totalChunks += list.size();
@@ -94,9 +98,9 @@ public class WorldUpgrader {
             ImmutableMap<ResourceKey<World>, ListIterator<ChunkCoordIntPair>> immutableMap = builder.build();
             Builder<ResourceKey<World>, IChunkLoader> builder2 = ImmutableMap.builder();
 
-            for(ResourceKey<World> resourceKey2 : this.levels) {
-                File file = this.levelStorage.getDimensionPath(resourceKey2);
-                builder2.put(resourceKey2, new IChunkLoader(new File(file, "region"), this.dataFixer, true));
+            for(ResourceKey<World> resourceKey2 : immutableSet) {
+                Path path = this.levelStorage.getDimensionPath(resourceKey2);
+                builder2.put(resourceKey2, new IChunkLoader(path.resolve("region"), this.dataFixer, true));
             }
 
             ImmutableMap<ResourceKey<World>, IChunkLoader> immutableMap2 = builder2.build();
@@ -107,7 +111,7 @@ public class WorldUpgrader {
                 boolean bl = false;
                 float g = 0.0F;
 
-                for(ResourceKey<World> resourceKey3 : this.levels) {
+                for(ResourceKey<World> resourceKey3 : immutableSet) {
                     ListIterator<ChunkCoordIntPair> listIterator = immutableMap.get(resourceKey3);
                     IChunkLoader chunkStorage = immutableMap2.get(resourceKey3);
                     if (listIterator.hasNext()) {
@@ -118,21 +122,21 @@ public class WorldUpgrader {
                             NBTTagCompound compoundTag = chunkStorage.read(chunkPos);
                             if (compoundTag != null) {
                                 int i = IChunkLoader.getVersion(compoundTag);
-                                NBTTagCompound compoundTag2 = chunkStorage.getChunkData(resourceKey3, () -> {
+                                ChunkGenerator chunkGenerator = this.worldGenSettings.dimensions().get(GeneratorSettings.levelToLevelStem(resourceKey3)).generator();
+                                NBTTagCompound compoundTag2 = chunkStorage.upgradeChunkTag(resourceKey3, () -> {
                                     return this.overworldDataStorage;
-                                }, compoundTag);
-                                NBTTagCompound compoundTag3 = compoundTag2.getCompound("Level");
-                                ChunkCoordIntPair chunkPos2 = new ChunkCoordIntPair(compoundTag3.getInt("xPos"), compoundTag3.getInt("zPos"));
+                                }, compoundTag, chunkGenerator.getTypeNameForDataFixer());
+                                ChunkCoordIntPair chunkPos2 = new ChunkCoordIntPair(compoundTag2.getInt("xPos"), compoundTag2.getInt("zPos"));
                                 if (!chunkPos2.equals(chunkPos)) {
                                     LOGGER.warn("Chunk {} has invalid position {}", chunkPos, chunkPos2);
                                 }
 
-                                boolean bl3 = i < SharedConstants.getGameVersion().getWorldVersion();
+                                boolean bl3 = i < SharedConstants.getCurrentVersion().getWorldVersion();
                                 if (this.eraseCache) {
-                                    bl3 = bl3 || compoundTag3.hasKey("Heightmaps");
-                                    compoundTag3.remove("Heightmaps");
-                                    bl3 = bl3 || compoundTag3.hasKey("isLightOn");
-                                    compoundTag3.remove("isLightOn");
+                                    bl3 = bl3 || compoundTag2.hasKey("Heightmaps");
+                                    compoundTag2.remove("Heightmaps");
+                                    bl3 = bl3 || compoundTag2.hasKey("isLightOn");
+                                    compoundTag2.remove("isLightOn");
                                 }
 
                                 if (bl3) {
@@ -140,15 +144,15 @@ public class WorldUpgrader {
                                     bl2 = true;
                                 }
                             }
-                        } catch (ReportedException var23) {
-                            Throwable throwable = var23.getCause();
+                        } catch (ReportedException var24) {
+                            Throwable throwable = var24.getCause();
                             if (!(throwable instanceof IOException)) {
-                                throw var23;
+                                throw var24;
                             }
 
                             LOGGER.error("Error upgrading chunk {}", chunkPos, throwable);
-                        } catch (IOException var24) {
-                            LOGGER.error("Error upgrading chunk {}", chunkPos, var24);
+                        } catch (IOException var25) {
+                            LOGGER.error("Error upgrading chunk {}", chunkPos, var25);
                         }
 
                         if (bl2) {
@@ -176,8 +180,8 @@ public class WorldUpgrader {
             for(IChunkLoader chunkStorage2 : immutableMap2.values()) {
                 try {
                     chunkStorage2.close();
-                } catch (IOException var22) {
-                    LOGGER.error("Error upgrading chunk", (Throwable)var22);
+                } catch (IOException var23) {
+                    LOGGER.error("Error upgrading chunk", (Throwable)var23);
                 }
             }
 
@@ -189,7 +193,7 @@ public class WorldUpgrader {
     }
 
     private List<ChunkCoordIntPair> getAllChunkPos(ResourceKey<World> world) {
-        File file = this.levelStorage.getDimensionPath(world);
+        File file = this.levelStorage.getDimensionPath(world).toFile();
         File file2 = new File(file, "region");
         File[] files = file2.listFiles((directory, name) -> {
             return name.endsWith(".mca");
@@ -206,7 +210,7 @@ public class WorldUpgrader {
                     int j = Integer.parseInt(matcher.group(2)) << 5;
 
                     try {
-                        RegionFile regionFile = new RegionFile(file3, file2, true);
+                        RegionFile regionFile = new RegionFile(file3.toPath(), file2.toPath(), true);
 
                         try {
                             for(int k = 0; k < 32; ++k) {
@@ -242,7 +246,7 @@ public class WorldUpgrader {
     }
 
     public ImmutableSet<ResourceKey<World>> levels() {
-        return this.levels;
+        return this.worldGenSettings.levels();
     }
 
     public float dimensionProgress(ResourceKey<World> world) {

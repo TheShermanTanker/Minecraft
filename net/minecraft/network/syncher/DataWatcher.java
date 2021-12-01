@@ -131,14 +131,14 @@ public class DataWatcher {
         return this.isDirty;
     }
 
-    public static void pack(@Nullable List<DataWatcher.Item<?>> list, PacketDataSerializer friendlyByteBuf) {
-        if (list != null) {
-            for(DataWatcher.Item<?> dataItem : list) {
-                writeDataItem(friendlyByteBuf, dataItem);
+    public static void pack(@Nullable List<DataWatcher.Item<?>> entries, PacketDataSerializer buf) {
+        if (entries != null) {
+            for(DataWatcher.Item<?> dataItem : entries) {
+                writeDataItem(buf, dataItem);
             }
         }
 
-        friendlyByteBuf.writeByte(255);
+        buf.writeByte(255);
     }
 
     @Nullable
@@ -190,7 +190,7 @@ public class DataWatcher {
         } else {
             buf.writeByte(entityDataAccessor.getId());
             buf.writeVarInt(i);
-            entityDataAccessor.getSerializer().a(buf, entry.getValue());
+            entityDataAccessor.getSerializer().write(buf, entry.getValue());
         }
     }
 
@@ -220,11 +220,11 @@ public class DataWatcher {
         return new DataWatcher.Item<>(entityDataSerializer.createAccessor(i), entityDataSerializer.read(buf));
     }
 
-    public void assignValues(List<DataWatcher.Item<?>> list) {
+    public void assignValues(List<DataWatcher.Item<?>> entries) {
         this.lock.writeLock().lock();
 
         try {
-            for(DataWatcher.Item<?> dataItem : list) {
+            for(DataWatcher.Item<?> dataItem : entries) {
                 DataWatcher.Item<?> dataItem2 = this.itemsById.get(dataItem.getAccessor().getId());
                 if (dataItem2 != null) {
                     this.assignValue(dataItem2, dataItem);
@@ -238,11 +238,11 @@ public class DataWatcher {
         this.isDirty = true;
     }
 
-    private <T> void assignValue(DataWatcher.Item<T> dataItem, DataWatcher.Item<?> dataItem2) {
-        if (!Objects.equals(dataItem2.accessor.getSerializer(), dataItem.accessor.getSerializer())) {
-            throw new IllegalStateException(String.format("Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", dataItem.accessor.getId(), this.entity, dataItem.value, dataItem.value.getClass(), dataItem2.value, dataItem2.value.getClass()));
+    private <T> void assignValue(DataWatcher.Item<T> to, DataWatcher.Item<?> from) {
+        if (!Objects.equals(from.accessor.getSerializer(), to.accessor.getSerializer())) {
+            throw new IllegalStateException(String.format("Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)", to.accessor.getId(), this.entity, to.value, to.value.getClass(), from.value, from.value.getClass()));
         } else {
-            dataItem.setValue((T)dataItem2.getValue());
+            to.setValue((T)from.getValue());
         }
     }
 
@@ -293,7 +293,7 @@ public class DataWatcher {
         }
 
         public DataWatcher.Item<T> copy() {
-            return new DataWatcher.Item<>(this.accessor, this.accessor.getSerializer().a(this.value));
+            return new DataWatcher.Item<>(this.accessor, this.accessor.getSerializer().copy(this.value));
         }
     }
 }

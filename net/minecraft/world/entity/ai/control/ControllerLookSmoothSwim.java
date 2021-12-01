@@ -8,20 +8,20 @@ public class ControllerLookSmoothSwim extends ControllerLook {
     private static final int HEAD_TILT_X = 10;
     private static final int HEAD_TILT_Y = 20;
 
-    public ControllerLookSmoothSwim(EntityInsentient entity, int maxYawDifference) {
+    public ControllerLookSmoothSwim(EntityInsentient entity, int yawAdjustThreshold) {
         super(entity);
-        this.maxYRotFromCenter = maxYawDifference;
+        this.maxYRotFromCenter = yawAdjustThreshold;
     }
 
     @Override
     public void tick() {
-        if (this.hasWanted) {
-            this.hasWanted = false;
-            this.getYRotD().ifPresent((float_) -> {
-                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, float_ + 20.0F, this.yMaxRotSpeed);
+        if (this.lookAtCooldown > 0) {
+            --this.lookAtCooldown;
+            this.getYRotD().ifPresent((yaw) -> {
+                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, yaw + 20.0F, this.yMaxRotSpeed);
             });
-            this.getXRotD().ifPresent((float_) -> {
-                this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), float_ + 10.0F, this.xMaxRotAngle));
+            this.getXRotD().ifPresent((pitch) -> {
+                this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), pitch + 10.0F, this.xMaxRotAngle));
             });
         } else {
             if (this.mob.getNavigation().isDone()) {

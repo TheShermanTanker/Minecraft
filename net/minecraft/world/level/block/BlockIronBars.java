@@ -40,7 +40,7 @@ public class BlockIronBars extends BlockTall {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return direction.getAxis().isHorizontal() ? state.set(PROPERTY_BY_DIRECTION.get(direction), Boolean.valueOf(this.attachsTo(neighborState, neighborState.isFaceSturdy(world, neighborPos, direction.opposite())))) : super.updateState(state, direction, neighborState, world, pos, neighborPos);

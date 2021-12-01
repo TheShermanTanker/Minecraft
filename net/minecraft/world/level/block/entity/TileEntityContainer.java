@@ -35,14 +35,13 @@ public abstract class TileEntityContainer extends TileEntity implements IInvento
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         this.lockKey.addToTag(nbt);
         if (this.name != null) {
             nbt.setString("CustomName", IChatBaseComponent.ChatSerializer.toJson(this.name));
         }
 
-        return nbt;
     }
 
     public void setCustomName(IChatBaseComponent customName) {

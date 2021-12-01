@@ -51,6 +51,14 @@ public abstract class BlockGrowingTop extends BlockGrowingAbstract implements IB
         return state.cycle(AGE);
     }
 
+    public IBlockData getMaxAgeState(IBlockData state) {
+        return state.set(AGE, Integer.valueOf(25));
+    }
+
+    public boolean isMaxAge(IBlockData state) {
+        return state.get(AGE) == 25;
+    }
+
     protected IBlockData updateBodyAfterConvertedFromHead(IBlockData from, IBlockData to) {
         return to;
     }
@@ -58,12 +66,12 @@ public abstract class BlockGrowingTop extends BlockGrowingAbstract implements IB
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (direction == this.growthDirection.opposite() && !state.canPlace(world, pos)) {
-            world.getBlockTickList().scheduleTick(pos, this, 1);
+            world.scheduleTick(pos, this, 1);
         }
 
         if (direction != this.growthDirection || !neighborState.is(this) && !neighborState.is(this.getBodyBlock())) {
             if (this.scheduleFluidTicks) {
-                world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
             }
 
             return super.updateState(state, direction, neighborState, world, pos, neighborPos);

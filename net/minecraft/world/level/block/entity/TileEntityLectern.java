@@ -218,14 +218,13 @@ public class TileEntityLectern extends TileEntity implements Clearable, ITileInv
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (!this.getBook().isEmpty()) {
             nbt.set("Book", this.getBook().save(new NBTTagCompound()));
             nbt.setInt("Page", this.page);
         }
 
-        return nbt;
     }
 
     @Override

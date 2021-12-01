@@ -13,7 +13,6 @@ import net.minecraft.util.datafix.fixes.DataConverterTypes;
 
 public class DataConverterSchemaV705 extends DataConverterSchemaNamed {
     protected static final HookFunction ADD_NAMES = new HookFunction() {
-        @Override
         public <T> T apply(DynamicOps<T> dynamicOps, T object) {
             return DataConverterSchemaV99.addNames(new Dynamic<>(dynamicOps, object), DataConverterSchemaV704.ITEM_TO_BLOCKENTITY, "minecraft:armor_stand");
         }
@@ -35,7 +34,6 @@ public class DataConverterSchemaV705 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = Maps.newHashMap();
         schema.registerSimple(map, "minecraft:area_effect_cloud");
@@ -168,7 +166,6 @@ public class DataConverterSchemaV705 extends DataConverterSchemaNamed {
         return map;
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         schema.registerType(true, DataConverterTypes.ENTITY, () -> {

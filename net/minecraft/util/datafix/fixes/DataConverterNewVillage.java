@@ -21,7 +21,6 @@ public class DataConverterNewVillage extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         CompoundListType<String, ?> compoundListType = DSL.compoundList(DSL.string(), this.getInputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE));
         OpticFinder<? extends List<? extends Pair<String, ?>>> opticFinder = compoundListType.finder();

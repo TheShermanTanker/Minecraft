@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.boss.enderdragon.EntityEnderDragon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,6 +9,7 @@ public class DragonControllerManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final EntityEnderDragon dragon;
     private final IDragonController[] phases = new IDragonController[DragonControllerPhase.getCount()];
+    @Nullable
     private IDragonController currentPhase;
 
     public DragonControllerManager(EntityEnderDragon dragon) {

@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockShulkerBox;
 import net.minecraft.world.level.block.SoundEffectType;
 import net.minecraft.world.level.block.entity.TileEntity;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.block.state.BlockStateList;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.block.state.properties.IBlockState;
@@ -30,8 +31,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.VoxelShapeCollision;
 
 public class ItemBlock extends Item {
-    public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+    private static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     public static final String BLOCK_STATE_TAG = "BlockStateTag";
+    /** @deprecated */
     @Deprecated
     private final Block block;
 
@@ -159,7 +161,7 @@ public class ItemBlock extends Item {
         if (minecraftServer == null) {
             return false;
         } else {
-            NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+            NBTTagCompound compoundTag = getBlockEntityData(stack);
             if (compoundTag != null) {
                 TileEntity blockEntity = world.getTileEntity(pos);
                 if (blockEntity != null) {
@@ -167,12 +169,9 @@ public class ItemBlock extends Item {
                         return false;
                     }
 
-                    NBTTagCompound compoundTag2 = blockEntity.save(new NBTTagCompound());
-                    NBTTagCompound compoundTag3 = compoundTag2.c();
+                    NBTTagCompound compoundTag2 = blockEntity.saveWithoutMetadata();
+                    NBTTagCompound compoundTag3 = compoundTag2.copy();
                     compoundTag2.merge(compoundTag);
-                    compoundTag2.setInt("x", pos.getX());
-                    compoundTag2.setInt("y", pos.getY());
-                    compoundTag2.setInt("z", pos.getZ());
                     if (!compoundTag2.equals(compoundTag3)) {
                         blockEntity.load(compoundTag2);
                         blockEntity.update();
@@ -220,11 +219,27 @@ public class ItemBlock extends Item {
     @Override
     public void onDestroyed(EntityItem entity) {
         if (this.block instanceof BlockShulkerBox) {
-            NBTTagCompound compoundTag = entity.getItemStack().getTag();
-            if (compoundTag != null) {
-                NBTTagList listTag = compoundTag.getCompound("BlockEntityTag").getList("Items", 10);
+            ItemStack itemStack = entity.getItemStack();
+            NBTTagCompound compoundTag = getBlockEntityData(itemStack);
+            if (compoundTag != null && compoundTag.hasKeyOfType("Items", 9)) {
+                NBTTagList listTag = compoundTag.getList("Items", 10);
                 ItemLiquidUtil.onContainerDestroyed(entity, listTag.stream().map(NBTTagCompound.class::cast).map(ItemStack::of));
             }
+        }
+
+    }
+
+    @Nullable
+    public static NBTTagCompound getBlockEntityData(ItemStack stack) {
+        return stack.getTagElement("BlockEntityTag");
+    }
+
+    public static void setBlockEntityData(ItemStack stack, TileEntityTypes<?> blockEntityType, NBTTagCompound tag) {
+        if (tag.isEmpty()) {
+            stack.removeTag("BlockEntityTag");
+        } else {
+            TileEntity.addEntityType(tag, blockEntityType);
+            stack.addTagElement("BlockEntityTag", tag);
         }
 
     }

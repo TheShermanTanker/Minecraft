@@ -17,6 +17,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryTarget;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.npc.EntityVillager;
@@ -27,26 +28,28 @@ import net.minecraft.world.level.pathfinder.PathMode;
 import net.minecraft.world.phys.Vec3D;
 
 public class BehaviorUtil {
+    private BehaviorUtil() {
+    }
+
     public static void lockGazeAndWalkToEachOther(EntityLiving first, EntityLiving second, float speed) {
         lookAtEachOther(first, second);
         setWalkAndLookTargetMemoriesToEachOther(first, second, speed);
     }
 
     public static boolean entityIsVisible(BehaviorController<?> brain, EntityLiving target) {
-        return brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).filter((list) -> {
-            return list.contains(target);
-        }).isPresent();
+        Optional<NearestVisibleLivingEntities> optional = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+        return optional.isPresent() && optional.get().contains(target);
     }
 
     public static boolean targetIsValid(BehaviorController<?> brain, MemoryModuleType<? extends EntityLiving> memoryModuleType, EntityTypes<?> entityType) {
-        return targetIsValid(brain, memoryModuleType, (livingEntity) -> {
-            return livingEntity.getEntityType() == entityType;
+        return targetIsValid(brain, memoryModuleType, (entity) -> {
+            return entity.getEntityType() == entityType;
         });
     }
 
     private static boolean targetIsValid(BehaviorController<?> brain, MemoryModuleType<? extends EntityLiving> memoryType, Predicate<EntityLiving> filter) {
-        return brain.getMemory(memoryType).filter(filter).filter(EntityLiving::isAlive).filter((livingEntity) -> {
-            return entityIsVisible(brain, livingEntity);
+        return brain.getMemory(memoryType).filter(filter).filter(EntityLiving::isAlive).filter((target) -> {
+            return entityIsVisible(brain, target);
         }).isPresent();
     }
 
@@ -95,14 +98,17 @@ public class BehaviorUtil {
         }).min(Comparator.comparingInt(world::sectionsToVillage)).orElse(center);
     }
 
-    public static boolean isWithinAttackRange(EntityInsentient source, EntityLiving target, int rangedWeaponReachReduction) {
-        Item item = source.getItemInMainHand().getItem();
-        if (item instanceof ItemProjectileWeapon && source.canFireProjectileWeapon((ItemProjectileWeapon)item)) {
-            int i = ((ItemProjectileWeapon)item).getDefaultProjectileRange() - rangedWeaponReachReduction;
-            return source.closerThan(target, (double)i);
-        } else {
-            return isWithinMeleeAttackRange(source, target);
+    public static boolean isWithinAttackRange(EntityInsentient mob, EntityLiving target, int rangedWeaponReachReduction) {
+        Item item = mob.getItemInMainHand().getItem();
+        if (item instanceof ItemProjectileWeapon) {
+            ItemProjectileWeapon projectileWeaponItem = (ItemProjectileWeapon)item;
+            if (mob.canFireProjectileWeapon((ItemProjectileWeapon)item)) {
+                int i = projectileWeaponItem.getDefaultProjectileRange() - rangedWeaponReachReduction;
+                return mob.closerThan(target, (double)i);
+            }
         }
+
+        return isWithinMeleeAttackRange(mob, target);
     }
 
     public static boolean isWithinMeleeAttackRange(EntityInsentient source, EntityLiving target) {
@@ -112,7 +118,7 @@ public class BehaviorUtil {
 
     public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(EntityLiving source, EntityLiving target, double extraDistance) {
         Optional<EntityLiving> optional = source.getBehaviorController().getMemory(MemoryModuleType.ATTACK_TARGET);
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             return false;
         } else {
             double d = source.distanceToSqr(optional.get().getPositionVector());
@@ -127,7 +133,7 @@ public class BehaviorUtil {
     }
 
     public static EntityLiving getNearestTarget(EntityLiving source, Optional<EntityLiving> first, EntityLiving second) {
-        return !first.isPresent() ? second : getTargetNearestMe(source, first.get(), second);
+        return first.isEmpty() ? second : getTargetNearestMe(source, first.get(), second);
     }
 
     public static EntityLiving getTargetNearestMe(EntityLiving source, EntityLiving first, EntityLiving second) {
@@ -138,17 +144,25 @@ public class BehaviorUtil {
 
     public static Optional<EntityLiving> getLivingEntityFromUUIDMemory(EntityLiving entity, MemoryModuleType<UUID> uuidMemoryModule) {
         Optional<UUID> optional = entity.getBehaviorController().getMemory(uuidMemoryModule);
-        return optional.map((uUID) -> {
-            return ((WorldServer)entity.level).getEntity(uUID);
-        }).map((entityx) -> {
-            return entityx instanceof EntityLiving ? (EntityLiving)entityx : null;
+        return optional.map((uuid) -> {
+            return ((WorldServer)entity.level).getEntity(uuid);
+        }).map((target) -> {
+            EntityLiving var10000;
+            if (target instanceof EntityLiving) {
+                EntityLiving livingEntity = (EntityLiving)target;
+                var10000 = livingEntity;
+            } else {
+                var10000 = null;
+            }
+
+            return var10000;
         });
     }
 
     public static Stream<EntityVillager> getNearbyVillagersWithCondition(EntityVillager villager, Predicate<EntityVillager> filter) {
         return villager.getBehaviorController().getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).map((list) -> {
-            return list.stream().filter((livingEntity) -> {
-                return livingEntity instanceof EntityVillager && livingEntity != villager;
+            return list.stream().filter((entity) -> {
+                return entity instanceof EntityVillager && entity != villager;
             }).map((livingEntity) -> {
                 return (EntityVillager)livingEntity;
             }).filter(EntityLiving::isAlive).filter(filter);

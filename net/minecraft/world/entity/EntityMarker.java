@@ -3,6 +3,7 @@ package net.minecraft.world.entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.material.EnumPistonReaction;
 
 public class EntityMarker extends Entity {
     private static final String DATA_TAG = "data";
@@ -28,7 +29,7 @@ public class EntityMarker extends Entity {
 
     @Override
     protected void saveData(NBTTagCompound nbt) {
-        nbt.set("data", this.data.c());
+        nbt.set("data", this.data.copy());
     }
 
     @Override
@@ -39,5 +40,10 @@ public class EntityMarker extends Entity {
     @Override
     protected void addPassenger(Entity passenger) {
         passenger.stopRiding();
+    }
+
+    @Override
+    public EnumPistonReaction getPushReaction() {
+        return EnumPistonReaction.IGNORE;
     }
 }

@@ -34,15 +34,15 @@ public class TagRegistry implements IReloadListener {
     @Override
     public CompletableFuture<Void> reload(IReloadListener.PreparationBarrier synchronizer, IResourceManager manager, GameProfilerFiller prepareProfiler, GameProfilerFiller applyProfiler, Executor prepareExecutor, Executor applyExecutor) {
         List<TagRegistry.LoaderInfo<?>> list = Lists.newArrayList();
-        TagStatic.visitHelpers((staticTagHelper) -> {
-            TagRegistry.LoaderInfo<?> loaderInfo = this.createLoader(manager, prepareExecutor, staticTagHelper);
+        TagStatic.visitHelpers((requiredTagList) -> {
+            TagRegistry.LoaderInfo<?> loaderInfo = this.createLoader(manager, prepareExecutor, requiredTagList);
             if (loaderInfo != null) {
                 list.add(loaderInfo);
             }
 
         });
-        return CompletableFuture.allOf(list.stream().map((loaderInfo) -> {
-            return loaderInfo.pendingLoad;
+        return CompletableFuture.allOf(list.stream().map((requiredGroup) -> {
+            return requiredGroup.pendingLoad;
         }).toArray((i) -> {
             return new CompletableFuture[i];
         })).thenCompose(synchronizer::wait).thenAcceptAsync((void_) -> {
@@ -83,9 +83,9 @@ public class TagRegistry implements IReloadListener {
         private final TagUtil<T> helper;
         final CompletableFuture<? extends Tags<T>> pendingLoad;
 
-        LoaderInfo(TagUtil<T> staticTagHelper, CompletableFuture<? extends Tags<T>> completableFuture) {
-            this.helper = staticTagHelper;
-            this.pendingLoad = completableFuture;
+        LoaderInfo(TagUtil<T> requirement, CompletableFuture<? extends Tags<T>> groupLoadFuture) {
+            this.helper = requirement;
+            this.pendingLoad = groupLoadFuture;
         }
 
         public void addToBuilder(ITagRegistry.Builder builder) {

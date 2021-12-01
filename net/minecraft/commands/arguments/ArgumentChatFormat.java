@@ -17,8 +17,8 @@ import net.minecraft.network.chat.ChatMessage;
 
 public class ArgumentChatFormat implements ArgumentType<EnumChatFormat> {
     private static final Collection<String> EXAMPLES = Arrays.asList("red", "green");
-    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.color.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((color) -> {
+        return new ChatMessage("argument.color.invalid", color);
     });
 
     private ArgumentChatFormat() {
@@ -32,7 +32,6 @@ public class ArgumentChatFormat implements ArgumentType<EnumChatFormat> {
         return context.getArgument(name, EnumChatFormat.class);
     }
 
-    @Override
     public EnumChatFormat parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
         EnumChatFormat chatFormatting = EnumChatFormat.getByName(string);
@@ -43,12 +42,10 @@ public class ArgumentChatFormat implements ArgumentType<EnumChatFormat> {
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggest(EnumChatFormat.getNames(true, false), suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

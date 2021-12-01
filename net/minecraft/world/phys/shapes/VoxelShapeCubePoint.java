@@ -13,12 +13,10 @@ public class VoxelShapeCubePoint extends AbstractDoubleList {
         }
     }
 
-    @Override
     public double getDouble(int i) {
         return (double)i / (double)this.parts;
     }
 
-    @Override
     public int size() {
         return this.parts + 1;
     }

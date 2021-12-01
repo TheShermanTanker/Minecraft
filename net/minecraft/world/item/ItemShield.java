@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.world.EnumHand;
@@ -22,7 +23,7 @@ public class ItemShield extends Item {
 
     @Override
     public String getDescriptionId(ItemStack stack) {
-        return stack.getTagElement("BlockEntityTag") != null ? this.getName() + "." + getColor(stack).getName() : super.getDescriptionId(stack);
+        return ItemBlock.getBlockEntityData(stack) != null ? this.getName() + "." + getColor(stack).getName() : super.getDescriptionId(stack);
     }
 
     @Override
@@ -53,6 +54,7 @@ public class ItemShield extends Item {
     }
 
     public static EnumColor getColor(ItemStack stack) {
-        return EnumColor.fromColorIndex(stack.getOrCreateTagElement("BlockEntityTag").getInt("Base"));
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
+        return compoundTag != null ? EnumColor.fromColorIndex(compoundTag.getInt("Base")) : EnumColor.WHITE;
     }
 }

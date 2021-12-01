@@ -13,8 +13,8 @@ import net.minecraft.world.level.storage.loot.LootTableInfo;
 public final class ConstantValue implements NumberProvider {
     final float value;
 
-    ConstantValue(float f) {
-        this.value = f;
+    ConstantValue(float value) {
+        this.value = value;
     }
 
     @Override

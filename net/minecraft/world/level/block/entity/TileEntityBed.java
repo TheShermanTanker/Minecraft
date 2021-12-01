@@ -21,7 +21,7 @@ public class TileEntityBed extends TileEntity {
 
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 11, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     public EnumColor getColor() {

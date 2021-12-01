@@ -31,6 +31,7 @@ import net.minecraft.network.chat.ChatMessageType;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.chat.IChatMutableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetSimulationDistancePacket;
 import net.minecraft.network.protocol.game.PacketPlayOutAbilities;
 import net.minecraft.network.protocol.game.PacketPlayOutBorder;
 import net.minecraft.network.protocol.game.PacketPlayOutBorderCenter;
@@ -112,6 +113,7 @@ public abstract class PlayerList {
     private final IRegistryCustom.Dimension registryHolder;
     protected final int maxPlayers;
     private int viewDistance;
+    private int simulationDistance;
     private boolean allowCheatsForAllPlayers;
     private static final boolean ALLOW_LOGOUTIVATOR = false;
     private int sendAllPlayerInfoIn;
@@ -153,7 +155,7 @@ public abstract class PlayerList {
         GameRules gameRules = serverLevel2.getGameRules();
         boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
         boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
-        serverGamePacketListenerImpl.sendPacket(new PacketPlayOutLogin(player.getId(), player.gameMode.getGameMode(), player.gameMode.getPreviousGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel2.getDimensionManager(), serverLevel2.getDimensionKey(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel2.isDebugWorld(), serverLevel2.isFlatWorld()));
+        serverGamePacketListenerImpl.sendPacket(new PacketPlayOutLogin(player.getId(), levelData.isHardcore(), player.gameMode.getGameMode(), player.gameMode.getPreviousGameModeForPlayer(), this.server.levelKeys(), this.registryHolder, serverLevel2.getDimensionManager(), serverLevel2.getDimensionKey(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), this.getMaxPlayers(), this.viewDistance, this.simulationDistance, bl2, !bl, serverLevel2.isDebugWorld(), serverLevel2.isFlatWorld()));
         serverGamePacketListenerImpl.sendPacket(new PacketPlayOutCustomPayload(PacketPlayOutCustomPayload.BRAND, (new PacketDataSerializer(Unpooled.buffer())).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.sendPacket(new PacketPlayOutServerDifficulty(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverGamePacketListenerImpl.sendPacket(new PacketPlayOutAbilities(player.getAbilities()));
@@ -251,7 +253,7 @@ public abstract class PlayerList {
 
     }
 
-    public void setPlayerFileData(WorldServer world) {
+    public void addWorldborderListener(WorldServer world) {
         world.getWorldBorder().addListener(new IWorldBorderListener() {
             @Override
             public void onBorderSizeSet(WorldBorder border, double size) {
@@ -687,10 +689,15 @@ public abstract class PlayerList {
         return this.viewDistance;
     }
 
+    public int getSimulationDistance() {
+        return this.simulationDistance;
+    }
+
     public MinecraftServer getServer() {
         return this.server;
     }
 
+    @Nullable
     public NBTTagCompound save() {
         return null;
     }
@@ -715,13 +722,13 @@ public abstract class PlayerList {
 
     }
 
-    public void broadcastMessage(IChatBaseComponent serverMessage, Function<EntityPlayer, IChatBaseComponent> playerMessageFactory, ChatMessageType playerMessageType, UUID sender) {
+    public void broadcastMessage(IChatBaseComponent serverMessage, Function<EntityPlayer, IChatBaseComponent> playerMessageFactory, ChatMessageType type, UUID sender) {
         this.server.sendMessage(serverMessage, sender);
 
         for(EntityPlayer serverPlayer : this.players) {
             IChatBaseComponent component = playerMessageFactory.apply(serverPlayer);
             if (component != null) {
-                serverPlayer.sendMessage(component, playerMessageType, sender);
+                serverPlayer.sendMessage(component, type, sender);
             }
         }
 
@@ -729,7 +736,7 @@ public abstract class PlayerList {
 
     public StatisticManagerServer getStatisticManager(EntityHuman player) {
         UUID uUID = player.getUniqueID();
-        StatisticManagerServer serverStatsCounter = uUID == null ? null : this.stats.get(uUID);
+        StatisticManagerServer serverStatsCounter = this.stats.get(uUID);
         if (serverStatsCounter == null) {
             File file = this.server.getWorldPath(SavedFile.PLAYER_STATS_DIR).toFile();
             File file2 = new File(file, uUID + ".json");
@@ -769,6 +776,18 @@ public abstract class PlayerList {
         for(WorldServer serverLevel : this.server.getWorlds()) {
             if (serverLevel != null) {
                 serverLevel.getChunkSource().setViewDistance(viewDistance);
+            }
+        }
+
+    }
+
+    public void setSimulationDistance(int simulationDistance) {
+        this.simulationDistance = simulationDistance;
+        this.sendAll(new ClientboundSetSimulationDistancePacket(simulationDistance));
+
+        for(WorldServer serverLevel : this.server.getWorlds()) {
+            if (serverLevel != null) {
+                serverLevel.getChunkSource().setSimulationDistance(simulationDistance);
             }
         }
 

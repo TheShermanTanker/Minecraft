@@ -1,6 +1,5 @@
 package net.minecraft.util;
 
-import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.world.phys.Vec3D;
 
 public class CubicSampler {
@@ -42,7 +41,7 @@ public class CubicSampler {
         return vec3.scale(1.0D / g);
     }
 
-    @DontObfuscate
+    @FunctionalInterface
     public interface Vec3Fetcher {
         Vec3D fetch(int x, int y, int z);
     }

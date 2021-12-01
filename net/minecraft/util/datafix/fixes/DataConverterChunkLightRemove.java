@@ -12,7 +12,6 @@ public class DataConverterChunkLightRemove extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.CHUNK);
         Type<?> type2 = type.findFieldType("Level");

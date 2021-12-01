@@ -1,10 +1,9 @@
 package net.minecraft.world.level;
 
-import net.minecraft.core.BlockPosition;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 
-public final class BlockColumn {
+public final class BlockColumn implements net.minecraft.world.level.chunk.BlockColumn {
     private final int minY;
     private final IBlockData[] column;
 
@@ -13,8 +12,19 @@ public final class BlockColumn {
         this.column = states;
     }
 
-    public IBlockData getBlockState(BlockPosition pos) {
-        int i = pos.getY() - this.minY;
+    @Override
+    public IBlockData getBlock(int y) {
+        int i = y - this.minY;
         return i >= 0 && i < this.column.length ? this.column[i] : Blocks.AIR.getBlockData();
+    }
+
+    @Override
+    public void setBlock(int y, IBlockData state) {
+        int i = y - this.minY;
+        if (i >= 0 && i < this.column.length) {
+            this.column[i] = state;
+        } else {
+            throw new IllegalArgumentException("Outside of column height: " + y);
+        }
     }
 }

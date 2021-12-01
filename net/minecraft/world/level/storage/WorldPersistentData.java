@@ -35,22 +35,22 @@ public class WorldPersistentData {
         return new File(this.dataFolder, id + ".dat");
     }
 
-    public <T extends PersistentBase> T computeIfAbsent(Function<NBTTagCompound, T> function, Supplier<T> supplier, String string) {
-        T savedData = this.get(function, string);
+    public <T extends PersistentBase> T computeIfAbsent(Function<NBTTagCompound, T> readFunction, Supplier<T> supplier, String id) {
+        T savedData = this.get(readFunction, id);
         if (savedData != null) {
             return savedData;
         } else {
             T savedData2 = supplier.get();
-            this.set(string, savedData2);
+            this.set(id, savedData2);
             return savedData2;
         }
     }
 
     @Nullable
-    public <T extends PersistentBase> T get(Function<NBTTagCompound, T> function, String id) {
+    public <T extends PersistentBase> T get(Function<NBTTagCompound, T> readFunction, String id) {
         PersistentBase savedData = this.cache.get(id);
         if (savedData == null && !this.cache.containsKey(id)) {
-            savedData = this.readSavedData(function, id);
+            savedData = this.readSavedData(readFunction, id);
             this.cache.put(id, savedData);
         }
 
@@ -58,12 +58,12 @@ public class WorldPersistentData {
     }
 
     @Nullable
-    private <T extends PersistentBase> T readSavedData(Function<NBTTagCompound, T> function, String id) {
+    private <T extends PersistentBase> T readSavedData(Function<NBTTagCompound, T> readFunction, String id) {
         try {
             File file = this.getDataFile(id);
             if (file.exists()) {
-                NBTTagCompound compoundTag = this.readTagFromDisk(id, SharedConstants.getGameVersion().getWorldVersion());
-                return function.apply(compoundTag.getCompound("data"));
+                NBTTagCompound compoundTag = this.readTagFromDisk(id, SharedConstants.getCurrentVersion().getWorldVersion());
+                return readFunction.apply(compoundTag.getCompound("data"));
             }
         } catch (Exception var5) {
             LOGGER.error("Error loading saved data: {}", id, var5);
@@ -72,8 +72,8 @@ public class WorldPersistentData {
         return (T)null;
     }
 
-    public void set(String string, PersistentBase savedData) {
-        this.cache.put(string, savedData);
+    public void set(String id, PersistentBase state) {
+        this.cache.put(id, state);
     }
 
     public NBTTagCompound readTagFromDisk(String id, int dataVersion) throws IOException {
@@ -152,9 +152,9 @@ public class WorldPersistentData {
     }
 
     public void save() {
-        this.cache.forEach((string, savedData) -> {
-            if (savedData != null) {
-                savedData.save(this.getDataFile(string));
+        this.cache.forEach((id, state) -> {
+            if (state != null) {
+                state.save(this.getDataFile(id));
             }
 
         });

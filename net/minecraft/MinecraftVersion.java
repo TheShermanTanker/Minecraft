@@ -2,7 +2,6 @@ package net.minecraft;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.bridge.game.GameVersion;
 import com.mojang.bridge.game.PackType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,16 +10,17 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
 import net.minecraft.util.ChatDeserializer;
+import net.minecraft.world.level.storage.DataVersion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MinecraftVersion implements GameVersion {
+public class MinecraftVersion implements WorldVersion {
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final GameVersion BUILT_IN = new MinecraftVersion();
+    public static final WorldVersion BUILT_IN = new MinecraftVersion();
     private final String id;
     private final String name;
     private final boolean stable;
-    private final int worldVersion;
+    private final DataVersion worldVersion;
     private final int protocolVersion;
     private final int resourcePackVersion;
     private final int dataPackVersion;
@@ -29,14 +29,14 @@ public class MinecraftVersion implements GameVersion {
 
     private MinecraftVersion() {
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
-        this.name = "1.17.1";
+        this.name = "1.18";
         this.stable = true;
-        this.worldVersion = 2730;
+        this.worldVersion = new DataVersion(2860, "main");
         this.protocolVersion = SharedConstants.getProtocolVersion();
-        this.resourcePackVersion = 7;
-        this.dataPackVersion = 7;
+        this.resourcePackVersion = 8;
+        this.dataPackVersion = 8;
         this.buildTime = new Date();
-        this.releaseTarget = "1.17.1";
+        this.releaseTarget = "1.18";
     }
 
     private MinecraftVersion(JsonObject json) {
@@ -44,7 +44,7 @@ public class MinecraftVersion implements GameVersion {
         this.name = ChatDeserializer.getAsString(json, "name");
         this.releaseTarget = ChatDeserializer.getAsString(json, "release_target");
         this.stable = ChatDeserializer.getAsBoolean(json, "stable");
-        this.worldVersion = ChatDeserializer.getAsInt(json, "world_version");
+        this.worldVersion = new DataVersion(ChatDeserializer.getAsInt(json, "world_version"), ChatDeserializer.getAsString(json, "series_id", DataVersion.MAIN_SERIES));
         this.protocolVersion = ChatDeserializer.getAsInt(json, "protocol_version");
         JsonObject jsonObject = ChatDeserializer.getAsJsonObject(json, "pack_version");
         this.resourcePackVersion = ChatDeserializer.getAsInt(jsonObject, "resource");
@@ -52,11 +52,11 @@ public class MinecraftVersion implements GameVersion {
         this.buildTime = Date.from(ZonedDateTime.parse(ChatDeserializer.getAsString(json, "build_time")).toInstant());
     }
 
-    public static GameVersion tryDetectVersion() {
+    public static WorldVersion tryDetectVersion() {
         try {
             InputStream inputStream = MinecraftVersion.class.getResourceAsStream("/version.json");
 
-            GameVersion var9;
+            WorldVersion var9;
             label63: {
                 MinecraftVersion var2;
                 try {
@@ -110,42 +110,35 @@ public class MinecraftVersion implements GameVersion {
         }
     }
 
-    @Override
     public String getId() {
         return this.id;
     }
 
-    @Override
     public String getName() {
         return this.name;
     }
 
-    @Override
     public String getReleaseTarget() {
         return this.releaseTarget;
     }
 
     @Override
-    public int getWorldVersion() {
+    public DataVersion getDataVersion() {
         return this.worldVersion;
     }
 
-    @Override
     public int getProtocolVersion() {
         return this.protocolVersion;
     }
 
-    @Override
     public int getPackVersion(PackType packType) {
         return packType == PackType.DATA ? this.dataPackVersion : this.resourcePackVersion;
     }
 
-    @Override
     public Date getBuildTime() {
         return this.buildTime;
     }
 
-    @Override
     public boolean isStable() {
         return this.stable;
     }

@@ -75,8 +75,8 @@ public class CustomFunctionCallbackTimerQueue<T> {
         }
     }
 
-    public int remove(String string) {
-        Collection<CustomFunctionCallbackTimerQueue.Event<T>> collection = this.events.row(string).values();
+    public int remove(String name) {
+        Collection<CustomFunctionCallbackTimerQueue.Event<T>> collection = this.events.row(name).values();
         collection.forEach(this.queue::remove);
         int i = collection.size();
         collection.clear();
@@ -118,11 +118,11 @@ public class CustomFunctionCallbackTimerQueue<T> {
         public final String id;
         public final CustomFunctionCallbackTimer<T> callback;
 
-        Event(long l, UnsignedLong unsignedLong, String string, CustomFunctionCallbackTimer<T> timerCallback) {
-            this.triggerTime = l;
-            this.sequentialId = unsignedLong;
-            this.id = string;
-            this.callback = timerCallback;
+        Event(long triggerTime, UnsignedLong id, String name, CustomFunctionCallbackTimer<T> callback) {
+            this.triggerTime = triggerTime;
+            this.sequentialId = id;
+            this.id = name;
+            this.callback = callback;
         }
     }
 }

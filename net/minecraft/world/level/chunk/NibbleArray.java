@@ -99,12 +99,12 @@ public final class NibbleArray {
     }
 
     @VisibleForDebug
-    public String layerToString(int i) {
+    public String layerToString(int unused) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        for(int j = 0; j < 256; ++j) {
-            stringBuilder.append(Integer.toHexString(this.get(j)));
-            if ((j & 15) == 15) {
+        for(int i = 0; i < 256; ++i) {
+            stringBuilder.append(Integer.toHexString(this.get(i)));
+            if ((i & 15) == 15) {
                 stringBuilder.append("\n");
             }
         }

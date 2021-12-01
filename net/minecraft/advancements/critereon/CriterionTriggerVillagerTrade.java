@@ -43,6 +43,10 @@ public class CriterionTriggerVillagerTrade extends CriterionTriggerAbstract<Crit
             return new CriterionTriggerVillagerTrade.CriterionInstanceTrigger(CriterionConditionEntity.Composite.ANY, CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY);
         }
 
+        public static CriterionTriggerVillagerTrade.CriterionInstanceTrigger tradedWithVillager(CriterionConditionEntity.Builder playerPredicate) {
+            return new CriterionTriggerVillagerTrade.CriterionInstanceTrigger(CriterionConditionEntity.Composite.wrap(playerPredicate.build()), CriterionConditionEntity.Composite.ANY, CriterionConditionItem.ANY);
+        }
+
         public boolean matches(LootTableInfo merchantContext, ItemStack stack) {
             if (!this.villager.matches(merchantContext)) {
                 return false;

@@ -93,8 +93,8 @@ public class BlockWitherSkull extends BlockSkull {
 
     private static ShapeDetector getOrCreateWitherFull() {
         if (witherPatternFull == null) {
-            witherPatternFull = ShapeDetectorBuilder.start().aisle("^^^", "###", "~#~").where('#', (blockInWorld) -> {
-                return blockInWorld.getState().is(TagsBlock.WITHER_SUMMON_BASE_BLOCKS);
+            witherPatternFull = ShapeDetectorBuilder.start().aisle("^^^", "###", "~#~").where('#', (pos) -> {
+                return pos.getState().is(TagsBlock.WITHER_SUMMON_BASE_BLOCKS);
             }).where('^', ShapeDetectorBlock.hasState(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_SKULL).or(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_WALL_SKULL)))).where('~', ShapeDetectorBlock.hasState(MaterialPredicate.forMaterial(Material.AIR))).build();
         }
 
@@ -103,8 +103,8 @@ public class BlockWitherSkull extends BlockSkull {
 
     private static ShapeDetector getOrCreateWitherBase() {
         if (witherPatternBase == null) {
-            witherPatternBase = ShapeDetectorBuilder.start().aisle("   ", "###", "~#~").where('#', (blockInWorld) -> {
-                return blockInWorld.getState().is(TagsBlock.WITHER_SUMMON_BASE_BLOCKS);
+            witherPatternBase = ShapeDetectorBuilder.start().aisle("   ", "###", "~#~").where('#', (pos) -> {
+                return pos.getState().is(TagsBlock.WITHER_SUMMON_BASE_BLOCKS);
             }).where('~', ShapeDetectorBlock.hasState(MaterialPredicate.forMaterial(Material.AIR))).build();
         }
 

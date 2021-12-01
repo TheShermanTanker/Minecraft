@@ -31,7 +31,9 @@ import net.minecraft.world.level.IMaterial;
 public final class RecipeItemStack implements Predicate<ItemStack> {
     public static final RecipeItemStack EMPTY = new RecipeItemStack(Stream.empty());
     private final RecipeItemStack.Provider[] values;
+    @Nullable
     public ItemStack[] itemStacks;
+    @Nullable
     private IntList stackingIds;
 
     public RecipeItemStack(Stream<? extends RecipeItemStack.Provider> entries) {
@@ -192,8 +194,8 @@ public final class RecipeItemStack implements Predicate<ItemStack> {
     public static class StackProvider implements RecipeItemStack.Provider {
         private final ItemStack item;
 
-        public StackProvider(ItemStack itemStack) {
-            this.item = itemStack;
+        public StackProvider(ItemStack stack) {
+            this.item = stack;
         }
 
         @Override

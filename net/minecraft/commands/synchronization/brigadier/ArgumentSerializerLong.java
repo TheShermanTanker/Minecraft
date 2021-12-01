@@ -7,16 +7,16 @@ import net.minecraft.network.PacketDataSerializer;
 
 public class ArgumentSerializerLong implements ArgumentSerializer<LongArgumentType> {
     @Override
-    public void serializeToNetwork(LongArgumentType longArgumentType, PacketDataSerializer friendlyByteBuf) {
-        boolean bl = longArgumentType.getMinimum() != Long.MIN_VALUE;
-        boolean bl2 = longArgumentType.getMaximum() != Long.MAX_VALUE;
-        friendlyByteBuf.writeByte(ArgumentSerializers.createNumberFlags(bl, bl2));
+    public void serializeToNetwork(LongArgumentType type, PacketDataSerializer buf) {
+        boolean bl = type.getMinimum() != Long.MIN_VALUE;
+        boolean bl2 = type.getMaximum() != Long.MAX_VALUE;
+        buf.writeByte(ArgumentSerializers.createNumberFlags(bl, bl2));
         if (bl) {
-            friendlyByteBuf.writeLong(longArgumentType.getMinimum());
+            buf.writeLong(type.getMinimum());
         }
 
         if (bl2) {
-            friendlyByteBuf.writeLong(longArgumentType.getMaximum());
+            buf.writeLong(type.getMaximum());
         }
 
     }
@@ -30,13 +30,13 @@ public class ArgumentSerializerLong implements ArgumentSerializer<LongArgumentTy
     }
 
     @Override
-    public void serializeToJson(LongArgumentType longArgumentType, JsonObject jsonObject) {
-        if (longArgumentType.getMinimum() != Long.MIN_VALUE) {
-            jsonObject.addProperty("min", longArgumentType.getMinimum());
+    public void serializeToJson(LongArgumentType type, JsonObject json) {
+        if (type.getMinimum() != Long.MIN_VALUE) {
+            json.addProperty("min", type.getMinimum());
         }
 
-        if (longArgumentType.getMaximum() != Long.MAX_VALUE) {
-            jsonObject.addProperty("max", longArgumentType.getMaximum());
+        if (type.getMaximum() != Long.MAX_VALUE) {
+            json.addProperty("max", type.getMaximum());
         }
 
     }

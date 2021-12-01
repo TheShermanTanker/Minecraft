@@ -37,6 +37,7 @@ public class CriterionTriggerBrewedPotion extends CriterionTriggerAbstract<Crite
     }
 
     public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
+        @Nullable
         private final PotionRegistry potion;
 
         public CriterionInstanceTrigger(CriterionConditionEntity.Composite player, @Nullable PotionRegistry potion) {

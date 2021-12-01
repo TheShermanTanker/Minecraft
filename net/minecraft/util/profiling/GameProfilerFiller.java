@@ -22,9 +22,17 @@ public interface GameProfilerFiller {
 
     void markForCharting(EnumMetricCategory type);
 
-    void incrementCounter(String marker);
+    default void incrementCounter(String marker) {
+        this.incrementCounter(marker, 1);
+    }
 
-    void incrementCounter(Supplier<String> markerGetter);
+    void incrementCounter(String marker, int i);
+
+    default void incrementCounter(Supplier<String> markerGetter) {
+        this.incrementCounter(markerGetter, 1);
+    }
+
+    void incrementCounter(Supplier<String> markerGetter, int i);
 
     static GameProfilerFiller tee(GameProfilerFiller a, GameProfilerFiller b) {
         if (a == GameProfilerDisabled.INSTANCE) {
@@ -80,15 +88,15 @@ public interface GameProfilerFiller {
                 }
 
                 @Override
-                public void incrementCounter(String marker) {
-                    a.incrementCounter(marker);
-                    b.incrementCounter(marker);
+                public void incrementCounter(String marker, int i) {
+                    a.incrementCounter(marker, i);
+                    b.incrementCounter(marker, i);
                 }
 
                 @Override
-                public void incrementCounter(Supplier<String> markerGetter) {
-                    a.incrementCounter(markerGetter);
-                    b.incrementCounter(markerGetter);
+                public void incrementCounter(Supplier<String> markerGetter, int i) {
+                    a.incrementCounter(markerGetter, i);
+                    b.incrementCounter(markerGetter, i);
                 }
             };
         }

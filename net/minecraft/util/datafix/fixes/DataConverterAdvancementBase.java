@@ -16,7 +16,6 @@ public class DataConverterAdvancementBase extends DataFix {
         this.renamer = renamer;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped(this.name, this.getInputSchema().getType(DataConverterTypes.ADVANCEMENTS), (typed) -> {
             return typed.update(DSL.remainderFinder(), (dynamic) -> {

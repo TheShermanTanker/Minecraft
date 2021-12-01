@@ -14,27 +14,22 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
         this.map = new SpatialLongSet.InternalMap(expectedSize / 64, loadFactor);
     }
 
-    @Override
     public boolean add(long l) {
         return this.map.addBit(l);
     }
 
-    @Override
     public boolean rem(long l) {
         return this.map.removeBit(l);
     }
 
-    @Override
     public long removeFirstLong() {
         return this.map.removeFirstBit();
     }
 
-    @Override
     public int size() {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public boolean isEmpty() {
         return this.map.isEmpty();
     }
@@ -212,7 +207,6 @@ public class SpatialLongSet extends LongLinkedOpenHashSet {
             }
         }
 
-        @Override
         protected void rehash(int i) {
             if (i > this.minSize) {
                 super.rehash(i);

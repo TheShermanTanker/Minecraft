@@ -7,11 +7,13 @@ import com.mojang.serialization.DynamicOps;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.world.level.block.state.IBlockDataHolder;
 
 public abstract class IBlockState<T extends Comparable<T>> {
     private final Class<T> clazz;
     private final String name;
+    @Nullable
     private Integer hashCode;
     private final Codec<T> codec = Codec.STRING.comapFlatMap((value) -> {
         return this.getValue(value).map(DataResult::success).orElseGet(() -> {
@@ -89,18 +91,15 @@ public abstract class IBlockState<T extends Comparable<T>> {
         return 31 * this.clazz.hashCode() + this.name.hashCode();
     }
 
-    public <U, S extends IBlockDataHolder<?, S>> DataResult<S> parseValue(DynamicOps<U> dynamicOps, S stateHolder, U object) {
-        DataResult<T> dataResult = this.codec.parse(dynamicOps, object);
-        return dataResult.map((comparable) -> {
-            return stateHolder.set(this, comparable);
-        }).setPartial(stateHolder);
+    public <U, S extends IBlockDataHolder<?, S>> DataResult<S> parseValue(DynamicOps<U> ops, S state, U input) {
+        DataResult<T> dataResult = this.codec.parse(ops, input);
+        return dataResult.map((property) -> {
+            return state.set(this, property);
+        }).setPartial(state);
     }
 
-    public static final class Value<T extends Comparable<T>> {
-        private final IBlockState<T> property;
-        private final T value;
-
-        Value(IBlockState<T> property, T value) {
+    public static record Value<T extends Comparable<T>>(IBlockState<T> property, T value) {
+        public Value(IBlockState<T> property, T value) {
             if (!property.getValues().contains(value)) {
                 throw new IllegalArgumentException("Value " + value + " does not belong to property " + property);
             } else {
@@ -109,35 +108,17 @@ public abstract class IBlockState<T extends Comparable<T>> {
             }
         }
 
-        public IBlockState<T> getProperty() {
-            return this.property;
-        }
-
-        public T value() {
-            return this.value;
-        }
-
         @Override
         public String toString() {
             return this.property.getName() + "=" + this.property.getName(this.value);
         }
 
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            } else if (!(object instanceof IBlockState.Value)) {
-                return false;
-            } else {
-                IBlockState.Value<?> value = (IBlockState.Value)object;
-                return this.property == value.property && this.value.equals(value.value);
-            }
+        public IBlockState<T> property() {
+            return this.property;
         }
 
-        @Override
-        public int hashCode() {
-            int i = this.property.hashCode();
-            return 31 * i + this.value.hashCode();
+        public T value() {
+            return this.value;
         }
     }
 }

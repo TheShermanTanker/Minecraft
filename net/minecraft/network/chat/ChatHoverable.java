@@ -254,7 +254,7 @@ public class ChatHoverable {
         }
 
         public ItemStackInfo(ItemStack stack) {
-            this(stack.getItem(), stack.getCount(), stack.getTag() != null ? stack.getTag().c() : null);
+            this(stack.getItem(), stack.getCount(), stack.getTag() != null ? stack.getTag().copy() : null);
         }
 
         @Override

@@ -63,6 +63,7 @@ import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.entity.EnumMainHand;
 import net.minecraft.world.entity.EnumMonsterType;
 import net.minecraft.world.entity.EnumMoveType;
+import net.minecraft.world.entity.LivingEntity$Fallsounds;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
@@ -155,7 +156,7 @@ public abstract class EntityHuman extends EntityLiving {
     protected int enchantmentSeed;
     protected final float defaultFlySpeed = 0.02F;
     private int lastLevelUpTime;
-    private final GameProfile gameProfile;
+    public GameProfile gameProfile;
     private boolean reducedDebugInfo;
     private ItemStack lastItemInMainHand = ItemStack.EMPTY;
     private final ItemCooldown cooldowns = this.createItemCooldowns();
@@ -757,7 +758,7 @@ public abstract class EntityHuman extends EntityLiving {
     @Override
     public void saveData(NBTTagCompound nbt) {
         super.saveData(nbt);
-        nbt.setInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+        nbt.setInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
         nbt.set("Inventory", this.inventory.save(new NBTTagList()));
         nbt.setInt("SelectedItemSlot", this.inventory.selected);
         nbt.setShort("SleepTimer", (short)this.sleepCounter);
@@ -1282,13 +1283,13 @@ public abstract class EntityHuman extends EntityLiving {
         return Either.right(Unit.INSTANCE);
     }
 
-    public void wakeup(boolean bl, boolean updateSleepingPlayers) {
+    public void wakeup(boolean skipSleepTimer, boolean updateSleepingPlayers) {
         super.entityWakeup();
         if (this.level instanceof WorldServer && updateSleepingPlayers) {
             ((WorldServer)this.level).everyoneSleeping();
         }
 
-        this.sleepCounter = bl ? 0 : 100;
+        this.sleepCounter = skipSleepTimer ? 0 : 100;
     }
 
     @Override
@@ -1296,24 +1297,24 @@ public abstract class EntityHuman extends EntityLiving {
         this.wakeup(true, true);
     }
 
-    public static Optional<Vec3D> getBed(WorldServer world, BlockPosition pos, float f, boolean bl, boolean bl2) {
+    public static Optional<Vec3D> getBed(WorldServer world, BlockPosition pos, float angle, boolean forced, boolean alive) {
         IBlockData blockState = world.getType(pos);
         Block block = blockState.getBlock();
         if (block instanceof BlockRespawnAnchor && blockState.get(BlockRespawnAnchor.CHARGE) > 0 && BlockRespawnAnchor.canSetSpawn(world)) {
             Optional<Vec3D> optional = BlockRespawnAnchor.findStandUpPosition(EntityTypes.PLAYER, world, pos);
-            if (!bl2 && optional.isPresent()) {
+            if (!alive && optional.isPresent()) {
                 world.setTypeAndData(pos, blockState.set(BlockRespawnAnchor.CHARGE, Integer.valueOf(blockState.get(BlockRespawnAnchor.CHARGE) - 1)), 3);
             }
 
             return optional;
         } else if (block instanceof BlockBed && BlockBed.canSetSpawn(world)) {
-            return BlockBed.findStandUpPosition(EntityTypes.PLAYER, world, pos, f);
-        } else if (!bl) {
+            return BlockBed.findStandUpPosition(EntityTypes.PLAYER, world, pos, angle);
+        } else if (!forced) {
             return Optional.empty();
         } else {
-            boolean bl3 = block.isPossibleToRespawnInThis();
-            boolean bl4 = world.getType(pos.above()).getBlock().isPossibleToRespawnInThis();
-            return bl3 && bl4 ? Optional.of(new Vec3D((double)pos.getX() + 0.5D, (double)pos.getY() + 0.1D, (double)pos.getZ() + 0.5D)) : Optional.empty();
+            boolean bl = block.isPossibleToRespawnInThis();
+            boolean bl2 = world.getType(pos.above()).getBlock().isPossibleToRespawnInThis();
+            return bl && bl2 ? Optional.of(new Vec3D((double)pos.getX() + 0.5D, (double)pos.getY() + 0.1D, (double)pos.getZ() + 0.5D)) : Optional.empty();
         }
     }
 
@@ -1391,7 +1392,7 @@ public abstract class EntityHuman extends EntityLiving {
             Vec3D vec32 = this.getMot();
             this.setMot(vec32.x, i * 0.6D, vec32.z);
             this.flyingSpeed = j;
-            this.fallDistance = 0.0F;
+            this.resetFallDistance();
             this.setFlag(7, false);
         } else {
             super.travel(movementInput);
@@ -1534,8 +1535,8 @@ public abstract class EntityHuman extends EntityLiving {
     }
 
     @Override
-    protected SoundEffect getSoundFall(int distance) {
-        return distance > 4 ? SoundEffects.PLAYER_BIG_FALL : SoundEffects.PLAYER_SMALL_FALL;
+    public LivingEntity$Fallsounds getFallSounds() {
+        return new LivingEntity$Fallsounds(SoundEffects.PLAYER_SMALL_FALL, SoundEffects.PLAYER_BIG_FALL);
     }
 
     @Override
@@ -1987,33 +1988,33 @@ public abstract class EntityHuman extends EntityLiving {
     }
 
     @Override
-    public Vec3D getRopeHoldPosition(float f) {
+    public Vec3D getRopeHoldPosition(float delta) {
         double d = 0.22D * (this.getMainHand() == EnumMainHand.RIGHT ? -1.0D : 1.0D);
-        float g = MathHelper.lerp(f * 0.5F, this.getXRot(), this.xRotO) * ((float)Math.PI / 180F);
-        float h = MathHelper.lerp(f, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180F);
+        float f = MathHelper.lerp(delta * 0.5F, this.getXRot(), this.xRotO) * ((float)Math.PI / 180F);
+        float g = MathHelper.lerp(delta, this.yBodyRotO, this.yBodyRot) * ((float)Math.PI / 180F);
         if (!this.isGliding() && !this.isRiptiding()) {
             if (this.isVisuallySwimming()) {
-                return this.getPosition(f).add((new Vec3D(d, 0.2D, -0.15D)).xRot(-g).yRot(-h));
+                return this.getPosition(delta).add((new Vec3D(d, 0.2D, -0.15D)).xRot(-f).yRot(-g));
             } else {
-                double n = this.getBoundingBox().getYsize() - 1.0D;
-                double o = this.isCrouching() ? -0.2D : 0.07D;
-                return this.getPosition(f).add((new Vec3D(d, n, o)).yRot(-h));
+                double m = this.getBoundingBox().getYsize() - 1.0D;
+                double n = this.isCrouching() ? -0.2D : 0.07D;
+                return this.getPosition(delta).add((new Vec3D(d, m, n)).yRot(-g));
             }
         } else {
-            Vec3D vec3 = this.getViewVector(f);
+            Vec3D vec3 = this.getViewVector(delta);
             Vec3D vec32 = this.getMot();
             double e = vec32.horizontalDistanceSqr();
-            double i = vec3.horizontalDistanceSqr();
-            float l;
-            if (e > 0.0D && i > 0.0D) {
-                double j = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(e * i);
-                double k = vec32.x * vec3.z - vec32.z * vec3.x;
-                l = (float)(Math.signum(k) * Math.acos(j));
+            double h = vec3.horizontalDistanceSqr();
+            float k;
+            if (e > 0.0D && h > 0.0D) {
+                double i = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(e * h);
+                double j = vec32.x * vec3.z - vec32.z * vec3.x;
+                k = (float)(Math.signum(j) * Math.acos(i));
             } else {
-                l = 0.0F;
+                k = 0.0F;
             }
 
-            return this.getPosition(f).add((new Vec3D(d, -0.11D, 0.85D)).zRot(-l).xRot(-g).yRot(-h));
+            return this.getPosition(delta).add((new Vec3D(d, -0.11D, 0.85D)).zRot(-k).xRot(-f).yRot(-g));
         }
     }
 
@@ -2046,8 +2047,8 @@ public abstract class EntityHuman extends EntityLiving {
             this.message = null;
         }
 
-        private EnumBedResult(IChatBaseComponent text) {
-            this.message = text;
+        private EnumBedResult(IChatBaseComponent message) {
+            this.message = message;
         }
 
         @Nullable

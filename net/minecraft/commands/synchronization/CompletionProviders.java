@@ -19,20 +19,20 @@ import net.minecraft.world.entity.EntityTypes;
 public class CompletionProviders {
     private static final Map<MinecraftKey, SuggestionProvider<ICompletionProvider>> PROVIDERS_BY_NAME = Maps.newHashMap();
     private static final MinecraftKey DEFAULT_NAME = new MinecraftKey("ask_server");
-    public static final SuggestionProvider<ICompletionProvider> ASK_SERVER = register(DEFAULT_NAME, (commandContext, suggestionsBuilder) -> {
-        return commandContext.getSource().customSuggestion(commandContext, suggestionsBuilder);
+    public static final SuggestionProvider<ICompletionProvider> ASK_SERVER = register(DEFAULT_NAME, (context, builder) -> {
+        return context.getSource().customSuggestion(context, builder);
     });
-    public static final SuggestionProvider<CommandListenerWrapper> ALL_RECIPES = register(new MinecraftKey("all_recipes"), (commandContext, suggestionsBuilder) -> {
-        return ICompletionProvider.suggestResource(commandContext.getSource().getRecipeNames(), suggestionsBuilder);
+    public static final SuggestionProvider<CommandListenerWrapper> ALL_RECIPES = register(new MinecraftKey("all_recipes"), (context, builder) -> {
+        return ICompletionProvider.suggestResource(context.getSource().getRecipeNames(), builder);
     });
-    public static final SuggestionProvider<CommandListenerWrapper> AVAILABLE_SOUNDS = register(new MinecraftKey("available_sounds"), (commandContext, suggestionsBuilder) -> {
-        return ICompletionProvider.suggestResource(commandContext.getSource().getAvailableSoundEvents(), suggestionsBuilder);
+    public static final SuggestionProvider<CommandListenerWrapper> AVAILABLE_SOUNDS = register(new MinecraftKey("available_sounds"), (context, builder) -> {
+        return ICompletionProvider.suggestResource(context.getSource().getAvailableSoundEvents(), builder);
     });
-    public static final SuggestionProvider<CommandListenerWrapper> AVAILABLE_BIOMES = register(new MinecraftKey("available_biomes"), (commandContext, suggestionsBuilder) -> {
-        return ICompletionProvider.suggestResource(commandContext.getSource().registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY).keySet(), suggestionsBuilder);
+    public static final SuggestionProvider<CommandListenerWrapper> AVAILABLE_BIOMES = register(new MinecraftKey("available_biomes"), (context, builder) -> {
+        return ICompletionProvider.suggestResource(context.getSource().registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY).keySet(), builder);
     });
-    public static final SuggestionProvider<CommandListenerWrapper> SUMMONABLE_ENTITIES = register(new MinecraftKey("summonable_entities"), (commandContext, suggestionsBuilder) -> {
-        return ICompletionProvider.suggestResource(IRegistry.ENTITY_TYPE.stream().filter(EntityTypes::canSummon), suggestionsBuilder, EntityTypes::getName, (entityType) -> {
+    public static final SuggestionProvider<CommandListenerWrapper> SUMMONABLE_ENTITIES = register(new MinecraftKey("summonable_entities"), (context, builder) -> {
+        return ICompletionProvider.suggestResource(IRegistry.ENTITY_TYPE.stream().filter(EntityTypes::canSummon), builder, EntityTypes::getName, (entityType) -> {
             return new ChatMessage(SystemUtils.makeDescriptionId("entity", EntityTypes.getName(entityType)));
         });
     });
@@ -62,12 +62,11 @@ public class CompletionProviders {
         private final SuggestionProvider<ICompletionProvider> delegate;
         final MinecraftKey name;
 
-        public Wrapper(MinecraftKey name, SuggestionProvider<ICompletionProvider> suggestionProvider) {
-            this.delegate = suggestionProvider;
+        public Wrapper(MinecraftKey name, SuggestionProvider<ICompletionProvider> provider) {
+            this.delegate = provider;
             this.name = name;
         }
 
-        @Override
         public CompletableFuture<Suggestions> getSuggestions(CommandContext<ICompletionProvider> commandContext, SuggestionsBuilder suggestionsBuilder) throws CommandSyntaxException {
             return this.delegate.getSuggestions(commandContext, suggestionsBuilder);
         }

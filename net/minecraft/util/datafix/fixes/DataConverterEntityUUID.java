@@ -21,7 +21,6 @@ public class DataConverterEntityUUID extends DataConverterUUIDBase {
         super(outputSchema, DataConverterTypes.ENTITY);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("EntityUUIDFixes", this.getInputSchema().getType(this.typeReference), (typed) -> {
             typed = typed.update(DSL.remainderFinder(), DataConverterEntityUUID::updateEntityUUID);

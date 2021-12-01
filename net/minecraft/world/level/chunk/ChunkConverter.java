@@ -128,10 +128,10 @@ public class ChunkConverter {
         GeneratorAccess levelAccessor = chunk.getWorld();
 
         for(int i = 0; i < this.index.length; ++i) {
-            ChunkSection levelChunkSection = chunk.getSections()[i];
+            ChunkSection levelChunkSection = chunk.getSection(i);
             int[] is = this.index[i];
             this.index[i] = null;
-            if (levelChunkSection != null && is != null && is.length > 0) {
+            if (is != null && is.length > 0) {
                 EnumDirection[] directions = EnumDirection.values();
                 DataPaletteBlock<IBlockData> palettedContainer = levelChunkSection.getBlocks();
 
@@ -201,7 +201,7 @@ public class ChunkConverter {
     }
 
     public interface BlockFixer {
-        IBlockData updateShape(IBlockData blockState, EnumDirection direction, IBlockData blockState2, GeneratorAccess world, BlockPosition blockPos, BlockPosition blockPos2);
+        IBlockData updateShape(IBlockData oldState, EnumDirection direction, IBlockData otherState, GeneratorAccess world, BlockPosition currentPos, BlockPosition otherPos);
 
         default void processChunk(GeneratorAccess world) {
         }
@@ -210,37 +210,37 @@ public class ChunkConverter {
     static enum Type implements ChunkConverter.BlockFixer {
         BLACKLIST(Blocks.OBSERVER, Blocks.NETHER_PORTAL, Blocks.WHITE_CONCRETE_POWDER, Blocks.ORANGE_CONCRETE_POWDER, Blocks.MAGENTA_CONCRETE_POWDER, Blocks.LIGHT_BLUE_CONCRETE_POWDER, Blocks.YELLOW_CONCRETE_POWDER, Blocks.LIME_CONCRETE_POWDER, Blocks.PINK_CONCRETE_POWDER, Blocks.GRAY_CONCRETE_POWDER, Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.CYAN_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.BLUE_CONCRETE_POWDER, Blocks.BROWN_CONCRETE_POWDER, Blocks.GREEN_CONCRETE_POWDER, Blocks.RED_CONCRETE_POWDER, Blocks.BLACK_CONCRETE_POWDER, Blocks.ANVIL, Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL, Blocks.DRAGON_EGG, Blocks.GRAVEL, Blocks.SAND, Blocks.RED_SAND, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.BIRCH_SIGN, Blocks.ACACIA_SIGN, Blocks.JUNGLE_SIGN, Blocks.DARK_OAK_SIGN, Blocks.OAK_WALL_SIGN, Blocks.SPRUCE_WALL_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.DARK_OAK_WALL_SIGN) {
             @Override
-            public IBlockData updateShape(IBlockData blockState, EnumDirection direction, IBlockData blockState2, GeneratorAccess world, BlockPosition blockPos, BlockPosition blockPos2) {
-                return blockState;
+            public IBlockData updateShape(IBlockData oldState, EnumDirection direction, IBlockData otherState, GeneratorAccess world, BlockPosition currentPos, BlockPosition otherPos) {
+                return oldState;
             }
         },
         DEFAULT {
             @Override
-            public IBlockData updateShape(IBlockData blockState, EnumDirection direction, IBlockData blockState2, GeneratorAccess world, BlockPosition blockPos, BlockPosition blockPos2) {
-                return blockState.updateState(direction, world.getType(blockPos2), world, blockPos, blockPos2);
+            public IBlockData updateShape(IBlockData oldState, EnumDirection direction, IBlockData otherState, GeneratorAccess world, BlockPosition currentPos, BlockPosition otherPos) {
+                return oldState.updateState(direction, world.getType(otherPos), world, currentPos, otherPos);
             }
         },
         CHEST(Blocks.CHEST, Blocks.TRAPPED_CHEST) {
             @Override
-            public IBlockData updateShape(IBlockData blockState, EnumDirection direction, IBlockData blockState2, GeneratorAccess world, BlockPosition blockPos, BlockPosition blockPos2) {
-                if (blockState2.is(blockState.getBlock()) && direction.getAxis().isHorizontal() && blockState.get(BlockChest.TYPE) == BlockPropertyChestType.SINGLE && blockState2.get(BlockChest.TYPE) == BlockPropertyChestType.SINGLE) {
-                    EnumDirection direction2 = blockState.get(BlockChest.FACING);
-                    if (direction.getAxis() != direction2.getAxis() && direction2 == blockState2.get(BlockChest.FACING)) {
+            public IBlockData updateShape(IBlockData oldState, EnumDirection direction, IBlockData otherState, GeneratorAccess world, BlockPosition currentPos, BlockPosition otherPos) {
+                if (otherState.is(oldState.getBlock()) && direction.getAxis().isHorizontal() && oldState.get(BlockChest.TYPE) == BlockPropertyChestType.SINGLE && otherState.get(BlockChest.TYPE) == BlockPropertyChestType.SINGLE) {
+                    EnumDirection direction2 = oldState.get(BlockChest.FACING);
+                    if (direction.getAxis() != direction2.getAxis() && direction2 == otherState.get(BlockChest.FACING)) {
                         BlockPropertyChestType chestType = direction == direction2.getClockWise() ? BlockPropertyChestType.LEFT : BlockPropertyChestType.RIGHT;
-                        world.setTypeAndData(blockPos2, blockState2.set(BlockChest.TYPE, chestType.getOpposite()), 18);
+                        world.setTypeAndData(otherPos, otherState.set(BlockChest.TYPE, chestType.getOpposite()), 18);
                         if (direction2 == EnumDirection.NORTH || direction2 == EnumDirection.EAST) {
-                            TileEntity blockEntity = world.getTileEntity(blockPos);
-                            TileEntity blockEntity2 = world.getTileEntity(blockPos2);
+                            TileEntity blockEntity = world.getTileEntity(currentPos);
+                            TileEntity blockEntity2 = world.getTileEntity(otherPos);
                             if (blockEntity instanceof TileEntityChest && blockEntity2 instanceof TileEntityChest) {
                                 TileEntityChest.swapContents((TileEntityChest)blockEntity, (TileEntityChest)blockEntity2);
                             }
                         }
 
-                        return blockState.set(BlockChest.TYPE, chestType);
+                        return oldState.set(BlockChest.TYPE, chestType);
                     }
                 }
 
-                return blockState;
+                return oldState;
             }
         },
         LEAVES(true, Blocks.ACACIA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES) {
@@ -249,10 +249,10 @@ public class ChunkConverter {
             });
 
             @Override
-            public IBlockData updateShape(IBlockData blockState, EnumDirection direction, IBlockData blockState2, GeneratorAccess world, BlockPosition blockPos, BlockPosition blockPos2) {
-                IBlockData blockState3 = blockState.updateState(direction, world.getType(blockPos2), world, blockPos, blockPos2);
-                if (blockState != blockState3) {
-                    int i = blockState3.get(BlockProperties.DISTANCE);
+            public IBlockData updateShape(IBlockData oldState, EnumDirection direction, IBlockData otherState, GeneratorAccess world, BlockPosition currentPos, BlockPosition otherPos) {
+                IBlockData blockState = oldState.updateState(direction, world.getType(otherPos), world, currentPos, otherPos);
+                if (oldState != blockState) {
+                    int i = blockState.get(BlockProperties.DISTANCE);
                     List<ObjectSet<BlockPosition>> list = this.queue.get();
                     if (list.isEmpty()) {
                         for(int j = 0; j < 7; ++j) {
@@ -260,10 +260,10 @@ public class ChunkConverter {
                         }
                     }
 
-                    list.get(i).add(blockPos.immutableCopy());
+                    list.get(i).add(currentPos.immutableCopy());
                 }
 
-                return blockState;
+                return oldState;
             }
 
             @Override
@@ -298,15 +298,15 @@ public class ChunkConverter {
         },
         STEM_BLOCK(Blocks.MELON_STEM, Blocks.PUMPKIN_STEM) {
             @Override
-            public IBlockData updateShape(IBlockData blockState, EnumDirection direction, IBlockData blockState2, GeneratorAccess world, BlockPosition blockPos, BlockPosition blockPos2) {
-                if (blockState.get(BlockStem.AGE) == 7) {
-                    BlockStemmed stemGrownBlock = ((BlockStem)blockState.getBlock()).getFruit();
-                    if (blockState2.is(stemGrownBlock)) {
+            public IBlockData updateShape(IBlockData oldState, EnumDirection direction, IBlockData otherState, GeneratorAccess world, BlockPosition currentPos, BlockPosition otherPos) {
+                if (oldState.get(BlockStem.AGE) == 7) {
+                    BlockStemmed stemGrownBlock = ((BlockStem)oldState.getBlock()).getFruit();
+                    if (otherState.is(stemGrownBlock)) {
                         return stemGrownBlock.getAttachedStem().getBlockData().set(BlockFacingHorizontal.FACING, direction);
                     }
                 }
 
-                return blockState;
+                return oldState;
             }
         };
 

@@ -41,19 +41,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class GameProfileSerializer {
-    private static final Comparator<NBTTagList> YXZ_LISTTAG_INT_COMPARATOR = Comparator.comparingInt((listTag) -> {
-        return listTag.getInt(1);
-    }).thenComparingInt((listTag) -> {
-        return listTag.getInt(0);
-    }).thenComparingInt((listTag) -> {
-        return listTag.getInt(2);
+    private static final Comparator<NBTTagList> YXZ_LISTTAG_INT_COMPARATOR = Comparator.comparingInt((nbt) -> {
+        return nbt.getInt(1);
+    }).thenComparingInt((nbt) -> {
+        return nbt.getInt(0);
+    }).thenComparingInt((nbt) -> {
+        return nbt.getInt(2);
     });
-    private static final Comparator<NBTTagList> YXZ_LISTTAG_DOUBLE_COMPARATOR = Comparator.comparingDouble((listTag) -> {
-        return listTag.getDouble(1);
-    }).thenComparingDouble((listTag) -> {
-        return listTag.getDouble(0);
-    }).thenComparingDouble((listTag) -> {
-        return listTag.getDouble(2);
+    private static final Comparator<NBTTagList> YXZ_LISTTAG_DOUBLE_COMPARATOR = Comparator.comparingDouble((nbt) -> {
+        return nbt.getDouble(1);
+    }).thenComparingDouble((nbt) -> {
+        return nbt.getDouble(0);
+    }).thenComparingDouble((nbt) -> {
+        return nbt.getDouble(2);
     });
     public static final String SNBT_DATA_TAG = "data";
     private static final char PROPERTIES_START = '{';
@@ -271,10 +271,10 @@ public final class GameProfileSerializer {
         return compoundTag;
     }
 
-    public static NBTTagCompound writeFluidState(Fluid fluidState) {
+    public static NBTTagCompound writeFluidState(Fluid state) {
         NBTTagCompound compoundTag = new NBTTagCompound();
-        compoundTag.setString("Name", IRegistry.FLUID.getKey(fluidState.getType()).toString());
-        ImmutableMap<IBlockState<?>, Comparable<?>> immutableMap = fluidState.getStateMap();
+        compoundTag.setString("Name", IRegistry.FLUID.getKey(state.getType()).toString());
+        ImmutableMap<IBlockState<?>, Comparable<?>> immutableMap = state.getStateMap();
         if (!immutableMap.isEmpty()) {
             NBTTagCompound compoundTag2 = new NBTTagCompound();
 
@@ -293,16 +293,16 @@ public final class GameProfileSerializer {
         return property.getName((T)value);
     }
 
-    public static String prettyPrint(NBTBase tag) {
-        return prettyPrint(tag, false);
+    public static String prettyPrint(NBTBase nbt) {
+        return prettyPrint(nbt, false);
     }
 
-    public static String prettyPrint(NBTBase tag, boolean bl) {
-        return prettyPrint(new StringBuilder(), tag, 0, bl).toString();
+    public static String prettyPrint(NBTBase nbt, boolean withArrayContents) {
+        return prettyPrint(new StringBuilder(), nbt, 0, withArrayContents).toString();
     }
 
-    public static StringBuilder prettyPrint(StringBuilder stringBuilder, NBTBase tag, int i, boolean bl) {
-        switch(tag.getTypeId()) {
+    public static StringBuilder prettyPrint(StringBuilder stringBuilder, NBTBase nbt, int depth, boolean withArrayContents) {
+        switch(nbt.getTypeId()) {
         case 0:
             break;
         case 1:
@@ -312,166 +312,166 @@ public final class GameProfileSerializer {
         case 5:
         case 6:
         case 8:
-            stringBuilder.append((Object)tag);
+            stringBuilder.append((Object)nbt);
             break;
         case 7:
-            NBTTagByteArray byteArrayTag = (NBTTagByteArray)tag;
+            NBTTagByteArray byteArrayTag = (NBTTagByteArray)nbt;
             byte[] bs = byteArrayTag.getBytes();
-            int j = bs.length;
-            indent(i, stringBuilder).append("byte[").append(j).append("] {\n");
-            if (!bl) {
-                indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
+            int i = bs.length;
+            indent(depth, stringBuilder).append("byte[").append(i).append("] {\n");
+            if (!withArrayContents) {
+                indent(depth + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
             } else {
-                indent(i + 1, stringBuilder);
+                indent(depth + 1, stringBuilder);
 
-                for(int k = 0; k < bs.length; ++k) {
-                    if (k != 0) {
+                for(int j = 0; j < bs.length; ++j) {
+                    if (j != 0) {
                         stringBuilder.append(',');
                     }
 
-                    if (k % 16 == 0 && k / 16 > 0) {
+                    if (j % 16 == 0 && j / 16 > 0) {
                         stringBuilder.append('\n');
-                        if (k < bs.length) {
-                            indent(i + 1, stringBuilder);
+                        if (j < bs.length) {
+                            indent(depth + 1, stringBuilder);
                         }
-                    } else if (k != 0) {
+                    } else if (j != 0) {
                         stringBuilder.append(' ');
                     }
 
-                    stringBuilder.append(String.format("0x%02X", bs[k] & 255));
+                    stringBuilder.append(String.format("0x%02X", bs[j] & 255));
                 }
             }
 
             stringBuilder.append('\n');
-            indent(i, stringBuilder).append('}');
+            indent(depth, stringBuilder).append('}');
             break;
         case 9:
-            NBTTagList listTag = (NBTTagList)tag;
-            int l = listTag.size();
-            int m = listTag.getElementType();
-            String string = m == 0 ? "undefined" : NBTTagTypes.getType(m).getPrettyName();
-            indent(i, stringBuilder).append("list<").append(string).append(">[").append(l).append("] [");
-            if (l != 0) {
+            NBTTagList listTag = (NBTTagList)nbt;
+            int k = listTag.size();
+            int l = listTag.getElementType();
+            String string = l == 0 ? "undefined" : NBTTagTypes.getType(l).getPrettyName();
+            indent(depth, stringBuilder).append("list<").append(string).append(">[").append(k).append("] [");
+            if (k != 0) {
                 stringBuilder.append('\n');
             }
 
-            for(int n = 0; n < l; ++n) {
-                if (n != 0) {
+            for(int m = 0; m < k; ++m) {
+                if (m != 0) {
                     stringBuilder.append(",\n");
                 }
 
-                indent(i + 1, stringBuilder);
-                prettyPrint(stringBuilder, listTag.get(n), i + 1, bl);
+                indent(depth + 1, stringBuilder);
+                prettyPrint(stringBuilder, listTag.get(m), depth + 1, withArrayContents);
             }
 
-            if (l != 0) {
+            if (k != 0) {
                 stringBuilder.append('\n');
             }
 
-            indent(i, stringBuilder).append(']');
+            indent(depth, stringBuilder).append(']');
             break;
         case 10:
-            NBTTagCompound compoundTag = (NBTTagCompound)tag;
+            NBTTagCompound compoundTag = (NBTTagCompound)nbt;
             List<String> list = Lists.newArrayList(compoundTag.getKeys());
             Collections.sort(list);
-            indent(i, stringBuilder).append('{');
-            if (stringBuilder.length() - stringBuilder.lastIndexOf("\n") > 2 * (i + 1)) {
+            indent(depth, stringBuilder).append('{');
+            if (stringBuilder.length() - stringBuilder.lastIndexOf("\n") > 2 * (depth + 1)) {
                 stringBuilder.append('\n');
-                indent(i + 1, stringBuilder);
+                indent(depth + 1, stringBuilder);
             }
 
-            int s = list.stream().mapToInt(String::length).max().orElse(0);
-            String string2 = Strings.repeat(" ", s);
+            int r = list.stream().mapToInt(String::length).max().orElse(0);
+            String string2 = Strings.repeat(" ", r);
 
-            for(int t = 0; t < list.size(); ++t) {
-                if (t != 0) {
+            for(int s = 0; s < list.size(); ++s) {
+                if (s != 0) {
                     stringBuilder.append(",\n");
                 }
 
-                String string3 = list.get(t);
-                indent(i + 1, stringBuilder).append('"').append(string3).append('"').append((CharSequence)string2, 0, string2.length() - string3.length()).append(": ");
-                prettyPrint(stringBuilder, compoundTag.get(string3), i + 1, bl);
+                String string3 = list.get(s);
+                indent(depth + 1, stringBuilder).append('"').append(string3).append('"').append((CharSequence)string2, 0, string2.length() - string3.length()).append(": ");
+                prettyPrint(stringBuilder, compoundTag.get(string3), depth + 1, withArrayContents);
             }
 
             if (!list.isEmpty()) {
                 stringBuilder.append('\n');
             }
 
-            indent(i, stringBuilder).append('}');
+            indent(depth, stringBuilder).append('}');
             break;
         case 11:
-            NBTTagIntArray intArrayTag = (NBTTagIntArray)tag;
+            NBTTagIntArray intArrayTag = (NBTTagIntArray)nbt;
             int[] is = intArrayTag.getInts();
-            int o = 0;
+            int n = 0;
 
-            for(int p : is) {
-                o = Math.max(o, String.format("%X", p).length());
+            for(int o : is) {
+                n = Math.max(n, String.format("%X", o).length());
             }
 
-            int q = is.length;
-            indent(i, stringBuilder).append("int[").append(q).append("] {\n");
-            if (!bl) {
-                indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
+            int p = is.length;
+            indent(depth, stringBuilder).append("int[").append(p).append("] {\n");
+            if (!withArrayContents) {
+                indent(depth + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
             } else {
-                indent(i + 1, stringBuilder);
+                indent(depth + 1, stringBuilder);
 
-                for(int r = 0; r < is.length; ++r) {
-                    if (r != 0) {
+                for(int q = 0; q < is.length; ++q) {
+                    if (q != 0) {
                         stringBuilder.append(',');
                     }
 
-                    if (r % 16 == 0 && r / 16 > 0) {
+                    if (q % 16 == 0 && q / 16 > 0) {
                         stringBuilder.append('\n');
-                        if (r < is.length) {
-                            indent(i + 1, stringBuilder);
+                        if (q < is.length) {
+                            indent(depth + 1, stringBuilder);
                         }
-                    } else if (r != 0) {
+                    } else if (q != 0) {
                         stringBuilder.append(' ');
                     }
 
-                    stringBuilder.append(String.format("0x%0" + o + "X", is[r]));
+                    stringBuilder.append(String.format("0x%0" + n + "X", is[q]));
                 }
             }
 
             stringBuilder.append('\n');
-            indent(i, stringBuilder).append('}');
+            indent(depth, stringBuilder).append('}');
             break;
         case 12:
-            NBTTagLongArray longArrayTag = (NBTTagLongArray)tag;
+            NBTTagLongArray longArrayTag = (NBTTagLongArray)nbt;
             long[] ls = longArrayTag.getLongs();
-            long u = 0L;
+            long t = 0L;
 
-            for(long v : ls) {
-                u = Math.max(u, (long)String.format("%X", v).length());
+            for(long u : ls) {
+                t = Math.max(t, (long)String.format("%X", u).length());
             }
 
-            long w = (long)ls.length;
-            indent(i, stringBuilder).append("long[").append(w).append("] {\n");
-            if (!bl) {
-                indent(i + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
+            long v = (long)ls.length;
+            indent(depth, stringBuilder).append("long[").append(v).append("] {\n");
+            if (!withArrayContents) {
+                indent(depth + 1, stringBuilder).append(" // Skipped, supply withBinaryBlobs true");
             } else {
-                indent(i + 1, stringBuilder);
+                indent(depth + 1, stringBuilder);
 
-                for(int x = 0; x < ls.length; ++x) {
-                    if (x != 0) {
+                for(int w = 0; w < ls.length; ++w) {
+                    if (w != 0) {
                         stringBuilder.append(',');
                     }
 
-                    if (x % 16 == 0 && x / 16 > 0) {
+                    if (w % 16 == 0 && w / 16 > 0) {
                         stringBuilder.append('\n');
-                        if (x < ls.length) {
-                            indent(i + 1, stringBuilder);
+                        if (w < ls.length) {
+                            indent(depth + 1, stringBuilder);
                         }
-                    } else if (x != 0) {
+                    } else if (w != 0) {
                         stringBuilder.append(' ');
                     }
 
-                    stringBuilder.append(String.format("0x%0" + u + "X", ls[x]));
+                    stringBuilder.append(String.format("0x%0" + t + "X", ls[w]));
                 }
             }
 
             stringBuilder.append('\n');
-            indent(i, stringBuilder).append('}');
+            indent(depth, stringBuilder).append('}');
             break;
         default:
             stringBuilder.append("<UNKNOWN :(>");
@@ -480,11 +480,11 @@ public final class GameProfileSerializer {
         return stringBuilder;
     }
 
-    private static StringBuilder indent(int i, StringBuilder stringBuilder) {
-        int j = stringBuilder.lastIndexOf("\n") + 1;
-        int k = stringBuilder.length() - j;
+    private static StringBuilder indent(int depth, StringBuilder stringBuilder) {
+        int i = stringBuilder.lastIndexOf("\n") + 1;
+        int j = stringBuilder.length() - i;
 
-        for(int l = 0; l < 2 * i - k; ++l) {
+        for(int k = 0; k < 2 * depth - j; ++k) {
             stringBuilder.append(' ');
         }
 
@@ -492,7 +492,7 @@ public final class GameProfileSerializer {
     }
 
     public static NBTTagCompound update(DataFixer fixer, DataFixTypes fixTypes, NBTTagCompound compound, int oldVersion) {
-        return update(fixer, fixTypes, compound, oldVersion, SharedConstants.getGameVersion().getWorldVersion());
+        return update(fixer, fixTypes, compound, oldVersion, SharedConstants.getCurrentVersion().getWorldVersion());
     }
 
     public static NBTTagCompound update(DataFixer fixer, DataFixTypes fixTypes, NBTTagCompound compound, int oldVersion, int targetVersion) {
@@ -526,11 +526,11 @@ public final class GameProfileSerializer {
         if (bl) {
             NBTTagList listTag4 = new NBTTagList();
             NBTTagList listTag5 = compound.getList("palettes", 9);
-            listTag5.stream().map(NBTTagList.class::cast).forEach((listTag3x) -> {
+            listTag5.stream().map(NBTTagList.class::cast).forEach((nbt) -> {
                 NBTTagCompound compoundTag = new NBTTagCompound();
 
-                for(int i = 0; i < listTag3x.size(); ++i) {
-                    compoundTag.setString(listTag3.getString(i), packBlockState(listTag3x.getCompound(i)));
+                for(int i = 0; i < nbt.size(); ++i) {
+                    compoundTag.setString(listTag3.getString(i), packBlockState(nbt.getCompound(i)));
                 }
 
                 listTag4.add(compoundTag);
@@ -540,16 +540,16 @@ public final class GameProfileSerializer {
 
         if (compound.hasKeyOfType("entities", 10)) {
             NBTTagList listTag6 = compound.getList("entities", 10);
-            NBTTagList listTag7 = listTag6.stream().map(NBTTagCompound.class::cast).sorted(Comparator.comparing((compoundTag) -> {
-                return compoundTag.getList("pos", 6);
+            NBTTagList listTag7 = listTag6.stream().map(NBTTagCompound.class::cast).sorted(Comparator.comparing((nbt) -> {
+                return nbt.getList("pos", 6);
             }, YXZ_LISTTAG_DOUBLE_COMPARATOR)).collect(Collectors.toCollection(NBTTagList::new));
             compound.set("entities", listTag7);
         }
 
-        NBTTagList listTag8 = compound.getList("blocks", 10).stream().map(NBTTagCompound.class::cast).sorted(Comparator.comparing((compoundTag) -> {
-            return compoundTag.getList("pos", 3);
-        }, YXZ_LISTTAG_INT_COMPARATOR)).peek((compoundTag) -> {
-            compoundTag.setString("state", listTag3.getString(compoundTag.getInt("state")));
+        NBTTagList listTag8 = compound.getList("blocks", 10).stream().map(NBTTagCompound.class::cast).sorted(Comparator.comparing((nbt) -> {
+            return nbt.getList("pos", 3);
+        }, YXZ_LISTTAG_INT_COMPARATOR)).peek((nbt) -> {
+            nbt.setString("state", listTag3.getString(nbt.getInt("state")));
         }).collect(Collectors.toCollection(NBTTagList::new));
         compound.set("data", listTag8);
         compound.remove("blocks");
@@ -561,8 +561,8 @@ public final class GameProfileSerializer {
         NBTTagList listTag = compound.getList("palette", 8);
         Map<String, NBTBase> map = listTag.stream().map(NBTTagString.class::cast).map(NBTTagString::asString).collect(ImmutableMap.toImmutableMap(Function.identity(), GameProfileSerializer::unpackBlockState));
         if (compound.hasKeyOfType("palettes", 9)) {
-            compound.set("palettes", compound.getList("palettes", 10).stream().map(NBTTagCompound.class::cast).map((compoundTagx) -> {
-                return map.keySet().stream().map(compoundTagx::getString).map(GameProfileSerializer::unpackBlockState).collect(Collectors.toCollection(NBTTagList::new));
+            compound.set("palettes", compound.getList("palettes", 10).stream().map(NBTTagCompound.class::cast).map((nbt) -> {
+                return map.keySet().stream().map(nbt::getString).map(GameProfileSerializer::unpackBlockState).collect(Collectors.toCollection(NBTTagList::new));
             }).collect(Collectors.toCollection(NBTTagList::new)));
             compound.remove("palette");
         } else {
@@ -602,8 +602,8 @@ public final class GameProfileSerializer {
         StringBuilder stringBuilder = new StringBuilder(compound.getString("Name"));
         if (compound.hasKeyOfType("Properties", 10)) {
             NBTTagCompound compoundTag = compound.getCompound("Properties");
-            String string = compoundTag.getKeys().stream().sorted().map((stringx) -> {
-                return stringx + ":" + compoundTag.get(stringx).asString();
+            String string = compoundTag.getKeys().stream().sorted().map((key) -> {
+                return key + ":" + compoundTag.get(key).asString();
             }).collect(Collectors.joining(","));
             stringBuilder.append('{').append(string).append('}');
         }
@@ -621,8 +621,8 @@ public final class GameProfileSerializer {
             NBTTagCompound compoundTag2 = new NBTTagCompound();
             if (i + 2 <= string.length()) {
                 String string3 = string.substring(i + 1, string.indexOf(125, i));
-                COMMA_SPLITTER.split(string3).forEach((string2) -> {
-                    List<String> list = COLON_SPLITTER.splitToList(string2);
+                COMMA_SPLITTER.split(string3).forEach((property) -> {
+                    List<String> list = COLON_SPLITTER.splitToList(property);
                     if (list.size() == 2) {
                         compoundTag2.setString(list.get(0), list.get(1));
                     } else {

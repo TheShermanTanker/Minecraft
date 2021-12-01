@@ -21,7 +21,6 @@ public class DataConverterEquipment extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.cap(this.getInputSchema().getTypeRaw(DataConverterTypes.ITEM_STACK));
     }

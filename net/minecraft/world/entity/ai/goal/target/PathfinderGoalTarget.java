@@ -20,6 +20,7 @@ public abstract class PathfinderGoalTarget extends PathfinderGoal {
     private int reachCache;
     private int reachCacheTime;
     private int unseenTicks;
+    @Nullable
     protected EntityLiving targetMob;
     protected int unseenMemoryTicks = 60;
 
@@ -57,7 +58,7 @@ public abstract class PathfinderGoalTarget extends PathfinderGoal {
                     if (this.mustSee) {
                         if (this.mob.getEntitySenses().hasLineOfSight(livingEntity)) {
                             this.unseenTicks = 0;
-                        } else if (++this.unseenTicks > this.unseenMemoryTicks) {
+                        } else if (++this.unseenTicks > reducedTickDelay(this.unseenMemoryTicks)) {
                             return false;
                         }
                     }
@@ -113,7 +114,7 @@ public abstract class PathfinderGoalTarget extends PathfinderGoal {
     }
 
     private boolean canReach(EntityLiving entity) {
-        this.reachCacheTime = 10 + this.mob.getRandom().nextInt(5);
+        this.reachCacheTime = reducedTickDelay(10 + this.mob.getRandom().nextInt(5));
         PathEntity path = this.mob.getNavigation().createPath(entity, 0);
         if (path == null) {
             return false;

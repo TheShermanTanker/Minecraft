@@ -8,11 +8,21 @@ import net.minecraft.util.MathHelper;
 public class NBTTagFloat extends NBTNumber {
     private static final int SELF_SIZE_IN_BITS = 96;
     public static final NBTTagFloat ZERO = new NBTTagFloat(0.0F);
-    public static final NBTTagType<NBTTagFloat> TYPE = new NBTTagType<NBTTagFloat>() {
+    public static final NBTTagType<NBTTagFloat> TYPE = new TagType$StaticSize<NBTTagFloat>() {
         @Override
         public NBTTagFloat load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(96L);
             return NBTTagFloat.valueOf(dataInput.readFloat());
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            return visitor.visit(input.readFloat());
+        }
+
+        @Override
+        public int size() {
+            return 4;
         }
 
         @Override
@@ -112,5 +122,10 @@ public class NBTTagFloat extends NBTNumber {
     @Override
     public Number getAsNumber() {
         return this.data;
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visit(this.data);
     }
 }

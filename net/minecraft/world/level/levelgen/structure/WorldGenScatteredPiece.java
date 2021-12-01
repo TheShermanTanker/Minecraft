@@ -3,10 +3,10 @@ package net.minecraft.world.level.levelgen.structure;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public abstract class WorldGenScatteredPiece extends StructurePiece {
     protected final int width;
@@ -31,35 +31,61 @@ public abstract class WorldGenScatteredPiece extends StructurePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
+    protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
         nbt.setInt("Width", this.width);
         nbt.setInt("Height", this.height);
         nbt.setInt("Depth", this.depth);
         nbt.setInt("HPos", this.heightPosition);
     }
 
-    protected boolean updateAverageGroundHeight(GeneratorAccess world, StructureBoundingBox boundingBox, int i) {
+    protected boolean updateAverageGroundHeight(GeneratorAccess world, StructureBoundingBox boundingBox, int deltaY) {
         if (this.heightPosition >= 0) {
             return true;
         } else {
+            int i = 0;
             int j = 0;
-            int k = 0;
             BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
 
-            for(int l = this.boundingBox.minZ(); l <= this.boundingBox.maxZ(); ++l) {
-                for(int m = this.boundingBox.minX(); m <= this.boundingBox.maxX(); ++m) {
-                    mutableBlockPos.set(m, 64, l);
+            for(int k = this.boundingBox.minZ(); k <= this.boundingBox.maxZ(); ++k) {
+                for(int l = this.boundingBox.minX(); l <= this.boundingBox.maxX(); ++l) {
+                    mutableBlockPos.set(l, 64, k);
                     if (boundingBox.isInside(mutableBlockPos)) {
-                        j += world.getHighestBlockYAt(HeightMap.Type.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY();
-                        ++k;
+                        i += world.getHighestBlockYAt(HeightMap.Type.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY();
+                        ++j;
                     }
                 }
             }
 
-            if (k == 0) {
+            if (j == 0) {
                 return false;
             } else {
-                this.heightPosition = j / k;
+                this.heightPosition = i / j;
+                this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + deltaY, 0);
+                return true;
+            }
+        }
+    }
+
+    protected boolean updateHeightPositionToLowestGroundHeight(GeneratorAccess world, int i) {
+        if (this.heightPosition >= 0) {
+            return true;
+        } else {
+            int j = world.getMaxBuildHeight();
+            boolean bl = false;
+            BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
+
+            for(int k = this.boundingBox.minZ(); k <= this.boundingBox.maxZ(); ++k) {
+                for(int l = this.boundingBox.minX(); l <= this.boundingBox.maxX(); ++l) {
+                    mutableBlockPos.set(l, 0, k);
+                    j = Math.min(j, world.getHighestBlockYAt(HeightMap.Type.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY());
+                    bl = true;
+                }
+            }
+
+            if (!bl) {
+                return false;
+            } else {
+                this.heightPosition = j;
                 this.boundingBox.move(0, this.heightPosition - this.boundingBox.minY() + i, 0);
                 return true;
             }

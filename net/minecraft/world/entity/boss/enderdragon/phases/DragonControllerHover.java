@@ -5,6 +5,7 @@ import net.minecraft.world.entity.boss.enderdragon.EntityEnderDragon;
 import net.minecraft.world.phys.Vec3D;
 
 public class DragonControllerHover extends DragonControllerAbstract {
+    @Nullable
     private Vec3D targetLocation;
 
     public DragonControllerHover(EntityEnderDragon dragon) {

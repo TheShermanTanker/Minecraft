@@ -77,7 +77,9 @@ public class EntityStrider extends EntityAnimal implements ISteerable, ISaddleab
     private static final DataWatcherObject<Boolean> DATA_SUFFOCATING = DataWatcher.defineId(EntityStrider.class, DataWatcherRegistry.BOOLEAN);
     private static final DataWatcherObject<Boolean> DATA_SADDLE_ID = DataWatcher.defineId(EntityStrider.class, DataWatcherRegistry.BOOLEAN);
     public final SaddleStorage steering = new SaddleStorage(this.entityData, DATA_BOOST_TIME, DATA_SADDLE_ID);
+    @Nullable
     private PathfinderGoalTempt temptGoal;
+    @Nullable
     private PathfinderGoalPanic panicGoal;
 
     public EntityStrider(EntityTypes<? extends EntityStrider> type, World world) {
@@ -280,7 +282,7 @@ public class EntityStrider extends EntityAnimal implements ISteerable, ISaddleab
     protected void checkFallDamage(double heightDifference, boolean onGround, IBlockData landedState, BlockPosition landedPosition) {
         this.checkBlockCollisions();
         if (this.isInLava()) {
-            this.fallDistance = 0.0F;
+            this.resetFallDistance();
         } else {
             super.checkFallDamage(heightDifference, onGround, landedState, landedPosition);
         }
@@ -480,9 +482,9 @@ public class EntityStrider extends EntityAnimal implements ISteerable, ISaddleab
     static class PathfinderGoalStriderFindLava extends PathfinderGoalGotoTarget {
         private final EntityStrider strider;
 
-        PathfinderGoalStriderFindLava(EntityStrider mob, double speed) {
-            super(mob, speed, 8, 2);
-            this.strider = mob;
+        PathfinderGoalStriderFindLava(EntityStrider strider, double speed) {
+            super(strider, speed, 8, 2);
+            this.strider = strider;
         }
 
         @Override

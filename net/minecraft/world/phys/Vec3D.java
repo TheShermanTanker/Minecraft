@@ -223,6 +223,13 @@ public class Vec3D implements IPosition {
         return axis.choose(this.x, this.y, this.z);
     }
 
+    public Vec3D with(EnumDirection.EnumAxis axis, double value) {
+        double d = axis == EnumDirection.EnumAxis.X ? value : this.x;
+        double e = axis == EnumDirection.EnumAxis.Y ? value : this.y;
+        double f = axis == EnumDirection.EnumAxis.Z ? value : this.z;
+        return new Vec3D(d, e, f);
+    }
+
     @Override
     public final double getX() {
         return this.x;

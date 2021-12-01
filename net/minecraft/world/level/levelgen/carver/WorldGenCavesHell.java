@@ -2,13 +2,13 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
-import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.IChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.material.FluidTypes;
@@ -37,16 +37,16 @@ public class WorldGenCavesHell extends WorldGenCaves {
     }
 
     @Override
-    protected boolean carveBlock(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, BitSet carvingMask, Random random, BlockPosition.MutableBlockPosition pos, BlockPosition.MutableBlockPosition downPos, Aquifer sampler, MutableBoolean foundSurface) {
-        if (this.canReplaceBlock(chunk.getType(pos))) {
+    protected boolean carveBlock(CarvingContext context, CaveCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, CarvingMask mask, BlockPosition.MutableBlockPosition mutableBlockPos, BlockPosition.MutableBlockPosition mutableBlockPos2, Aquifer aquiferSampler, MutableBoolean mutableBoolean) {
+        if (this.canReplaceBlock(chunk.getType(mutableBlockPos))) {
             IBlockData blockState;
-            if (pos.getY() <= context.getMinGenY() + 31) {
+            if (mutableBlockPos.getY() <= context.getMinGenY() + 31) {
                 blockState = LAVA.getBlockData();
             } else {
                 blockState = CAVE_AIR;
             }
 
-            chunk.setType(pos, blockState, false);
+            chunk.setType(mutableBlockPos, blockState, false);
             return true;
         } else {
             return false;

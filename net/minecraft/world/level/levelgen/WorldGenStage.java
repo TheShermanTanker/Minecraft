@@ -17,6 +17,7 @@ public class WorldGenStage {
         STRONGHOLDS,
         UNDERGROUND_ORES,
         UNDERGROUND_DECORATION,
+        FLUID_SPRINGS,
         VEGETAL_DECORATION,
         TOP_LAYER_MODIFICATION;
     }

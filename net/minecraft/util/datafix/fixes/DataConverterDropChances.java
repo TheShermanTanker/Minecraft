@@ -15,7 +15,6 @@ public class DataConverterDropChances extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("EntityRedundantChanceTagsFix", this.getInputSchema().getType(DataConverterTypes.ENTITY), (typed) -> {
             return typed.update(DSL.remainderFinder(), (dynamic) -> {

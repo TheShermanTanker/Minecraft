@@ -49,7 +49,7 @@ public class PathfinderGoalTame extends PathfinderGoal {
 
     @Override
     public void tick() {
-        if (!this.horse.isTamed() && this.horse.getRandom().nextInt(50) == 0) {
+        if (!this.horse.isTamed() && this.horse.getRandom().nextInt(this.adjustedTickDelay(50)) == 0) {
             Entity entity = this.horse.getPassengers().get(0);
             if (entity == null) {
                 return;

@@ -20,8 +20,8 @@ import net.minecraft.resources.MinecraftKey;
 
 public class ArgumentParticle implements ArgumentType<ParticleParam> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "particle with options");
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_PARTICLE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("particle.notFound", object);
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_PARTICLE = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("particle.notFound", id);
     });
 
     public static ArgumentParticle particle() {
@@ -32,12 +32,10 @@ public class ArgumentParticle implements ArgumentType<ParticleParam> {
         return context.getArgument(name, ParticleParam.class);
     }
 
-    @Override
     public ParticleParam parse(StringReader stringReader) throws CommandSyntaxException {
         return readParticle(stringReader);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
@@ -54,7 +52,6 @@ public class ArgumentParticle implements ArgumentType<ParticleParam> {
         return type.getDeserializer().fromCommand(type, reader);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggestResource(IRegistry.PARTICLE_TYPE.keySet(), suggestionsBuilder);
     }

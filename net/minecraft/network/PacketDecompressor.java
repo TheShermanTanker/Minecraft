@@ -15,13 +15,12 @@ public class PacketDecompressor extends ByteToMessageDecoder {
     private int threshold;
     private boolean validateDecompressed;
 
-    public PacketDecompressor(int compressionThreshold, boolean bl) {
+    public PacketDecompressor(int compressionThreshold, boolean rejectsBadPackets) {
         this.threshold = compressionThreshold;
-        this.validateDecompressed = bl;
+        this.validateDecompressed = rejectsBadPackets;
         this.inflater = new Inflater();
     }
 
-    @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
         if (byteBuf.readableBytes() != 0) {
             PacketDataSerializer friendlyByteBuf = new PacketDataSerializer(byteBuf);
@@ -50,8 +49,8 @@ public class PacketDecompressor extends ByteToMessageDecoder {
         }
     }
 
-    public void setThreshold(int compressionThreshold, boolean bl) {
+    public void setThreshold(int compressionThreshold, boolean rejectsBadPackets) {
         this.threshold = compressionThreshold;
-        this.validateDecompressed = bl;
+        this.validateDecompressed = rejectsBadPackets;
     }
 }

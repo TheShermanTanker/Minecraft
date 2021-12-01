@@ -12,7 +12,6 @@ public class DataConverterSchemaV1451 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
         schema.register(map, "minecraft:trapped_chest", () -> {

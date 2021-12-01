@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3D;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public final class Fluid extends IBlockDataHolder<FluidType, Fluid> {
-    public static final Codec<Fluid> CODEC = codec(IRegistry.FLUID, FluidType::defaultFluidState).stable();
+    public static final Codec<Fluid> CODEC = codec(IRegistry.FLUID.byNameCodec(), FluidType::defaultFluidState).stable();
     public static final int AMOUNT_MAX = 9;
     public static final int AMOUNT_FULL = 8;
 
@@ -100,6 +100,10 @@ public final class Fluid extends IBlockDataHolder<FluidType, Fluid> {
 
     public boolean is(Tag<FluidType> tag) {
         return this.getType().is(tag);
+    }
+
+    public boolean is(FluidType fluid) {
+        return this.getType() == fluid;
     }
 
     public float getExplosionResistance() {

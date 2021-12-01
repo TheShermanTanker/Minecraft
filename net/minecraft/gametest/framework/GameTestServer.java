@@ -8,7 +8,6 @@ import com.mojang.serialization.Lifecycle;
 import java.net.Proxy;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
@@ -59,7 +58,7 @@ public class GameTestServer extends MinecraftServer {
     }
 
     private GameTestServer(Thread serverThread, Convertable.ConversionSession session, ResourcePackRepository dataPackManager, DataPackResources serverResourceManager, Collection<GameTestHarnessBatch> batches, BlockPosition pos, IRegistryCustom.Dimension registryManager, IRegistry<BiomeBase> biomeRegistry, IRegistry<DimensionManager> dimensionTypeRegistry) {
-        super(serverThread, registryManager, session, new WorldDataServer(TEST_SETTINGS, new GeneratorSettings(0L, false, false, GeneratorSettings.withOverworld(dimensionTypeRegistry, DimensionManager.defaultDimensions(dimensionTypeRegistry, biomeRegistry, registryManager.registryOrThrow(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY), 0L), new ChunkProviderFlat(GeneratorSettingsFlat.getDefault(biomeRegistry)))), Lifecycle.stable()), dataPackManager, Proxy.NO_PROXY, DataConverterRegistry.getDataFixer(), serverResourceManager, (MinecraftSessionService)null, (GameProfileRepository)null, (UserCache)null, WorldLoadListenerLogger::new);
+        super(serverThread, registryManager, session, new WorldDataServer(TEST_SETTINGS, new GeneratorSettings(0L, false, false, GeneratorSettings.withOverworld(dimensionTypeRegistry, DimensionManager.defaultDimensions(registryManager, 0L), new ChunkProviderFlat(GeneratorSettingsFlat.getDefault(biomeRegistry)))), Lifecycle.stable()), dataPackManager, Proxy.NO_PROXY, DataConverterRegistry.getDataFixer(), serverResourceManager, (MinecraftSessionService)null, (GameProfileRepository)null, (UserCache)null, WorldLoadListenerLogger::new);
         this.testBatches = Lists.newArrayList(batches);
         this.spawnPos = pos;
         if (batches.isEmpty()) {
@@ -74,8 +73,8 @@ public class GameTestServer extends MinecraftServer {
         this.loadWorld();
         WorldServer serverLevel = this.overworld();
         serverLevel.setDefaultSpawnPos(this.spawnPos, 0.0F);
-        serverLevel.getWorldData().setStorm(false);
-        serverLevel.getWorldData().setStorm(false);
+        int i = 20000000;
+        serverLevel.setWeatherParameters(20000000, 20000000, false, false);
         return true;
     }
 
@@ -135,7 +134,7 @@ public class GameTestServer extends MinecraftServer {
     }
 
     private void startTests(WorldServer world) {
-        Collection<GameTestHarnessInfo> collection = GameTestHarnessRunner.runTestBatches(this.testBatches, new BlockPosition(0, 4, 0), EnumBlockRotation.NONE, world, GameTestHarnessTicker.SINGLETON, 8);
+        Collection<GameTestHarnessInfo> collection = GameTestHarnessRunner.runTestBatches(this.testBatches, new BlockPosition(0, -60, 0), EnumBlockRotation.NONE, world, GameTestHarnessTicker.SINGLETON, 8);
         this.testTracker = new GameTestHarnessCollector(collection);
         LOGGER.info("{} tests are now running!", (int)this.testTracker.getTotalCount());
     }
@@ -197,10 +196,5 @@ public class GameTestServer extends MinecraftServer {
     @Override
     public boolean isSingleplayerOwner(GameProfile profile) {
         return false;
-    }
-
-    @Override
-    public Optional<String> getModded() {
-        return Optional.empty();
     }
 }

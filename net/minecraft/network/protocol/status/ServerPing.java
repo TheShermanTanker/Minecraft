@@ -11,17 +11,23 @@ import com.google.gson.JsonSerializer;
 import com.mojang.authlib.GameProfile;
 import java.lang.reflect.Type;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.util.ChatDeserializer;
 
 public class ServerPing {
     public static final int FAVICON_WIDTH = 64;
     public static final int FAVICON_HEIGHT = 64;
+    @Nullable
     private IChatBaseComponent description;
+    @Nullable
     private ServerPing.ServerPingPlayerSample players;
+    @Nullable
     private ServerPing.ServerData version;
+    @Nullable
     private String favicon;
 
+    @Nullable
     public IChatBaseComponent getDescription() {
         return this.description;
     }
@@ -30,6 +36,7 @@ public class ServerPing {
         this.description = description;
     }
 
+    @Nullable
     public ServerPing.ServerPingPlayerSample getPlayers() {
         return this.players;
     }
@@ -38,6 +45,7 @@ public class ServerPing {
         this.players = players;
     }
 
+    @Nullable
     public ServerPing.ServerData getServerData() {
         return this.version;
     }
@@ -50,6 +58,7 @@ public class ServerPing {
         this.favicon = favicon;
     }
 
+    @Nullable
     public String getFavicon() {
         return this.favicon;
     }
@@ -138,6 +147,7 @@ public class ServerPing {
     public static class ServerPingPlayerSample {
         private final int maxPlayers;
         private final int numPlayers;
+        @Nullable
         private GameProfile[] sample;
 
         public ServerPingPlayerSample(int max, int online) {
@@ -153,6 +163,7 @@ public class ServerPing {
             return this.numPlayers;
         }
 
+        @Nullable
         public GameProfile[] getSample() {
             return this.sample;
         }
@@ -189,14 +200,15 @@ public class ServerPing {
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("max", players.getMaxPlayers());
                 jsonObject.addProperty("online", players.getNumPlayers());
-                if (players.getSample() != null && players.getSample().length > 0) {
+                GameProfile[] gameProfiles = players.getSample();
+                if (gameProfiles != null && gameProfiles.length > 0) {
                     JsonArray jsonArray = new JsonArray();
 
-                    for(int i = 0; i < players.getSample().length; ++i) {
+                    for(int i = 0; i < gameProfiles.length; ++i) {
                         JsonObject jsonObject2 = new JsonObject();
-                        UUID uUID = players.getSample()[i].getId();
+                        UUID uUID = gameProfiles[i].getId();
                         jsonObject2.addProperty("id", uUID == null ? "" : uUID.toString());
-                        jsonObject2.addProperty("name", players.getSample()[i].getName());
+                        jsonObject2.addProperty("name", gameProfiles[i].getName());
                         jsonArray.add(jsonObject2);
                     }
 

@@ -64,18 +64,18 @@ public abstract class VoxelShape {
         return voxelShapes[0];
     }
 
-    public void forAllEdges(VoxelShapes.DoubleLineConsumer doubleLineConsumer) {
-        this.shape.forAllEdges((i, j, k, l, m, n) -> {
-            doubleLineConsumer.consume(this.get(EnumDirection.EnumAxis.X, i), this.get(EnumDirection.EnumAxis.Y, j), this.get(EnumDirection.EnumAxis.Z, k), this.get(EnumDirection.EnumAxis.X, l), this.get(EnumDirection.EnumAxis.Y, m), this.get(EnumDirection.EnumAxis.Z, n));
+    public void forAllEdges(VoxelShapes.DoubleLineConsumer consumer) {
+        this.shape.forAllEdges((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            consumer.consume(this.get(EnumDirection.EnumAxis.X, minX), this.get(EnumDirection.EnumAxis.Y, minY), this.get(EnumDirection.EnumAxis.Z, minZ), this.get(EnumDirection.EnumAxis.X, maxX), this.get(EnumDirection.EnumAxis.Y, maxY), this.get(EnumDirection.EnumAxis.Z, maxZ));
         }, true);
     }
 
-    public void forAllBoxes(VoxelShapes.DoubleLineConsumer doubleLineConsumer) {
+    public void forAllBoxes(VoxelShapes.DoubleLineConsumer consumer) {
         DoubleList doubleList = this.getCoords(EnumDirection.EnumAxis.X);
         DoubleList doubleList2 = this.getCoords(EnumDirection.EnumAxis.Y);
         DoubleList doubleList3 = this.getCoords(EnumDirection.EnumAxis.Z);
-        this.shape.forAllBoxes((i, j, k, l, m, n) -> {
-            doubleLineConsumer.consume(doubleList.getDouble(i), doubleList2.getDouble(j), doubleList3.getDouble(k), doubleList.getDouble(l), doubleList2.getDouble(m), doubleList3.getDouble(n));
+        this.shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            consumer.consume(doubleList.getDouble(minX), doubleList2.getDouble(minY), doubleList3.getDouble(minZ), doubleList.getDouble(maxX), doubleList2.getDouble(maxY), doubleList3.getDouble(maxZ));
         }, true);
     }
 
@@ -87,11 +87,11 @@ public abstract class VoxelShape {
         return list;
     }
 
-    public double min(EnumDirection.EnumAxis axis, double d, double e) {
+    public double min(EnumDirection.EnumAxis axis, double from, double to) {
         EnumDirection.EnumAxis axis2 = EnumAxisCycle.FORWARD.cycle(axis);
         EnumDirection.EnumAxis axis3 = EnumAxisCycle.BACKWARD.cycle(axis);
-        int i = this.findIndex(axis2, d);
-        int j = this.findIndex(axis3, e);
+        int i = this.findIndex(axis2, from);
+        int j = this.findIndex(axis3, to);
         int k = this.shape.firstFull(axis, i, j);
         return k >= this.shape.getSize(axis) ? Double.POSITIVE_INFINITY : this.get(axis, k);
     }
@@ -131,12 +131,12 @@ public abstract class VoxelShape {
             return Optional.empty();
         } else {
             Vec3D[] vec3s = new Vec3D[1];
-            this.forAllBoxes((d, e, f, g, h, i) -> {
-                double j = MathHelper.clamp(target.getX(), d, g);
-                double k = MathHelper.clamp(target.getY(), e, h);
-                double l = MathHelper.clamp(target.getZ(), f, i);
-                if (vec3s[0] == null || target.distanceToSqr(j, k, l) < target.distanceSquared(vec3s[0])) {
-                    vec3s[0] = new Vec3D(j, k, l);
+            this.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                double d = MathHelper.clamp(target.getX(), minX, maxX);
+                double e = MathHelper.clamp(target.getY(), minY, maxY);
+                double f = MathHelper.clamp(target.getZ(), minZ, maxZ);
+                if (vec3s[0] == null || target.distanceToSqr(d, e, f) < target.distanceSquared(vec3s[0])) {
+                    vec3s[0] = new Vec3D(d, e, f);
                 }
 
             });

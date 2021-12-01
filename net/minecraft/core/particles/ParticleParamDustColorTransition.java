@@ -14,12 +14,12 @@ public class ParticleParamDustColorTransition extends ParticleParamDust {
     public static final Vector3fa SCULK_PARTICLE_COLOR = new Vector3fa(Vec3D.fromRGB24(3790560));
     public static final ParticleParamDustColorTransition SCULK_TO_REDSTONE = new ParticleParamDustColorTransition(SCULK_PARTICLE_COLOR, ParticleParamRedstone.REDSTONE_PARTICLE_COLOR, 1.0F);
     public static final Codec<ParticleParamDustColorTransition> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(Vector3fa.CODEC.fieldOf("fromColor").forGetter((dustColorTransitionOptions) -> {
-            return dustColorTransitionOptions.color;
-        }), Vector3fa.CODEC.fieldOf("toColor").forGetter((dustColorTransitionOptions) -> {
-            return dustColorTransitionOptions.toColor;
-        }), Codec.FLOAT.fieldOf("scale").forGetter((dustColorTransitionOptions) -> {
-            return dustColorTransitionOptions.scale;
+        return instance.group(Vector3fa.CODEC.fieldOf("fromColor").forGetter((effect) -> {
+            return effect.color;
+        }), Vector3fa.CODEC.fieldOf("toColor").forGetter((effect) -> {
+            return effect.toColor;
+        }), Codec.FLOAT.fieldOf("scale").forGetter((effect) -> {
+            return effect.scale;
         })).apply(instance, ParticleParamDustColorTransition::new);
     });
     public static final ParticleParam.Deserializer<ParticleParamDustColorTransition> DESERIALIZER = new ParticleParam.Deserializer<ParticleParamDustColorTransition>() {

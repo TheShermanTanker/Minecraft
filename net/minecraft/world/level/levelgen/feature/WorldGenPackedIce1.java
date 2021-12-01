@@ -24,6 +24,6 @@ public class WorldGenPackedIce1 extends WorldGenFeatureDisk {
         for(blockPos = context.origin(); worldGenLevel.isEmpty(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2; blockPos = blockPos.below()) {
         }
 
-        return !worldGenLevel.getType(blockPos).is(Blocks.SNOW_BLOCK) ? false : super.generate(new FeaturePlaceContext<>(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration));
+        return !worldGenLevel.getType(blockPos).is(Blocks.SNOW_BLOCK) ? false : super.generate(new FeaturePlaceContext<>(context.topFeature(), worldGenLevel, context.chunkGenerator(), context.random(), blockPos, context.config()));
     }
 }

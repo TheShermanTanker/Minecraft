@@ -8,6 +8,7 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.effect.MobEffect;
 
 public class PotionRegistry {
+    @Nullable
     private final String name;
     private final ImmutableList<MobEffect> effects;
 

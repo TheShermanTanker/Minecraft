@@ -21,8 +21,8 @@ public class SensorNearestPlayers extends Sensor<EntityLiving> {
 
     @Override
     protected void doTick(WorldServer world, EntityLiving entity) {
-        List<EntityHuman> list = world.getPlayers().stream().filter(IEntitySelector.NO_SPECTATORS).filter((serverPlayer) -> {
-            return entity.closerThan(serverPlayer, 16.0D);
+        List<EntityHuman> list = world.getPlayers().stream().filter(IEntitySelector.NO_SPECTATORS).filter((player) -> {
+            return entity.closerThan(player, 16.0D);
         }).sorted(Comparator.comparingDouble(entity::distanceToSqr)).collect(Collectors.toList());
         BehaviorController<?> brain = entity.getBehaviorController();
         brain.setMemory(MemoryModuleType.NEAREST_PLAYERS, list);

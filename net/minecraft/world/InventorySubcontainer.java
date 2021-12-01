@@ -3,6 +3,7 @@ package net.minecraft.world;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 public class InventorySubcontainer implements IInventory, AutoRecipeOutput {
     private final int size;
     public final NonNullList<ItemStack> items;
+    @Nullable
     private List<IInventoryListener> listeners;
 
     public InventorySubcontainer(int size) {
@@ -36,7 +38,10 @@ public class InventorySubcontainer implements IInventory, AutoRecipeOutput {
     }
 
     public void removeListener(IInventoryListener listener) {
-        this.listeners.remove(listener);
+        if (this.listeners != null) {
+            this.listeners.remove(listener);
+        }
+
     }
 
     @Override

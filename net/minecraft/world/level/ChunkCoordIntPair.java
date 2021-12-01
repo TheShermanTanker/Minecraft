@@ -9,7 +9,9 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.SectionPosition;
 
 public class ChunkCoordIntPair {
-    public static final long INVALID_CHUNK_POS = pair(1875016, 1875016);
+    private static final int SAFETY_MARGIN = 1056;
+    public static final long INVALID_CHUNK_POS = pair(1875066, 1875066);
+    public static final ChunkCoordIntPair ZERO = new ChunkCoordIntPair(0, 0);
     private static final long COORD_BITS = 32L;
     private static final long COORD_MASK = 4294967295L;
     private static final int REGION_BITS = 5;
@@ -43,8 +45,8 @@ public class ChunkCoordIntPair {
         return (long)chunkX & 4294967295L | ((long)chunkZ & 4294967295L) << 32;
     }
 
-    public static long asLong(BlockPosition blockPos) {
-        return pair(SectionPosition.blockToSectionCoord(blockPos.getX()), SectionPosition.blockToSectionCoord(blockPos.getZ()));
+    public static long asLong(BlockPosition pos) {
+        return pair(SectionPosition.blockToSectionCoord(pos.getX()), SectionPosition.blockToSectionCoord(pos.getZ()));
     }
 
     public static int getX(long pos) {

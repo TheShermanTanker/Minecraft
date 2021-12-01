@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.IBlockData;
 
 public class DefinedStructureTestRandomBlock extends DefinedStructureRuleTest {
     public static final Codec<DefinedStructureTestRandomBlock> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(IRegistry.BLOCK.fieldOf("block").forGetter((randomBlockMatchTest) -> {
+        return instance.group(IRegistry.BLOCK.byNameCodec().fieldOf("block").forGetter((randomBlockMatchTest) -> {
             return randomBlockMatchTest.block;
         }), Codec.FLOAT.fieldOf("probability").forGetter((randomBlockMatchTest) -> {
             return randomBlockMatchTest.probability;

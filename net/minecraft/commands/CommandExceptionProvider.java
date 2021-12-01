@@ -69,137 +69,110 @@ public class CommandExceptionProvider implements BuiltInExceptionProvider {
         return new ChatMessage("command.exception", message);
     });
 
-    @Override
     public Dynamic2CommandExceptionType doubleTooLow() {
         return DOUBLE_TOO_SMALL;
     }
 
-    @Override
     public Dynamic2CommandExceptionType doubleTooHigh() {
         return DOUBLE_TOO_BIG;
     }
 
-    @Override
     public Dynamic2CommandExceptionType floatTooLow() {
         return FLOAT_TOO_SMALL;
     }
 
-    @Override
     public Dynamic2CommandExceptionType floatTooHigh() {
         return FLOAT_TOO_BIG;
     }
 
-    @Override
     public Dynamic2CommandExceptionType integerTooLow() {
         return INTEGER_TOO_SMALL;
     }
 
-    @Override
     public Dynamic2CommandExceptionType integerTooHigh() {
         return INTEGER_TOO_BIG;
     }
 
-    @Override
     public Dynamic2CommandExceptionType longTooLow() {
         return LONG_TOO_SMALL;
     }
 
-    @Override
     public Dynamic2CommandExceptionType longTooHigh() {
         return LONG_TOO_BIG;
     }
 
-    @Override
     public DynamicCommandExceptionType literalIncorrect() {
         return LITERAL_INCORRECT;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedStartOfQuote() {
         return READER_EXPECTED_START_OF_QUOTE;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedEndOfQuote() {
         return READER_EXPECTED_END_OF_QUOTE;
     }
 
-    @Override
     public DynamicCommandExceptionType readerInvalidEscape() {
         return READER_INVALID_ESCAPE;
     }
 
-    @Override
     public DynamicCommandExceptionType readerInvalidBool() {
         return READER_INVALID_BOOL;
     }
 
-    @Override
     public DynamicCommandExceptionType readerInvalidInt() {
         return READER_INVALID_INT;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedInt() {
         return READER_EXPECTED_INT;
     }
 
-    @Override
     public DynamicCommandExceptionType readerInvalidLong() {
         return READER_INVALID_LONG;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedLong() {
         return READER_EXPECTED_LONG;
     }
 
-    @Override
     public DynamicCommandExceptionType readerInvalidDouble() {
         return READER_INVALID_DOUBLE;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedDouble() {
         return READER_EXPECTED_DOUBLE;
     }
 
-    @Override
     public DynamicCommandExceptionType readerInvalidFloat() {
         return READER_INVALID_FLOAT;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedFloat() {
         return READER_EXPECTED_FLOAT;
     }
 
-    @Override
     public SimpleCommandExceptionType readerExpectedBool() {
         return READER_EXPECTED_BOOL;
     }
 
-    @Override
     public DynamicCommandExceptionType readerExpectedSymbol() {
         return READER_EXPECTED_SYMBOL;
     }
 
-    @Override
     public SimpleCommandExceptionType dispatcherUnknownCommand() {
         return DISPATCHER_UNKNOWN_COMMAND;
     }
 
-    @Override
     public SimpleCommandExceptionType dispatcherUnknownArgument() {
         return DISPATCHER_UNKNOWN_ARGUMENT;
     }
 
-    @Override
     public SimpleCommandExceptionType dispatcherExpectedArgumentSeparator() {
         return DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR;
     }
 
-    @Override
     public DynamicCommandExceptionType dispatcherParseException() {
         return DISPATCHER_PARSE_EXCEPTION;
     }

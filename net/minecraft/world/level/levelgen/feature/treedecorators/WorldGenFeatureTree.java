@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.block.state.properties.BlockStateBoolean;
 
 public abstract class WorldGenFeatureTree {
-    public static final Codec<WorldGenFeatureTree> CODEC = IRegistry.TREE_DECORATOR_TYPES.dispatch(WorldGenFeatureTree::type, WorldGenFeatureTrees::codec);
+    public static final Codec<WorldGenFeatureTree> CODEC = IRegistry.TREE_DECORATOR_TYPES.byNameCodec().dispatch(WorldGenFeatureTree::type, WorldGenFeatureTrees::codec);
 
     protected abstract WorldGenFeatureTrees<?> type();
 

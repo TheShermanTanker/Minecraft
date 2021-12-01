@@ -57,14 +57,14 @@ public final class Material {
     private final boolean replaceable;
     private final boolean solid;
 
-    public Material(MaterialMapColor color, boolean liquid, boolean solid, boolean blocksMovement, boolean blocksLight, boolean breakByHand, boolean burnable, EnumPistonReaction pistonBehavior) {
+    public Material(MaterialMapColor color, boolean liquid, boolean solid, boolean blocksMovement, boolean blocksLight, boolean burnable, boolean replaceable, EnumPistonReaction pistonBehavior) {
         this.color = color;
         this.liquid = liquid;
         this.solid = solid;
         this.blocksMotion = blocksMovement;
         this.solidBlocking = blocksLight;
-        this.flammable = breakByHand;
-        this.replaceable = burnable;
+        this.flammable = burnable;
+        this.replaceable = replaceable;
         this.pushReaction = pistonBehavior;
     }
 

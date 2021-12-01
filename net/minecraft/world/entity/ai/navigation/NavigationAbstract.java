@@ -42,6 +42,7 @@ public abstract class NavigationAbstract {
     protected boolean hasDelayedRecomputation;
     protected long timeLastRecompute;
     protected PathfinderAbstract nodeEvaluator;
+    @Nullable
     private BlockPosition targetPos;
     private int reachRange;
     private float maxVisitedNodesMultiplier = 1.0F;
@@ -63,6 +64,7 @@ public abstract class NavigationAbstract {
         this.maxVisitedNodesMultiplier = rangeMultiplier;
     }
 
+    @Nullable
     public BlockPosition getTargetPos() {
         return this.targetPos;
     }
@@ -213,10 +215,14 @@ public abstract class NavigationAbstract {
             PacketDebug.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
             if (!this.isDone()) {
                 Vec3D vec33 = this.path.getNextEntityPos(this.mob);
-                BlockPosition blockPos = new BlockPosition(vec33);
-                this.mob.getControllerMove().setWantedPosition(vec33.x, this.level.getType(blockPos.below()).isAir() ? vec33.y : PathfinderNormal.getFloorLevel(this.level, blockPos), vec33.z, this.speedModifier);
+                this.mob.getControllerMove().setWantedPosition(vec33.x, this.getGroundY(vec33), vec33.z, this.speedModifier);
             }
         }
+    }
+
+    protected double getGroundY(Vec3D pos) {
+        BlockPosition blockPos = new BlockPosition(pos);
+        return this.level.getType(blockPos.below()).isAir() ? pos.y : PathfinderNormal.getFloorLevel(this.level, blockPos);
     }
 
     protected void followThePath() {
@@ -241,6 +247,8 @@ public abstract class NavigationAbstract {
             Vec3D vec3 = Vec3D.atBottomCenterOf(this.path.getNextNodePos());
             if (!currentPos.closerThan(vec3, 2.0D)) {
                 return false;
+            } else if (this.canMoveDirectly(currentPos, this.path.getNextEntityPos(this.mob))) {
+                return true;
             } else {
                 Vec3D vec32 = Vec3D.atBottomCenterOf(this.path.getNodePos(this.path.getNextNodeIndex() + 1));
                 Vec3D vec33 = vec32.subtract(vec3);
@@ -331,7 +339,9 @@ public abstract class NavigationAbstract {
         }
     }
 
-    protected abstract boolean canMoveDirectly(Vec3D origin, Vec3D target, int sizeX, int sizeY, int sizeZ);
+    protected boolean canMoveDirectly(Vec3D origin, Vec3D target) {
+        return false;
+    }
 
     public boolean isStableDestination(BlockPosition pos) {
         BlockPosition blockPos = pos.below();

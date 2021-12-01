@@ -97,8 +97,8 @@ public class EntityFireworks extends IProjectile implements ItemSupplier {
         super.tick();
         if (this.isAttachedToEntity()) {
             if (this.attachedToEntity == null) {
-                this.entityData.get(DATA_ATTACHED_TO_TARGET).ifPresent((i) -> {
-                    Entity entity = this.level.getEntity(i);
+                this.entityData.get(DATA_ATTACHED_TO_TARGET).ifPresent((id) -> {
+                    Entity entity = this.level.getEntity(id);
                     if (entity instanceof EntityLiving) {
                         this.attachedToEntity = (EntityLiving)entity;
                     }

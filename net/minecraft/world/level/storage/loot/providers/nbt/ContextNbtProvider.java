@@ -10,7 +10,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.CriterionConditionNBT;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.TileEntity;
@@ -26,7 +25,7 @@ public class ContextNbtProvider implements NbtProvider {
         @Override
         public NBTBase get(LootTableInfo context) {
             TileEntity blockEntity = context.getContextParameter(LootContextParameters.BLOCK_ENTITY);
-            return blockEntity != null ? blockEntity.save(new NBTTagCompound()) : null;
+            return blockEntity != null ? blockEntity.saveWithFullMetadata() : null;
         }
 
         @Override

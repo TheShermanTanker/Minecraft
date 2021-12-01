@@ -208,7 +208,7 @@ public class EntityVindicator extends EntityIllagerAbstract {
         @Override
         public boolean canUse() {
             EntityVindicator vindicator = (EntityVindicator)this.mob;
-            return vindicator.hasActiveRaid() && vindicator.random.nextInt(10) == 0 && super.canUse();
+            return vindicator.hasActiveRaid() && vindicator.random.nextInt(reducedTickDelay(10)) == 0 && super.canUse();
         }
 
         @Override

@@ -1,5 +1,7 @@
 package net.minecraft.world.entity;
 
+import java.util.Random;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.core.particles.Particles;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,6 +13,8 @@ import net.minecraft.sounds.SoundEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.animal.EntitySquid;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.WorldAccess;
+import net.minecraft.world.level.block.Blocks;
 
 public class EntityGlowSquid extends EntitySquid {
     private static final DataWatcherObject<Integer> DATA_DARK_TICKS_REMAINING = DataWatcher.defineId(EntityGlowSquid.class, DataWatcherRegistry.INT);
@@ -89,5 +93,9 @@ public class EntityGlowSquid extends EntitySquid {
 
     public int getDarkTicksRemaining() {
         return this.entityData.get(DATA_DARK_TICKS_REMAINING);
+    }
+
+    public static boolean checkGlowSquideSpawnRules(EntityTypes<? extends EntityLiving> type, WorldAccess world, EnumMobSpawn reason, BlockPosition pos, Random random) {
+        return world.getType(pos).is(Blocks.WATER) && pos.getY() <= world.getSeaLevel() - 33;
     }
 }

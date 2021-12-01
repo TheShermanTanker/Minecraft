@@ -19,7 +19,6 @@ public class DataConverterAttributes extends DataFix {
         super(outputSchema, false);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.ITEM_STACK);
         OpticFinder<?> opticFinder = type.findField("tag");

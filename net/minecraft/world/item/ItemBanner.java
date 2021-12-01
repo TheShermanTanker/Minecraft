@@ -23,7 +23,7 @@ public class ItemBanner extends ItemBlockWallable {
     }
 
     public static void appendHoverTextFromBannerBlockEntityTag(ItemStack stack, List<IChatBaseComponent> tooltip) {
-        NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
         if (compoundTag != null && compoundTag.hasKey("Patterns")) {
             NBTTagList listTag = compoundTag.getList("Patterns", 10);
 

@@ -41,7 +41,7 @@ public class PathfinderGoalEatTile extends PathfinderGoal {
 
     @Override
     public void start() {
-        this.eatAnimationTick = 40;
+        this.eatAnimationTick = this.adjustedTickDelay(40);
         this.level.broadcastEntityEffect(this.mob, (byte)10);
         this.mob.getNavigation().stop();
     }
@@ -63,7 +63,7 @@ public class PathfinderGoalEatTile extends PathfinderGoal {
     @Override
     public void tick() {
         this.eatAnimationTick = Math.max(0, this.eatAnimationTick - 1);
-        if (this.eatAnimationTick == 4) {
+        if (this.eatAnimationTick == this.adjustedTickDelay(4)) {
             BlockPosition blockPos = this.mob.getChunkCoordinates();
             if (IS_TALL_GRASS.test(this.level.getType(blockPos))) {
                 if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {

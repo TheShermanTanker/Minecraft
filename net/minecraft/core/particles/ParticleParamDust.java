@@ -19,13 +19,13 @@ public abstract class ParticleParamDust implements ParticleParam {
         this.scale = MathHelper.clamp(scale, 0.01F, 4.0F);
     }
 
-    public static Vector3fa readVector3f(StringReader stringReader) throws CommandSyntaxException {
-        stringReader.expect(' ');
-        float f = stringReader.readFloat();
-        stringReader.expect(' ');
-        float g = stringReader.readFloat();
-        stringReader.expect(' ');
-        float h = stringReader.readFloat();
+    public static Vector3fa readVector3f(StringReader reader) throws CommandSyntaxException {
+        reader.expect(' ');
+        float f = reader.readFloat();
+        reader.expect(' ');
+        float g = reader.readFloat();
+        reader.expect(' ');
+        float h = reader.readFloat();
         return new Vector3fa(f, g, h);
     }
 

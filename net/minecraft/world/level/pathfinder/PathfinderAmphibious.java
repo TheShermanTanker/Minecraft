@@ -77,8 +77,8 @@ public class PathfinderAmphibious extends PathfinderNormal {
     }
 
     @Override
-    protected double getFloorLevel(BlockPosition blockPos) {
-        return this.mob.isInWater() ? (double)blockPos.getY() + 0.5D : super.getFloorLevel(blockPos);
+    protected double getFloorLevel(BlockPosition pos) {
+        return this.mob.isInWater() ? (double)pos.getY() + 0.5D : super.getFloorLevel(pos);
     }
 
     @Override

@@ -134,8 +134,8 @@ public class StringDecomposer {
 
     public static String filterBrokenSurrogates(String text) {
         StringBuilder stringBuilder = new StringBuilder();
-        iterate(text, ChatModifier.EMPTY, (i, style, j) -> {
-            stringBuilder.appendCodePoint(j);
+        iterate(text, ChatModifier.EMPTY, (index, style, codePoint) -> {
+            stringBuilder.appendCodePoint(codePoint);
             return true;
         });
         return stringBuilder.toString();
@@ -143,8 +143,8 @@ public class StringDecomposer {
 
     public static String getPlainText(IChatFormatted text) {
         StringBuilder stringBuilder = new StringBuilder();
-        iterateFormatted(text, ChatModifier.EMPTY, (i, style, j) -> {
-            stringBuilder.appendCodePoint(j);
+        iterateFormatted(text, ChatModifier.EMPTY, (index, style, codePoint) -> {
+            stringBuilder.appendCodePoint(codePoint);
             return true;
         });
         return stringBuilder.toString();

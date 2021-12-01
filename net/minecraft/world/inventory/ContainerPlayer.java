@@ -93,8 +93,8 @@ public class ContainerPlayer extends ContainerRecipeBook<InventoryCrafting> {
         });
     }
 
-    public static boolean isHotbarSlot(int i) {
-        return i >= 36 && i < 45 || i == 45;
+    public static boolean isHotbarSlot(int slot) {
+        return slot >= 36 && slot < 45 || slot == 45;
     }
 
     @Override

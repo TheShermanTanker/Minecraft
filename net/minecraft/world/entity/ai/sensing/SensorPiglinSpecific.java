@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.boss.wither.EntityWither;
 import net.minecraft.world.entity.monster.EntitySkeletonWither;
 import net.minecraft.world.entity.monster.hoglin.EntityHoglin;
@@ -45,38 +46,42 @@ public class SensorPiglinSpecific extends Sensor<EntityLiving> {
         int i = 0;
         List<EntityPiglinAbstract> list = Lists.newArrayList();
         List<EntityPiglinAbstract> list2 = Lists.newArrayList();
+        NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
 
-        for(EntityLiving livingEntity : brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
+        for(EntityLiving livingEntity : nearestVisibleLivingEntities.findAll((livingEntityx) -> {
+            return true;
+        })) {
             if (livingEntity instanceof EntityHoglin) {
                 EntityHoglin hoglin = (EntityHoglin)livingEntity;
-                if (hoglin.isBaby() && !optional3.isPresent()) {
+                if (hoglin.isBaby() && optional3.isEmpty()) {
                     optional3 = Optional.of(hoglin);
                 } else if (hoglin.isAdult()) {
                     ++i;
-                    if (!optional2.isPresent() && hoglin.canBeHunted()) {
+                    if (optional2.isEmpty() && hoglin.canBeHunted()) {
                         optional2 = Optional.of(hoglin);
                     }
                 }
             } else if (livingEntity instanceof EntityPiglinBrute) {
-                list.add((EntityPiglinBrute)livingEntity);
+                EntityPiglinBrute piglinBrute = (EntityPiglinBrute)livingEntity;
+                list.add(piglinBrute);
             } else if (livingEntity instanceof EntityPiglin) {
                 EntityPiglin piglin = (EntityPiglin)livingEntity;
-                if (piglin.isBaby() && !optional4.isPresent()) {
+                if (piglin.isBaby() && optional4.isEmpty()) {
                     optional4 = Optional.of(piglin);
                 } else if (piglin.isAdult()) {
                     list.add(piglin);
                 }
             } else if (livingEntity instanceof EntityHuman) {
                 EntityHuman player = (EntityHuman)livingEntity;
-                if (!optional6.isPresent() && entity.canAttack(livingEntity) && !PiglinAI.isWearingGold(player)) {
+                if (optional6.isEmpty() && !PiglinAI.isWearingGold(player) && entity.canAttack(livingEntity)) {
                     optional6 = Optional.of(player);
                 }
 
-                if (!optional7.isPresent() && !player.isSpectator() && PiglinAI.isPlayerHoldingLovedItem(player)) {
+                if (optional7.isEmpty() && !player.isSpectator() && PiglinAI.isPlayerHoldingLovedItem(player)) {
                     optional7 = Optional.of(player);
                 }
-            } else if (optional.isPresent() || !(livingEntity instanceof EntitySkeletonWither) && !(livingEntity instanceof EntityWither)) {
-                if (!optional5.isPresent() && PiglinAI.isZombified(livingEntity.getEntityType())) {
+            } else if (!optional.isEmpty() || !(livingEntity instanceof EntitySkeletonWither) && !(livingEntity instanceof EntityWither)) {
+                if (optional5.isEmpty() && PiglinAI.isZombified(livingEntity.getEntityType())) {
                     optional5 = Optional.of(livingEntity);
                 }
             } else {
@@ -85,8 +90,11 @@ public class SensorPiglinSpecific extends Sensor<EntityLiving> {
         }
 
         for(EntityLiving livingEntity2 : brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of())) {
-            if (livingEntity2 instanceof EntityPiglinAbstract && ((EntityPiglinAbstract)livingEntity2).isAdult()) {
-                list2.add((EntityPiglinAbstract)livingEntity2);
+            if (livingEntity2 instanceof EntityPiglinAbstract) {
+                EntityPiglinAbstract abstractPiglin = (EntityPiglinAbstract)livingEntity2;
+                if (abstractPiglin.isAdult()) {
+                    list2.add(abstractPiglin);
+                }
             }
         }
 

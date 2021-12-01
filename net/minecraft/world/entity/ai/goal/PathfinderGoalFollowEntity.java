@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.ai.control.ControllerLook;
 import net.minecraft.world.entity.ai.navigation.Navigation;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.pathfinder.PathType;
 public class PathfinderGoalFollowEntity extends PathfinderGoal {
     private final EntityInsentient mob;
     private final Predicate<EntityInsentient> followPredicate;
+    @Nullable
     private EntityInsentient followingMob;
     private final double speedModifier;
     private final NavigationAbstract navigation;
@@ -23,8 +25,8 @@ public class PathfinderGoalFollowEntity extends PathfinderGoal {
 
     public PathfinderGoalFollowEntity(EntityInsentient mob, double speed, float minDistance, float maxDistance) {
         this.mob = mob;
-        this.followPredicate = (mob2) -> {
-            return mob2 != null && mob.getClass() != mob2.getClass();
+        this.followPredicate = (target) -> {
+            return target != null && mob.getClass() != target.getClass();
         };
         this.speedModifier = speed;
         this.navigation = mob.getNavigation();
@@ -75,7 +77,7 @@ public class PathfinderGoalFollowEntity extends PathfinderGoal {
         if (this.followingMob != null && !this.mob.isLeashed()) {
             this.mob.getControllerLook().setLookAt(this.followingMob, 10.0F, (float)this.mob.getMaxHeadXRot());
             if (--this.timeToRecalcPath <= 0) {
-                this.timeToRecalcPath = 10;
+                this.timeToRecalcPath = this.adjustedTickDelay(10);
                 double d = this.mob.locX() - this.followingMob.locX();
                 double e = this.mob.locY() - this.followingMob.locY();
                 double f = this.mob.locZ() - this.followingMob.locZ();

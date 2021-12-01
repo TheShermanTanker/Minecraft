@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -21,12 +22,12 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
 import net.minecraft.stats.StatisticList;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.util.MathHelper;
@@ -73,11 +74,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.IWorldReader;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockSweetBerryBush;
 import net.minecraft.world.level.block.Blocks;
@@ -287,11 +288,15 @@ public class EntityFox extends EntityAnimal {
         return fox;
     }
 
+    public static boolean checkFoxSpawnRules(EntityTypes<EntityFox> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
+        return world.getType(pos.below()).is(TagsBlock.FOXES_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
+    }
+
     @Nullable
     @Override
     public GroupDataEntity prepare(WorldAccess world, DifficultyDamageScaler difficulty, EnumMobSpawn spawnReason, @Nullable GroupDataEntity entityData, @Nullable NBTTagCompound entityNbt) {
-        Optional<ResourceKey<BiomeBase>> optional = world.getBiomeName(this.getChunkCoordinates());
-        EntityFox.Type type = EntityFox.Type.byBiome(optional);
+        BiomeBase biome = world.getBiome(this.getChunkCoordinates());
+        EntityFox.Type type = EntityFox.Type.byBiome(biome);
         boolean bl = false;
         if (entityData instanceof EntityFox.FoxGroupData) {
             type = ((EntityFox.FoxGroupData)entityData).type;
@@ -706,10 +711,11 @@ public class EntityFox extends EntityAnimal {
     class DefendTrustedTargetGoal extends PathfinderGoalNearestAttackableTarget<EntityLiving> {
         @Nullable
         private EntityLiving trustedLastHurtBy;
+        @Nullable
         private EntityLiving trustedLastHurt;
         private int timestamp;
 
-        public DefendTrustedTargetGoal(Class<EntityLiving> targetEntityClass, boolean checkVisibility, @Nullable boolean checkCanNavigate, Predicate<EntityLiving> targetPredicate) {
+        public DefendTrustedTargetGoal(Class<EntityLiving> targetEntityClass, boolean checkVisibility, boolean checkCanNavigate, @Nullable Predicate<EntityLiving> targetPredicate) {
             super(EntityFox.this, targetEntityClass, 10, checkVisibility, checkCanNavigate, targetPredicate);
         }
 
@@ -769,7 +775,7 @@ public class EntityFox extends EntityAnimal {
 
         @Override
         public void start() {
-            this.countdown = 40;
+            this.countdown = this.adjustedTickDelay(40);
         }
 
         @Override
@@ -1143,9 +1149,12 @@ public class EntityFox extends EntityAnimal {
             EntityFox.this.setIsPouncing(true);
             EntityFox.this.setIsInterested(false);
             EntityLiving livingEntity = EntityFox.this.getGoalTarget();
-            EntityFox.this.getControllerLook().setLookAt(livingEntity, 60.0F, 30.0F);
-            Vec3D vec3 = (new Vec3D(livingEntity.locX() - EntityFox.this.locX(), livingEntity.locY() - EntityFox.this.locY(), livingEntity.locZ() - EntityFox.this.locZ())).normalize();
-            EntityFox.this.setMot(EntityFox.this.getMot().add(vec3.x * 0.8D, 0.9D, vec3.z * 0.8D));
+            if (livingEntity != null) {
+                EntityFox.this.getControllerLook().setLookAt(livingEntity, 60.0F, 30.0F);
+                Vec3D vec3 = (new Vec3D(livingEntity.locX() - EntityFox.this.locX(), livingEntity.locY() - EntityFox.this.locY(), livingEntity.locZ() - EntityFox.this.locZ())).normalize();
+                EntityFox.this.setMot(EntityFox.this.getMot().add(vec3.x * 0.8D, 0.9D, vec3.z * 0.8D));
+            }
+
             EntityFox.this.getNavigation().stop();
         }
 
@@ -1199,7 +1208,7 @@ public class EntityFox extends EntityAnimal {
             } else if (EntityFox.this.getGoalTarget() == null && EntityFox.this.getLastDamager() == null) {
                 if (!EntityFox.this.canMove()) {
                     return false;
-                } else if (EntityFox.this.getRandom().nextInt(10) != 0) {
+                } else if (EntityFox.this.getRandom().nextInt(reducedTickDelay(10)) != 0) {
                     return false;
                 } else {
                     List<EntityItem> list = EntityFox.this.level.getEntitiesOfClass(EntityItem.class, EntityFox.this.getBoundingBox().grow(8.0D, 8.0D, 8.0D), EntityFox.ALLOWED_ITEMS);
@@ -1304,12 +1313,12 @@ public class EntityFox extends EntityAnimal {
             double d = (Math.PI * 2D) * EntityFox.this.getRandom().nextDouble();
             this.relX = Math.cos(d);
             this.relZ = Math.sin(d);
-            this.lookTime = 80 + EntityFox.this.getRandom().nextInt(20);
+            this.lookTime = this.adjustedTickDelay(80 + EntityFox.this.getRandom().nextInt(20));
         }
     }
 
     class SeekShelterGoal extends PathfinderGoalFleeSun {
-        private int interval = 100;
+        private int interval = reducedTickDelay(100);
 
         public SeekShelterGoal(double speed) {
             super(EntityFox.this, speed);
@@ -1341,8 +1350,8 @@ public class EntityFox extends EntityAnimal {
     }
 
     class SleepGoal extends EntityFox.FoxBehaviorGoal {
-        private static final int WAIT_TIME_BEFORE_SLEEP = 140;
-        private int countdown = EntityFox.this.random.nextInt(140);
+        private static final int WAIT_TIME_BEFORE_SLEEP = reducedTickDelay(140);
+        private int countdown = EntityFox.this.random.nextInt(WAIT_TIME_BEFORE_SLEEP);
 
         public SleepGoal() {
             this.setFlags(EnumSet.of(PathfinderGoal.Type.MOVE, PathfinderGoal.Type.LOOK, PathfinderGoal.Type.JUMP));
@@ -1373,7 +1382,7 @@ public class EntityFox extends EntityAnimal {
 
         @Override
         public void stop() {
-            this.countdown = EntityFox.this.random.nextInt(140);
+            this.countdown = EntityFox.this.random.nextInt(WAIT_TIME_BEFORE_SLEEP);
             EntityFox.this.clearStates();
         }
 
@@ -1428,21 +1437,23 @@ public class EntityFox extends EntityAnimal {
         @Override
         public void tick() {
             EntityLiving livingEntity = EntityFox.this.getGoalTarget();
-            EntityFox.this.getControllerLook().setLookAt(livingEntity, (float)EntityFox.this.getMaxHeadYRot(), (float)EntityFox.this.getMaxHeadXRot());
-            if (EntityFox.this.distanceToSqr(livingEntity) <= 36.0D) {
-                EntityFox.this.setIsInterested(true);
-                EntityFox.this.setCrouching(true);
-                EntityFox.this.getNavigation().stop();
-            } else {
-                EntityFox.this.getNavigation().moveTo(livingEntity, 1.5D);
-            }
+            if (livingEntity != null) {
+                EntityFox.this.getControllerLook().setLookAt(livingEntity, (float)EntityFox.this.getMaxHeadYRot(), (float)EntityFox.this.getMaxHeadXRot());
+                if (EntityFox.this.distanceToSqr(livingEntity) <= 36.0D) {
+                    EntityFox.this.setIsInterested(true);
+                    EntityFox.this.setCrouching(true);
+                    EntityFox.this.getNavigation().stop();
+                } else {
+                    EntityFox.this.getNavigation().moveTo(livingEntity, 1.5D);
+                }
 
+            }
         }
     }
 
     public static enum Type {
-        RED(0, "red", Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.TAIGA_MOUNTAINS, Biomes.GIANT_TREE_TAIGA, Biomes.GIANT_SPRUCE_TAIGA, Biomes.GIANT_TREE_TAIGA_HILLS, Biomes.GIANT_SPRUCE_TAIGA_HILLS),
-        SNOW(1, "snow", Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA_HILLS, Biomes.SNOWY_TAIGA_MOUNTAINS);
+        RED(0, "red"),
+        SNOW(1, "snow");
 
         private static final EntityFox.Type[] BY_ID = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityFox.Type::getId)).toArray((i) -> {
             return new EntityFox.Type[i];
@@ -1452,12 +1463,10 @@ public class EntityFox extends EntityAnimal {
         }));
         private final int id;
         private final String name;
-        private final List<ResourceKey<BiomeBase>> biomes;
 
-        private Type(int id, String key, ResourceKey<BiomeBase>... biomes) {
+        private Type(int id, String key) {
             this.id = id;
             this.name = key;
-            this.biomes = Arrays.asList(biomes);
         }
 
         public String getName() {
@@ -1480,8 +1489,8 @@ public class EntityFox extends EntityAnimal {
             return BY_ID[id];
         }
 
-        public static EntityFox.Type byBiome(Optional<ResourceKey<BiomeBase>> biome) {
-            return biome.isPresent() && SNOW.biomes.contains(biome.get()) ? SNOW : RED;
+        public static EntityFox.Type byBiome(BiomeBase biome) {
+            return biome.getPrecipitation() == BiomeBase.Precipitation.SNOW ? SNOW : RED;
         }
     }
 }

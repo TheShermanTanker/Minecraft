@@ -20,8 +20,8 @@ public class Containers<T extends Container> {
     public static final Containers<ContainerFurnaceFurnace> FURNACE = register("furnace", ContainerFurnaceFurnace::new);
     public static final Containers<ContainerGrindstone> GRINDSTONE = register("grindstone", ContainerGrindstone::new);
     public static final Containers<ContainerHopper> HOPPER = register("hopper", ContainerHopper::new);
-    public static final Containers<ContainerLectern> LECTERN = register("lectern", (i, inventory) -> {
-        return new ContainerLectern(i);
+    public static final Containers<ContainerLectern> LECTERN = register("lectern", (syncId, playerInventory) -> {
+        return new ContainerLectern(syncId);
     });
     public static final Containers<ContainerLoom> LOOM = register("loom", ContainerLoom::new);
     public static final Containers<ContainerMerchant> MERCHANT = register("merchant", ContainerMerchant::new);

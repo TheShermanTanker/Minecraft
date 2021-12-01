@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviderConstant;
 
-public class WorldGenDecoratorFrequencyConfiguration implements WorldGenFeatureDecoratorConfiguration, WorldGenFeatureConfiguration {
+public class WorldGenDecoratorFrequencyConfiguration implements WorldGenFeatureConfiguration {
     public static final Codec<WorldGenDecoratorFrequencyConfiguration> CODEC = IntProvider.codec(0, 256).fieldOf("count").xmap(WorldGenDecoratorFrequencyConfiguration::new, WorldGenDecoratorFrequencyConfiguration::count).codec();
     private final IntProvider count;
 

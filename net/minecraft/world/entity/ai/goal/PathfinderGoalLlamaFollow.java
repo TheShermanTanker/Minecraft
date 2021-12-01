@@ -76,7 +76,7 @@ public class PathfinderGoalLlamaFollow extends PathfinderGoal {
             if (d > 676.0D) {
                 if (this.speedModifier <= 3.0D) {
                     this.speedModifier *= 1.2D;
-                    this.distCheckCounter = 40;
+                    this.distCheckCounter = reducedTickDelay(40);
                     return true;
                 }
 

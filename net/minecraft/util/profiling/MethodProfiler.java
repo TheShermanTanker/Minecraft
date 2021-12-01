@@ -153,13 +153,13 @@ public class MethodProfiler implements GameProfilerFillerActive {
     }
 
     @Override
-    public void incrementCounter(String marker) {
-        this.getCurrentEntry().counters.addTo(marker, 1L);
+    public void incrementCounter(String marker, int i) {
+        this.getCurrentEntry().counters.addTo(marker, (long)i);
     }
 
     @Override
-    public void incrementCounter(Supplier<String> markerGetter) {
-        this.getCurrentEntry().counters.addTo(markerGetter.get(), 1L);
+    public void incrementCounter(Supplier<String> markerGetter, int i) {
+        this.getCurrentEntry().counters.addTo(markerGetter.get(), (long)i);
     }
 
     @Override

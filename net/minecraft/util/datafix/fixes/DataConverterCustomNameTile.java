@@ -14,7 +14,6 @@ public class DataConverterCustomNameTile extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         OpticFinder<String> opticFinder = DSL.fieldFinder("id", DataConverterSchemaNamed.namespacedString());
         return this.fixTypeEverywhereTyped("BlockEntityCustomNameToComponentFix", this.getInputSchema().getType(DataConverterTypes.BLOCK_ENTITY), (typed) -> {

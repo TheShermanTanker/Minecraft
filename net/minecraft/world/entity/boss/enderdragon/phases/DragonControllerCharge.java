@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 public class DragonControllerCharge extends DragonControllerAbstract {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int CHARGE_RECOVERY_TIME = 10;
+    @Nullable
     private Vec3D targetLocation;
     private int timeSinceCharge;
 

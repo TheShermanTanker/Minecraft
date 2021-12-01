@@ -43,7 +43,7 @@ public class BlockObserver extends BlockDirectional {
             world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(false)), 2);
         } else {
             world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(true)), 2);
-            world.getBlockTicks().scheduleTick(pos, this, 2);
+            world.scheduleTick(pos, this, 2);
         }
 
         this.updateNeighborsInFront(world, pos, state);
@@ -59,8 +59,8 @@ public class BlockObserver extends BlockDirectional {
     }
 
     private void startSignal(GeneratorAccess world, BlockPosition pos) {
-        if (!world.isClientSide() && !world.getBlockTickList().hasScheduledTick(pos, this)) {
-            world.getBlockTickList().scheduleTick(pos, this, 2);
+        if (!world.isClientSide() && !world.getBlockTicks().hasScheduledTick(pos, this)) {
+            world.scheduleTick(pos, this, 2);
         }
 
     }
@@ -90,7 +90,7 @@ public class BlockObserver extends BlockDirectional {
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         if (!state.is(oldState.getBlock())) {
-            if (!world.isClientSide() && state.get(POWERED) && !world.getBlockTickList().hasScheduledTick(pos, this)) {
+            if (!world.isClientSide() && state.get(POWERED) && !world.getBlockTicks().hasScheduledTick(pos, this)) {
                 IBlockData blockState = state.set(POWERED, Boolean.valueOf(false));
                 world.setTypeAndData(pos, blockState, 18);
                 this.updateNeighborsInFront(world, pos, blockState);
@@ -102,7 +102,7 @@ public class BlockObserver extends BlockDirectional {
     @Override
     public void remove(IBlockData state, World world, BlockPosition pos, IBlockData newState, boolean moved) {
         if (!state.is(newState.getBlock())) {
-            if (!world.isClientSide && state.get(POWERED) && world.getBlockTickList().hasScheduledTick(pos, this)) {
+            if (!world.isClientSide && state.get(POWERED) && world.getBlockTicks().hasScheduledTick(pos, this)) {
                 this.updateNeighborsInFront(world, pos, state.set(POWERED, Boolean.valueOf(false)));
             }
 

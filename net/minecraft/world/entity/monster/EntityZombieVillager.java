@@ -53,8 +53,11 @@ public class EntityZombieVillager extends EntityZombie implements VillagerDataHo
     private static final int MAX_SPECIAL_BLOCKS_COUNT = 14;
     private static final int SPECIAL_BLOCK_RADIUS = 4;
     public int villagerConversionTime;
+    @Nullable
     public UUID conversionStarter;
+    @Nullable
     private NBTBase gossips;
+    @Nullable
     private NBTTagCompound tradeOffers;
     private int villagerXp;
 

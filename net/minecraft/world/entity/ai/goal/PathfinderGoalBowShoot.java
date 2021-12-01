@@ -61,6 +61,11 @@ public class PathfinderGoalBowShoot<T extends EntityMonster & IRangedEntity> ext
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         EntityLiving livingEntity = this.mob.getGoalTarget();
         if (livingEntity != null) {

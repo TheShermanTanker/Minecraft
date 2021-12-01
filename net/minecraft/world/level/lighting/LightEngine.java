@@ -54,17 +54,17 @@ public class LightEngine implements ILightEngine {
     }
 
     @Override
-    public int runUpdates(int i, boolean bl, boolean bl2) {
+    public int runUpdates(int i, boolean doSkylight, boolean skipEdgeLightPropagation) {
         if (this.blockEngine != null && this.skyEngine != null) {
             int j = i / 2;
-            int k = this.blockEngine.runUpdates(j, bl, bl2);
+            int k = this.blockEngine.runUpdates(j, doSkylight, skipEdgeLightPropagation);
             int l = i - j + k;
-            int m = this.skyEngine.runUpdates(l, bl, bl2);
-            return k == 0 && m > 0 ? this.blockEngine.runUpdates(m, bl, bl2) : m;
+            int m = this.skyEngine.runUpdates(l, doSkylight, skipEdgeLightPropagation);
+            return k == 0 && m > 0 ? this.blockEngine.runUpdates(m, doSkylight, skipEdgeLightPropagation) : m;
         } else if (this.blockEngine != null) {
-            return this.blockEngine.runUpdates(i, bl, bl2);
+            return this.blockEngine.runUpdates(i, doSkylight, skipEdgeLightPropagation);
         } else {
-            return this.skyEngine != null ? this.skyEngine.runUpdates(i, bl, bl2) : i;
+            return this.skyEngine != null ? this.skyEngine.runUpdates(i, doSkylight, skipEdgeLightPropagation) : i;
         }
     }
 
@@ -81,13 +81,13 @@ public class LightEngine implements ILightEngine {
     }
 
     @Override
-    public void enableLightSources(ChunkCoordIntPair chunkPos, boolean bl) {
+    public void enableLightSources(ChunkCoordIntPair pos, boolean retainData) {
         if (this.blockEngine != null) {
-            this.blockEngine.enableLightSources(chunkPos, bl);
+            this.blockEngine.enableLightSources(pos, retainData);
         }
 
         if (this.skyEngine != null) {
-            this.skyEngine.enableLightSources(chunkPos, bl);
+            this.skyEngine.enableLightSources(pos, retainData);
         }
 
     }
@@ -100,25 +100,25 @@ public class LightEngine implements ILightEngine {
         }
     }
 
-    public String getDebugData(EnumSkyBlock lightType, SectionPosition sectionPos) {
+    public String getDebugData(EnumSkyBlock lightType, SectionPosition pos) {
         if (lightType == EnumSkyBlock.BLOCK) {
             if (this.blockEngine != null) {
-                return this.blockEngine.getDebugData(sectionPos.asLong());
+                return this.blockEngine.getDebugData(pos.asLong());
             }
         } else if (this.skyEngine != null) {
-            return this.skyEngine.getDebugData(sectionPos.asLong());
+            return this.skyEngine.getDebugData(pos.asLong());
         }
 
         return "n/a";
     }
 
-    public void queueSectionData(EnumSkyBlock lightType, SectionPosition pos, @Nullable NibbleArray nibbles, boolean bl) {
+    public void queueSectionData(EnumSkyBlock lightType, SectionPosition pos, @Nullable NibbleArray nibbles, boolean nonEdge) {
         if (lightType == EnumSkyBlock.BLOCK) {
             if (this.blockEngine != null) {
-                this.blockEngine.queueSectionData(pos.asLong(), nibbles, bl);
+                this.blockEngine.queueSectionData(pos.asLong(), nibbles, nonEdge);
             }
         } else if (this.skyEngine != null) {
-            this.skyEngine.queueSectionData(pos.asLong(), nibbles, bl);
+            this.skyEngine.queueSectionData(pos.asLong(), nibbles, nonEdge);
         }
 
     }

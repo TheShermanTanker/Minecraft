@@ -13,6 +13,7 @@ public class CriterionConditionDamage {
     private final CriterionConditionValue.DoubleRange dealtDamage;
     private final CriterionConditionValue.DoubleRange takenDamage;
     private final CriterionConditionEntity sourceEntity;
+    @Nullable
     private final Boolean blocked;
     private final CriterionConditionDamageSource type;
 
@@ -83,6 +84,7 @@ public class CriterionConditionDamage {
         private CriterionConditionValue.DoubleRange dealtDamage = CriterionConditionValue.DoubleRange.ANY;
         private CriterionConditionValue.DoubleRange takenDamage = CriterionConditionValue.DoubleRange.ANY;
         private CriterionConditionEntity sourceEntity = CriterionConditionEntity.ANY;
+        @Nullable
         private Boolean blocked;
         private CriterionConditionDamageSource type = CriterionConditionDamageSource.ANY;
 

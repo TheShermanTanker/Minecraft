@@ -406,14 +406,12 @@ public class CommandExecute {
                                     return OptionalInt.empty();
                                 }
 
-                                NBTTagCompound compoundTag = blockEntity.save(new NBTTagCompound());
-                                compoundTag.remove("x");
-                                compoundTag.remove("y");
-                                compoundTag.remove("z");
-                                NBTTagCompound compoundTag2 = blockEntity2.save(new NBTTagCompound());
-                                compoundTag2.remove("x");
-                                compoundTag2.remove("y");
-                                compoundTag2.remove("z");
+                                if (blockEntity2.getTileType() != blockEntity.getTileType()) {
+                                    return OptionalInt.empty();
+                                }
+
+                                NBTTagCompound compoundTag = blockEntity.saveWithoutMetadata();
+                                NBTTagCompound compoundTag2 = blockEntity2.saveWithoutMetadata();
                                 if (!compoundTag.equals(compoundTag2)) {
                                     return OptionalInt.empty();
                                 }

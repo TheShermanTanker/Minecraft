@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.EntityCreature;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.IEntitySelector;
@@ -15,8 +16,10 @@ public class PathfinderGoalAvoidTarget<T extends EntityLiving> extends Pathfinde
     protected final EntityCreature mob;
     private final double walkSpeedModifier;
     private final double sprintSpeedModifier;
+    @Nullable
     protected T toAvoid;
     protected final float maxDist;
+    @Nullable
     protected PathEntity path;
     protected final NavigationAbstract pathNav;
     protected final Class<T> avoidClass;

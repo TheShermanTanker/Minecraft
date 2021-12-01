@@ -82,7 +82,6 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
         this.receiving = side;
     }
 
-    @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
         super.channelActive(channelHandlerContext);
         this.channel = channelHandlerContext.channel();
@@ -102,12 +101,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
         LOGGER.debug("Enabled auto read");
     }
 
-    @Override
     public void channelInactive(ChannelHandlerContext channelHandlerContext) {
         this.close(new ChatMessage("disconnect.endOfStream"));
     }
 
-    @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable throwable) {
         if (throwable instanceof SkipEncodeException) {
             LOGGER.debug("Skipping packet due to errors", throwable.getCause());
@@ -138,7 +135,6 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
         }
     }
 
-    @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Packet<?> packet) {
         if (this.channel.isOpen()) {
             try {
@@ -196,9 +192,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
 
     }
 
-    private void doSendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> callback, EnumProtocol connectionProtocol, EnumProtocol connectionProtocol2) {
-        if (connectionProtocol != connectionProtocol2) {
-            this.setProtocol(connectionProtocol);
+    private void doSendPacket(Packet<?> packet, @Nullable GenericFutureListener<? extends Future<? super Void>> callback, EnumProtocol packetState, EnumProtocol currentState) {
+        if (packetState != currentState) {
+            this.setProtocol(packetState);
         }
 
         ChannelFuture channelFuture = this.channel.writeAndFlush(packet);
@@ -293,7 +289,6 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
         }
 
         (new Bootstrap()).group(lazyLoadedValue.get()).handler(new ChannelInitializer<Channel>() {
-            @Override
             protected void initChannel(Channel channel) {
                 try {
                     channel.config().setOption(ChannelOption.TCP_NODELAY, true);
@@ -309,7 +304,6 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
     public static NetworkManager connectToLocalServer(SocketAddress address) {
         final NetworkManager connection = new NetworkManager(EnumProtocolDirection.CLIENTBOUND);
         (new Bootstrap()).group(LOCAL_WORKER_GROUP.get()).handler(new ChannelInitializer<Channel>() {
-            @Override
             protected void initChannel(Channel channel) {
                 channel.pipeline().addLast("packet_handler", connection);
             }
@@ -348,12 +342,12 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
         this.channel.config().setAutoRead(false);
     }
 
-    public void setCompressionLevel(int compressionThreshold, boolean bl) {
+    public void setCompressionLevel(int compressionThreshold, boolean rejectsBadPackets) {
         if (compressionThreshold >= 0) {
             if (this.channel.pipeline().get("decompress") instanceof PacketDecompressor) {
-                ((PacketDecompressor)this.channel.pipeline().get("decompress")).setThreshold(compressionThreshold, bl);
+                ((PacketDecompressor)this.channel.pipeline().get("decompress")).setThreshold(compressionThreshold, rejectsBadPackets);
             } else {
-                this.channel.pipeline().addBefore("decoder", "decompress", new PacketDecompressor(compressionThreshold, bl));
+                this.channel.pipeline().addBefore("decoder", "decompress", new PacketDecompressor(compressionThreshold, rejectsBadPackets));
             }
 
             if (this.channel.pipeline().get("compress") instanceof PacketCompressor) {

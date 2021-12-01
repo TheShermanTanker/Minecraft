@@ -16,10 +16,10 @@ public class LongJumpMidJump extends Behavior<EntityInsentient> {
     private final IntProviderUniform timeBetweenLongJumps;
     private SoundEffect landingSound;
 
-    public LongJumpMidJump(IntProviderUniform cooldownRange, SoundEffect soundEvent) {
+    public LongJumpMidJump(IntProviderUniform cooldownRange, SoundEffect sound) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LONG_JUMP_MID_JUMP, MemoryStatus.VALUE_PRESENT), 100);
         this.timeBetweenLongJumps = cooldownRange;
-        this.landingSound = soundEvent;
+        this.landingSound = sound;
     }
 
     @Override

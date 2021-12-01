@@ -17,8 +17,11 @@ public class DragonControllerStrafe extends DragonControllerAbstract {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int FIREBALL_CHARGE_AMOUNT = 5;
     private int fireballCharge;
+    @Nullable
     private PathEntity currentPath;
+    @Nullable
     private Vec3D targetLocation;
+    @Nullable
     private EntityLiving attackTarget;
     private boolean holdingPatternClockwise;
 

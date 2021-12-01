@@ -10,7 +10,6 @@ public class DataConverterMiscUUID extends DataConverterUUIDBase {
         super(outputSchema, DataConverterTypes.LEVEL);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("LevelUUIDFix", this.getInputSchema().getType(this.typeReference), (typed) -> {
             return typed.updateTyped(DSL.remainderFinder(), (typedx) -> {

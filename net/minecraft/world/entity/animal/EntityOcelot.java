@@ -55,7 +55,9 @@ public class EntityOcelot extends EntityAnimal {
     public static final double SPRINT_SPEED_MOD = 1.33D;
     private static final RecipeItemStack TEMPT_INGREDIENT = RecipeItemStack.of(Items.COD, Items.SALMON);
     private static final DataWatcherObject<Boolean> DATA_TRUSTING = DataWatcher.defineId(EntityOcelot.class, DataWatcherRegistry.BOOLEAN);
+    @Nullable
     private EntityOcelot.OcelotAvoidEntityGoal<EntityHuman> ocelotAvoidPlayersGoal;
+    @Nullable
     private EntityOcelot.OcelotTemptGoal temptGoal;
 
     public EntityOcelot(EntityTypes<? extends EntityOcelot> type, World world) {

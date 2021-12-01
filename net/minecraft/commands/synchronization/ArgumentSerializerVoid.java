@@ -13,15 +13,15 @@ public class ArgumentSerializerVoid<T extends ArgumentType<?>> implements Argume
     }
 
     @Override
-    public void serializeToNetwork(T argumentType, PacketDataSerializer friendlyByteBuf) {
+    public void serializeToNetwork(T type, PacketDataSerializer buf) {
     }
 
     @Override
-    public T deserializeFromNetwork(PacketDataSerializer friendlyByteBuf) {
+    public T deserializeFromNetwork(PacketDataSerializer buf) {
         return this.constructor.get();
     }
 
     @Override
-    public void serializeToJson(T argumentType, JsonObject jsonObject) {
+    public void serializeToJson(T type, JsonObject json) {
     }
 }

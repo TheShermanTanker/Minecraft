@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
@@ -48,18 +48,17 @@ public class TileEntityEndGateway extends TileEntityEnderPortal {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setLong("Age", this.age);
         if (this.exitPortal != null) {
             nbt.set("ExitPortal", GameProfileSerializer.writeBlockPos(this.exitPortal));
         }
 
         if (this.exactTeleport) {
-            nbt.setBoolean("ExactTeleport", this.exactTeleport);
+            nbt.setBoolean("ExactTeleport", true);
         }
 
-        return nbt;
     }
 
     @Override
@@ -127,15 +126,14 @@ public class TileEntityEndGateway extends TileEntityEnderPortal {
         return 1.0F - MathHelper.clamp(((float)this.teleportCooldown - tickDelta) / 40.0F, 0.0F, 1.0F);
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 8, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     private static void triggerCooldown(World world, BlockPosition pos, IBlockData state, TileEntityEndGateway blockEntity) {
@@ -209,7 +207,7 @@ public class TileEntityEndGateway extends TileEntityEnderPortal {
         if (blockPos == null) {
             blockPos = new BlockPosition(vec3.x + 0.5D, 75.0D, vec3.z + 0.5D);
             LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", (Object)blockPos);
-            WorldGenBiomeDecoratorGroups.END_ISLAND.place(world, world.getChunkSource().getChunkGenerator(), new Random(blockPos.asLong()), blockPos);
+            EndFeatures.END_ISLAND.place(world, world.getChunkSource().getChunkGenerator(), new Random(blockPos.asLong()), blockPos);
         } else {
             LOGGER.debug("Found suitable block to teleport to: {}", (Object)blockPos);
         }

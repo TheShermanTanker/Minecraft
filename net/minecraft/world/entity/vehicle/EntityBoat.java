@@ -747,7 +747,7 @@ public class EntityBoat extends Entity {
             if (onGround) {
                 if (this.fallDistance > 3.0F) {
                     if (this.status != EntityBoat.EnumStatus.ON_LAND) {
-                        this.fallDistance = 0.0F;
+                        this.resetFallDistance();
                         return;
                     }
 
@@ -766,7 +766,7 @@ public class EntityBoat extends Entity {
                     }
                 }
 
-                this.fallDistance = 0.0F;
+                this.resetFallDistance();
             } else if (!this.level.getFluid(this.getChunkCoordinates().below()).is(TagsFluid.WATER) && heightDifference < 0.0D) {
                 this.fallDistance = (float)((double)this.fallDistance - heightDifference);
             }

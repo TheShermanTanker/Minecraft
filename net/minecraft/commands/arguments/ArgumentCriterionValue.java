@@ -25,12 +25,10 @@ public interface ArgumentCriterionValue<T extends CriterionConditionValue<?>> ex
             return context.getArgument(name, CriterionConditionValue.DoubleRange.class);
         }
 
-        @Override
         public CriterionConditionValue.DoubleRange parse(StringReader stringReader) throws CommandSyntaxException {
             return CriterionConditionValue.DoubleRange.fromReader(stringReader);
         }
 
-        @Override
         public Collection<String> getExamples() {
             return EXAMPLES;
         }
@@ -43,12 +41,10 @@ public interface ArgumentCriterionValue<T extends CriterionConditionValue<?>> ex
             return context.getArgument(name, CriterionConditionValue.IntegerRange.class);
         }
 
-        @Override
         public CriterionConditionValue.IntegerRange parse(StringReader stringReader) throws CommandSyntaxException {
             return CriterionConditionValue.IntegerRange.fromReader(stringReader);
         }
 
-        @Override
         public Collection<String> getExamples() {
             return EXAMPLES;
         }

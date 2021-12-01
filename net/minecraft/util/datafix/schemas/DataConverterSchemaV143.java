@@ -10,7 +10,6 @@ public class DataConverterSchemaV143 extends Schema {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         map.remove("TippedArrow");

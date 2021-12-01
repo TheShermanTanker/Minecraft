@@ -325,7 +325,13 @@ public class BlockPosition extends BaseBlockPosition {
     }
 
     public static Optional<BlockPosition> findClosestMatch(BlockPosition pos, int horizontalRange, int verticalRange, Predicate<BlockPosition> condition) {
-        return withinManhattanStream(pos, horizontalRange, verticalRange, horizontalRange).filter(condition).findFirst();
+        for(BlockPosition blockPos : withinManhattan(pos, horizontalRange, verticalRange, horizontalRange)) {
+            if (condition.test(blockPos)) {
+                return Optional.of(blockPos);
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static Stream<BlockPosition> withinManhattanStream(BlockPosition center, int maxX, int maxY, int maxZ) {

@@ -17,8 +17,8 @@ import net.minecraft.world.scores.Scoreboard;
 
 public class ArgumentScoreboardSlot implements ArgumentType<Integer> {
     private static final Collection<String> EXAMPLES = Arrays.asList("sidebar", "foo.bar");
-    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.scoreboardDisplaySlot.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((name) -> {
+        return new ChatMessage("argument.scoreboardDisplaySlot.invalid", name);
     });
 
     private ArgumentScoreboardSlot() {
@@ -32,7 +32,6 @@ public class ArgumentScoreboardSlot implements ArgumentType<Integer> {
         return context.getArgument(name, Integer.class);
     }
 
-    @Override
     public Integer parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
         int i = Scoreboard.getSlotForName(string);
@@ -43,12 +42,10 @@ public class ArgumentScoreboardSlot implements ArgumentType<Integer> {
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggest(Scoreboard.getDisplaySlotNames(), suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

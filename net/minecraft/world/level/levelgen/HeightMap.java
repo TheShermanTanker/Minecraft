@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.util.DataBits;
 import net.minecraft.util.INamable;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.world.level.block.BlockLeaves;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
@@ -38,7 +39,7 @@ public class HeightMap {
         this.isOpaque = type.isOpaque();
         this.chunk = chunk;
         int i = MathHelper.ceillog2(chunk.getHeight() + 1);
-        this.data = new DataBits(i, 256);
+        this.data = new SimpleBitStorage(i, 256);
     }
 
     public static void primeHeightmaps(IChunkAccess chunk, Set<HeightMap.Type> types) {
@@ -123,13 +124,13 @@ public class HeightMap {
         this.data.set(getIndex(x, z), height - this.chunk.getMinBuildHeight());
     }
 
-    public void setRawData(IChunkAccess chunkAccess, HeightMap.Type types, long[] ls) {
+    public void setRawData(IChunkAccess chunk, HeightMap.Type type, long[] ls) {
         long[] ms = this.data.getRaw();
         if (ms.length == ls.length) {
             System.arraycopy(ls, 0, ms, 0, ls.length);
         } else {
-            LOGGER.warn("Ignoring heightmap data for chunk " + chunkAccess.getPos() + ", size does not match; expected: " + ms.length + ", got: " + ls.length);
-            primeHeightmaps(chunkAccess, EnumSet.of(types));
+            LOGGER.warn("Ignoring heightmap data for chunk " + chunk.getPos() + ", size does not match; expected: " + ms.length + ", got: " + ls.length);
+            primeHeightmaps(chunk, EnumSet.of(type));
         }
     }
 
@@ -146,11 +147,11 @@ public class HeightMap {
         WORLD_SURFACE("WORLD_SURFACE", HeightMap.Use.CLIENT, HeightMap.NOT_AIR),
         OCEAN_FLOOR_WG("OCEAN_FLOOR_WG", HeightMap.Use.WORLDGEN, HeightMap.MATERIAL_MOTION_BLOCKING),
         OCEAN_FLOOR("OCEAN_FLOOR", HeightMap.Use.LIVE_WORLD, HeightMap.MATERIAL_MOTION_BLOCKING),
-        MOTION_BLOCKING("MOTION_BLOCKING", HeightMap.Use.CLIENT, (blockState) -> {
-            return blockState.getMaterial().isSolid() || !blockState.getFluid().isEmpty();
+        MOTION_BLOCKING("MOTION_BLOCKING", HeightMap.Use.CLIENT, (state) -> {
+            return state.getMaterial().isSolid() || !state.getFluid().isEmpty();
         }),
-        MOTION_BLOCKING_NO_LEAVES("MOTION_BLOCKING_NO_LEAVES", HeightMap.Use.LIVE_WORLD, (blockState) -> {
-            return (blockState.getMaterial().isSolid() || !blockState.getFluid().isEmpty()) && !(blockState.getBlock() instanceof BlockLeaves);
+        MOTION_BLOCKING_NO_LEAVES("MOTION_BLOCKING_NO_LEAVES", HeightMap.Use.LIVE_WORLD, (state) -> {
+            return (state.getMaterial().isSolid() || !state.getFluid().isEmpty()) && !(state.getBlock() instanceof BlockLeaves);
         });
 
         public static final Codec<HeightMap.Type> CODEC = INamable.fromEnum(HeightMap.Type::values, HeightMap.Type::getFromKey);

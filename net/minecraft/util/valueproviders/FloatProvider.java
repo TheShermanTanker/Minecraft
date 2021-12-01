@@ -8,13 +8,13 @@ import java.util.function.Function;
 import net.minecraft.core.IRegistry;
 
 public abstract class FloatProvider {
-    private static final Codec<Either<Float, FloatProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(Codec.FLOAT, IRegistry.FLOAT_PROVIDER_TYPES.dispatch(FloatProvider::getType, FloatProviderType::codec));
+    private static final Codec<Either<Float, FloatProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(Codec.FLOAT, IRegistry.FLOAT_PROVIDER_TYPES.byNameCodec().dispatch(FloatProvider::getType, FloatProviderType::codec));
     public static final Codec<FloatProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap((either) -> {
-        return either.map(FloatProviderConstant::of, (floatProvider) -> {
-            return floatProvider;
+        return either.map(FloatProviderConstant::of, (provider) -> {
+            return provider;
         });
-    }, (floatProvider) -> {
-        return floatProvider.getType() == FloatProviderType.CONSTANT ? Either.left(((FloatProviderConstant)floatProvider).getValue()) : Either.right(floatProvider);
+    }, (provider) -> {
+        return provider.getType() == FloatProviderType.CONSTANT ? Either.left(((FloatProviderConstant)provider).getValue()) : Either.right(provider);
     });
 
     public static Codec<FloatProvider> codec(float min, float max) {

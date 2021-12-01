@@ -204,8 +204,8 @@ public class PathfinderNormal extends PathfinderAbstract {
         return true;
     }
 
-    protected double getFloorLevel(BlockPosition blockPos) {
-        return getFloorLevel(this.level, blockPos);
+    protected double getFloorLevel(BlockPosition pos) {
+        return getFloorLevel(this.level, pos);
     }
 
     public static double getFloorLevel(IBlockAccess world, BlockPosition pos) {
@@ -323,7 +323,7 @@ public class PathfinderNormal extends PathfinderAbstract {
     }
 
     private boolean hasCollisions(AxisAlignedBB box) {
-        return this.collisionCache.computeIfAbsent(box, (aABB2) -> {
+        return this.collisionCache.computeIfAbsent(box, (object) -> {
             return !this.level.getCubes(this.mob, box);
         });
     }

@@ -18,45 +18,44 @@ import net.minecraft.tags.Tag;
 
 public class ArgumentTag implements ArgumentType<ArgumentTag.Result> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "#foo");
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("arguments.function.tag.unknown", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("arguments.function.tag.unknown", id);
     });
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_FUNCTION = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("arguments.function.unknown", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_FUNCTION = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("arguments.function.unknown", id);
     });
 
     public static ArgumentTag functions() {
         return new ArgumentTag();
     }
 
-    @Override
     public ArgumentTag.Result parse(StringReader stringReader) throws CommandSyntaxException {
         if (stringReader.canRead() && stringReader.peek() == '#') {
             stringReader.skip();
             final MinecraftKey resourceLocation = MinecraftKey.read(stringReader);
             return new ArgumentTag.Result() {
                 @Override
-                public Collection<CustomFunction> create(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException {
-                    Tag<CustomFunction> tag = ArgumentTag.getFunctionTag(commandContext, resourceLocation);
+                public Collection<CustomFunction> create(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
+                    Tag<CustomFunction> tag = ArgumentTag.getFunctionTag(context, resourceLocation);
                     return tag.getTagged();
                 }
 
                 @Override
-                public Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> unwrap(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException {
-                    return Pair.of(resourceLocation, Either.right(ArgumentTag.getFunctionTag(commandContext, resourceLocation)));
+                public Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> unwrap(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
+                    return Pair.of(resourceLocation, Either.right(ArgumentTag.getFunctionTag(context, resourceLocation)));
                 }
             };
         } else {
             final MinecraftKey resourceLocation2 = MinecraftKey.read(stringReader);
             return new ArgumentTag.Result() {
                 @Override
-                public Collection<CustomFunction> create(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException {
-                    return Collections.singleton(ArgumentTag.getFunction(commandContext, resourceLocation2));
+                public Collection<CustomFunction> create(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
+                    return Collections.singleton(ArgumentTag.getFunction(context, resourceLocation2));
                 }
 
                 @Override
-                public Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> unwrap(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException {
-                    return Pair.of(resourceLocation2, Either.left(ArgumentTag.getFunction(commandContext, resourceLocation2)));
+                public Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> unwrap(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
+                    return Pair.of(resourceLocation2, Either.left(ArgumentTag.getFunction(context, resourceLocation2)));
                 }
             };
         }
@@ -81,18 +80,17 @@ public class ArgumentTag implements ArgumentType<ArgumentTag.Result> {
         return context.getArgument(name, ArgumentTag.Result.class).create(context);
     }
 
-    public static Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> getFunctionOrTag(CommandContext<CommandListenerWrapper> commandContext, String string) throws CommandSyntaxException {
-        return commandContext.getArgument(string, ArgumentTag.Result.class).unwrap(commandContext);
+    public static Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> getFunctionOrTag(CommandContext<CommandListenerWrapper> context, String name) throws CommandSyntaxException {
+        return context.getArgument(name, ArgumentTag.Result.class).unwrap(context);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
 
     public interface Result {
-        Collection<CustomFunction> create(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException;
+        Collection<CustomFunction> create(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException;
 
-        Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> unwrap(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException;
+        Pair<MinecraftKey, Either<CustomFunction, Tag<CustomFunction>>> unwrap(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException;
     }
 }

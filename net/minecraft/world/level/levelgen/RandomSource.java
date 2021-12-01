@@ -1,11 +1,19 @@
 package net.minecraft.world.level.levelgen;
 
 public interface RandomSource {
+    RandomSource fork();
+
+    PositionalRandomFactory forkPositional();
+
     void setSeed(long seed);
 
     int nextInt();
 
     int nextInt(int bound);
+
+    default int nextIntBetweenInclusive(int min, int max) {
+        return this.nextInt(max - min + 1) + min;
+    }
 
     long nextLong();
 

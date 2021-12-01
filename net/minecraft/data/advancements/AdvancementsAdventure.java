@@ -1,12 +1,15 @@
 package net.minecraft.data.advancements;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementFrameType;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.critereon.CriterionConditionBlock;
 import net.minecraft.advancements.critereon.CriterionConditionDamage;
 import net.minecraft.advancements.critereon.CriterionConditionDamageSource;
 import net.minecraft.advancements.critereon.CriterionConditionDistance;
@@ -18,6 +21,7 @@ import net.minecraft.advancements.critereon.CriterionConditionLocation;
 import net.minecraft.advancements.critereon.CriterionConditionPlayer;
 import net.minecraft.advancements.critereon.CriterionConditionValue;
 import net.minecraft.advancements.critereon.CriterionTriggerChanneledLightning;
+import net.minecraft.advancements.critereon.CriterionTriggerInteractBlock;
 import net.minecraft.advancements.critereon.CriterionTriggerKilled;
 import net.minecraft.advancements.critereon.CriterionTriggerKilledByCrossbow;
 import net.minecraft.advancements.critereon.CriterionTriggerLightningStrike;
@@ -30,21 +34,28 @@ import net.minecraft.advancements.critereon.CriterionTriggerTargetHit;
 import net.minecraft.advancements.critereon.CriterionTriggerUseItem;
 import net.minecraft.advancements.critereon.CriterionTriggerUsedTotem;
 import net.minecraft.advancements.critereon.CriterionTriggerVillagerTrade;
+import net.minecraft.advancements.critereon.DistanceTrigger;
 import net.minecraft.core.IRegistry;
+import net.minecraft.data.RegistryGeneration;
 import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagsEntity;
+import net.minecraft.tags.TagsItem;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.WorldChunkManagerMultiNoise;
 import net.minecraft.world.level.block.Blocks;
 
 public class AdvancementsAdventure implements Consumer<Consumer<Advancement>> {
-    private static final List<ResourceKey<BiomeBase>> EXPLORABLE_BIOMES = ImmutableList.of(Biomes.BIRCH_FOREST_HILLS, Biomes.RIVER, Biomes.SWAMP, Biomes.DESERT, Biomes.WOODED_HILLS, Biomes.GIANT_TREE_TAIGA_HILLS, Biomes.SNOWY_TAIGA, Biomes.BADLANDS, Biomes.FOREST, Biomes.STONE_SHORE, Biomes.SNOWY_TUNDRA, Biomes.TAIGA_HILLS, Biomes.SNOWY_MOUNTAINS, Biomes.WOODED_BADLANDS_PLATEAU, Biomes.SAVANNA, Biomes.PLAINS, Biomes.FROZEN_RIVER, Biomes.GIANT_TREE_TAIGA, Biomes.SNOWY_BEACH, Biomes.JUNGLE_HILLS, Biomes.JUNGLE_EDGE, Biomes.MUSHROOM_FIELD_SHORE, Biomes.MOUNTAINS, Biomes.DESERT_HILLS, Biomes.JUNGLE, Biomes.BEACH, Biomes.SAVANNA_PLATEAU, Biomes.SNOWY_TAIGA_HILLS, Biomes.BADLANDS_PLATEAU, Biomes.DARK_FOREST, Biomes.TAIGA, Biomes.BIRCH_FOREST, Biomes.MUSHROOM_FIELDS, Biomes.WOODED_MOUNTAINS, Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.COLD_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.DEEP_COLD_OCEAN, Biomes.DEEP_FROZEN_OCEAN, Biomes.BAMBOO_JUNGLE, Biomes.BAMBOO_JUNGLE_HILLS);
+    private static final int DISTANCE_FROM_BOTTOM_TO_TOP = 384;
+    private static final int Y_COORDINATE_AT_TOP = 320;
+    private static final int Y_COORDINATE_AT_BOTTOM = -64;
+    private static final int BEDROCK_THICKNESS = 5;
     private static final EntityTypes<?>[] MOBS_TO_KILL = new EntityTypes[]{EntityTypes.BLAZE, EntityTypes.CAVE_SPIDER, EntityTypes.CREEPER, EntityTypes.DROWNED, EntityTypes.ELDER_GUARDIAN, EntityTypes.ENDER_DRAGON, EntityTypes.ENDERMAN, EntityTypes.ENDERMITE, EntityTypes.EVOKER, EntityTypes.GHAST, EntityTypes.GUARDIAN, EntityTypes.HOGLIN, EntityTypes.HUSK, EntityTypes.MAGMA_CUBE, EntityTypes.PHANTOM, EntityTypes.PIGLIN, EntityTypes.PIGLIN_BRUTE, EntityTypes.PILLAGER, EntityTypes.RAVAGER, EntityTypes.SHULKER, EntityTypes.SILVERFISH, EntityTypes.SKELETON, EntityTypes.SLIME, EntityTypes.SPIDER, EntityTypes.STRAY, EntityTypes.VEX, EntityTypes.VINDICATOR, EntityTypes.WITCH, EntityTypes.WITHER_SKELETON, EntityTypes.WITHER, EntityTypes.ZOGLIN, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.ZOMBIE, EntityTypes.ZOMBIFIED_PIGLIN};
 
     private static CriterionTriggerLightningStrike.CriterionInstanceTrigger fireCountAndBystander(CriterionConditionValue.IntegerRange range, CriterionConditionEntity entity) {
@@ -59,8 +70,9 @@ public class AdvancementsAdventure implements Consumer<Consumer<Advancement>> {
     public void accept(Consumer<Advancement> consumer) {
         Advancement advancement = Advancement.SerializedAdvancement.advancement().display(Items.MAP, new ChatMessage("advancements.adventure.root.title"), new ChatMessage("advancements.adventure.root.description"), new MinecraftKey("textures/gui/advancements/backgrounds/adventure.png"), AdvancementFrameType.TASK, false, false, false).requirements(AdvancementRequirements.OR).addCriterion("killed_something", CriterionTriggerKilled.CriterionInstanceTrigger.playerKilledEntity()).addCriterion("killed_by_something", CriterionTriggerKilled.CriterionInstanceTrigger.entityKilledPlayer()).save(consumer, "adventure/root");
         Advancement advancement2 = Advancement.SerializedAdvancement.advancement().parent(advancement).display(Blocks.RED_BED, new ChatMessage("advancements.adventure.sleep_in_bed.title"), new ChatMessage("advancements.adventure.sleep_in_bed.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("slept_in_bed", CriterionTriggerLocation.CriterionInstanceTrigger.sleptInBed()).save(consumer, "adventure/sleep_in_bed");
-        addBiomes(Advancement.SerializedAdvancement.advancement(), EXPLORABLE_BIOMES).parent(advancement2).display(Items.DIAMOND_BOOTS, new ChatMessage("advancements.adventure.adventuring_time.title"), new ChatMessage("advancements.adventure.adventuring_time.description"), (MinecraftKey)null, AdvancementFrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
+        addBiomes(Advancement.SerializedAdvancement.advancement(), this.getAllOverworldBiomes()).parent(advancement2).display(Items.DIAMOND_BOOTS, new ChatMessage("advancements.adventure.adventuring_time.title"), new ChatMessage("advancements.adventure.adventuring_time.description"), (MinecraftKey)null, AdvancementFrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
         Advancement advancement3 = Advancement.SerializedAdvancement.advancement().parent(advancement).display(Items.EMERALD, new ChatMessage("advancements.adventure.trade.title"), new ChatMessage("advancements.adventure.trade.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("traded", CriterionTriggerVillagerTrade.CriterionInstanceTrigger.tradedWithVillager()).save(consumer, "adventure/trade");
+        Advancement.SerializedAdvancement.advancement().parent(advancement3).display(Items.EMERALD, new ChatMessage("advancements.adventure.trade_at_world_height.title"), new ChatMessage("advancements.adventure.trade_at_world_height.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("trade_at_world_height", CriterionTriggerVillagerTrade.CriterionInstanceTrigger.tradedWithVillager(CriterionConditionEntity.Builder.entity().located(CriterionConditionLocation.atYLocation(CriterionConditionValue.DoubleRange.atLeast(319.0D))))).save(consumer, "adventure/trade_at_world_height");
         Advancement advancement4 = this.addMobsToKill(Advancement.SerializedAdvancement.advancement()).parent(advancement).display(Items.IRON_SWORD, new ChatMessage("advancements.adventure.kill_a_mob.title"), new ChatMessage("advancements.adventure.kill_a_mob.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).requirements(AdvancementRequirements.OR).save(consumer, "adventure/kill_a_mob");
         this.addMobsToKill(Advancement.SerializedAdvancement.advancement()).parent(advancement4).display(Items.DIAMOND_SWORD, new ChatMessage("advancements.adventure.kill_all_mobs.title"), new ChatMessage("advancements.adventure.kill_all_mobs.description"), (MinecraftKey)null, AdvancementFrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).save(consumer, "adventure/kill_all_mobs");
         Advancement advancement5 = Advancement.SerializedAdvancement.advancement().parent(advancement4).display(Items.BOW, new ChatMessage("advancements.adventure.shoot_arrow.title"), new ChatMessage("advancements.adventure.shoot_arrow.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("shot_arrow", CriterionTriggerPlayerHurtEntity.CriterionInstanceTrigger.playerHurtEntity(CriterionConditionDamage.Builder.damageInstance().type(CriterionConditionDamageSource.Builder.damageType().isProjectile(true).direct(CriterionConditionEntity.Builder.entity().of(TagsEntity.ARROWS))))).save(consumer, "adventure/shoot_arrow");
@@ -77,11 +89,18 @@ public class AdvancementsAdventure implements Consumer<Consumer<Advancement>> {
         Advancement.SerializedAdvancement.advancement().parent(advancement8).display(Raid.getLeaderBannerInstance(), new ChatMessage("advancements.adventure.hero_of_the_village.title"), new ChatMessage("advancements.adventure.hero_of_the_village.description"), (MinecraftKey)null, AdvancementFrameType.CHALLENGE, true, true, true).rewards(AdvancementRewards.Builder.experience(100)).addCriterion("hero_of_the_village", CriterionTriggerLocation.CriterionInstanceTrigger.raidWon()).save(consumer, "adventure/hero_of_the_village");
         Advancement.SerializedAdvancement.advancement().parent(advancement).display(Blocks.HONEY_BLOCK.getItem(), new ChatMessage("advancements.adventure.honey_block_slide.title"), new ChatMessage("advancements.adventure.honey_block_slide.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("honey_block_slide", CriterionTriggerSlideDownBlock.CriterionInstanceTrigger.slidesDownBlock(Blocks.HONEY_BLOCK)).save(consumer, "adventure/honey_block_slide");
         Advancement.SerializedAdvancement.advancement().parent(advancement5).display(Blocks.TARGET.getItem(), new ChatMessage("advancements.adventure.bullseye.title"), new ChatMessage("advancements.adventure.bullseye.description"), (MinecraftKey)null, AdvancementFrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(50)).addCriterion("bullseye", CriterionTriggerTargetHit.CriterionInstanceTrigger.targetHit(CriterionConditionValue.IntegerRange.exactly(15), CriterionConditionEntity.Composite.wrap(CriterionConditionEntity.Builder.entity().distance(CriterionConditionDistance.horizontal(CriterionConditionValue.DoubleRange.atLeast(30.0D))).build()))).save(consumer, "adventure/bullseye");
-        Advancement.SerializedAdvancement.advancement().parent(advancement).display(Items.LEATHER_BOOTS, new ChatMessage("advancements.adventure.walk_on_powder_snow_with_leather_boots.title"), new ChatMessage("advancements.adventure.walk_on_powder_snow_with_leather_boots.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("walk_on_powder_snow_with_leather_boots", CriterionTriggerLocation.CriterionInstanceTrigger.walkOnBlockWithEquipment(Blocks.POWDER_SNOW, Items.LEATHER_BOOTS)).save(consumer, "adventure/walk_on_powder_snow_with_leather_boots");
+        Advancement.SerializedAdvancement.advancement().parent(advancement2).display(Items.LEATHER_BOOTS, new ChatMessage("advancements.adventure.walk_on_powder_snow_with_leather_boots.title"), new ChatMessage("advancements.adventure.walk_on_powder_snow_with_leather_boots.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("walk_on_powder_snow_with_leather_boots", CriterionTriggerLocation.CriterionInstanceTrigger.walkOnBlockWithEquipment(Blocks.POWDER_SNOW, Items.LEATHER_BOOTS)).save(consumer, "adventure/walk_on_powder_snow_with_leather_boots");
         Advancement.SerializedAdvancement.advancement().parent(advancement).display(Items.LIGHTNING_ROD, new ChatMessage("advancements.adventure.lightning_rod_with_villager_no_fire.title"), new ChatMessage("advancements.adventure.lightning_rod_with_villager_no_fire.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("lightning_rod_with_villager_no_fire", fireCountAndBystander(CriterionConditionValue.IntegerRange.exactly(0), CriterionConditionEntity.Builder.entity().of(EntityTypes.VILLAGER).build())).save(consumer, "adventure/lightning_rod_with_villager_no_fire");
         Advancement advancement9 = Advancement.SerializedAdvancement.advancement().parent(advancement).display(Items.SPYGLASS, new ChatMessage("advancements.adventure.spyglass_at_parrot.title"), new ChatMessage("advancements.adventure.spyglass_at_parrot.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("spyglass_at_parrot", lookAtThroughItem(EntityTypes.PARROT, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_parrot");
         Advancement advancement10 = Advancement.SerializedAdvancement.advancement().parent(advancement9).display(Items.SPYGLASS, new ChatMessage("advancements.adventure.spyglass_at_ghast.title"), new ChatMessage("advancements.adventure.spyglass_at_ghast.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("spyglass_at_ghast", lookAtThroughItem(EntityTypes.GHAST, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_ghast");
+        Advancement.SerializedAdvancement.advancement().parent(advancement2).display(Items.JUKEBOX, new ChatMessage("advancements.adventure.play_jukebox_in_meadows.title"), new ChatMessage("advancements.adventure.play_jukebox_in_meadows.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("play_jukebox_in_meadows", CriterionTriggerInteractBlock.CriterionInstanceTrigger.itemUsedOnBlock(CriterionConditionLocation.Builder.location().setBiome(Biomes.MEADOW).setBlock(CriterionConditionBlock.Builder.block().of(Blocks.JUKEBOX).build()), CriterionConditionItem.Builder.item().of(TagsItem.MUSIC_DISCS))).save(consumer, "adventure/play_jukebox_in_meadows");
         Advancement.SerializedAdvancement.advancement().parent(advancement10).display(Items.SPYGLASS, new ChatMessage("advancements.adventure.spyglass_at_dragon.title"), new ChatMessage("advancements.adventure.spyglass_at_dragon.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("spyglass_at_dragon", lookAtThroughItem(EntityTypes.ENDER_DRAGON, Items.SPYGLASS)).save(consumer, "adventure/spyglass_at_dragon");
+        Advancement.SerializedAdvancement.advancement().parent(advancement).display(Items.WATER_BUCKET, new ChatMessage("advancements.adventure.fall_from_world_height.title"), new ChatMessage("advancements.adventure.fall_from_world_height.description"), (MinecraftKey)null, AdvancementFrameType.TASK, true, true, false).addCriterion("fall_from_world_height", DistanceTrigger.TriggerInstance.fallFromHeight(CriterionConditionEntity.Builder.entity().located(CriterionConditionLocation.atYLocation(CriterionConditionValue.DoubleRange.atMost(-59.0D))), CriterionConditionDistance.vertical(CriterionConditionValue.DoubleRange.atLeast(379.0D)), CriterionConditionLocation.atYLocation(CriterionConditionValue.DoubleRange.atLeast(319.0D)))).save(consumer, "adventure/fall_from_world_height");
+    }
+
+    private List<ResourceKey<BiomeBase>> getAllOverworldBiomes() {
+        Set<BiomeBase> set = WorldChunkManagerMultiNoise.Preset.OVERWORLD.biomeSource(RegistryGeneration.BIOME).possibleBiomes();
+        return set.stream().map(RegistryGeneration.BIOME::getResourceKey).flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     private Advancement.SerializedAdvancement addMobsToKill(Advancement.SerializedAdvancement task) {

@@ -11,7 +11,7 @@ public interface ILightEngine {
 
     boolean hasLightWork();
 
-    int runUpdates(int i, boolean bl, boolean bl2);
+    int runUpdates(int i, boolean doSkylight, boolean skipEdgeLightPropagation);
 
     default void updateSectionStatus(BlockPosition pos, boolean notReady) {
         this.updateSectionStatus(SectionPosition.of(pos), notReady);
@@ -19,5 +19,5 @@ public interface ILightEngine {
 
     void updateSectionStatus(SectionPosition pos, boolean notReady);
 
-    void enableLightSources(ChunkCoordIntPair chunkPos, boolean bl);
+    void enableLightSources(ChunkCoordIntPair pos, boolean retainData);
 }

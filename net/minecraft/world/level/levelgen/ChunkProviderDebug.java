@@ -14,16 +14,19 @@ import net.minecraft.server.level.RegionLimitedWorldAccess;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.BlockColumn;
 import net.minecraft.world.level.ChunkCoordIntPair;
+import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.IWorldHeightAccess;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.WorldChunkManagerHell;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.IChunkAccess;
+import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class ChunkProviderDebug extends ChunkGenerator {
     public static final Codec<ChunkProviderDebug> CODEC = RegistryLookupCodec.create(IRegistry.BIOME_REGISTRY).xmap(ChunkProviderDebug::new, ChunkProviderDebug::biomes).stable().codec();
@@ -59,34 +62,30 @@ public class ChunkProviderDebug extends ChunkGenerator {
     }
 
     @Override
-    public void buildBase(RegionLimitedWorldAccess region, IChunkAccess chunk) {
+    public void buildSurface(RegionLimitedWorldAccess region, StructureManager structures, IChunkAccess chunk) {
     }
 
     @Override
-    public void doCarving(long seed, BiomeManager access, IChunkAccess chunk, WorldGenStage.Features carver) {
-    }
-
-    @Override
-    public void addDecorations(RegionLimitedWorldAccess region, StructureManager accessor) {
+    public void applyBiomeDecoration(GeneratorAccessSeed world, IChunkAccess chunk, StructureManager structureAccessor) {
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
-        ChunkCoordIntPair chunkPos = region.getCenter();
+        ChunkCoordIntPair chunkPos = chunk.getPos();
+        int i = chunkPos.x;
+        int j = chunkPos.z;
 
-        for(int i = 0; i < 16; ++i) {
-            for(int j = 0; j < 16; ++j) {
-                int k = SectionPosition.sectionToBlockCoord(chunkPos.x, i);
-                int l = SectionPosition.sectionToBlockCoord(chunkPos.z, j);
-                region.setTypeAndData(mutableBlockPos.set(k, 60, l), BARRIER, 2);
-                IBlockData blockState = getBlockStateFor(k, l);
-                if (blockState != null) {
-                    region.setTypeAndData(mutableBlockPos.set(k, 70, l), blockState, 2);
-                }
+        for(int k = 0; k < 16; ++k) {
+            for(int l = 0; l < 16; ++l) {
+                int m = SectionPosition.sectionToBlockCoord(i, k);
+                int n = SectionPosition.sectionToBlockCoord(j, l);
+                world.setTypeAndData(mutableBlockPos.set(m, 60, n), BARRIER, 2);
+                IBlockData blockState = getBlockStateFor(m, n);
+                world.setTypeAndData(mutableBlockPos.set(m, 70, n), blockState, 2);
             }
         }
 
     }
 
     @Override
-    public CompletableFuture<IChunkAccess> buildNoise(Executor executor, StructureManager accessor, IChunkAccess chunk) {
+    public CompletableFuture<IChunkAccess> fillFromNoise(Executor executor, Blender blender, StructureManager structureAccessor, IChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 
@@ -114,5 +113,35 @@ public class ChunkProviderDebug extends ChunkGenerator {
         }
 
         return blockState;
+    }
+
+    @Override
+    public Climate.Sampler climateSampler() {
+        return (i, j, k) -> {
+            return Climate.target(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        };
+    }
+
+    @Override
+    public void applyCarvers(RegionLimitedWorldAccess chunkRegion, long seed, BiomeManager biomeAccess, StructureManager structureAccessor, IChunkAccess chunk, WorldGenStage.Features generationStep) {
+    }
+
+    @Override
+    public void addMobs(RegionLimitedWorldAccess region) {
+    }
+
+    @Override
+    public int getMinY() {
+        return 0;
+    }
+
+    @Override
+    public int getGenerationDepth() {
+        return 384;
+    }
+
+    @Override
+    public int getSeaLevel() {
+        return 63;
     }
 }

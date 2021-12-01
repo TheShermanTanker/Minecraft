@@ -179,7 +179,7 @@ public class BlockStairs extends Block implements IBlockWaterlogged {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return direction.getAxis().isHorizontal() ? state.set(SHAPE, getStairsShape(state, world, pos)) : super.updateState(state, direction, neighborState, world, pos, neighborPos);

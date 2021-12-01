@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -54,8 +55,8 @@ public class EntitySnowman extends EntityGolem implements IShearable, IRangedEnt
         this.goalSelector.addGoal(2, new PathfinderGoalRandomStrollLand(this, 1.0D, 1.0000001E-5F));
         this.goalSelector.addGoal(3, new PathfinderGoalLookAtPlayer(this, EntityHuman.class, 6.0F));
         this.goalSelector.addGoal(4, new PathfinderGoalRandomLookaround(this));
-        this.targetSelector.addGoal(1, new PathfinderGoalNearestAttackableTarget<>(this, EntityInsentient.class, 10, true, false, (livingEntity) -> {
-            return livingEntity instanceof IMonster;
+        this.targetSelector.addGoal(1, new PathfinderGoalNearestAttackableTarget<>(this, EntityInsentient.class, 10, true, false, (entity) -> {
+            return entity instanceof IMonster;
         }));
     }
 
@@ -96,7 +97,9 @@ public class EntitySnowman extends EntityGolem implements IShearable, IRangedEnt
             int i = MathHelper.floor(this.locX());
             int j = MathHelper.floor(this.locY());
             int k = MathHelper.floor(this.locZ());
-            if (this.level.getBiome(new BlockPosition(i, 0, k)).getAdjustedTemperature(new BlockPosition(i, j, k)) > 1.0F) {
+            BlockPosition blockPos = new BlockPosition(i, j, k);
+            BiomeBase biome = this.level.getBiome(blockPos);
+            if (biome.shouldSnowGolemBurn(blockPos)) {
                 this.damageEntity(DamageSource.ON_FIRE, 1.0F);
             }
 
@@ -110,9 +113,9 @@ public class EntitySnowman extends EntityGolem implements IShearable, IRangedEnt
                 i = MathHelper.floor(this.locX() + (double)((float)(l % 2 * 2 - 1) * 0.25F));
                 j = MathHelper.floor(this.locY());
                 k = MathHelper.floor(this.locZ() + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25F));
-                BlockPosition blockPos = new BlockPosition(i, j, k);
-                if (this.level.getType(blockPos).isAir() && this.level.getBiome(blockPos).getAdjustedTemperature(blockPos) < 0.8F && blockState.canPlace(this.level, blockPos)) {
-                    this.level.setTypeUpdate(blockPos, blockState);
+                BlockPosition blockPos2 = new BlockPosition(i, j, k);
+                if (this.level.getType(blockPos2).isAir() && blockState.canPlace(this.level, blockPos2)) {
+                    this.level.setTypeUpdate(blockPos2, blockState);
                 }
             }
         }

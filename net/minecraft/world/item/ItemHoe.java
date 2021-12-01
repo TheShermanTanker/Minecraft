@@ -58,16 +58,16 @@ public class ItemHoe extends ItemTool {
         }
     }
 
-    public static Consumer<ItemActionContext> changeIntoState(IBlockData state) {
+    public static Consumer<ItemActionContext> changeIntoState(IBlockData result) {
         return (context) -> {
-            context.getWorld().setTypeAndData(context.getClickPosition(), state, 11);
+            context.getWorld().setTypeAndData(context.getClickPosition(), result, 11);
         };
     }
 
-    public static Consumer<ItemActionContext> changeIntoStateAndDropItem(IBlockData state, IMaterial dropItem) {
+    public static Consumer<ItemActionContext> changeIntoStateAndDropItem(IBlockData result, IMaterial droppedItem) {
         return (context) -> {
-            context.getWorld().setTypeAndData(context.getClickPosition(), state, 11);
-            Block.popResourceFromFace(context.getWorld(), context.getClickPosition(), context.getClickedFace(), new ItemStack(dropItem));
+            context.getWorld().setTypeAndData(context.getClickPosition(), result, 11);
+            Block.popResourceFromFace(context.getWorld(), context.getClickPosition(), context.getClickedFace(), new ItemStack(droppedItem));
         };
     }
 

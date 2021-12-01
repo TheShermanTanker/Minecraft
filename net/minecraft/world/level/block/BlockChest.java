@@ -143,7 +143,7 @@ public class BlockChest extends BlockChestAbstract<TileEntityChest> implements I
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         if (neighborState.is(this) && direction.getAxis().isHorizontal()) {
@@ -292,12 +292,12 @@ public class BlockChest extends BlockChestAbstract<TileEntityChest> implements I
         return this.combine(state, world, pos, false).<Optional<ITileInventory>>apply(MENU_PROVIDER_COMBINER).orElse((ITileInventory)null);
     }
 
-    public static DoubleBlockFinder.Combiner<TileEntityChest, Float2FloatFunction> opennessCombiner(LidBlockEntity lidBlockEntity) {
+    public static DoubleBlockFinder.Combiner<TileEntityChest, Float2FloatFunction> opennessCombiner(LidBlockEntity progress) {
         return new DoubleBlockFinder.Combiner<TileEntityChest, Float2FloatFunction>() {
             @Override
             public Float2FloatFunction acceptDouble(TileEntityChest first, TileEntityChest second) {
-                return (f) -> {
-                    return Math.max(first.getOpenNess(f), second.getOpenNess(f));
+                return (tickDelta) -> {
+                    return Math.max(first.getOpenNess(tickDelta), second.getOpenNess(tickDelta));
                 };
             }
 
@@ -308,7 +308,7 @@ public class BlockChest extends BlockChestAbstract<TileEntityChest> implements I
 
             @Override
             public Float2FloatFunction acceptNone() {
-                return lidBlockEntity::getOpenNess;
+                return progress::getOpenNess;
             }
         };
     }

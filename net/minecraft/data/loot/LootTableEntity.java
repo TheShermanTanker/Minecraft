@@ -7,18 +7,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import net.minecraft.SystemUtils;
 import net.minecraft.advancements.critereon.CriterionConditionDamageSource;
 import net.minecraft.advancements.critereon.CriterionConditionEntity;
 import net.minecraft.advancements.critereon.CriterionConditionEntityFlags;
 import net.minecraft.core.IRegistry;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.tags.TagsEntity;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumCreatureType;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.IMaterial;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootSelector;
@@ -31,8 +30,8 @@ import net.minecraft.world.level.storage.loot.entries.LootSelectorLootTable;
 import net.minecraft.world.level.storage.loot.entries.LootSelectorTag;
 import net.minecraft.world.level.storage.loot.functions.LootEnchantFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionSetCount;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionSetTag;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionSmelt;
+import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionDamageSourceProperties;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionEntityProperty;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionKilledByPlayer;
@@ -122,9 +121,7 @@ public class LootTableEntity implements Consumer<BiConsumer<MinecraftKey, LootTa
         this.add(EntityTypes.SNOW_GOLEM, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.SNOWBALL).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 15.0F))))));
         this.add(EntityTypes.SPIDER, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.STRING).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 2.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))).withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.SPIDER_EYE).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(-1.0F, 1.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))).when(LootItemConditionKilledByPlayer.killedByPlayer())));
         this.add(EntityTypes.SQUID, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.INK_SAC).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(1.0F, 3.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))));
-        this.add(EntityTypes.STRAY, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 2.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))).withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.BONE).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 2.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))).withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)).setLimit(1)).apply(LootItemFunctionSetTag.setTag(SystemUtils.make(new NBTTagCompound(), (compoundTag) -> {
-            compoundTag.setString("Potion", "minecraft:slowness");
-        })))).when(LootItemConditionKilledByPlayer.killedByPlayer())));
+        this.add(EntityTypes.STRAY, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 2.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))).withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.BONE).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 2.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))).withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.TIPPED_ARROW).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 1.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)).setLimit(1)).apply(SetPotionFunction.setPotion(Potions.SLOWNESS))).when(LootItemConditionKilledByPlayer.killedByPlayer())));
         this.add(EntityTypes.STRIDER, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.STRING).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(2.0F, 5.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))));
         this.add(EntityTypes.TRADER_LLAMA, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.LEATHER).apply(LootItemFunctionSetCount.setCount(UniformGenerator.between(0.0F, 2.0F))).apply(LootEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))));
         this.add(EntityTypes.TROPICAL_FISH, LootTable.lootTable().withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.TROPICAL_FISH).apply(LootItemFunctionSetCount.setCount(ConstantValue.exactly(1.0F))))).withPool(LootSelector.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.BONE_MEAL)).when(LootItemConditionRandomChance.randomChance(0.05F))));
@@ -163,7 +160,7 @@ public class LootTableEntity implements Consumer<BiConsumer<MinecraftKey, LootTa
             }
         }
 
-        this.map.forEach(biConsumer::accept);
+        this.map.forEach(biConsumer);
     }
 
     private void add(EntityTypes<?> entityType, LootTable.Builder lootTable) {

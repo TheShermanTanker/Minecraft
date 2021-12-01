@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
@@ -22,6 +21,7 @@ import net.minecraft.world.level.block.EnumBlockMirror;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
@@ -992,16 +992,16 @@ public class WorldGenWoodlandMansionPieces {
     }
 
     public static class WoodlandMansionPiece extends DefinedStructurePiece {
-        public WoodlandMansionPiece(DefinedStructureManager structureManager, String template, BlockPosition pos, EnumBlockRotation rotation) {
-            this(structureManager, template, pos, rotation, EnumBlockMirror.NONE);
+        public WoodlandMansionPiece(DefinedStructureManager manager, String template, BlockPosition pos, EnumBlockRotation rotation) {
+            this(manager, template, pos, rotation, EnumBlockMirror.NONE);
         }
 
-        public WoodlandMansionPiece(DefinedStructureManager structureManager, String template, BlockPosition pos, EnumBlockRotation rotation, EnumBlockMirror mirror) {
-            super(WorldGenFeatureStructurePieceType.WOODLAND_MANSION_PIECE, 0, structureManager, makeLocation(template), template, makeSettings(mirror, rotation), pos);
+        public WoodlandMansionPiece(DefinedStructureManager manager, String template, BlockPosition pos, EnumBlockRotation rotation, EnumBlockMirror mirror) {
+            super(WorldGenFeatureStructurePieceType.WOODLAND_MANSION_PIECE, 0, manager, makeLocation(template), template, makeSettings(mirror, rotation), pos);
         }
 
-        public WoodlandMansionPiece(WorldServer world, NBTTagCompound nbt) {
-            super(WorldGenFeatureStructurePieceType.WOODLAND_MANSION_PIECE, nbt, world, (resourceLocation) -> {
+        public WoodlandMansionPiece(DefinedStructureManager manager, NBTTagCompound nbt) {
+            super(WorldGenFeatureStructurePieceType.WOODLAND_MANSION_PIECE, nbt, manager, (resourceLocation) -> {
                 return makeSettings(EnumBlockMirror.valueOf(nbt.getString("Mi")), EnumBlockRotation.valueOf(nbt.getString("Rot")));
             });
         }
@@ -1020,8 +1020,8 @@ public class WorldGenWoodlandMansionPieces {
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setString("Rot", this.placeSettings.getRotation().name());
             nbt.setString("Mi", this.placeSettings.getMirror().name());
         }

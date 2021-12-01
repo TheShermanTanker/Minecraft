@@ -39,9 +39,7 @@ public class ItemArmorStand extends Item {
             ItemStack itemStack = context.getItemStack();
             Vec3D vec3 = Vec3D.atBottomCenterOf(blockPos);
             AxisAlignedBB aABB = EntityTypes.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.getX(), vec3.getY(), vec3.getZ());
-            if (level.noCollision((Entity)null, aABB, (entity) -> {
-                return true;
-            }) && level.getEntities((Entity)null, aABB).isEmpty()) {
+            if (level.getCubes((Entity)null, aABB) && level.getEntities((Entity)null, aABB).isEmpty()) {
                 if (level instanceof WorldServer) {
                     WorldServer serverLevel = (WorldServer)level;
                     EntityArmorStand armorStand = EntityTypes.ARMOR_STAND.createCreature(serverLevel, itemStack.getTag(), (IChatBaseComponent)null, context.getEntity(), blockPos, EnumMobSpawn.SPAWN_EGG, true, true);

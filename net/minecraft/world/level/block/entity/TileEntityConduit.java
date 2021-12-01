@@ -62,24 +62,22 @@ public class TileEntityConduit extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (this.destroyTarget != null) {
             nbt.putUUID("Target", this.destroyTarget.getUniqueID());
         }
 
-        return nbt;
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 5, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     public static void clientTick(World world, BlockPosition pos, IBlockData state, TileEntityConduit blockEntity) {
@@ -199,8 +197,8 @@ public class TileEntityConduit extends TileEntity {
             blockEntity.destroyTarget = findDestroyTarget(world, pos, blockEntity.destroyTargetUUID);
             blockEntity.destroyTargetUUID = null;
         } else if (blockEntity.destroyTarget == null) {
-            List<EntityLiving> list = world.getEntitiesOfClass(EntityLiving.class, getDestroyRangeAABB(pos), (livingEntityx) -> {
-                return livingEntityx instanceof IMonster && livingEntityx.isInWaterOrRain();
+            List<EntityLiving> list = world.getEntitiesOfClass(EntityLiving.class, getDestroyRangeAABB(pos), (entity) -> {
+                return entity instanceof IMonster && entity.isInWaterOrRain();
             });
             if (!list.isEmpty()) {
                 blockEntity.destroyTarget = list.get(world.random.nextInt(list.size()));
@@ -241,15 +239,15 @@ public class TileEntityConduit extends TileEntity {
 
     @Nullable
     private static EntityLiving findDestroyTarget(World world, BlockPosition pos, UUID uuid) {
-        List<EntityLiving> list = world.getEntitiesOfClass(EntityLiving.class, getDestroyRangeAABB(pos), (livingEntity) -> {
-            return livingEntity.getUniqueID().equals(uuid);
+        List<EntityLiving> list = world.getEntitiesOfClass(EntityLiving.class, getDestroyRangeAABB(pos), (entity) -> {
+            return entity.getUniqueID().equals(uuid);
         });
         return list.size() == 1 ? list.get(0) : null;
     }
 
-    private static void animationTick(World world, BlockPosition pos, List<BlockPosition> activatingBlocks, @Nullable Entity entity, int i) {
+    private static void animationTick(World world, BlockPosition pos, List<BlockPosition> activatingBlocks, @Nullable Entity entity, int ticks) {
         Random random = world.random;
-        double d = (double)(MathHelper.sin((float)(i + 35) * 0.1F) / 2.0F + 0.5F);
+        double d = (double)(MathHelper.sin((float)(ticks + 35) * 0.1F) / 2.0F + 0.5F);
         d = (d * d + d) * (double)0.3F;
         Vec3D vec3 = new Vec3D((double)pos.getX() + 0.5D, (double)pos.getY() + 1.5D + d, (double)pos.getZ() + 0.5D);
 
@@ -265,10 +263,10 @@ public class TileEntityConduit extends TileEntity {
 
         if (entity != null) {
             Vec3D vec32 = new Vec3D(entity.locX(), entity.getHeadY(), entity.locZ());
-            float j = (-0.5F + random.nextFloat()) * (3.0F + entity.getWidth());
-            float k = -1.0F + random.nextFloat() * entity.getHeight();
-            float l = (-0.5F + random.nextFloat()) * (3.0F + entity.getWidth());
-            Vec3D vec33 = new Vec3D((double)j, (double)k, (double)l);
+            float i = (-0.5F + random.nextFloat()) * (3.0F + entity.getWidth());
+            float j = -1.0F + random.nextFloat() * entity.getHeight();
+            float k = (-0.5F + random.nextFloat()) * (3.0F + entity.getWidth());
+            Vec3D vec33 = new Vec3D((double)i, (double)j, (double)k);
             world.addParticle(Particles.NAUTILUS, vec32.x, vec32.y, vec32.z, vec33.x, vec33.y, vec33.z);
         }
 

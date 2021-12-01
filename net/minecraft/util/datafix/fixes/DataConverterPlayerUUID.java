@@ -10,7 +10,6 @@ public class DataConverterPlayerUUID extends DataConverterUUIDBase {
         super(outputSchema, DataConverterTypes.PLAYER);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("PlayerUUIDFix", this.getInputSchema().getType(this.typeReference), (typed) -> {
             OpticFinder<?> opticFinder = typed.getType().findField("RootVehicle");

@@ -19,9 +19,9 @@ public enum BlockPropertyJigsawOrientation implements INamable {
     NORTH_UP("north_up", EnumDirection.NORTH, EnumDirection.UP),
     SOUTH_UP("south_up", EnumDirection.SOUTH, EnumDirection.UP);
 
-    private static final Int2ObjectMap<BlockPropertyJigsawOrientation> LOOKUP_TOP_FRONT = SystemUtils.make(new Int2ObjectOpenHashMap<>(values().length), (int2ObjectOpenHashMap) -> {
+    private static final Int2ObjectMap<BlockPropertyJigsawOrientation> LOOKUP_TOP_FRONT = SystemUtils.make(new Int2ObjectOpenHashMap<>(values().length), (map) -> {
         for(BlockPropertyJigsawOrientation frontAndTop : values()) {
-            int2ObjectOpenHashMap.put(lookupKey(frontAndTop.front, frontAndTop.top), frontAndTop);
+            map.put(lookupKey(frontAndTop.front, frontAndTop.top), frontAndTop);
         }
 
     });

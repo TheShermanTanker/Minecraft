@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.entity.ai.targeting.PathfinderTargetCondition;
 import net.minecraft.world.entity.animal.EntityWolf;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.World;
 
 public class PathfinderGoalBeg extends PathfinderGoal {
     private final EntityWolf wolf;
+    @Nullable
     private EntityHuman player;
     private final World level;
     private final float lookDistance;
@@ -45,7 +47,7 @@ public class PathfinderGoalBeg extends PathfinderGoal {
     @Override
     public void start() {
         this.wolf.setIsInterested(true);
-        this.lookTime = 40 + this.wolf.getRandom().nextInt(40);
+        this.lookTime = this.adjustedTickDelay(40 + this.wolf.getRandom().nextInt(40));
     }
 
     @Override

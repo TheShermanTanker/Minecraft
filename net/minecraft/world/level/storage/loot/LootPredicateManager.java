@@ -72,9 +72,9 @@ public class LootPredicateManager extends ResourceDataJson {
         private final LootItemCondition[] terms;
         private final Predicate<LootTableInfo> composedPredicate;
 
-        CompositePredicate(LootItemCondition[] lootItemConditions) {
-            this.terms = lootItemConditions;
-            this.composedPredicate = LootItemConditions.andConditions(lootItemConditions);
+        CompositePredicate(LootItemCondition[] terms) {
+            this.terms = terms;
+            this.composedPredicate = LootItemConditions.andConditions(terms);
         }
 
         @Override

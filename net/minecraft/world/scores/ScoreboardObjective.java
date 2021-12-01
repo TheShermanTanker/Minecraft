@@ -7,7 +7,6 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.world.scores.criteria.IScoreboardCriteria;
 
 public class ScoreboardObjective {
-    public static final int MAX_NAME_LENGTH = 16;
     private final Scoreboard scoreboard;
     private final String name;
     private final IScoreboardCriteria criteria;

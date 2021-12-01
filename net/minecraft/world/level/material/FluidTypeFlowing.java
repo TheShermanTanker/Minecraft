@@ -35,7 +35,6 @@ public abstract class FluidTypeFlowing extends FluidType {
     private static final int CACHE_SIZE = 200;
     private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
         Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(200) {
-            @Override
             protected void rehash(int i) {
             }
         };
@@ -264,14 +263,14 @@ public abstract class FluidTypeFlowing extends FluidType {
             if (direction2 != direction) {
                 BlockPosition blockPos3 = blockPos.relative(direction2);
                 short s = getCacheKey(blockPos2, blockPos3);
-                Pair<IBlockData, Fluid> pair = short2ObjectMap.computeIfAbsent(s, (ix) -> {
+                Pair<IBlockData, Fluid> pair = short2ObjectMap.computeIfAbsent(s, (sx) -> {
                     IBlockData blockState = world.getType(blockPos3);
                     return Pair.of(blockState, blockState.getFluid());
                 });
                 IBlockData blockState2 = pair.getFirst();
                 Fluid fluidState = pair.getSecond();
                 if (this.canPassThrough(world, this.getFlowing(), blockPos, blockState, direction2, blockPos3, blockState2, fluidState)) {
-                    boolean bl = short2BooleanMap.computeIfAbsent(s, (ix) -> {
+                    boolean bl = short2BooleanMap.computeIfAbsent(s, (sx) -> {
                         BlockPosition blockPos2 = blockPos3.below();
                         IBlockData blockState2 = world.getType(blockPos2);
                         return this.isWaterHole(world, this.getFlowing(), blockPos3, blockState2, blockPos2, blockState2);
@@ -334,7 +333,7 @@ public abstract class FluidTypeFlowing extends FluidType {
         for(EnumDirection direction : EnumDirection.EnumDirectionLimit.HORIZONTAL) {
             BlockPosition blockPos = pos.relative(direction);
             short s = getCacheKey(pos, blockPos);
-            Pair<IBlockData, Fluid> pair = short2ObjectMap.computeIfAbsent(s, (ix) -> {
+            Pair<IBlockData, Fluid> pair = short2ObjectMap.computeIfAbsent(s, (sx) -> {
                 IBlockData blockState = world.getType(blockPos);
                 return Pair.of(blockState, blockState.getFluid());
             });
@@ -343,7 +342,7 @@ public abstract class FluidTypeFlowing extends FluidType {
             Fluid fluidState2 = this.getNewLiquid(world, blockPos, blockState);
             if (this.canPassThrough(world, fluidState2.getType(), pos, state, direction, blockPos, blockState, fluidState)) {
                 BlockPosition blockPos2 = blockPos.below();
-                boolean bl = short2BooleanMap.computeIfAbsent(s, (ix) -> {
+                boolean bl = short2BooleanMap.computeIfAbsent(s, (sx) -> {
                     IBlockData blockState2 = world.getType(blockPos2);
                     return this.isWaterHole(world, this.getFlowing(), blockPos, blockState, blockPos2, blockState2);
                 });
@@ -406,7 +405,7 @@ public abstract class FluidTypeFlowing extends FluidType {
                 state = fluidState;
                 IBlockData blockState = fluidState.getBlockData();
                 world.setTypeAndData(pos, blockState, 2);
-                world.getFluidTickList().scheduleTick(pos, fluidState.getType(), i);
+                world.scheduleTick(pos, fluidState.getType(), i);
                 world.applyPhysics(pos, blockState.getBlock());
             }
         }

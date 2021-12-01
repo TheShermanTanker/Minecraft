@@ -46,12 +46,14 @@ import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.GroupDataEntity;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.EnumColor;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.EnumBannerPatternType;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.phys.Vec3D;
 
@@ -394,8 +396,8 @@ public class Raid {
 
     private void moveRaidCenterToNearbyVillageSection() {
         Stream<SectionPosition> stream = SectionPosition.cube(SectionPosition.of(this.center), 2);
-        stream.filter(this.level::isVillage).map(SectionPosition::center).min(Comparator.comparingDouble((blockPos) -> {
-            return blockPos.distSqr(this.center);
+        stream.filter(this.level::isVillage).map(SectionPosition::center).min(Comparator.comparingDouble((pos) -> {
+            return pos.distSqr(this.center);
         })).ifPresent(this::setCenter);
     }
 
@@ -600,9 +602,10 @@ public class Raid {
 
     public static ItemStack getLeaderBannerInstance() {
         ItemStack itemStack = new ItemStack(Items.WHITE_BANNER);
-        NBTTagCompound compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = new NBTTagCompound();
         NBTTagList listTag = (new EnumBannerPatternType.Builder()).addPattern(EnumBannerPatternType.RHOMBUS_MIDDLE, EnumColor.CYAN).addPattern(EnumBannerPatternType.STRIPE_BOTTOM, EnumColor.LIGHT_GRAY).addPattern(EnumBannerPatternType.STRIPE_CENTER, EnumColor.GRAY).addPattern(EnumBannerPatternType.BORDER, EnumColor.LIGHT_GRAY).addPattern(EnumBannerPatternType.STRIPE_MIDDLE, EnumColor.BLACK).addPattern(EnumBannerPatternType.HALF_HORIZONTAL, EnumColor.LIGHT_GRAY).addPattern(EnumBannerPatternType.CIRCLE_MIDDLE, EnumColor.LIGHT_GRAY).addPattern(EnumBannerPatternType.BORDER, EnumColor.BLACK).toListTag();
         compoundTag.set("Patterns", listTag);
+        ItemBlock.setBlockEntityData(itemStack, TileEntityTypes.BANNER, compoundTag);
         itemStack.hideTooltipPart(ItemStack.HideFlags.ADDITIONAL);
         itemStack.setHoverName((new ChatMessage("block.minecraft.ominous_banner")).withStyle(EnumChatFormat.GOLD));
         return itemStack;

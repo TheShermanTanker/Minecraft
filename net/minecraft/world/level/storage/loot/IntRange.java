@@ -39,11 +39,11 @@ public class IntRange {
         return builder.build();
     }
 
-    IntRange(@Nullable NumberProvider numberProvider, @Nullable NumberProvider numberProvider2) {
-        this.min = numberProvider;
-        this.max = numberProvider2;
-        if (numberProvider == null) {
-            if (numberProvider2 == null) {
+    IntRange(@Nullable NumberProvider min, @Nullable NumberProvider max) {
+        this.min = min;
+        this.max = max;
+        if (min == null) {
+            if (max == null) {
                 this.limiter = (context, value) -> {
                     return value;
                 };
@@ -52,25 +52,25 @@ public class IntRange {
                 };
             } else {
                 this.limiter = (context, value) -> {
-                    return Math.min(numberProvider2.getInt(context), value);
+                    return Math.min(max.getInt(context), value);
                 };
                 this.predicate = (context, value) -> {
-                    return value <= numberProvider2.getInt(context);
+                    return value <= max.getInt(context);
                 };
             }
-        } else if (numberProvider2 == null) {
+        } else if (max == null) {
             this.limiter = (context, value) -> {
-                return Math.max(numberProvider.getInt(context), value);
+                return Math.max(min.getInt(context), value);
             };
             this.predicate = (context, value) -> {
-                return value >= numberProvider.getInt(context);
+                return value >= min.getInt(context);
             };
         } else {
             this.limiter = (context, value) -> {
-                return MathHelper.clamp(value, numberProvider.getInt(context), numberProvider2.getInt(context));
+                return MathHelper.clamp(value, min.getInt(context), max.getInt(context));
             };
             this.predicate = (context, value) -> {
-                return value >= numberProvider.getInt(context) && value <= numberProvider2.getInt(context);
+                return value >= min.getInt(context) && value <= max.getInt(context);
             };
         }
 

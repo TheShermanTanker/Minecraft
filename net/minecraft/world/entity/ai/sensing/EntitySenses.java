@@ -1,14 +1,14 @@
 package net.minecraft.world.entity.ai.sensing;
 
-import com.google.common.collect.Lists;
-import java.util.List;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 
 public class EntitySenses {
     private final EntityInsentient mob;
-    private final List<Entity> seen = Lists.newArrayList();
-    private final List<Entity> unseen = Lists.newArrayList();
+    private final IntSet seen = new IntOpenHashSet();
+    private final IntSet unseen = new IntOpenHashSet();
 
     public EntitySenses(EntityInsentient owner) {
         this.mob = owner;
@@ -20,18 +20,19 @@ public class EntitySenses {
     }
 
     public boolean hasLineOfSight(Entity entity) {
-        if (this.seen.contains(entity)) {
+        int i = entity.getId();
+        if (this.seen.contains(i)) {
             return true;
-        } else if (this.unseen.contains(entity)) {
+        } else if (this.unseen.contains(i)) {
             return false;
         } else {
             this.mob.level.getMethodProfiler().enter("hasLineOfSight");
             boolean bl = this.mob.hasLineOfSight(entity);
             this.mob.level.getMethodProfiler().exit();
             if (bl) {
-                this.seen.add(entity);
+                this.seen.add(i);
             } else {
-                this.unseen.add(entity);
+                this.unseen.add(i);
             }
 
             return bl;

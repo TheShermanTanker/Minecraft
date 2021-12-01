@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.animal;
 
-import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.particles.ParticleParam;
 import net.minecraft.core.particles.Particles;
@@ -17,13 +16,11 @@ import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntitySize;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.EnumMoveType;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
 import net.minecraft.world.entity.ai.attributes.GenericAttributes;
 import net.minecraft.world.entity.ai.goal.PathfinderGoal;
 import net.minecraft.world.entity.player.EntityHuman;
-import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.material.Fluid;
@@ -201,10 +198,6 @@ public class EntitySquid extends EntityWaterAnimal {
         this.move(EnumMoveType.SELF, this.getMot());
     }
 
-    public static boolean checkSquidSpawnRules(EntityTypes<EntitySquid> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return pos.getY() > 45 && pos.getY() < world.getSeaLevel();
-    }
-
     @Override
     public void handleEntityEvent(byte status) {
         if (status == 19) {
@@ -242,7 +235,7 @@ public class EntitySquid extends EntityWaterAnimal {
             int i = this.squid.getNoActionTime();
             if (i > 100) {
                 this.squid.setMovementVector(0.0F, 0.0F, 0.0F);
-            } else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
+            } else if (this.squid.getRandom().nextInt(reducedTickDelay(50)) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
                 float f = this.squid.getRandom().nextFloat() * ((float)Math.PI * 2F);
                 float g = MathHelper.cos(f) * 0.2F;
                 float h = -0.1F + this.squid.getRandom().nextFloat() * 0.2F;
@@ -272,6 +265,11 @@ public class EntitySquid extends EntityWaterAnimal {
         @Override
         public void start() {
             this.fleeTicks = 0;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
         }
 
         @Override

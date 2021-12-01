@@ -154,7 +154,7 @@ public class EntityTypes<T extends Entity> implements EntityTypeTest<Entity, T> 
     public static final EntityTypes<EntityAreaEffectCloud> AREA_EFFECT_CLOUD = register("area_effect_cloud", EntityTypes.Builder.<EntityAreaEffectCloud>of(EntityAreaEffectCloud::new, EnumCreatureType.MISC).fireImmune().sized(6.0F, 0.5F).trackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityTypes<EntityArmorStand> ARMOR_STAND = register("armor_stand", EntityTypes.Builder.<EntityArmorStand>of(EntityArmorStand::new, EnumCreatureType.MISC).sized(0.5F, 1.975F).trackingRange(10));
     public static final EntityTypes<EntityTippedArrow> ARROW = register("arrow", EntityTypes.Builder.<EntityTippedArrow>of(EntityTippedArrow::new, EnumCreatureType.MISC).sized(0.5F, 0.5F).trackingRange(4).updateInterval(20));
-    public static final EntityTypes<EntityAxolotl> AXOLOTL = register("axolotl", EntityTypes.Builder.<EntityAxolotl>of(EntityAxolotl::new, EnumCreatureType.UNDERGROUND_WATER_CREATURE).sized(0.75F, 0.42F).trackingRange(10));
+    public static final EntityTypes<EntityAxolotl> AXOLOTL = register("axolotl", EntityTypes.Builder.<EntityAxolotl>of(EntityAxolotl::new, EnumCreatureType.AXOLOTLS).sized(0.75F, 0.42F).trackingRange(10));
     public static final EntityTypes<EntityBat> BAT = register("bat", EntityTypes.Builder.<EntityBat>of(EntityBat::new, EnumCreatureType.AMBIENT).sized(0.5F, 0.9F).trackingRange(5));
     public static final EntityTypes<EntityBee> BEE = register("bee", EntityTypes.Builder.<EntityBee>of(EntityBee::new, EnumCreatureType.CREATURE).sized(0.7F, 0.6F).trackingRange(8));
     public static final EntityTypes<EntityBlaze> BLAZE = register("blaze", EntityTypes.Builder.<EntityBlaze>of(EntityBlaze::new, EnumCreatureType.MONSTER).fireImmune().sized(0.6F, 1.8F).trackingRange(8));
@@ -359,10 +359,8 @@ public class EntityTypes<T extends Entity> implements EntityTypeTest<Entity, T> 
             aABB = aABB.expandTowards(0.0D, -1.0D, 0.0D);
         }
 
-        Stream<VoxelShape> stream = world.getCollisions((Entity)null, aABB, (entity) -> {
-            return true;
-        });
-        return 1.0D + VoxelShapes.collide(EnumDirection.EnumAxis.Y, boundingBox, stream, invertY ? -2.0D : -1.0D);
+        Iterable<VoxelShape> iterable = world.getCollisions((Entity)null, aABB);
+        return 1.0D + VoxelShapes.collide(EnumDirection.EnumAxis.Y, boundingBox, iterable, invertY ? -2.0D : -1.0D);
     }
 
     public static void updateCustomEntityTag(World world, @Nullable EntityHuman player, @Nullable Entity entity, @Nullable NBTTagCompound itemNbt) {

@@ -6,7 +6,7 @@ import net.minecraft.core.EnumDirection;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.cauldron.ICauldronBehavior;
 import net.minecraft.core.particles.Particles;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.effect.MobEffectList;
 import net.minecraft.world.entity.EntityTypes;
@@ -179,10 +179,10 @@ public class Blocks {
     public static final Block BROWN_MUSHROOM = register("brown_mushroom", new BlockMushroom(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_BROWN).noCollission().randomTicks().instabreak().sound(SoundEffectType.GRASS).lightLevel((state) -> {
         return 1;
     }).hasPostProcess(Blocks::always), () -> {
-        return WorldGenBiomeDecoratorGroups.HUGE_BROWN_MUSHROOM;
+        return TreeFeatures.HUGE_BROWN_MUSHROOM;
     }));
     public static final Block RED_MUSHROOM = register("red_mushroom", new BlockMushroom(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_RED).noCollission().randomTicks().instabreak().sound(SoundEffectType.GRASS).hasPostProcess(Blocks::always), () -> {
-        return WorldGenBiomeDecoratorGroups.HUGE_RED_MUSHROOM;
+        return TreeFeatures.HUGE_RED_MUSHROOM;
     }));
     public static final Block GOLD_BLOCK = register("gold_block", new Block(BlockBase.Info.of(Material.METAL, MaterialMapColor.GOLD).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundEffectType.METAL)));
     public static final Block IRON_BLOCK = register("iron_block", new Block(BlockBase.Info.of(Material.METAL, MaterialMapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundEffectType.METAL)));
@@ -246,7 +246,9 @@ public class Blocks {
     public static final Block REDSTONE_TORCH = register("redstone_torch", new BlockRedstoneTorch(BlockBase.Info.of(Material.DECORATION).noCollission().instabreak().lightLevel(litBlockEmission(7)).sound(SoundEffectType.WOOD)));
     public static final Block REDSTONE_WALL_TORCH = register("redstone_wall_torch", new BlockRedstoneTorchWall(BlockBase.Info.of(Material.DECORATION).noCollission().instabreak().lightLevel(litBlockEmission(7)).sound(SoundEffectType.WOOD).dropsLike(REDSTONE_TORCH)));
     public static final Block STONE_BUTTON = register("stone_button", new BlockStoneButton(BlockBase.Info.of(Material.DECORATION).noCollission().strength(0.5F)));
-    public static final Block SNOW = register("snow", new BlockSnow(BlockBase.Info.of(Material.TOP_SNOW).randomTicks().strength(0.1F).requiresCorrectToolForDrops().sound(SoundEffectType.SNOW)));
+    public static final Block SNOW = register("snow", new BlockSnow(BlockBase.Info.of(Material.TOP_SNOW).randomTicks().strength(0.1F).requiresCorrectToolForDrops().sound(SoundEffectType.SNOW).isViewBlocking((blockStatex, blockGetter, blockPos) -> {
+        return blockStatex.get(BlockSnow.LAYERS) >= 8;
+    })));
     public static final Block ICE = register("ice", new BlockIce(BlockBase.Info.of(Material.ICE).friction(0.98F).randomTicks().strength(0.5F).sound(SoundEffectType.GLASS).noOcclusion().isValidSpawn((state, world, pos, entityType) -> {
         return entityType == EntityTypes.POLAR_BEAR;
     })));
@@ -342,7 +344,9 @@ public class Blocks {
     public static final Block NETHER_BRICK_FENCE = register("nether_brick_fence", new BlockFence(BlockBase.Info.of(Material.STONE, MaterialMapColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundEffectType.NETHER_BRICKS)));
     public static final Block NETHER_BRICK_STAIRS = register("nether_brick_stairs", new BlockStairs(NETHER_BRICKS.getBlockData(), BlockBase.Info.copy(NETHER_BRICKS)));
     public static final Block NETHER_WART = register("nether_wart", new BlockNetherWart(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_RED).noCollission().randomTicks().sound(SoundEffectType.NETHER_WART)));
-    public static final Block ENCHANTING_TABLE = register("enchanting_table", new BlockEnchantmentTable(BlockBase.Info.of(Material.STONE, MaterialMapColor.COLOR_RED).requiresCorrectToolForDrops().strength(5.0F, 1200.0F)));
+    public static final Block ENCHANTING_TABLE = register("enchanting_table", new BlockEnchantmentTable(BlockBase.Info.of(Material.STONE, MaterialMapColor.COLOR_RED).requiresCorrectToolForDrops().lightLevel((state) -> {
+        return 7;
+    }).strength(5.0F, 1200.0F)));
     public static final Block BREWING_STAND = register("brewing_stand", new BlockBrewingStand(BlockBase.Info.of(Material.METAL).requiresCorrectToolForDrops().strength(0.5F).lightLevel((state) -> {
         return 1;
     }).noOcclusion()));
@@ -736,7 +740,7 @@ public class Blocks {
         return BlockSeaPickle.isDead(state) ? 0 : 3 + 3 * state.get(BlockSeaPickle.PICKLES);
     }).sound(SoundEffectType.SLIME_BLOCK).noOcclusion()));
     public static final Block BLUE_ICE = register("blue_ice", new BlockHalfTransparent(BlockBase.Info.of(Material.ICE_SOLID).strength(2.8F).friction(0.989F).sound(SoundEffectType.GLASS)));
-    public static final Block CONDUIT = register("conduit", new BlockConduit(BlockBase.Info.of(Material.GLASS, MaterialMapColor.DIAMOND).strength(3.0F).lightLevel((blockStatex) -> {
+    public static final Block CONDUIT = register("conduit", new BlockConduit(BlockBase.Info.of(Material.GLASS, MaterialMapColor.DIAMOND).strength(3.0F).lightLevel((state) -> {
         return 15;
     }).noOcclusion()));
     public static final Block BAMBOO_SAPLING = register("bamboo_sapling", new BlockBambooSapling(BlockBase.Info.of(Material.BAMBOO_SAPLING).randomTicks().instabreak().noCollission().strength(1.0F).sound(SoundEffectType.BAMBOO_SAPLING)));
@@ -811,7 +815,7 @@ public class Blocks {
     public static final Block STRIPPED_WARPED_HYPHAE = register("stripped_warped_hyphae", new BlockRotatable(BlockBase.Info.of(Material.NETHER_WOOD, MaterialMapColor.WARPED_HYPHAE).strength(2.0F).sound(SoundEffectType.STEM)));
     public static final Block WARPED_NYLIUM = register("warped_nylium", new BlockNylium(BlockBase.Info.of(Material.STONE, MaterialMapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(0.4F).sound(SoundEffectType.NYLIUM).randomTicks()));
     public static final Block WARPED_FUNGUS = register("warped_fungus", new BlockFungi(BlockBase.Info.of(Material.PLANT, MaterialMapColor.COLOR_CYAN).instabreak().noCollission().sound(SoundEffectType.FUNGUS), () -> {
-        return WorldGenBiomeDecoratorGroups.WARPED_FUNGI_PLANTED;
+        return TreeFeatures.WARPED_FUNGUS_PLANTED;
     }));
     public static final Block WARPED_WART_BLOCK = register("warped_wart_block", new Block(BlockBase.Info.of(Material.GRASS, MaterialMapColor.WARPED_WART_BLOCK).strength(1.0F).sound(SoundEffectType.WART_BLOCK)));
     public static final Block WARPED_ROOTS = register("warped_roots", new BlockRoots(BlockBase.Info.of(Material.REPLACEABLE_FIREPROOF_PLANT, MaterialMapColor.COLOR_CYAN).noCollission().instabreak().sound(SoundEffectType.ROOTS)));
@@ -822,9 +826,9 @@ public class Blocks {
     public static final Block STRIPPED_CRIMSON_HYPHAE = register("stripped_crimson_hyphae", new BlockRotatable(BlockBase.Info.of(Material.NETHER_WOOD, MaterialMapColor.CRIMSON_HYPHAE).strength(2.0F).sound(SoundEffectType.STEM)));
     public static final Block CRIMSON_NYLIUM = register("crimson_nylium", new BlockNylium(BlockBase.Info.of(Material.STONE, MaterialMapColor.CRIMSON_NYLIUM).requiresCorrectToolForDrops().strength(0.4F).sound(SoundEffectType.NYLIUM).randomTicks()));
     public static final Block CRIMSON_FUNGUS = register("crimson_fungus", new BlockFungi(BlockBase.Info.of(Material.PLANT, MaterialMapColor.NETHER).instabreak().noCollission().sound(SoundEffectType.FUNGUS), () -> {
-        return WorldGenBiomeDecoratorGroups.CRIMSON_FUNGI_PLANTED;
+        return TreeFeatures.CRIMSON_FUNGUS_PLANTED;
     }));
-    public static final Block SHROOMLIGHT = register("shroomlight", new Block(BlockBase.Info.of(Material.GRASS, MaterialMapColor.COLOR_RED).strength(1.0F).sound(SoundEffectType.SHROOMLIGHT).lightLevel((blockStatex) -> {
+    public static final Block SHROOMLIGHT = register("shroomlight", new Block(BlockBase.Info.of(Material.GRASS, MaterialMapColor.COLOR_RED).strength(1.0F).sound(SoundEffectType.SHROOMLIGHT).lightLevel((state) -> {
         return 15;
     })));
     public static final Block WEEPING_VINES = register("weeping_vines", new BlockWeepingVines(BlockBase.Info.of(Material.PLANT, MaterialMapColor.NETHER).randomTicks().noCollission().instabreak().sound(SoundEffectType.WEEPING_VINES)));
@@ -937,7 +941,7 @@ public class Blocks {
     public static final Block LARGE_AMETHYST_BUD = register("large_amethyst_bud", new BlockAmethystCluster(5, 3, BlockBase.Info.copy(AMETHYST_CLUSTER).sound(SoundEffectType.MEDIUM_AMETHYST_BUD).lightLevel((state) -> {
         return 4;
     })));
-    public static final Block MEDIUM_AMETHYST_BUD = register("medium_amethyst_bud", new BlockAmethystCluster(4, 3, BlockBase.Info.copy(AMETHYST_CLUSTER).sound(SoundEffectType.LARGE_AMETHYST_BUD).lightLevel((state) -> {
+    public static final Block MEDIUM_AMETHYST_BUD = register("medium_amethyst_bud", new BlockAmethystCluster(4, 3, BlockBase.Info.copy(AMETHYST_CLUSTER).sound(SoundEffectType.LARGE_AMETHYST_BUD).lightLevel((blockStatex) -> {
         return 2;
     })));
     public static final Block SMALL_AMETHYST_BUD = register("small_amethyst_bud", new BlockAmethystCluster(3, 4, BlockBase.Info.copy(AMETHYST_CLUSTER).sound(SoundEffectType.SMALL_AMETHYST_BUD).lightLevel((blockStatex) -> {

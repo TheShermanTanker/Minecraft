@@ -24,7 +24,7 @@ import net.minecraft.commands.CommandListenerWrapper;
 import net.minecraft.commands.arguments.blocks.ArgumentTileLocation;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.data.structures.DebugReportProviderNBT;
+import net.minecraft.data.structures.DebugReportProviderStructureFromNBT;
 import net.minecraft.nbt.GameProfileSerializer;
 import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -321,7 +321,7 @@ public class GameTestHarnessTestCommand {
         Path path = Paths.get(GameTestHarnessStructures.testStructuresDir);
         MinecraftKey resourceLocation = new MinecraftKey("minecraft", structure);
         Path path2 = source.getWorld().getStructureManager().createPathToStructure(resourceLocation, ".nbt");
-        Path path3 = DebugReportProviderNBT.convertStructure(path2, structure, path);
+        Path path3 = DebugReportProviderStructureFromNBT.convertStructure(path2, structure, path);
         if (path3 == null) {
             say(source, "Failed to export " + path2);
             return 1;

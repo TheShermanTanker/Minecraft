@@ -6,11 +6,21 @@ import java.io.IOException;
 
 public class NBTTagInt extends NBTNumber {
     private static final int SELF_SIZE_IN_BITS = 96;
-    public static final NBTTagType<NBTTagInt> TYPE = new NBTTagType<NBTTagInt>() {
+    public static final NBTTagType<NBTTagInt> TYPE = new TagType$StaticSize<NBTTagInt>() {
         @Override
         public NBTTagInt load(DataInput dataInput, int i, NBTReadLimiter nbtAccounter) throws IOException {
             nbtAccounter.accountBits(96L);
             return NBTTagInt.valueOf(dataInput.readInt());
+        }
+
+        @Override
+        public StreamTagVisitor.ValueResult parse(DataInput input, StreamTagVisitor visitor) throws IOException {
+            return visitor.visit(input.readInt());
+        }
+
+        @Override
+        public int size() {
+            return 4;
         }
 
         @Override
@@ -30,8 +40,8 @@ public class NBTTagInt extends NBTNumber {
     };
     private final int data;
 
-    NBTTagInt(int i) {
-        this.data = i;
+    NBTTagInt(int value) {
+        this.data = value;
     }
 
     public static NBTTagInt valueOf(int value) {
@@ -110,6 +120,11 @@ public class NBTTagInt extends NBTNumber {
     @Override
     public Number getAsNumber() {
         return this.data;
+    }
+
+    @Override
+    public StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor) {
+        return visitor.visit(this.data);
     }
 
     static class Cache {

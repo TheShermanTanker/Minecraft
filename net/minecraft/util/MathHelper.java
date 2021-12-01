@@ -70,8 +70,8 @@ public class MathHelper {
         return value < (double)l ? l - 1L : l;
     }
 
-    public static int absFloor(double d) {
-        return (int)(d >= 0.0D ? d : -d + 1.0D);
+    public static int absFloor(double value) {
+        return (int)(value >= 0.0D ? value : -value + 1.0D);
     }
 
     public static float abs(float value) {
@@ -140,11 +140,11 @@ public class MathHelper {
         }
     }
 
-    public static float clampedLerp(float f, float g, float h) {
-        if (h < 0.0F) {
-            return f;
+    public static float clampedLerp(float start, float end, float delta) {
+        if (delta < 0.0F) {
+            return start;
         } else {
-            return h > 1.0F ? g : lerp(h, f, g);
+            return delta > 1.0F ? end : lerp(delta, start, end);
         }
     }
 
@@ -253,10 +253,10 @@ public class MathHelper {
         return abs(degreesDifference(first, second));
     }
 
-    public static float rotateIfNecessary(float from, float to, float step) {
-        float f = degreesDifference(from, to);
-        float g = clamp(f, -step, step);
-        return to - g;
+    public static float rotateIfNecessary(float value, float mean, float delta) {
+        float f = degreesDifference(value, mean);
+        float g = clamp(f, -delta, delta);
+        return mean - g;
     }
 
     public static float approach(float from, float to, float step) {
@@ -273,8 +273,8 @@ public class MathHelper {
         return NumberUtils.toInt(string, fallback);
     }
 
-    public static int getInt(String string, int i, int j) {
-        return Math.max(j, getInt(string, i));
+    public static int getInt(String string, int fallback, int min) {
+        return Math.max(min, getInt(string, fallback));
     }
 
     public static double getDouble(String string, double fallback) {
@@ -285,8 +285,8 @@ public class MathHelper {
         }
     }
 
-    public static double getDouble(String string, double d, double e) {
-        return Math.max(e, getDouble(string, d));
+    public static double getDouble(String string, double fallback, double min) {
+        return Math.max(min, getDouble(string, fallback));
     }
 
     public static int smallestEncompassingPowerOfTwo(int value) {
@@ -321,27 +321,27 @@ public class MathHelper {
         return (i << 8) + b;
     }
 
-    public static int colorMultiply(int i, int j) {
-        int k = (i & 16711680) >> 16;
-        int l = (j & 16711680) >> 16;
-        int m = (i & '\uff00') >> 8;
-        int n = (j & '\uff00') >> 8;
-        int o = (i & 255) >> 0;
-        int p = (j & 255) >> 0;
-        int q = (int)((float)k * (float)l / 255.0F);
-        int r = (int)((float)m * (float)n / 255.0F);
-        int s = (int)((float)o * (float)p / 255.0F);
-        return i & -16777216 | q << 16 | r << 8 | s;
+    public static int colorMultiply(int a, int b) {
+        int i = (a & 16711680) >> 16;
+        int j = (b & 16711680) >> 16;
+        int k = (a & '\uff00') >> 8;
+        int l = (b & '\uff00') >> 8;
+        int m = (a & 255) >> 0;
+        int n = (b & 255) >> 0;
+        int o = (int)((float)i * (float)j / 255.0F);
+        int p = (int)((float)k * (float)l / 255.0F);
+        int q = (int)((float)m * (float)n / 255.0F);
+        return a & -16777216 | o << 16 | p << 8 | q;
     }
 
-    public static int colorMultiply(int i, float f, float g, float h) {
-        int j = (i & 16711680) >> 16;
-        int k = (i & '\uff00') >> 8;
-        int l = (i & 255) >> 0;
-        int m = (int)((float)j * f);
-        int n = (int)((float)k * g);
-        int o = (int)((float)l * h);
-        return i & -16777216 | m << 16 | n << 8 | o;
+    public static int colorMultiply(int color, float r, float g, float b) {
+        int i = (color & 16711680) >> 16;
+        int j = (color & '\uff00') >> 8;
+        int k = (color & 255) >> 0;
+        int l = (int)((float)i * r);
+        int m = (int)((float)j * g);
+        int n = (int)((float)k * b);
+        return color & -16777216 | l << 16 | m << 8 | n;
     }
 
     public static float frac(float value) {
@@ -381,6 +381,10 @@ public class MathHelper {
     }
 
     public static double inverseLerp(double value, double start, double end) {
+        return (value - start) / (end - start);
+    }
+
+    public static float inverseLerp(float value, float start, float end) {
         return (value - start) / (end - start);
     }
 
@@ -554,12 +558,12 @@ public class MathHelper {
         return value ^ value >>> 16;
     }
 
-    public static long murmurHash3Mixer(long l) {
-        l = l ^ l >>> 33;
-        l = l * -49064778989728563L;
-        l = l ^ l >>> 33;
-        l = l * -4265267296055464877L;
-        return l ^ l >>> 33;
+    public static long murmurHash3Mixer(long value) {
+        value = value ^ value >>> 33;
+        value = value * -49064778989728563L;
+        value = value ^ value >>> 33;
+        value = value * -4265267296055464877L;
+        return value ^ value >>> 33;
     }
 
     public static double[] cumulativeSum(double... values) {
@@ -685,6 +689,7 @@ public class MathHelper {
         return Math.min(f * f * 0.6F + g * g * ((3.0F + g) / 4.0F) + h * h * 0.8F, 1.0F);
     }
 
+    /** @deprecated */
     @Deprecated
     public static float rotlerp(float start, float end, float delta) {
         float f;
@@ -698,6 +703,7 @@ public class MathHelper {
         return start + delta * f;
     }
 
+    /** @deprecated */
     @Deprecated
     public static float rotWrap(double degrees) {
         while(degrees >= 180.0D) {
@@ -727,11 +733,23 @@ public class MathHelper {
         return n * n;
     }
 
+    public static long square(long n) {
+        return n * n;
+    }
+
     public static double clampedMap(double lerpValue, double lerpStart, double lerpEnd, double start, double end) {
         return clampedLerp(start, end, inverseLerp(lerpValue, lerpStart, lerpEnd));
     }
 
+    public static float clampedMap(float lerpValue, float lerpStart, float lerpEnd, float start, float end) {
+        return clampedLerp(start, end, inverseLerp(lerpValue, lerpStart, lerpEnd));
+    }
+
     public static double map(double lerpValue, double lerpStart, double lerpEnd, double start, double end) {
+        return lerp(inverseLerp(lerpValue, lerpStart, lerpEnd), start, end);
+    }
+
+    public static float map(float lerpValue, float lerpStart, float lerpEnd, float start, float end) {
         return lerp(inverseLerp(lerpValue, lerpStart, lerpEnd), start, end);
     }
 
@@ -740,7 +758,11 @@ public class MathHelper {
     }
 
     public static int roundToward(int value, int divisor) {
-        return (value + divisor - 1) / divisor * divisor;
+        return positiveCeilDiv(value, divisor) * divisor;
+    }
+
+    public static int positiveCeilDiv(int a, int b) {
+        return -Math.floorDiv(-a, b);
     }
 
     public static int randomBetweenInclusive(Random random, int min, int max) {
@@ -755,8 +777,16 @@ public class MathHelper {
         return mean + (float)random.nextGaussian() * deviation;
     }
 
-    public static double length(int x, double y, int z) {
-        return Math.sqrt((double)(x * x) + y * y + (double)(z * z));
+    public static double length(double a, double b) {
+        return Math.sqrt(a * a + b * b);
+    }
+
+    public static double length(double a, double b, double c) {
+        return Math.sqrt(a * a + b * b + c * c);
+    }
+
+    public static int quantize(double a, int b) {
+        return floor(a / (double)b) * b;
     }
 
     static {

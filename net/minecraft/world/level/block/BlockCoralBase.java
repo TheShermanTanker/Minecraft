@@ -29,7 +29,7 @@ public class BlockCoralBase extends Block implements IBlockWaterlogged {
 
     protected void tryScheduleDieTick(IBlockData state, GeneratorAccess world, BlockPosition pos) {
         if (!scanForWater(state, world, pos)) {
-            world.getBlockTickList().scheduleTick(pos, this, 60 + world.getRandom().nextInt(40));
+            world.scheduleTick(pos, this, 60 + world.getRandom().nextInt(40));
         }
 
     }
@@ -63,7 +63,7 @@ public class BlockCoralBase extends Block implements IBlockWaterlogged {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return direction == EnumDirection.DOWN && !this.canPlace(state, world, pos) ? Blocks.AIR.getBlockData() : super.updateState(state, direction, neighborState, world, pos, neighborPos);

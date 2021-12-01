@@ -49,6 +49,16 @@ public class PathfinderGoalWrapped extends PathfinderGoal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return this.goal.requiresUpdateEveryTick();
+    }
+
+    @Override
+    protected int adjustedTickDelay(int ticks) {
+        return this.goal.adjustedTickDelay(ticks);
+    }
+
+    @Override
     public void tick() {
         this.goal.tick();
     }

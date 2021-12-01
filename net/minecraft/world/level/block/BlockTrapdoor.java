@@ -85,7 +85,7 @@ public class BlockTrapdoor extends BlockFacingHorizontal implements IBlockWaterl
             state = state.cycle(OPEN);
             world.setTypeAndData(pos, state, 2);
             if (state.get(WATERLOGGED)) {
-                world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
             }
 
             this.playSound(player, world, pos, state.get(OPEN));
@@ -117,7 +117,7 @@ public class BlockTrapdoor extends BlockFacingHorizontal implements IBlockWaterl
 
                 world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(bl)), 2);
                 if (state.get(WATERLOGGED)) {
-                    world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                    world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
                 }
             }
 
@@ -155,7 +155,7 @@ public class BlockTrapdoor extends BlockFacingHorizontal implements IBlockWaterl
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);

@@ -32,15 +32,15 @@ public interface Condition extends Supplier<JsonElement> {
         private final Condition.Operation operation;
         private final List<Condition> subconditions;
 
-        CompositeCondition(Condition.Operation operation, List<Condition> list) {
-            this.operation = operation;
-            this.subconditions = list;
+        CompositeCondition(Condition.Operation operator, List<Condition> components) {
+            this.operation = operator;
+            this.subconditions = components;
         }
 
         @Override
         public void validate(BlockStateList<?, ?> stateManager) {
-            this.subconditions.forEach((condition) -> {
-                condition.validate(stateManager);
+            this.subconditions.forEach((component) -> {
+                component.validate(stateManager);
             });
         }
 
@@ -94,22 +94,22 @@ public interface Condition extends Supplier<JsonElement> {
             return this;
         }
 
-        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(IBlockState<T> property, T comparable) {
-            this.putValue(property, "!" + property.getName(comparable));
+        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(IBlockState<T> property, T value) {
+            this.putValue(property, "!" + property.getName(value));
             return this;
         }
 
         @SafeVarargs
-        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(IBlockState<T> property, T comparable, T... comparables) {
-            this.putValue(property, "!" + getTerm(property, comparable, comparables));
+        public final <T extends Comparable<T>> Condition.TerminalCondition negatedTerm(IBlockState<T> property, T value, T... otherValues) {
+            this.putValue(property, "!" + getTerm(property, value, otherValues));
             return this;
         }
 
         @Override
         public JsonElement get() {
             JsonObject jsonObject = new JsonObject();
-            this.terms.forEach((property, string) -> {
-                jsonObject.addProperty(property.getName(), string);
+            this.terms.forEach((property, value) -> {
+                jsonObject.addProperty(property.getName(), value);
             });
             return jsonObject;
         }

@@ -27,14 +27,14 @@ public interface SaveData {
 
     void setModdedInfo(String brand, boolean modded);
 
-    default void fillCrashReportCategory(CrashReportSystemDetails crashReportCategory) {
-        crashReportCategory.setDetail("Known server brands", () -> {
+    default void fillCrashReportCategory(CrashReportSystemDetails section) {
+        section.setDetail("Known server brands", () -> {
             return String.join(", ", this.getKnownServerBrands());
         });
-        crashReportCategory.setDetail("Level was modded", () -> {
+        section.setDetail("Level was modded", () -> {
             return Boolean.toString(this.wasModded());
         });
-        crashReportCategory.setDetail("Level storage version", () -> {
+        section.setDetail("Level storage version", () -> {
             int i = this.getVersion();
             return String.format("0x%05X - %s", i, this.getStorageVersionName(i));
         });
@@ -84,6 +84,7 @@ public interface SaveData {
 
     GameRules getGameRules();
 
+    @Nullable
     NBTTagCompound getLoadedPlayerTag();
 
     NBTTagCompound endDragonFightData();

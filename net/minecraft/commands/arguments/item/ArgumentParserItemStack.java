@@ -20,13 +20,13 @@ import net.minecraft.world.item.Item;
 
 public class ArgumentParserItemStack {
     public static final SimpleCommandExceptionType ERROR_NO_TAGS_ALLOWED = new SimpleCommandExceptionType(new ChatMessage("argument.item.tag.disallowed"));
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.item.id.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("argument.item.id.invalid", id);
     });
     private static final char SYNTAX_START_NBT = '{';
     private static final char SYNTAX_TAG = '#';
-    private static final BiFunction<SuggestionsBuilder, Tags<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> {
-        return suggestionsBuilder.buildFuture();
+    private static final BiFunction<SuggestionsBuilder, Tags<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (builder, group) -> {
+        return builder.buildFuture();
     };
     private final StringReader reader;
     private final boolean forTesting;
@@ -96,27 +96,27 @@ public class ArgumentParserItemStack {
         return this;
     }
 
-    private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, Tags<Item> tagCollection) {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
-            suggestionsBuilder.suggest(String.valueOf('{'));
+    private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder builder, Tags<Item> group) {
+        if (builder.getRemaining().isEmpty()) {
+            builder.suggest(String.valueOf('{'));
         }
 
-        return suggestionsBuilder.buildFuture();
+        return builder.buildFuture();
     }
 
-    private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, Tags<Item> tagCollection) {
-        return ICompletionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder.createOffset(this.tagCursor));
+    private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder builder, Tags<Item> group) {
+        return ICompletionProvider.suggestResource(group.getAvailableTags(), builder.createOffset(this.tagCursor));
     }
 
-    private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder, Tags<Item> tagCollection) {
+    private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder builder, Tags<Item> group) {
         if (this.forTesting) {
-            ICompletionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
+            ICompletionProvider.suggestResource(group.getAvailableTags(), builder, String.valueOf('#'));
         }
 
-        return ICompletionProvider.suggestResource(IRegistry.ITEM.keySet(), suggestionsBuilder);
+        return ICompletionProvider.suggestResource(IRegistry.ITEM.keySet(), builder);
     }
 
-    public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder builder, Tags<Item> tagCollection) {
-        return this.suggestions.apply(builder.createOffset(this.reader.getCursor()), tagCollection);
+    public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder builder, Tags<Item> group) {
+        return this.suggestions.apply(builder.createOffset(this.reader.getCursor()), group);
     }
 }

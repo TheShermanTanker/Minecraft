@@ -80,6 +80,6 @@ public abstract class ContainerOpenersCounter {
     }
 
     private static void scheduleRecheck(World world, BlockPosition pos, IBlockData state) {
-        world.getBlockTickList().scheduleTick(pos, state.getBlock(), 5);
+        world.scheduleTick(pos, state.getBlock(), 5);
     }
 }

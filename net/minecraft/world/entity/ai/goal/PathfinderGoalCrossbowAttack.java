@@ -62,6 +62,11 @@ public class PathfinderGoalCrossbowAttack<T extends EntityMonster & IRangedEntit
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         EntityLiving livingEntity = this.mob.getGoalTarget();
         if (livingEntity != null) {

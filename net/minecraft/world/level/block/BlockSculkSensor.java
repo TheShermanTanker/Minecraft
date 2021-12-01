@@ -131,11 +131,11 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         if (!world.isClientSide() && !state.is(oldState.getBlock())) {
-            if (state.get(POWER) > 0 && !world.getBlockTickList().hasScheduledTick(pos, this)) {
+            if (state.get(POWER) > 0 && !world.getBlockTicks().hasScheduledTick(pos, this)) {
                 world.setTypeAndData(pos, state.set(POWER, Integer.valueOf(0)), 18);
             }
 
-            world.getBlockTickList().scheduleTick(new BlockPosition(pos), state.getBlock(), 1);
+            world.scheduleTick(new BlockPosition(pos), state.getBlock(), 1);
         }
     }
 
@@ -153,7 +153,7 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -214,7 +214,7 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
 
     public static void deactivate(World world, BlockPosition pos, IBlockData state) {
         world.setTypeAndData(pos, state.set(PHASE, SculkSensorPhase.COOLDOWN).set(POWER, Integer.valueOf(0)), 3);
-        world.getBlockTickList().scheduleTick(new BlockPosition(pos), state.getBlock(), 1);
+        world.scheduleTick(new BlockPosition(pos), state.getBlock(), 1);
         if (!state.get(WATERLOGGED)) {
             world.playSound((EntityHuman)null, pos, SoundEffects.SCULK_CLICKING_STOP, EnumSoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
         }
@@ -224,7 +224,7 @@ public class BlockSculkSensor extends BlockTileEntity implements IBlockWaterlogg
 
     public static void activate(World world, BlockPosition pos, IBlockData state, int power) {
         world.setTypeAndData(pos, state.set(PHASE, SculkSensorPhase.ACTIVE).set(POWER, Integer.valueOf(power)), 3);
-        world.getBlockTickList().scheduleTick(new BlockPosition(pos), state.getBlock(), 40);
+        world.scheduleTick(new BlockPosition(pos), state.getBlock(), 40);
         updateNeighbours(world, pos);
         if (!state.get(WATERLOGGED)) {
             world.playSound((EntityHuman)null, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, SoundEffects.SCULK_CLICKING, EnumSoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);

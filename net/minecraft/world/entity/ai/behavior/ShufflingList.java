@@ -84,7 +84,6 @@ public class ShufflingList<U> {
 
         public static <E> Codec<ShufflingList.WeightedEntry<E>> codec(Codec<E> codec) {
             return new Codec<ShufflingList.WeightedEntry<E>>() {
-                @Override
                 public <T> DataResult<Pair<ShufflingList.WeightedEntry<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
                     Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
                     return dynamic.get("data").flatMap(codec::parse).map((data) -> {
@@ -94,7 +93,6 @@ public class ShufflingList<U> {
                     });
                 }
 
-                @Override
                 public <T> DataResult<T> encode(ShufflingList.WeightedEntry<E> weightedEntry, DynamicOps<T> dynamicOps, T object) {
                     return dynamicOps.mapBuilder().add("weight", dynamicOps.createInt(weightedEntry.weight)).add("data", codec.encodeStart(dynamicOps, weightedEntry.data)).build(object);
                 }

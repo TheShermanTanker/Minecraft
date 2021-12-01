@@ -60,6 +60,7 @@ public class EntityIronGolem extends EntityGolem implements IEntityAngerable {
     private int offerFlowerTick;
     private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
+    @Nullable
     private UUID persistentAngerTarget;
 
     public EntityIronGolem(EntityTypes<? extends EntityIronGolem> type, World world) {
@@ -179,6 +180,7 @@ public class EntityIronGolem extends EntityGolem implements IEntityAngerable {
         this.persistentAngerTarget = uuid;
     }
 
+    @Nullable
     @Override
     public UUID getAngerTarget() {
         return this.persistentAngerTarget;

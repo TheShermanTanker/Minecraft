@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
@@ -17,7 +18,9 @@ import javax.annotation.Nullable;
 import net.minecraft.SystemUtils;
 import net.minecraft.data.RegistryGeneration;
 import net.minecraft.resources.MinecraftKey;
+import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryResourceAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.dimension.DimensionManager;
@@ -26,24 +29,26 @@ import net.minecraft.world.level.levelgen.carver.WorldGenCarverWrapper;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureConfigured;
 import net.minecraft.world.level.levelgen.feature.structures.WorldGenFeatureDefinedStructurePoolTemplate;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureStructureProcessorType;
-import net.minecraft.world.level.levelgen.surfacebuilders.WorldGenSurfaceComposite;
+import net.minecraft.world.level.levelgen.synth.NormalNoise$NoiseParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class IRegistryCustom {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     static final Map<ResourceKey<? extends IRegistry<?>>, IRegistryCustom.RegistryData<?>> REGISTRIES = SystemUtils.make(() -> {
         Builder<ResourceKey<? extends IRegistry<?>>, IRegistryCustom.RegistryData<?>> builder = ImmutableMap.builder();
         put(builder, IRegistry.DIMENSION_TYPE_REGISTRY, DimensionManager.DIRECT_CODEC, DimensionManager.DIRECT_CODEC);
         put(builder, IRegistry.BIOME_REGISTRY, BiomeBase.DIRECT_CODEC, BiomeBase.NETWORK_CODEC);
-        put(builder, IRegistry.CONFIGURED_SURFACE_BUILDER_REGISTRY, WorldGenSurfaceComposite.DIRECT_CODEC);
         put(builder, IRegistry.CONFIGURED_CARVER_REGISTRY, WorldGenCarverWrapper.DIRECT_CODEC);
         put(builder, IRegistry.CONFIGURED_FEATURE_REGISTRY, WorldGenFeatureConfigured.DIRECT_CODEC);
+        put(builder, IRegistry.PLACED_FEATURE_REGISTRY, PlacedFeature.DIRECT_CODEC);
         put(builder, IRegistry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, StructureFeature.DIRECT_CODEC);
         put(builder, IRegistry.PROCESSOR_LIST_REGISTRY, DefinedStructureStructureProcessorType.DIRECT_CODEC);
         put(builder, IRegistry.TEMPLATE_POOL_REGISTRY, WorldGenFeatureDefinedStructurePoolTemplate.DIRECT_CODEC);
         put(builder, IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY, GeneratorSettingBase.DIRECT_CODEC);
+        put(builder, IRegistry.NOISE_REGISTRY, NormalNoise$NoiseParameters.DIRECT_CODEC);
         return builder.build();
     });
     private static final IRegistryCustom.Dimension BUILTIN = SystemUtils.make(() -> {
@@ -84,19 +89,23 @@ public abstract class IRegistryCustom {
         infosBuilder.put(registryRef, new IRegistryCustom.RegistryData<>(registryRef, entryCodec, networkEntryCodec));
     }
 
+    public static Iterable<IRegistryCustom.RegistryData<?>> knownRegistries() {
+        return REGISTRIES.values();
+    }
+
     public static IRegistryCustom.Dimension builtin() {
         IRegistryCustom.Dimension registryHolder = new IRegistryCustom.Dimension();
-        RegistryReadOps.ResourceAccess.MemoryMap memoryMap = new RegistryReadOps.ResourceAccess.MemoryMap();
+        RegistryResourceAccess.InMemoryStorage inMemoryStorage = new RegistryResourceAccess.InMemoryStorage();
 
         for(IRegistryCustom.RegistryData<?> registryData : REGISTRIES.values()) {
-            addBuiltinElements(registryHolder, memoryMap, registryData);
+            addBuiltinElements(registryHolder, inMemoryStorage, registryData);
         }
 
-        RegistryReadOps.createAndLoad(JsonOps.INSTANCE, memoryMap, registryHolder);
+        RegistryReadOps.createAndLoad(JsonOps.INSTANCE, inMemoryStorage, registryHolder);
         return registryHolder;
     }
 
-    private static <E> void addBuiltinElements(IRegistryCustom.Dimension registryManager, RegistryReadOps.ResourceAccess.MemoryMap entryLoader, IRegistryCustom.RegistryData<E> info) {
+    private static <E> void addBuiltinElements(IRegistryCustom.Dimension registryManager, RegistryResourceAccess.InMemoryStorage entryLoader, IRegistryCustom.RegistryData<E> info) {
         ResourceKey<? extends IRegistry<E>> resourceKey = info.key();
         boolean bl = !resourceKey.equals(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY) && !resourceKey.equals(IRegistry.DIMENSION_TYPE_REGISTRY);
         IRegistry<E> registry = BUILTIN.registryOrThrow(resourceKey);
@@ -130,16 +139,16 @@ public abstract class IRegistryCustom {
 
     }
 
-    public static void load(IRegistryCustom registryAccess, RegistryReadOps<?> registryReadOps) {
+    public static void load(IRegistryCustom manager, RegistryReadOps<?> ops) {
         for(IRegistryCustom.RegistryData<?> registryData : REGISTRIES.values()) {
-            readRegistry(registryReadOps, registryAccess, registryData);
+            readRegistry(ops, manager, registryData);
         }
 
     }
 
-    private static <E> void readRegistry(RegistryReadOps<?> ops, IRegistryCustom registryAccess, IRegistryCustom.RegistryData<E> info) {
+    private static <E> void readRegistry(RegistryReadOps<?> ops, IRegistryCustom manager, IRegistryCustom.RegistryData<E> info) {
         ResourceKey<? extends IRegistry<E>> resourceKey = info.key();
-        RegistryMaterials<E> mappedRegistry = (RegistryMaterials)registryAccess.<E>ownedRegistryOrThrow(resourceKey);
+        RegistryMaterials<E> mappedRegistry = (RegistryMaterials)manager.<E>ownedRegistryOrThrow(resourceKey);
         DataResult<RegistryMaterials<E>> dataResult = ops.decodeElements(mappedRegistry, info.key(), info.codec());
         dataResult.error().ifPresent((partialResult) -> {
             throw new JsonParseException("Error loading registry data: " + partialResult.message());
@@ -183,6 +192,18 @@ public abstract class IRegistryCustom {
             this(IRegistryCustom.REGISTRIES.keySet().stream().collect(Collectors.toMap(Function.identity(), IRegistryCustom.Dimension::createRegistry)));
         }
 
+        public static IRegistryCustom readFromDisk(Dynamic<?> dynamic) {
+            return new IRegistryCustom.Dimension(IRegistryCustom.REGISTRIES.keySet().stream().collect(Collectors.toMap(Function.identity(), (resourceKey) -> {
+                return parseRegistry(resourceKey, dynamic);
+            })));
+        }
+
+        private static <E> RegistryMaterials<?> parseRegistry(ResourceKey<? extends IRegistry<?>> resourceKey, Dynamic<?> dynamic) {
+            return (RegistryMaterials)RegistryLookupCodec.create(resourceKey).codec().parse(dynamic).resultOrPartial(SystemUtils.prefix(resourceKey + " registry: ", IRegistryCustom.LOGGER::error)).orElseThrow(() -> {
+                return new IllegalStateException("Failed to get " + resourceKey + " registry");
+            });
+        }
+
         private Dimension(Map<? extends ResourceKey<? extends IRegistry<?>>, ? extends RegistryMaterials<?>> registries) {
             this.registries = registries;
         }
@@ -199,16 +220,15 @@ public abstract class IRegistryCustom {
         }
     }
 
-    static final class RegistryData<E> {
-        private final ResourceKey<? extends IRegistry<E>> key;
-        private final Codec<E> codec;
-        @Nullable
-        private final Codec<E> networkCodec;
-
+    public static record RegistryData<E>(ResourceKey<? extends IRegistry<E>> key, Codec<E> codec, @Nullable Codec<E> networkCodec) {
         public RegistryData(ResourceKey<? extends IRegistry<E>> registry, Codec<E> entryCodec, @Nullable Codec<E> networkEntryCodec) {
             this.key = registry;
             this.codec = entryCodec;
             this.networkCodec = networkEntryCodec;
+        }
+
+        public boolean sendToClient() {
+            return this.networkCodec != null;
         }
 
         public ResourceKey<? extends IRegistry<E>> key() {
@@ -222,10 +242,6 @@ public abstract class IRegistryCustom {
         @Nullable
         public Codec<E> networkCodec() {
             return this.networkCodec;
-        }
-
-        public boolean sendToClient() {
-            return this.networkCodec != null;
         }
     }
 }

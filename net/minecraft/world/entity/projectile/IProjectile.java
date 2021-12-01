@@ -123,13 +123,13 @@ public abstract class IProjectile extends Entity {
         this.xRotO = this.getXRot();
     }
 
-    public void shootFromRotation(Entity user, float pitch, float yaw, float roll, float modifierZ, float modifierXYZ) {
+    public void shootFromRotation(Entity shooter, float pitch, float yaw, float roll, float speed, float divergence) {
         float f = -MathHelper.sin(yaw * ((float)Math.PI / 180F)) * MathHelper.cos(pitch * ((float)Math.PI / 180F));
         float g = -MathHelper.sin((pitch + roll) * ((float)Math.PI / 180F));
         float h = MathHelper.cos(yaw * ((float)Math.PI / 180F)) * MathHelper.cos(pitch * ((float)Math.PI / 180F));
-        this.shoot((double)f, (double)g, (double)h, modifierZ, modifierXYZ);
-        Vec3D vec3 = user.getMot();
-        this.setMot(this.getMot().add(vec3.x, user.isOnGround() ? 0.0D : vec3.y, vec3.z));
+        this.shoot((double)f, (double)g, (double)h, speed, divergence);
+        Vec3D vec3 = shooter.getMot();
+        this.setMot(this.getMot().add(vec3.x, shooter.isOnGround() ? 0.0D : vec3.y, vec3.z));
     }
 
     protected void onHit(MovingObjectPosition hitResult) {

@@ -15,6 +15,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 public class CriterionConditionEnchantments {
     public static final CriterionConditionEnchantments ANY = new CriterionConditionEnchantments();
     public static final CriterionConditionEnchantments[] NONE = new CriterionConditionEnchantments[0];
+    @Nullable
     private final Enchantment enchantment;
     private final CriterionConditionValue.IntegerRange level;
 
@@ -35,10 +36,10 @@ public class CriterionConditionEnchantments {
             }
 
             int i = enchantments.get(this.enchantment);
-            if (this.level != null && !this.level.matches(i)) {
+            if (this.level != CriterionConditionValue.IntegerRange.ANY && !this.level.matches(i)) {
                 return false;
             }
-        } else if (this.level != null) {
+        } else if (this.level != CriterionConditionValue.IntegerRange.ANY) {
             for(Integer integer : enchantments.values()) {
                 if (this.level.matches(integer)) {
                     return true;

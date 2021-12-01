@@ -16,7 +16,6 @@ public class DataConverterAddChoices extends DataFix {
         this.type = types;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         TaggedChoiceType<?> taggedChoiceType = this.getInputSchema().findChoiceType(this.type);
         TaggedChoiceType<?> taggedChoiceType2 = this.getOutputSchema().findChoiceType(this.type);

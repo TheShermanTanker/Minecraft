@@ -1,17 +1,21 @@
 package net.minecraft.server;
 
 import java.io.PrintStream;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
+import net.minecraft.SystemUtils;
 import net.minecraft.commands.CommandDispatcher;
 import net.minecraft.commands.arguments.selector.options.PlayerSelector;
 import net.minecraft.commands.synchronization.ArgumentRegistry;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.cauldron.ICauldronBehavior;
 import net.minecraft.core.dispenser.IDispenseBehavior;
+import net.minecraft.data.RegistryGeneration;
 import net.minecraft.locale.LocaleLanguage;
 import net.minecraft.tags.TagStatic;
 import net.minecraft.world.effect.MobEffectBase;
@@ -25,6 +29,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockComposter;
 import net.minecraft.world.level.block.BlockFire;
+import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,9 +127,22 @@ public class DispenserRegistry {
                 LOGGER.error("Missing translations: {}", (Object)key);
             });
             CommandDispatcher.validate();
+            validateThatAllBiomeFeaturesHaveBiomeFilter();
         }
 
         AttributeDefaults.validate();
+    }
+
+    private static void validateThatAllBiomeFeaturesHaveBiomeFilter() {
+        RegistryGeneration.BIOME.stream().forEach((biome) -> {
+            List<List<Supplier<PlacedFeature>>> list = biome.getGenerationSettings().features();
+            list.stream().flatMap(Collection::stream).forEach((placedFeatureSupplier) -> {
+                if (!((PlacedFeature)placedFeatureSupplier.get()).getPlacement().contains(BiomeFilter.biome())) {
+                    SystemUtils.logAndPauseIfInIde("Placed feature " + RegistryGeneration.PLACED_FEATURE.getResourceKey((PlacedFeature)placedFeatureSupplier.get()) + " is missing BiomeFilter.biome()");
+                }
+
+            });
+        });
     }
 
     private static void wrapStreams() {

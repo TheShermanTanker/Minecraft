@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.Packet;
 public class PacketLoginInCustomPayload implements Packet<PacketLoginInListener> {
     private static final int MAX_PAYLOAD_SIZE = 1048576;
     private final int transactionId;
+    @Nullable
     private final PacketDataSerializer data;
 
     public PacketLoginInCustomPayload(int queryId, @Nullable PacketDataSerializer response) {
@@ -50,6 +51,7 @@ public class PacketLoginInCustomPayload implements Packet<PacketLoginInListener>
         return this.transactionId;
     }
 
+    @Nullable
     public PacketDataSerializer getData() {
         return this.data;
     }

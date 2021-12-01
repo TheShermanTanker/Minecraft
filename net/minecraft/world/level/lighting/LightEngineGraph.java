@@ -25,7 +25,6 @@ public abstract class LightEngineGraph {
 
             for(int i = 0; i < levelCount; ++i) {
                 this.queues[i] = new LongLinkedOpenHashSet(expectedLevelSize, 0.5F) {
-                    @Override
                     protected void rehash(int i) {
                         if (i > expectedLevelSize) {
                             super.rehash(i);
@@ -36,7 +35,6 @@ public abstract class LightEngineGraph {
             }
 
             this.computedLevels = new Long2ByteOpenHashMap(expectedTotalSize, 0.5F) {
-                @Override
                 protected void rehash(int i) {
                     if (i > expectedTotalSize) {
                         super.rehash(i);

@@ -31,14 +31,14 @@ public class BehaviorCareer extends Behavior<EntityVillager> {
         world.broadcastEntityEffect(entity, (byte)14);
         if (entity.getVillagerData().getProfession() == VillagerProfession.NONE) {
             MinecraftServer minecraftServer = world.getMinecraftServer();
-            Optional.ofNullable(minecraftServer.getWorldServer(globalPos.getDimensionManager())).flatMap((serverLevel) -> {
-                return serverLevel.getPoiManager().getType(globalPos.getBlockPosition());
+            Optional.ofNullable(minecraftServer.getWorldServer(globalPos.getDimensionManager())).flatMap((worldx) -> {
+                return worldx.getPoiManager().getType(globalPos.getBlockPosition());
             }).flatMap((poiType) -> {
-                return IRegistry.VILLAGER_PROFESSION.stream().filter((villagerProfession) -> {
-                    return villagerProfession.getJobPoiType() == poiType;
+                return IRegistry.VILLAGER_PROFESSION.stream().filter((profession) -> {
+                    return profession.getJobPoiType() == poiType;
                 }).findFirst();
-            }).ifPresent((villagerProfession) -> {
-                entity.setVillagerData(entity.getVillagerData().withProfession(villagerProfession));
+            }).ifPresent((profession) -> {
+                entity.setVillagerData(entity.getVillagerData().withProfession(profession));
                 entity.refreshBrain(world);
             });
         }

@@ -8,8 +8,8 @@ import net.minecraft.resources.MinecraftKey;
 public class RecipeSerializerComplex<T extends IRecipe<?>> implements RecipeSerializer<T> {
     private final Function<MinecraftKey, T> constructor;
 
-    public RecipeSerializerComplex(Function<MinecraftKey, T> id) {
-        this.constructor = id;
+    public RecipeSerializerComplex(Function<MinecraftKey, T> factory) {
+        this.constructor = factory;
     }
 
     @Override

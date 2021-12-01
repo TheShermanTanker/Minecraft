@@ -74,8 +74,8 @@ public class WorldGenFeatureDefinedStructurePoolTemplate {
         if (this.maxSize == Integer.MIN_VALUE) {
             this.maxSize = this.templates.stream().filter((structurePoolElement) -> {
                 return structurePoolElement != WorldGenFeatureDefinedStructurePoolEmpty.INSTANCE;
-            }).mapToInt((structurePoolElement) -> {
-                return structurePoolElement.getBoundingBox(structureManager, BlockPosition.ZERO, EnumBlockRotation.NONE).getYSpan();
+            }).mapToInt((element) -> {
+                return element.getBoundingBox(structureManager, BlockPosition.ZERO, EnumBlockRotation.NONE).getYSpan();
             }).max().orElse(0);
         }
 

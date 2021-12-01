@@ -17,8 +17,7 @@ import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.WorldGenFeaturePillagerOutpostPoolPiece;
 
-public class Beardifier {
-    public static final Beardifier NO_BEARDS = new Beardifier();
+public class Beardifier implements NoiseChunk.NoiseFiller {
     public static final int BEARD_KERNEL_RADIUS = 12;
     private static final int BEARD_KERNEL_SIZE = 24;
     private static final float[] BEARD_KERNEL = SystemUtils.make(new float[13824], (array) -> {
@@ -36,7 +35,7 @@ public class Beardifier {
     private final ObjectListIterator<StructurePiece> pieceIterator;
     private final ObjectListIterator<WorldGenFeatureDefinedStructureJigsawJunction> junctionIterator;
 
-    protected Beardifier(StructureManager accessor, IChunkAccess chunk) {
+    protected Beardifier(StructureManager structureAccessor, IChunkAccess chunk) {
         ChunkCoordIntPair chunkPos = chunk.getPos();
         int i = chunkPos.getMinBlockX();
         int j = chunkPos.getMinBlockZ();
@@ -44,7 +43,7 @@ public class Beardifier {
         this.rigids = new ObjectArrayList<>(10);
 
         for(StructureGenerator<?> structureFeature : StructureGenerator.NOISE_AFFECTING_FEATURES) {
-            accessor.startsForFeature(SectionPosition.bottomOf(chunk), structureFeature).forEach((start) -> {
+            structureAccessor.startsForFeature(SectionPosition.bottomOf(chunk), structureFeature).forEach((start) -> {
                 for(StructurePiece structurePiece : start.getPieces()) {
                     if (structurePiece.isCloseToChunk(chunkPos, 12)) {
                         if (structurePiece instanceof WorldGenFeaturePillagerOutpostPoolPiece) {
@@ -74,14 +73,8 @@ public class Beardifier {
         this.junctionIterator = this.junctions.iterator();
     }
 
-    private Beardifier() {
-        this.junctions = new ObjectArrayList<>();
-        this.rigids = new ObjectArrayList<>();
-        this.pieceIterator = this.rigids.iterator();
-        this.junctionIterator = this.junctions.iterator();
-    }
-
-    protected double beardifyOrBury(int x, int y, int z) {
+    @Override
+    public double calculateNoise(int x, int y, int z) {
         double d = 0.0D;
 
         while(this.pieceIterator.hasNext()) {
@@ -113,7 +106,7 @@ public class Beardifier {
     }
 
     private static double getBuryContribution(int x, int y, int z) {
-        double d = MathHelper.length(x, (double)y / 2.0D, z);
+        double d = MathHelper.length((double)x, (double)y / 2.0D, (double)z);
         return MathHelper.clampedMap(d, 0.0D, 6.0D, 1.0D, 0.0D);
     }
 

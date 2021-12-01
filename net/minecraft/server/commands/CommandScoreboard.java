@@ -348,8 +348,6 @@ public class CommandScoreboard {
         Scoreboard scoreboard = source.getServer().getScoreboard();
         if (scoreboard.getObjective(objective) != null) {
             throw ERROR_OBJECTIVE_ALREADY_EXISTS.create();
-        } else if (objective.length() > 16) {
-            throw ArgumentScoreboardObjective.ERROR_OBJECTIVE_NAME_TOO_LONG.create(16);
         } else {
             scoreboard.registerObjective(objective, criteria, displayName, criteria.getDefaultRenderType());
             ScoreboardObjective objective2 = scoreboard.getObjective(objective);

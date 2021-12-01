@@ -109,7 +109,7 @@ public abstract class BlockButtonAbstract extends BlockAttachable {
     public void press(IBlockData state, World world, BlockPosition pos) {
         world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(true)), 3);
         this.updateNeighbours(state, world, pos);
-        world.getBlockTickList().scheduleTick(pos, this, this.getPressDuration());
+        world.scheduleTick(pos, this, this.getPressDuration());
     }
 
     protected void playSound(@Nullable EntityHuman player, GeneratorAccess world, BlockPosition pos, boolean powered) {
@@ -178,7 +178,7 @@ public abstract class BlockButtonAbstract extends BlockAttachable {
         }
 
         if (bl) {
-            world.getBlockTickList().scheduleTick(new BlockPosition(pos), this, this.getPressDuration());
+            world.scheduleTick(new BlockPosition(pos), this, this.getPressDuration());
         }
 
     }

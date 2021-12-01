@@ -50,7 +50,7 @@ public class EnchantmentFrostWalker extends Enchantment {
                         IBlockData blockState3 = world.getType(blockPos2);
                         if (blockState3.getMaterial() == Material.WATER && blockState3.get(BlockFluids.LEVEL) == 0 && blockState.canPlace(world, blockPos2) && world.isUnobstructed(blockState, blockPos2, VoxelShapeCollision.empty())) {
                             world.setTypeUpdate(blockPos2, blockState);
-                            world.getBlockTickList().scheduleTick(blockPos2, Blocks.FROSTED_ICE, MathHelper.nextInt(entity.getRandom(), 60, 120));
+                            world.scheduleTick(blockPos2, Blocks.FROSTED_ICE, MathHelper.nextInt(entity.getRandom(), 60, 120));
                         }
                     }
                 }

@@ -186,7 +186,8 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
         EnumDirection direction = ctx.getHorizontalDirection();
         BlockPosition blockPos = ctx.getClickPosition();
         BlockPosition blockPos2 = blockPos.relative(direction);
-        return ctx.getWorld().getType(blockPos2).canBeReplaced(ctx) ? this.getBlockData().set(FACING, direction) : null;
+        World level = ctx.getWorld();
+        return level.getType(blockPos2).canBeReplaced(ctx) && level.getWorldBorder().isWithinBounds(blockPos2) ? this.getBlockData().set(FACING, direction) : null;
     }
 
     @Override
@@ -218,10 +219,10 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
         return world.getType(pos.below()).getBlock() instanceof BlockBed;
     }
 
-    public static Optional<Vec3D> findStandUpPosition(EntityTypes<?> type, ICollisionAccess world, BlockPosition pos, float f) {
+    public static Optional<Vec3D> findStandUpPosition(EntityTypes<?> type, ICollisionAccess world, BlockPosition pos, float spawnAngle) {
         EnumDirection direction = world.getType(pos).get(FACING);
         EnumDirection direction2 = direction.getClockWise();
-        EnumDirection direction3 = direction2.isFacingAngle(f) ? direction2.opposite() : direction2;
+        EnumDirection direction3 = direction2.isFacingAngle(spawnAngle) ? direction2.opposite() : direction2;
         if (isBunkBed(world, pos)) {
             return findBunkBedStandUpPosition(type, world, pos, direction, direction3);
         } else {
@@ -231,8 +232,8 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
         }
     }
 
-    private static Optional<Vec3D> findBunkBedStandUpPosition(EntityTypes<?> type, ICollisionAccess world, BlockPosition pos, EnumDirection direction, EnumDirection direction2) {
-        int[][] is = bedSurroundStandUpOffsets(direction, direction2);
+    private static Optional<Vec3D> findBunkBedStandUpPosition(EntityTypes<?> type, ICollisionAccess world, BlockPosition pos, EnumDirection bedDirection, EnumDirection respawnDirection) {
+        int[][] is = bedSurroundStandUpOffsets(bedDirection, respawnDirection);
         Optional<Vec3D> optional = findStandUpPositionAtOffset(type, world, pos, is, true);
         if (optional.isPresent()) {
             return optional;
@@ -242,7 +243,7 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
             if (optional2.isPresent()) {
                 return optional2;
             } else {
-                int[][] js = bedAboveStandUpOffsets(direction);
+                int[][] js = bedAboveStandUpOffsets(bedDirection);
                 Optional<Vec3D> optional3 = findStandUpPositionAtOffset(type, world, pos, js, true);
                 if (optional3.isPresent()) {
                     return optional3;
@@ -259,12 +260,12 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
         }
     }
 
-    private static Optional<Vec3D> findStandUpPositionAtOffset(EntityTypes<?> type, ICollisionAccess world, BlockPosition pos, int[][] is, boolean bl) {
+    private static Optional<Vec3D> findStandUpPositionAtOffset(EntityTypes<?> type, ICollisionAccess world, BlockPosition pos, int[][] possibleOffsets, boolean ignoreInvalidPos) {
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
 
-        for(int[] js : is) {
-            mutableBlockPos.set(pos.getX() + js[0], pos.getY(), pos.getZ() + js[1]);
-            Vec3D vec3 = DismountUtil.findSafeDismountLocation(type, world, mutableBlockPos, bl);
+        for(int[] is : possibleOffsets) {
+            mutableBlockPos.set(pos.getX() + is[0], pos.getY(), pos.getZ() + is[1]);
+            Vec3D vec3 = DismountUtil.findSafeDismountLocation(type, world, mutableBlockPos, ignoreInvalidPos);
             if (vec3 != null) {
                 return Optional.of(vec3);
             }
@@ -320,15 +321,15 @@ public class BlockBed extends BlockFacingHorizontal implements ITileEntity {
         return false;
     }
 
-    private static int[][] bedStandUpOffsets(EnumDirection direction, EnumDirection direction2) {
-        return ArrayUtils.addAll((int[][])bedSurroundStandUpOffsets(direction, direction2), (int[][])bedAboveStandUpOffsets(direction));
+    private static int[][] bedStandUpOffsets(EnumDirection bedDirection, EnumDirection respawnDirection) {
+        return ArrayUtils.addAll((int[][])bedSurroundStandUpOffsets(bedDirection, respawnDirection), (int[][])bedAboveStandUpOffsets(bedDirection));
     }
 
-    private static int[][] bedSurroundStandUpOffsets(EnumDirection direction, EnumDirection direction2) {
-        return new int[][]{{direction2.getAdjacentX(), direction2.getAdjacentZ()}, {direction2.getAdjacentX() - direction.getAdjacentX(), direction2.getAdjacentZ() - direction.getAdjacentZ()}, {direction2.getAdjacentX() - direction.getAdjacentX() * 2, direction2.getAdjacentZ() - direction.getAdjacentZ() * 2}, {-direction.getAdjacentX() * 2, -direction.getAdjacentZ() * 2}, {-direction2.getAdjacentX() - direction.getAdjacentX() * 2, -direction2.getAdjacentZ() - direction.getAdjacentZ() * 2}, {-direction2.getAdjacentX() - direction.getAdjacentX(), -direction2.getAdjacentZ() - direction.getAdjacentZ()}, {-direction2.getAdjacentX(), -direction2.getAdjacentZ()}, {-direction2.getAdjacentX() + direction.getAdjacentX(), -direction2.getAdjacentZ() + direction.getAdjacentZ()}, {direction.getAdjacentX(), direction.getAdjacentZ()}, {direction2.getAdjacentX() + direction.getAdjacentX(), direction2.getAdjacentZ() + direction.getAdjacentZ()}};
+    private static int[][] bedSurroundStandUpOffsets(EnumDirection bedDirection, EnumDirection respawnDirection) {
+        return new int[][]{{respawnDirection.getAdjacentX(), respawnDirection.getAdjacentZ()}, {respawnDirection.getAdjacentX() - bedDirection.getAdjacentX(), respawnDirection.getAdjacentZ() - bedDirection.getAdjacentZ()}, {respawnDirection.getAdjacentX() - bedDirection.getAdjacentX() * 2, respawnDirection.getAdjacentZ() - bedDirection.getAdjacentZ() * 2}, {-bedDirection.getAdjacentX() * 2, -bedDirection.getAdjacentZ() * 2}, {-respawnDirection.getAdjacentX() - bedDirection.getAdjacentX() * 2, -respawnDirection.getAdjacentZ() - bedDirection.getAdjacentZ() * 2}, {-respawnDirection.getAdjacentX() - bedDirection.getAdjacentX(), -respawnDirection.getAdjacentZ() - bedDirection.getAdjacentZ()}, {-respawnDirection.getAdjacentX(), -respawnDirection.getAdjacentZ()}, {-respawnDirection.getAdjacentX() + bedDirection.getAdjacentX(), -respawnDirection.getAdjacentZ() + bedDirection.getAdjacentZ()}, {bedDirection.getAdjacentX(), bedDirection.getAdjacentZ()}, {respawnDirection.getAdjacentX() + bedDirection.getAdjacentX(), respawnDirection.getAdjacentZ() + bedDirection.getAdjacentZ()}};
     }
 
-    private static int[][] bedAboveStandUpOffsets(EnumDirection direction) {
-        return new int[][]{{0, 0}, {-direction.getAdjacentX(), -direction.getAdjacentZ()}};
+    private static int[][] bedAboveStandUpOffsets(EnumDirection bedDirection) {
+        return new int[][]{{0, 0}, {-bedDirection.getAdjacentX(), -bedDirection.getAdjacentZ()}};
     }
 }

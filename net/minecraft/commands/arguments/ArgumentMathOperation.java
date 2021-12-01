@@ -25,11 +25,10 @@ public class ArgumentMathOperation implements ArgumentType<ArgumentMathOperation
         return new ArgumentMathOperation();
     }
 
-    public static ArgumentMathOperation.Operation getOperation(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, ArgumentMathOperation.Operation.class);
+    public static ArgumentMathOperation.Operation getOperation(CommandContext<CommandListenerWrapper> context, String name) {
+        return context.getArgument(name, ArgumentMathOperation.Operation.class);
     }
 
-    @Override
     public ArgumentMathOperation.Operation parse(StringReader stringReader) throws CommandSyntaxException {
         if (!stringReader.canRead()) {
             throw ERROR_INVALID_OPERATION.create();
@@ -44,56 +43,54 @@ public class ArgumentMathOperation implements ArgumentType<ArgumentMathOperation
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return ICompletionProvider.suggest(new String[]{"=", "+=", "-=", "*=", "/=", "%=", "<", ">", "><"}, suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
 
-    private static ArgumentMathOperation.Operation getOperation(String string) throws CommandSyntaxException {
-        return (ArgumentMathOperation.Operation)(string.equals("><") ? (score, score2) -> {
-            int i = score.getScore();
-            score.setScore(score2.getScore());
-            score2.setScore(i);
-        } : getSimpleOperation(string));
+    private static ArgumentMathOperation.Operation getOperation(String operator) throws CommandSyntaxException {
+        return (ArgumentMathOperation.Operation)(operator.equals("><") ? (a, b) -> {
+            int i = a.getScore();
+            a.setScore(b.getScore());
+            b.setScore(i);
+        } : getSimpleOperation(operator));
     }
 
-    private static ArgumentMathOperation.SimpleOperation getSimpleOperation(String string) throws CommandSyntaxException {
-        switch(string) {
+    private static ArgumentMathOperation.SimpleOperation getSimpleOperation(String operator) throws CommandSyntaxException {
+        switch(operator) {
         case "=":
-            return (i, j) -> {
-                return j;
+            return (a, b) -> {
+                return b;
             };
         case "+=":
-            return (i, j) -> {
-                return i + j;
+            return (a, b) -> {
+                return a + b;
             };
         case "-=":
-            return (i, j) -> {
-                return i - j;
+            return (a, b) -> {
+                return a - b;
             };
         case "*=":
-            return (i, j) -> {
-                return i * j;
+            return (a, b) -> {
+                return a * b;
             };
         case "/=":
-            return (i, j) -> {
-                if (j == 0) {
+            return (a, b) -> {
+                if (b == 0) {
                     throw ERROR_DIVIDE_BY_ZERO.create();
                 } else {
-                    return MathHelper.intFloorDiv(i, j);
+                    return MathHelper.intFloorDiv(a, b);
                 }
             };
         case "%=":
-            return (i, j) -> {
-                if (j == 0) {
+            return (a, b) -> {
+                if (b == 0) {
                     throw ERROR_DIVIDE_BY_ZERO.create();
                 } else {
-                    return MathHelper.positiveModulo(i, j);
+                    return MathHelper.positiveModulo(a, b);
                 }
             };
         case "<":
@@ -107,16 +104,16 @@ public class ArgumentMathOperation implements ArgumentType<ArgumentMathOperation
 
     @FunctionalInterface
     public interface Operation {
-        void apply(ScoreboardScore score, ScoreboardScore score2) throws CommandSyntaxException;
+        void apply(ScoreboardScore a, ScoreboardScore b) throws CommandSyntaxException;
     }
 
     @FunctionalInterface
     interface SimpleOperation extends ArgumentMathOperation.Operation {
-        int apply(int i, int j) throws CommandSyntaxException;
+        int apply(int a, int b) throws CommandSyntaxException;
 
         @Override
-        default void apply(ScoreboardScore score, ScoreboardScore score2) throws CommandSyntaxException {
-            score.setScore(this.apply(score.getScore(), score2.getScore()));
+        default void apply(ScoreboardScore a, ScoreboardScore b) throws CommandSyntaxException {
+            a.setScore(this.apply(a.getScore(), b.getScore()));
         }
     }
 }

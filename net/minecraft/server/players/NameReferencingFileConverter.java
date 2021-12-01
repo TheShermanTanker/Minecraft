@@ -81,7 +81,6 @@ public class NameReferencingFileConverter {
                 final Map<String, String[]> map = Maps.newHashMap();
                 readOldListFormat(OLD_USERBANLIST, map);
                 ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
-                    @Override
                     public void onProfileLookupSucceeded(GameProfile gameProfile) {
                         server.getUserCache().add(gameProfile);
                         String[] strings = map.get(gameProfile.getName().toLowerCase(Locale.ROOT));
@@ -97,7 +96,6 @@ public class NameReferencingFileConverter {
                         }
                     }
 
-                    @Override
                     public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
                         NameReferencingFileConverter.LOGGER.warn("Could not lookup user banlist entry for {}", gameProfile.getName(), exception);
                         if (!(exception instanceof ProfileNotFoundException)) {
@@ -171,13 +169,11 @@ public class NameReferencingFileConverter {
             try {
                 List<String> list = Files.readLines(OLD_OPLIST, StandardCharsets.UTF_8);
                 ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
-                    @Override
                     public void onProfileLookupSucceeded(GameProfile gameProfile) {
                         server.getUserCache().add(gameProfile);
                         serverOpList.add(new OpListEntry(gameProfile, server.getOperatorUserPermissionLevel(), false));
                     }
 
-                    @Override
                     public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
                         NameReferencingFileConverter.LOGGER.warn("Could not lookup oplist entry for {}", gameProfile.getName(), exception);
                         if (!(exception instanceof ProfileNotFoundException)) {
@@ -215,13 +211,11 @@ public class NameReferencingFileConverter {
             try {
                 List<String> list = Files.readLines(OLD_WHITELIST, StandardCharsets.UTF_8);
                 ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
-                    @Override
                     public void onProfileLookupSucceeded(GameProfile gameProfile) {
                         server.getUserCache().add(gameProfile);
                         userWhiteList.add(new WhiteListEntry(gameProfile));
                     }
 
-                    @Override
                     public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
                         NameReferencingFileConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", gameProfile.getName(), exception);
                         if (!(exception instanceof ProfileNotFoundException)) {
@@ -254,13 +248,11 @@ public class NameReferencingFileConverter {
             } else if (!server.isEmbeddedServer() && server.getOnlineMode()) {
                 final List<GameProfile> list = Lists.newArrayList();
                 ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
-                    @Override
                     public void onProfileLookupSucceeded(GameProfile gameProfile) {
                         server.getUserCache().add(gameProfile);
                         list.add(gameProfile);
                     }
 
-                    @Override
                     public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
                         NameReferencingFileConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", gameProfile.getName(), exception);
                     }
@@ -300,7 +292,6 @@ public class NameReferencingFileConverter {
             try {
                 final String[] strings = list.toArray(new String[list.size()]);
                 ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
-                    @Override
                     public void onProfileLookupSucceeded(GameProfile gameProfile) {
                         minecraftServer.getUserCache().add(gameProfile);
                         UUID uUID = gameProfile.getId();
@@ -311,7 +302,6 @@ public class NameReferencingFileConverter {
                         }
                     }
 
-                    @Override
                     public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
                         NameReferencingFileConverter.LOGGER.warn("Could not lookup user uuid for {}", gameProfile.getName(), exception);
                         if (exception instanceof ProfileNotFoundException) {

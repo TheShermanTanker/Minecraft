@@ -17,9 +17,9 @@ public class UnderwaterMagmaConfiguration implements WorldGenFeatureConfiguratio
     public final int placementRadiusAroundFloor;
     public final float placementProbabilityPerValidPosition;
 
-    public UnderwaterMagmaConfiguration(int floorSearchRange, int placementRadiusAroundFloor, float placementProbabilityPerValidPosition) {
-        this.floorSearchRange = floorSearchRange;
-        this.placementRadiusAroundFloor = placementRadiusAroundFloor;
+    public UnderwaterMagmaConfiguration(int minDistanceBelowSurface, int floorSearchRange, float placementProbabilityPerValidPosition) {
+        this.floorSearchRange = minDistanceBelowSurface;
+        this.placementRadiusAroundFloor = floorSearchRange;
         this.placementProbabilityPerValidPosition = placementProbabilityPerValidPosition;
     }
 }

@@ -13,10 +13,10 @@ public class CustomFunctionCallback implements CustomFunctionCallbackTimer<Minec
     }
 
     @Override
-    public void handle(MinecraftServer server, CustomFunctionCallbackTimerQueue<MinecraftServer> events, long time) {
-        CustomFunctionData serverFunctionManager = server.getFunctionData();
-        serverFunctionManager.get(this.functionId).ifPresent((commandFunction) -> {
-            serverFunctionManager.execute(commandFunction, serverFunctionManager.getGameLoopSender());
+    public void handle(MinecraftServer minecraftServer, CustomFunctionCallbackTimerQueue<MinecraftServer> timerQueue, long l) {
+        CustomFunctionData serverFunctionManager = minecraftServer.getFunctionData();
+        serverFunctionManager.get(this.functionId).ifPresent((function) -> {
+            serverFunctionManager.execute(function, serverFunctionManager.getGameLoopSender());
         });
     }
 

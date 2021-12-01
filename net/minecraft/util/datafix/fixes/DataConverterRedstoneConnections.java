@@ -11,7 +11,6 @@ public class DataConverterRedstoneConnections extends DataFix {
         super(outputSchema, false);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Schema schema = this.getInputSchema();
         return this.fixTypeEverywhereTyped("RedstoneConnectionsFix", schema.getType(DataConverterTypes.BLOCK_STATE), (typed) -> {

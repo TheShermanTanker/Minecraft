@@ -10,7 +10,7 @@ import net.minecraft.world.level.dimension.DimensionManager;
 
 public class WorldGenFlatLayerInfo {
     public static final Codec<WorldGenFlatLayerInfo> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(Codec.intRange(0, DimensionManager.Y_SIZE).fieldOf("height").forGetter(WorldGenFlatLayerInfo::getHeight), IRegistry.BLOCK.fieldOf("block").orElse(Blocks.AIR).forGetter((flatLayerInfo) -> {
+        return instance.group(Codec.intRange(0, DimensionManager.Y_SIZE).fieldOf("height").forGetter(WorldGenFlatLayerInfo::getHeight), IRegistry.BLOCK.byNameCodec().fieldOf("block").orElse(Blocks.AIR).forGetter((flatLayerInfo) -> {
             return flatLayerInfo.getBlockState().getBlock();
         })).apply(instance, WorldGenFlatLayerInfo::new);
     });

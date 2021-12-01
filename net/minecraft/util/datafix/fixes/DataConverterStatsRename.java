@@ -20,7 +20,6 @@ public class DataConverterStatsRename extends DataFix {
         this.renames = replacements;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return TypeRewriteRule.seq(this.createStatRule(), this.createCriteriaRule());
     }

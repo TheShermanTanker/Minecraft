@@ -9,6 +9,7 @@ import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityBanner;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 import net.minecraft.world.level.block.state.BlockBase;
 import net.minecraft.world.level.block.state.IBlockData;
 
@@ -32,11 +33,14 @@ public abstract class BlockBannerAbstract extends BlockTileEntity {
 
     @Override
     public void postPlace(World world, BlockPosition pos, IBlockData state, @Nullable EntityLiving placer, ItemStack itemStack) {
-        if (itemStack.hasName()) {
-            TileEntity blockEntity = world.getTileEntity(pos);
-            if (blockEntity instanceof TileEntityBanner) {
-                ((TileEntityBanner)blockEntity).setCustomName(itemStack.getName());
-            }
+        if (world.isClientSide) {
+            world.getBlockEntity(pos, TileEntityTypes.BANNER).ifPresent((blockEntity) -> {
+                blockEntity.fromItem(itemStack);
+            });
+        } else if (itemStack.hasName()) {
+            world.getBlockEntity(pos, TileEntityTypes.BANNER).ifPresent((blockEntity) -> {
+                blockEntity.setCustomName(itemStack.getName());
+            });
         }
 
     }

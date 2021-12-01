@@ -14,6 +14,7 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.damagesource.DamageSource;
@@ -382,8 +383,7 @@ public class EntityRabbit extends EntityAnimal {
     }
 
     public static boolean checkRabbitSpawnRules(EntityTypes<EntityRabbit> entity, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        IBlockData blockState = world.getType(pos.below());
-        return (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.SAND)) && world.getLightLevel(pos, 0) > 8;
+        return world.getType(pos.below()).is(TagsBlock.RABBITS_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
     }
 
     boolean wantsMoreFood() {
@@ -407,7 +407,7 @@ public class EntityRabbit extends EntityAnimal {
         return new Vec3D(0.0D, (double)(0.6F * this.getHeadHeight()), (double)(this.getWidth() * 0.4F));
     }
 
-    public class ControllerJumpRabbit extends ControllerJump {
+    public static class ControllerJumpRabbit extends ControllerJump {
         private final EntityRabbit rabbit;
         private boolean canJump;
 
@@ -424,8 +424,8 @@ public class EntityRabbit extends EntityAnimal {
             return this.canJump;
         }
 
-        public void setCanJump(boolean bl) {
-            this.canJump = bl;
+        public void setCanJump(boolean canJump) {
+            this.canJump = canJump;
         }
 
         @Override

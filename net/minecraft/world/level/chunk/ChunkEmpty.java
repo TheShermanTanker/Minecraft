@@ -2,7 +2,6 @@ package net.minecraft.world.level.chunk;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.IRegistry;
 import net.minecraft.data.worldgen.biome.BiomeRegistry;
 import net.minecraft.server.level.PlayerChunk;
 import net.minecraft.world.level.ChunkCoordIntPair;
@@ -16,7 +15,7 @@ import net.minecraft.world.level.material.FluidTypes;
 
 public class ChunkEmpty extends Chunk {
     public ChunkEmpty(World world, ChunkCoordIntPair pos) {
-        super(world, pos, new ChunkEmpty.EmptyChunkBiomeContainer(world));
+        super(world, pos);
     }
 
     @Override
@@ -59,10 +58,6 @@ public class ChunkEmpty extends Chunk {
     }
 
     @Override
-    public void markDirty() {
-    }
-
-    @Override
     public boolean isEmpty() {
         return true;
     }
@@ -77,21 +72,8 @@ public class ChunkEmpty extends Chunk {
         return PlayerChunk.State.BORDER;
     }
 
-    static class EmptyChunkBiomeContainer extends BiomeStorage {
-        private static final BiomeBase[] EMPTY_BIOMES = new BiomeBase[0];
-
-        public EmptyChunkBiomeContainer(World world) {
-            super(world.registryAccess().registryOrThrow(IRegistry.BIOME_REGISTRY), world, EMPTY_BIOMES);
-        }
-
-        @Override
-        public int[] writeBiomes() {
-            throw new UnsupportedOperationException("Can not write biomes of an empty chunk");
-        }
-
-        @Override
-        public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
-            return BiomeRegistry.PLAINS;
-        }
+    @Override
+    public BiomeBase getBiome(int biomeX, int biomeY, int biomeZ) {
+        return BiomeRegistry.PLAINS;
     }
 }

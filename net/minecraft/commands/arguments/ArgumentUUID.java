@@ -26,7 +26,6 @@ public class ArgumentUUID implements ArgumentType<UUID> {
         return new ArgumentUUID();
     }
 
-    @Override
     public UUID parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.getRemaining();
         Matcher matcher = ALLOWED_CHARACTERS.matcher(string);
@@ -44,7 +43,6 @@ public class ArgumentUUID implements ArgumentType<UUID> {
         throw ERROR_INVALID_UUID.create();
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

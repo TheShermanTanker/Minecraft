@@ -43,7 +43,7 @@ public class CommandSummon {
         if (!World.isInSpawnableBounds(blockPos)) {
             throw INVALID_POSITION.create();
         } else {
-            NBTTagCompound compoundTag = nbt.c();
+            NBTTagCompound compoundTag = nbt.copy();
             compoundTag.setString("id", entity.toString());
             WorldServer serverLevel = source.getWorld();
             Entity entity2 = EntityTypes.loadEntityRecursive(compoundTag, serverLevel, (entityx) -> {

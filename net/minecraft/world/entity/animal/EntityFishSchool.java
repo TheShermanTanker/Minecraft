@@ -13,6 +13,7 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
 
 public abstract class EntityFishSchool extends EntityFish {
+    @Nullable
     private EntityFishSchool leader;
     private int schoolSize = 1;
 

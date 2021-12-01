@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.player.EntityHuman;
 public class PathfinderGoalLookAtPlayer extends PathfinderGoal {
     public static final float DEFAULT_PROBABILITY = 0.02F;
     protected final EntityInsentient mob;
+    @Nullable
     protected Entity lookAt;
     protected final float lookDistance;
     private int lookTime;
@@ -27,19 +29,19 @@ public class PathfinderGoalLookAtPlayer extends PathfinderGoal {
         this(mob, targetType, range, chance, false);
     }
 
-    public PathfinderGoalLookAtPlayer(EntityInsentient mob, Class<? extends EntityLiving> class_, float f, float g, boolean bl) {
+    public PathfinderGoalLookAtPlayer(EntityInsentient mob, Class<? extends EntityLiving> targetType, float range, float chance, boolean bl) {
         this.mob = mob;
-        this.lookAtType = class_;
-        this.lookDistance = f;
-        this.probability = g;
+        this.lookAtType = targetType;
+        this.lookDistance = range;
+        this.probability = chance;
         this.onlyHorizontal = bl;
         this.setFlags(EnumSet.of(PathfinderGoal.Type.LOOK));
-        if (class_ == EntityHuman.class) {
-            this.lookAtContext = PathfinderTargetCondition.forNonCombat().range((double)f).selector((livingEntity) -> {
-                return IEntitySelector.notRiding(mob).test(livingEntity);
+        if (targetType == EntityHuman.class) {
+            this.lookAtContext = PathfinderTargetCondition.forNonCombat().range((double)range).selector((entity) -> {
+                return IEntitySelector.notRiding(mob).test(entity);
             });
         } else {
-            this.lookAtContext = PathfinderTargetCondition.forNonCombat().range((double)f);
+            this.lookAtContext = PathfinderTargetCondition.forNonCombat().range((double)range);
         }
 
     }
@@ -78,7 +80,7 @@ public class PathfinderGoalLookAtPlayer extends PathfinderGoal {
 
     @Override
     public void start() {
-        this.lookTime = 40 + this.mob.getRandom().nextInt(40);
+        this.lookTime = this.adjustedTickDelay(40 + this.mob.getRandom().nextInt(40));
     }
 
     @Override
@@ -88,8 +90,10 @@ public class PathfinderGoalLookAtPlayer extends PathfinderGoal {
 
     @Override
     public void tick() {
-        double d = this.onlyHorizontal ? this.mob.getHeadY() : this.lookAt.getHeadY();
-        this.mob.getControllerLook().setLookAt(this.lookAt.locX(), d, this.lookAt.locZ());
-        --this.lookTime;
+        if (this.lookAt.isAlive()) {
+            double d = this.onlyHorizontal ? this.mob.getHeadY() : this.lookAt.getHeadY();
+            this.mob.getControllerLook().setLookAt(this.lookAt.locX(), d, this.lookAt.locZ());
+            --this.lookTime;
+        }
     }
 }

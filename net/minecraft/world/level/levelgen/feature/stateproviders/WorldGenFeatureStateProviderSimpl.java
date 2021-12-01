@@ -11,7 +11,7 @@ public class WorldGenFeatureStateProviderSimpl extends WorldGenFeatureStateProvi
     }).codec();
     private final IBlockData state;
 
-    public WorldGenFeatureStateProviderSimpl(IBlockData state) {
+    protected WorldGenFeatureStateProviderSimpl(IBlockData state) {
         this.state = state;
     }
 

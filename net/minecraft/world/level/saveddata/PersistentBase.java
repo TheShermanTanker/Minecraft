@@ -30,7 +30,7 @@ public abstract class PersistentBase {
         if (this.isDirty()) {
             NBTTagCompound compoundTag = new NBTTagCompound();
             compoundTag.set("data", this.save(new NBTTagCompound()));
-            compoundTag.setInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            compoundTag.setInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
 
             try {
                 NBTCompressedStreamTools.writeCompressed(compoundTag, file);

@@ -90,9 +90,9 @@ public class PiglinBruteAI {
         piglinBrute.setAggressive(brain.hasMemory(MemoryModuleType.ATTACK_TARGET));
     }
 
-    private static boolean isNearestValidAttackTarget(EntityPiglinAbstract piglin, EntityLiving livingEntity) {
+    private static boolean isNearestValidAttackTarget(EntityPiglinAbstract piglin, EntityLiving entity) {
         return findNearestValidAttackTarget(piglin).filter((livingEntity2) -> {
-            return livingEntity2 == livingEntity;
+            return livingEntity2 == entity;
         }).isPresent();
     }
 
@@ -118,9 +118,9 @@ public class PiglinBruteAI {
         }
     }
 
-    protected static void setAngerTarget(EntityPiglinBrute piglinBrute, EntityLiving livingEntity) {
+    protected static void setAngerTarget(EntityPiglinBrute piglinBrute, EntityLiving target) {
         piglinBrute.getBehaviorController().removeMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-        piglinBrute.getBehaviorController().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, livingEntity.getUniqueID(), 600L);
+        piglinBrute.getBehaviorController().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, target.getUniqueID(), 600L);
     }
 
     protected static void maybePlayActivitySound(EntityPiglinBrute piglinBrute) {

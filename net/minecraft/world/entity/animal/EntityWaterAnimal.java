@@ -2,21 +2,17 @@ package net.minecraft.world.entity.animal;
 
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.EnumDirection;
-import net.minecraft.tags.TagsBlock;
+import net.minecraft.tags.TagsFluid;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityCreature;
-import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.EnumMonsterType;
 import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.IWorldReader;
 import net.minecraft.world.level.World;
-import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.pathfinder.PathType;
 
 public abstract class EntityWaterAnimal extends EntityCreature {
@@ -80,30 +76,9 @@ public abstract class EntityWaterAnimal extends EntityCreature {
         return false;
     }
 
-    public static boolean checkUndergroundWaterCreatureSpawnRules(EntityTypes<? extends EntityLiving> entityType, WorldAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return pos.getY() < world.getSeaLevel() && pos.getY() < world.getHeight(HeightMap.Type.OCEAN_FLOOR, pos.getX(), pos.getZ()) && isDarkEnoughToSpawn(world, pos) && isBaseStoneBelow(pos, world);
-    }
-
-    public static boolean isBaseStoneBelow(BlockPosition pos, WorldAccess world) {
-        BlockPosition.MutableBlockPosition mutableBlockPos = pos.mutable();
-
-        for(int i = 0; i < 5; ++i) {
-            mutableBlockPos.move(EnumDirection.DOWN);
-            IBlockData blockState = world.getType(mutableBlockPos);
-            if (blockState.is(TagsBlock.BASE_STONE_OVERWORLD)) {
-                return true;
-            }
-
-            if (!blockState.is(Blocks.WATER)) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-    public static boolean isDarkEnoughToSpawn(WorldAccess world, BlockPosition pos) {
-        int i = world.getLevel().isThundering() ? world.getMaxLocalRawBrightness(pos, 10) : world.getLightLevel(pos);
-        return i == 0;
+    public static boolean checkSurfaceWaterAnimalSpawnRules(EntityTypes<? extends EntityWaterAnimal> type, GeneratorAccess world, EnumMobSpawn reason, BlockPosition pos, Random random) {
+        int i = world.getSeaLevel();
+        int j = i - 13;
+        return world.getFluid(pos.below()).is(TagsFluid.WATER) && world.getType(pos.above()).is(Blocks.WATER) && pos.getY() >= j && pos.getY() <= i;
     }
 }

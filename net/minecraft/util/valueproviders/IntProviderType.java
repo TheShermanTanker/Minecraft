@@ -8,6 +8,8 @@ public interface IntProviderType<P extends IntProvider> {
     IntProviderType<IntProviderUniform> UNIFORM = register("uniform", IntProviderUniform.CODEC);
     IntProviderType<IntProviderBiasedToBottom> BIASED_TO_BOTTOM = register("biased_to_bottom", IntProviderBiasedToBottom.CODEC);
     IntProviderType<IntProviderClamped> CLAMPED = register("clamped", IntProviderClamped.CODEC);
+    IntProviderType<WeightedListInt> WEIGHTED_LIST = register("weighted_list", WeightedListInt.CODEC);
+    IntProviderType<ClampedNormalInt> CLAMPED_NORMAL = register("clamped_normal", ClampedNormalInt.CODEC);
 
     Codec<P> codec();
 

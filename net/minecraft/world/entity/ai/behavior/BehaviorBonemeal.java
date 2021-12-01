@@ -84,8 +84,8 @@ public class BehaviorBonemeal extends Behavior<EntityVillager> {
     }
 
     private void setCurrentCropAsTarget(EntityVillager villager) {
-        this.cropPos.ifPresent((blockPos) -> {
-            BehaviorTarget blockPosTracker = new BehaviorTarget(blockPos);
+        this.cropPos.ifPresent((pos) -> {
+            BehaviorTarget blockPosTracker = new BehaviorTarget(pos);
             villager.getBehaviorController().setMemory(MemoryModuleType.LOOK_TARGET, blockPosTracker);
             villager.getBehaviorController().setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(blockPosTracker, 0.5F, 1));
         });

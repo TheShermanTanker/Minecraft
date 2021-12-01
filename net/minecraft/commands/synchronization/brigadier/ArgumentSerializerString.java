@@ -8,8 +8,8 @@ import net.minecraft.network.PacketDataSerializer;
 
 public class ArgumentSerializerString implements ArgumentSerializer<StringArgumentType> {
     @Override
-    public void serializeToNetwork(StringArgumentType stringArgumentType, PacketDataSerializer friendlyByteBuf) {
-        friendlyByteBuf.writeEnum(stringArgumentType.getType());
+    public void serializeToNetwork(StringArgumentType type, PacketDataSerializer buf) {
+        buf.writeEnum(type.getType());
     }
 
     @Override
@@ -27,17 +27,17 @@ public class ArgumentSerializerString implements ArgumentSerializer<StringArgume
     }
 
     @Override
-    public void serializeToJson(StringArgumentType stringArgumentType, JsonObject jsonObject) {
-        switch(stringArgumentType.getType()) {
+    public void serializeToJson(StringArgumentType type, JsonObject json) {
+        switch(type.getType()) {
         case SINGLE_WORD:
-            jsonObject.addProperty("type", "word");
+            json.addProperty("type", "word");
             break;
         case QUOTABLE_PHRASE:
-            jsonObject.addProperty("type", "phrase");
+            json.addProperty("type", "phrase");
             break;
         case GREEDY_PHRASE:
         default:
-            jsonObject.addProperty("type", "greedy");
+            json.addProperty("type", "greedy");
         }
 
     }

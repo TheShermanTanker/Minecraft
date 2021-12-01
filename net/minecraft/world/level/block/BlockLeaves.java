@@ -63,7 +63,7 @@ public class BlockLeaves extends Block {
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         int i = getDistanceAt(neighborState) + 1;
         if (i != 1 || state.get(DISTANCE) != i) {
-            world.getBlockTickList().scheduleTick(pos, this, 1);
+            world.scheduleTick(pos, this, 1);
         }
 
         return state;

@@ -41,6 +41,7 @@ public class ReloadableProfiled extends Reloadable<ReloadableProfiled.State> {
                 });
             });
             return completableFuture.thenApplyAsync((void_) -> {
+                LOGGER.debug("Finished reloading " + reloader.getName());
                 return new ReloadableProfiled.State(reloader.getName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2);
             }, applyExecutor);
         }, initialStage);

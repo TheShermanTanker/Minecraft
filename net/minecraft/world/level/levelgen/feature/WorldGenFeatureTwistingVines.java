@@ -6,51 +6,51 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.GeneratorAccess;
+import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.block.BlockGrowingTop;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureEmptyConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TwistingVinesConfig;
 
-public class WorldGenFeatureTwistingVines extends WorldGenerator<WorldGenFeatureEmptyConfiguration> {
-    public WorldGenFeatureTwistingVines(Codec<WorldGenFeatureEmptyConfiguration> configCodec) {
+public class WorldGenFeatureTwistingVines extends WorldGenerator<TwistingVinesConfig> {
+    public WorldGenFeatureTwistingVines(Codec<TwistingVinesConfig> configCodec) {
         super(configCodec);
     }
 
     @Override
-    public boolean generate(FeaturePlaceContext<WorldGenFeatureEmptyConfiguration> context) {
-        return place(context.level(), context.random(), context.origin(), 8, 4, 8);
-    }
-
-    public static boolean place(GeneratorAccess world, Random random, BlockPosition pos, int horizontalSpread, int verticalSpread, int length) {
-        if (isInvalidPlacementLocation(world, pos)) {
+    public boolean generate(FeaturePlaceContext<TwistingVinesConfig> context) {
+        GeneratorAccessSeed worldGenLevel = context.level();
+        BlockPosition blockPos = context.origin();
+        if (isInvalidPlacementLocation(worldGenLevel, blockPos)) {
             return false;
         } else {
-            placeTwistingVines(world, random, pos, horizontalSpread, verticalSpread, length);
+            Random random = context.random();
+            TwistingVinesConfig twistingVinesConfig = context.config();
+            int i = twistingVinesConfig.spreadWidth();
+            int j = twistingVinesConfig.spreadHeight();
+            int k = twistingVinesConfig.maxHeight();
+            BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
+
+            for(int l = 0; l < i * i; ++l) {
+                mutableBlockPos.set(blockPos).move(MathHelper.nextInt(random, -i, i), MathHelper.nextInt(random, -j, j), MathHelper.nextInt(random, -i, i));
+                if (findFirstAirBlockAboveGround(worldGenLevel, mutableBlockPos) && !isInvalidPlacementLocation(worldGenLevel, mutableBlockPos)) {
+                    int m = MathHelper.nextInt(random, 1, k);
+                    if (random.nextInt(6) == 0) {
+                        m *= 2;
+                    }
+
+                    if (random.nextInt(5) == 0) {
+                        m = 1;
+                    }
+
+                    int n = 17;
+                    int o = 25;
+                    placeWeepingVinesColumn(worldGenLevel, random, mutableBlockPos, m, 17, 25);
+                }
+            }
+
             return true;
         }
-    }
-
-    private static void placeTwistingVines(GeneratorAccess world, Random random, BlockPosition pos, int horizontalSpread, int verticalSpread, int length) {
-        BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
-
-        for(int i = 0; i < horizontalSpread * horizontalSpread; ++i) {
-            mutableBlockPos.set(pos).move(MathHelper.nextInt(random, -horizontalSpread, horizontalSpread), MathHelper.nextInt(random, -verticalSpread, verticalSpread), MathHelper.nextInt(random, -horizontalSpread, horizontalSpread));
-            if (findFirstAirBlockAboveGround(world, mutableBlockPos) && !isInvalidPlacementLocation(world, mutableBlockPos)) {
-                int j = MathHelper.nextInt(random, 1, length);
-                if (random.nextInt(6) == 0) {
-                    j *= 2;
-                }
-
-                if (random.nextInt(5) == 0) {
-                    j = 1;
-                }
-
-                int k = 17;
-                int l = 25;
-                placeWeepingVinesColumn(world, random, mutableBlockPos, j, 17, 25);
-            }
-        }
-
     }
 
     private static boolean findFirstAirBlockAboveGround(GeneratorAccess world, BlockPosition.MutableBlockPosition pos) {

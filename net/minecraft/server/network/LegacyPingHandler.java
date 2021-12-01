@@ -20,7 +20,6 @@ public class LegacyPingHandler extends ChannelInboundHandlerAdapter {
         this.serverConnectionListener = networkIo;
     }
 
-    @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) {
         ByteBuf byteBuf = (ByteBuf)object;
         byteBuf.markReaderIndex();

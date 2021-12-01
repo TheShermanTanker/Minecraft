@@ -18,7 +18,6 @@ public class DataConverterSchemaV2501 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
         registerFurnace(schema, map, "minecraft:furnace");

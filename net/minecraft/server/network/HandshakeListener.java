@@ -26,12 +26,12 @@ public class HandshakeListener implements PacketHandshakingInListener {
         switch(packet.getIntention()) {
         case LOGIN:
             this.connection.setProtocol(EnumProtocol.LOGIN);
-            if (packet.getProtocolVersion() != SharedConstants.getGameVersion().getProtocolVersion()) {
+            if (packet.getProtocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
                 IChatBaseComponent component;
                 if (packet.getProtocolVersion() < 754) {
-                    component = new ChatMessage("multiplayer.disconnect.outdated_client", SharedConstants.getGameVersion().getName());
+                    component = new ChatMessage("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName());
                 } else {
-                    component = new ChatMessage("multiplayer.disconnect.incompatible", SharedConstants.getGameVersion().getName());
+                    component = new ChatMessage("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
                 }
 
                 this.connection.sendPacket(new PacketLoginOutDisconnect(component));

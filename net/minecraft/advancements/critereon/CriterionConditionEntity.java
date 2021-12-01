@@ -64,7 +64,7 @@ public class CriterionConditionEntity {
         this.catType = catType;
     }
 
-    CriterionConditionEntity(CriterionConditionEntityType type, CriterionConditionDistance distance, CriterionConditionLocation location, CriterionConditionLocation steppingOn, CriterionConditionMobEffect effects, CriterionConditionNBT nbt, CriterionConditionEntityFlags flags, CriterionConditionEntityEquipment equipment, CriterionConditionPlayer player, CriterionConditionInOpenWater fishingHook, CriterionConditionLightningStrike lighthingBoltPredicate, CriterionConditionEntity vehicle, CriterionConditionEntity entityPredicate, CriterionConditionEntity targetedEntity, @Nullable String team, @Nullable MinecraftKey catType) {
+    CriterionConditionEntity(CriterionConditionEntityType type, CriterionConditionDistance distance, CriterionConditionLocation location, CriterionConditionLocation steppingOn, CriterionConditionMobEffect effects, CriterionConditionNBT nbt, CriterionConditionEntityFlags flags, CriterionConditionEntityEquipment equipment, CriterionConditionPlayer player, CriterionConditionInOpenWater fishingHook, CriterionConditionLightningStrike lightningBolt, CriterionConditionEntity vehicle, CriterionConditionEntity passenger, CriterionConditionEntity targetedEntity, @Nullable String team, @Nullable MinecraftKey catType) {
         this.entityType = type;
         this.distanceToPlayer = distance;
         this.location = location;
@@ -75,9 +75,9 @@ public class CriterionConditionEntity {
         this.equipment = equipment;
         this.player = player;
         this.fishingHook = fishingHook;
-        this.lighthingBolt = lighthingBoltPredicate;
+        this.lighthingBolt = lightningBolt;
         this.vehicle = vehicle;
-        this.passenger = entityPredicate;
+        this.passenger = passenger;
         this.targetedEntity = targetedEntity;
         this.team = team;
         this.catType = catType;
@@ -221,7 +221,9 @@ public class CriterionConditionEntity {
         private CriterionConditionEntity vehicle = CriterionConditionEntity.ANY;
         private CriterionConditionEntity passenger = CriterionConditionEntity.ANY;
         private CriterionConditionEntity targetedEntity = CriterionConditionEntity.ANY;
+        @Nullable
         private String team;
+        @Nullable
         private MinecraftKey catType;
 
         public static CriterionConditionEntity.Builder entity() {

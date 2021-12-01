@@ -35,6 +35,7 @@ public class LootItemFunctions {
     public static final LootItemFunctionType COPY_NBT = register("copy_nbt", new LootItemFunctionCopyNBT.Serializer());
     public static final LootItemFunctionType COPY_STATE = register("copy_state", new LootItemFunctionCopyState.Serializer());
     public static final LootItemFunctionType SET_BANNER_PATTERN = register("set_banner_pattern", new SetBannerPatternFunction.Serializer());
+    public static final LootItemFunctionType SET_POTION = register("set_potion", new SetPotionFunction.Serializer());
 
     private static LootItemFunctionType register(String id, LootSerializer<? extends LootItemFunction> jsonSerializer) {
         return IRegistry.register(IRegistry.LOOT_FUNCTION_TYPE, new MinecraftKey(id), new LootItemFunctionType(jsonSerializer));

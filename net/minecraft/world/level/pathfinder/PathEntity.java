@@ -15,6 +15,7 @@ public class PathEntity {
     public final List<PathPoint> nodes;
     private PathPoint[] openSet = new PathPoint[0];
     private PathPoint[] closedSet = new PathPoint[0];
+    @Nullable
     private Set<PathDestination> targetNodes;
     private int nextNodeIndex;
     private final BlockPosition target;

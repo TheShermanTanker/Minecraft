@@ -12,7 +12,6 @@ public class DataConverterStructureReference extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE);
         return this.fixTypeEverywhereTyped("Structure Reference Fix", type, (typed) -> {

@@ -10,15 +10,15 @@ import net.minecraft.world.level.levelgen.WorldGenerationContext;
 public class ConstantHeight extends HeightProvider {
     public static final ConstantHeight ZERO = new ConstantHeight(VerticalAnchor.absolute(0));
     public static final Codec<ConstantHeight> CODEC = Codec.either(VerticalAnchor.CODEC, RecordCodecBuilder.create((instance) -> {
-        return instance.group(VerticalAnchor.CODEC.fieldOf("value").forGetter((constantHeight) -> {
-            return constantHeight.value;
+        return instance.group(VerticalAnchor.CODEC.fieldOf("value").forGetter((provider) -> {
+            return provider.value;
         })).apply(instance, ConstantHeight::new);
     })).xmap((either) -> {
-        return either.map(ConstantHeight::of, (constantHeight) -> {
-            return constantHeight;
+        return either.map(ConstantHeight::of, (provider) -> {
+            return provider;
         });
-    }, (constantHeight) -> {
-        return Either.left(constantHeight.value);
+    }, (provider) -> {
+        return Either.left(provider.value);
     });
     private final VerticalAnchor value;
 

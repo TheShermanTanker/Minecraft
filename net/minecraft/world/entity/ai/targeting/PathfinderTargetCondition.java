@@ -13,6 +13,7 @@ public class PathfinderTargetCondition {
     private double range = -1.0D;
     private boolean checkLineOfSight = true;
     private boolean testInvisible = true;
+    @Nullable
     private Predicate<EntityLiving> selector;
 
     private PathfinderTargetCondition(boolean attackable) {
@@ -82,8 +83,11 @@ public class PathfinderTargetCondition {
                     }
                 }
 
-                if (this.checkLineOfSight && baseEntity instanceof EntityInsentient && !((EntityInsentient)baseEntity).getEntitySenses().hasLineOfSight(targetEntity)) {
-                    return false;
+                if (this.checkLineOfSight && baseEntity instanceof EntityInsentient) {
+                    EntityInsentient mob = (EntityInsentient)baseEntity;
+                    if (!mob.getEntitySenses().hasLineOfSight(targetEntity)) {
+                        return false;
+                    }
                 }
             }
 

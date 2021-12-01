@@ -40,10 +40,9 @@ public class TileEntityMobSpawner extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
-        this.spawner.save(this.level, this.worldPosition, nbt);
-        return nbt;
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
+        this.spawner.save(nbt);
     }
 
     public static void clientTick(World world, BlockPosition pos, IBlockData state, TileEntityMobSpawner blockEntity) {
@@ -54,15 +53,14 @@ public class TileEntityMobSpawner extends TileEntity {
         blockEntity.spawner.serverTick((WorldServer)world, pos);
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 1, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        NBTTagCompound compoundTag = this.save(new NBTTagCompound());
+        NBTTagCompound compoundTag = this.saveWithoutMetadata();
         compoundTag.remove("SpawnPotentials");
         return compoundTag;
     }

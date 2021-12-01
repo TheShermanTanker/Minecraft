@@ -81,7 +81,6 @@ public class ServerConnection {
             }
 
             this.channels.add((new ServerBootstrap()).channel(class_).childHandler(new ChannelInitializer<Channel>() {
-                @Override
                 protected void initChannel(Channel channel) {
                     try {
                         channel.config().setOption(ChannelOption.TCP_NODELAY, true);
@@ -103,7 +102,6 @@ public class ServerConnection {
         ChannelFuture channelFuture;
         synchronized(this.channels) {
             channelFuture = (new ServerBootstrap()).channel(LocalServerChannel.class).childHandler(new ChannelInitializer<Channel>() {
-                @Override
                 protected void initChannel(Channel channel) {
                     NetworkManager connection = new NetworkManager(EnumProtocolDirection.SERVERBOUND);
                     connection.setPacketListener(new HandshakeMemoryListener(ServerConnection.this.server, connection));
@@ -166,6 +164,10 @@ public class ServerConnection {
         return this.server;
     }
 
+    public List<NetworkManager> getConnections() {
+        return this.connections;
+    }
+
     static class LatencySimulator extends ChannelInboundHandlerAdapter {
         private static final Timer TIMER = new HashedWheelTimer();
         private final int delay;
@@ -177,7 +179,6 @@ public class ServerConnection {
             this.jitter = extraDelay;
         }
 
-        @Override
         public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) {
             this.delayDownstream(channelHandlerContext, object);
         }

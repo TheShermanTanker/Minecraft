@@ -8,13 +8,13 @@ import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 
 public abstract class HeightProvider {
-    private static final Codec<Either<VerticalAnchor, HeightProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(VerticalAnchor.CODEC, IRegistry.HEIGHT_PROVIDER_TYPES.dispatch(HeightProvider::getType, HeightProviderType::codec));
+    private static final Codec<Either<VerticalAnchor, HeightProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(VerticalAnchor.CODEC, IRegistry.HEIGHT_PROVIDER_TYPES.byNameCodec().dispatch(HeightProvider::getType, HeightProviderType::codec));
     public static final Codec<HeightProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap((either) -> {
-        return either.map(ConstantHeight::of, (heightProvider) -> {
-            return heightProvider;
+        return either.map(ConstantHeight::of, (provider) -> {
+            return provider;
         });
-    }, (heightProvider) -> {
-        return heightProvider.getType() == HeightProviderType.CONSTANT ? Either.left(((ConstantHeight)heightProvider).getValue()) : Either.right(heightProvider);
+    }, (provider) -> {
+        return provider.getType() == HeightProviderType.CONSTANT ? Either.left(((ConstantHeight)provider).getValue()) : Either.right(provider);
     });
 
     public abstract int sample(Random random, WorldGenerationContext context);

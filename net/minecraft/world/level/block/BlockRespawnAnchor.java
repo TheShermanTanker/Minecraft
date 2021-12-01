@@ -171,12 +171,12 @@ public class BlockRespawnAnchor extends Block {
         return optional.isPresent() ? optional : findStandUpPosition(entity, world, pos, false);
     }
 
-    private static Optional<Vec3D> findStandUpPosition(EntityTypes<?> entity, ICollisionAccess world, BlockPosition pos, boolean bl) {
+    private static Optional<Vec3D> findStandUpPosition(EntityTypes<?> entity, ICollisionAccess world, BlockPosition pos, boolean ignoreInvalidPos) {
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
 
         for(BaseBlockPosition vec3i : RESPAWN_OFFSETS) {
             mutableBlockPos.set(pos).move(vec3i);
-            Vec3D vec3 = DismountUtil.findSafeDismountLocation(entity, world, mutableBlockPos, bl);
+            Vec3D vec3 = DismountUtil.findSafeDismountLocation(entity, world, mutableBlockPos, ignoreInvalidPos);
             if (vec3 != null) {
                 return Optional.of(vec3);
             }

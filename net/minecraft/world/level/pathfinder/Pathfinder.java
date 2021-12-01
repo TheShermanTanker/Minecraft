@@ -35,8 +35,8 @@ public class Pathfinder {
         this.openSet.clear();
         this.nodeEvaluator.prepare(world, mob);
         PathPoint node = this.nodeEvaluator.getStart();
-        Map<PathDestination, BlockPosition> map = positions.stream().collect(Collectors.toMap((blockPos) -> {
-            return this.nodeEvaluator.getGoal((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+        Map<PathDestination, BlockPosition> map = positions.stream().collect(Collectors.toMap((pos) -> {
+            return this.nodeEvaluator.getGoal((double)pos.getX(), (double)pos.getY(), (double)pos.getZ());
         }, Function.identity()));
         PathEntity path = this.findPath(world.getProfiler(), node, map, followRange, distance, rangeMultiplier);
         this.nodeEvaluator.done();

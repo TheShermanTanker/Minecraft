@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.annotations.VisibleForTesting;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
@@ -12,17 +13,33 @@ public class NoiseGeneratorNormal {
     private final NoiseGeneratorOctaves first;
     private final NoiseGeneratorOctaves second;
 
+    /** @deprecated */
+    @Deprecated
+    public static NoiseGeneratorNormal createLegacyNetherBiome(RandomSource random, NormalNoise$NoiseParameters parameters) {
+        return new NoiseGeneratorNormal(random, parameters.firstOctave(), parameters.amplitudes(), false);
+    }
+
     public static NoiseGeneratorNormal create(RandomSource random, int offset, double... octaves) {
-        return new NoiseGeneratorNormal(random, offset, new DoubleArrayList(octaves));
+        return new NoiseGeneratorNormal(random, offset, new DoubleArrayList(octaves), true);
+    }
+
+    public static NoiseGeneratorNormal create(RandomSource random, NormalNoise$NoiseParameters parameters) {
+        return new NoiseGeneratorNormal(random, parameters.firstOctave(), parameters.amplitudes(), true);
     }
 
     public static NoiseGeneratorNormal create(RandomSource random, int offset, DoubleList octaves) {
-        return new NoiseGeneratorNormal(random, offset, octaves);
+        return new NoiseGeneratorNormal(random, offset, octaves, true);
     }
 
-    private NoiseGeneratorNormal(RandomSource random, int offset, DoubleList octaves) {
-        this.first = NoiseGeneratorOctaves.create(random, offset, octaves);
-        this.second = NoiseGeneratorOctaves.create(random, offset, octaves);
+    private NoiseGeneratorNormal(RandomSource random, int offset, DoubleList octaves, boolean xoroshiro) {
+        if (xoroshiro) {
+            this.first = NoiseGeneratorOctaves.create(random, offset, octaves);
+            this.second = NoiseGeneratorOctaves.create(random, offset, octaves);
+        } else {
+            this.first = NoiseGeneratorOctaves.createLegacyForLegacyNormalNoise(random, offset, octaves);
+            this.second = NoiseGeneratorOctaves.createLegacyForLegacyNormalNoise(random, offset, octaves);
+        }
+
         int i = Integer.MAX_VALUE;
         int j = Integer.MIN_VALUE;
         DoubleListIterator doubleListIterator = octaves.iterator();
@@ -48,5 +65,19 @@ public class NoiseGeneratorNormal {
         double e = y * 1.0181268882175227D;
         double f = z * 1.0181268882175227D;
         return (this.first.getValue(x, y, z) + this.second.getValue(d, e, f)) * this.valueFactor;
+    }
+
+    public NormalNoise$NoiseParameters parameters() {
+        return new NormalNoise$NoiseParameters(this.first.firstOctave(), this.first.amplitudes());
+    }
+
+    @VisibleForTesting
+    public void parityConfigString(StringBuilder info) {
+        info.append("NormalNoise {");
+        info.append("first: ");
+        this.first.parityConfigString(info);
+        info.append(", second: ");
+        this.second.parityConfigString(info);
+        info.append("}");
     }
 }

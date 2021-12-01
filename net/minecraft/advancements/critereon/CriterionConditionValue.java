@@ -18,7 +18,9 @@ import net.minecraft.util.ChatDeserializer;
 public abstract class CriterionConditionValue<T extends Number> {
     public static final SimpleCommandExceptionType ERROR_EMPTY = new SimpleCommandExceptionType(new ChatMessage("argument.range.empty"));
     public static final SimpleCommandExceptionType ERROR_SWAPPED = new SimpleCommandExceptionType(new ChatMessage("argument.range.swapped"));
+    @Nullable
     protected final T min;
+    @Nullable
     protected final T max;
 
     protected CriterionConditionValue(@Nullable T min, @Nullable T max) {
@@ -75,7 +77,7 @@ public abstract class CriterionConditionValue<T extends Number> {
         }
     }
 
-    protected static <T extends Number, R extends CriterionConditionValue<T>> R fromReader(StringReader commandReader, CriterionConditionValue.BoundsFromReaderFactory<T, R> boundsFromReaderFactory, Function<String, T> converter, Supplier<DynamicCommandExceptionType> exceptionTypeSupplier, Function<T, T> mapper) throws CommandSyntaxException {
+    protected static <T extends Number, R extends CriterionConditionValue<T>> R fromReader(StringReader commandReader, CriterionConditionValue.BoundsFromReaderFactory<T, R> commandFactory, Function<String, T> converter, Supplier<DynamicCommandExceptionType> exceptionTypeSupplier, Function<T, T> mapper) throws CommandSyntaxException {
         if (!commandReader.canRead()) {
             throw ERROR_EMPTY.createWithContext(commandReader);
         } else {
@@ -98,7 +100,7 @@ public abstract class CriterionConditionValue<T extends Number> {
                 if (number == null && number2 == null) {
                     throw ERROR_EMPTY.createWithContext(commandReader);
                 } else {
-                    return boundsFromReaderFactory.create(commandReader, number, number2);
+                    return commandFactory.create(commandReader, number, number2);
                 }
             } catch (CommandSyntaxException var8) {
                 commandReader.setCursor(i);
@@ -157,20 +159,22 @@ public abstract class CriterionConditionValue<T extends Number> {
 
     public static class DoubleRange extends CriterionConditionValue<Double> {
         public static final CriterionConditionValue.DoubleRange ANY = new CriterionConditionValue.DoubleRange((Double)null, (Double)null);
+        @Nullable
         private final Double minSq;
+        @Nullable
         private final Double maxSq;
 
-        private static CriterionConditionValue.DoubleRange create(StringReader reader, @Nullable Double double_, @Nullable Double double2) throws CommandSyntaxException {
-            if (double_ != null && double2 != null && double_ > double2) {
+        private static CriterionConditionValue.DoubleRange create(StringReader reader, @Nullable Double min, @Nullable Double max) throws CommandSyntaxException {
+            if (min != null && max != null && min > max) {
                 throw ERROR_SWAPPED.createWithContext(reader);
             } else {
-                return new CriterionConditionValue.DoubleRange(double_, double2);
+                return new CriterionConditionValue.DoubleRange(min, max);
             }
         }
 
         @Nullable
-        private static Double squareOpt(@Nullable Double double_) {
-            return double_ == null ? null : double_ * double_;
+        private static Double squareOpt(@Nullable Double value) {
+            return value == null ? null : value * value;
         }
 
         private DoubleRange(@Nullable Double min, @Nullable Double max) {
@@ -179,27 +183,27 @@ public abstract class CriterionConditionValue<T extends Number> {
             this.maxSq = squareOpt(max);
         }
 
-        public static CriterionConditionValue.DoubleRange exactly(double d) {
-            return new CriterionConditionValue.DoubleRange(d, d);
+        public static CriterionConditionValue.DoubleRange exactly(double value) {
+            return new CriterionConditionValue.DoubleRange(value, value);
         }
 
-        public static CriterionConditionValue.DoubleRange between(double d, double e) {
-            return new CriterionConditionValue.DoubleRange(d, e);
+        public static CriterionConditionValue.DoubleRange between(double min, double max) {
+            return new CriterionConditionValue.DoubleRange(min, max);
         }
 
-        public static CriterionConditionValue.DoubleRange atLeast(double d) {
-            return new CriterionConditionValue.DoubleRange(d, (Double)null);
+        public static CriterionConditionValue.DoubleRange atLeast(double value) {
+            return new CriterionConditionValue.DoubleRange(value, (Double)null);
         }
 
-        public static CriterionConditionValue.DoubleRange atMost(double d) {
-            return new CriterionConditionValue.DoubleRange((Double)null, d);
+        public static CriterionConditionValue.DoubleRange atMost(double value) {
+            return new CriterionConditionValue.DoubleRange((Double)null, value);
         }
 
-        public boolean matches(double d) {
-            if (this.min != null && this.min > d) {
+        public boolean matches(double value) {
+            if (this.min != null && this.min > value) {
                 return false;
             } else {
-                return this.max == null || !(this.max < d);
+                return this.max == null || !(this.max < value);
             }
         }
 
@@ -216,8 +220,8 @@ public abstract class CriterionConditionValue<T extends Number> {
         }
 
         public static CriterionConditionValue.DoubleRange fromReader(StringReader reader) throws CommandSyntaxException {
-            return fromReader(reader, (double_) -> {
-                return double_;
+            return fromReader(reader, (value) -> {
+                return value;
             });
         }
 
@@ -228,7 +232,9 @@ public abstract class CriterionConditionValue<T extends Number> {
 
     public static class IntegerRange extends CriterionConditionValue<Integer> {
         public static final CriterionConditionValue.IntegerRange ANY = new CriterionConditionValue.IntegerRange((Integer)null, (Integer)null);
+        @Nullable
         private final Long minSq;
+        @Nullable
         private final Long maxSq;
 
         private static CriterionConditionValue.IntegerRange create(StringReader reader, @Nullable Integer min, @Nullable Integer max) throws CommandSyntaxException {
@@ -274,11 +280,11 @@ public abstract class CriterionConditionValue<T extends Number> {
             }
         }
 
-        public boolean matchesSqr(long l) {
-            if (this.minSq != null && this.minSq > l) {
+        public boolean matchesSqr(long value) {
+            if (this.minSq != null && this.minSq > value) {
                 return false;
             } else {
-                return this.maxSq == null || this.maxSq >= l;
+                return this.maxSq == null || this.maxSq >= value;
             }
         }
 
@@ -287,8 +293,8 @@ public abstract class CriterionConditionValue<T extends Number> {
         }
 
         public static CriterionConditionValue.IntegerRange fromReader(StringReader reader) throws CommandSyntaxException {
-            return fromReader(reader, (integer) -> {
-                return integer;
+            return fromReader(reader, (value) -> {
+                return value;
             });
         }
 

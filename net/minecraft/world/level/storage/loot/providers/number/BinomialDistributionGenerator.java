@@ -15,9 +15,9 @@ public final class BinomialDistributionGenerator implements NumberProvider {
     final NumberProvider n;
     final NumberProvider p;
 
-    BinomialDistributionGenerator(NumberProvider numberProvider, NumberProvider numberProvider2) {
-        this.n = numberProvider;
-        this.p = numberProvider2;
+    BinomialDistributionGenerator(NumberProvider n, NumberProvider p) {
+        this.n = n;
+        this.p = p;
     }
 
     @Override

@@ -22,7 +22,6 @@ public class DataConverterSchemaV1928 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         map.remove("minecraft:illager_beast");

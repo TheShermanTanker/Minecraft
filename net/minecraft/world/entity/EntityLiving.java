@@ -318,8 +318,12 @@ public abstract class EntityLiving extends Entity {
 
         super.entityBaseTick();
         this.level.getMethodProfiler().enter("livingEntityBaseTick");
-        boolean bl = this instanceof EntityHuman;
+        if (this.isFireProof() || this.level.isClientSide) {
+            this.extinguish();
+        }
+
         if (this.isAlive()) {
+            boolean bl = this instanceof EntityHuman;
             if (this.inBlock()) {
                 this.damageEntity(DamageSource.IN_WALL, 1.0F);
             } else if (bl && !this.level.getWorldBorder().isWithinBounds(this.getBoundingBox())) {
@@ -331,16 +335,10 @@ public abstract class EntityLiving extends Entity {
                     }
                 }
             }
-        }
 
-        if (this.isFireProof() || this.level.isClientSide) {
-            this.extinguish();
-        }
-
-        boolean bl2 = bl && ((EntityHuman)this).getAbilities().invulnerable;
-        if (this.isAlive()) {
             if (this.isEyeInFluid(TagsFluid.WATER) && !this.level.getType(new BlockPosition(this.locX(), this.getHeadY(), this.locZ())).is(Blocks.BUBBLE_COLUMN)) {
-                if (!this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && !bl2) {
+                boolean bl2 = !this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && (!bl || !((EntityHuman)this).getAbilities().invulnerable);
+                if (bl2) {
                     this.setAirTicks(this.decreaseAirSupply(this.getAirTicks()));
                     if (this.getAirTicks() == -20) {
                         this.setAirTicks(0);
@@ -389,7 +387,7 @@ public abstract class EntityLiving extends Entity {
             --this.invulnerableTime;
         }
 
-        if (this.isDeadOrDying()) {
+        if (this.isDeadOrDying() && this.level.shouldTickDeath(this)) {
             this.tickDeath();
         }
 
@@ -834,7 +832,7 @@ public abstract class EntityLiving extends Entity {
 
     public static boolean areAllEffectsAmbient(Collection<MobEffect> effects) {
         for(MobEffect mobEffectInstance : effects) {
-            if (!mobEffectInstance.isAmbient()) {
+            if (mobEffectInstance.isShowParticles() && !mobEffectInstance.isAmbient()) {
                 return false;
             }
         }
@@ -1366,8 +1364,12 @@ public abstract class EntityLiving extends Entity {
         return SoundEffects.GENERIC_DEATH;
     }
 
-    protected SoundEffect getSoundFall(int distance) {
-        return distance > 4 ? SoundEffects.GENERIC_BIG_FALL : SoundEffects.GENERIC_SMALL_FALL;
+    private SoundEffect getSoundFall(int distance) {
+        return distance > 4 ? this.getFallSounds().big() : this.getFallSounds().small();
+    }
+
+    public LivingEntity$Fallsounds getFallSounds() {
+        return new LivingEntity$Fallsounds(SoundEffects.GENERIC_SMALL_FALL, SoundEffects.GENERIC_BIG_FALL);
     }
 
     protected SoundEffect getDrinkingSound(ItemStack stack) {
@@ -1980,7 +1982,7 @@ public abstract class EntityLiving extends Entity {
             boolean bl = this.getMot().y <= 0.0D;
             if (bl && this.hasEffect(MobEffectList.SLOW_FALLING)) {
                 d = 0.01D;
-                this.fallDistance = 0.0F;
+                this.resetFallDistance();
             }
 
             Fluid fluidState = this.level.getFluid(this.getChunkCoordinates());
@@ -2090,7 +2092,7 @@ public abstract class EntityLiving extends Entity {
                 double v = vec37.y;
                 if (this.hasEffect(MobEffectList.LEVITATION)) {
                     v += (0.05D * (double)(this.getEffect(MobEffectList.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2D;
-                    this.fallDistance = 0.0F;
+                    this.resetFallDistance();
                 } else if (this.level.isClientSide && !this.level.isLoaded(blockPos)) {
                     if (this.locY() > (double)this.level.getMinBuildHeight()) {
                         v = -0.1D;
@@ -2126,16 +2128,16 @@ public abstract class EntityLiving extends Entity {
         entity.animationPosition += entity.animationSpeed;
     }
 
-    public Vec3D handleRelativeFrictionAndCalculateMovement(Vec3D vec3, float f) {
-        this.moveRelative(this.getFrictionInfluencedSpeed(f), vec3);
+    public Vec3D handleRelativeFrictionAndCalculateMovement(Vec3D movementInput, float slipperiness) {
+        this.moveRelative(this.getFrictionInfluencedSpeed(slipperiness), movementInput);
         this.setMot(this.handleOnClimbable(this.getMot()));
         this.move(EnumMoveType.SELF, this.getMot());
-        Vec3D vec32 = this.getMot();
+        Vec3D vec3 = this.getMot();
         if ((this.horizontalCollision || this.jumping) && (this.isCurrentlyClimbing() || this.getFeetBlockState().is(Blocks.POWDER_SNOW) && BlockPowderSnow.canEntityWalkOnPowderSnow(this))) {
-            vec32 = new Vec3D(vec32.x, 0.2D, vec32.z);
+            vec3 = new Vec3D(vec3.x, 0.2D, vec3.z);
         }
 
-        return vec32;
+        return vec3;
     }
 
     public Vec3D getFluidFallingAdjustedMovement(double d, boolean bl, Vec3D vec3) {
@@ -2155,7 +2157,7 @@ public abstract class EntityLiving extends Entity {
 
     private Vec3D handleOnClimbable(Vec3D motion) {
         if (this.isCurrentlyClimbing()) {
-            this.fallDistance = 0.0F;
+            this.resetFallDistance();
             float f = 0.15F;
             double d = MathHelper.clamp(motion.x, (double)-0.15F, (double)0.15F);
             double e = MathHelper.clamp(motion.z, (double)-0.15F, (double)0.15F);
@@ -2355,22 +2357,22 @@ public abstract class EntityLiving extends Entity {
         return map;
     }
 
-    private void handleHandSwap(Map<EnumItemSlot, ItemStack> equipment) {
-        ItemStack itemStack = equipment.get(EnumItemSlot.MAINHAND);
-        ItemStack itemStack2 = equipment.get(EnumItemSlot.OFFHAND);
+    private void handleHandSwap(Map<EnumItemSlot, ItemStack> equipmentChanges) {
+        ItemStack itemStack = equipmentChanges.get(EnumItemSlot.MAINHAND);
+        ItemStack itemStack2 = equipmentChanges.get(EnumItemSlot.OFFHAND);
         if (itemStack != null && itemStack2 != null && ItemStack.matches(itemStack, this.getLastHandItem(EnumItemSlot.OFFHAND)) && ItemStack.matches(itemStack2, this.getLastHandItem(EnumItemSlot.MAINHAND))) {
             ((WorldServer)this.level).getChunkSource().broadcast(this, new PacketPlayOutEntityStatus(this, (byte)55));
-            equipment.remove(EnumItemSlot.MAINHAND);
-            equipment.remove(EnumItemSlot.OFFHAND);
+            equipmentChanges.remove(EnumItemSlot.MAINHAND);
+            equipmentChanges.remove(EnumItemSlot.OFFHAND);
             this.setLastHandItem(EnumItemSlot.MAINHAND, itemStack.cloneItemStack());
             this.setLastHandItem(EnumItemSlot.OFFHAND, itemStack2.cloneItemStack());
         }
 
     }
 
-    private void handleEquipmentChanges(Map<EnumItemSlot, ItemStack> equipment) {
-        List<Pair<EnumItemSlot, ItemStack>> list = Lists.newArrayListWithCapacity(equipment.size());
-        equipment.forEach((slot, stack) -> {
+    private void handleEquipmentChanges(Map<EnumItemSlot, ItemStack> equipmentChanges) {
+        List<Pair<EnumItemSlot, ItemStack>> list = Lists.newArrayListWithCapacity(equipmentChanges.size());
+        equipmentChanges.forEach((slot, stack) -> {
             ItemStack itemStack = stack.cloneItemStack();
             list.add(Pair.of(slot, itemStack));
             switch(slot.getType()) {
@@ -2672,7 +2674,7 @@ public abstract class EntityLiving extends Entity {
         super.passengerTick();
         this.oRun = this.run;
         this.run = 0.0F;
-        this.fallDistance = 0.0F;
+        this.resetFallDistance();
     }
 
     @Override
@@ -2938,20 +2940,22 @@ public abstract class EntityLiving extends Entity {
     }
 
     protected void completeUsingItem() {
-        EnumHand interactionHand = this.getRaisedHand();
-        if (!this.useItem.equals(this.getItemInHand(interactionHand))) {
-            this.releaseActiveItem();
-        } else {
-            if (!this.useItem.isEmpty() && this.isHandRaised()) {
-                this.triggerItemUseEffects(this.useItem, 16);
-                ItemStack itemStack = this.useItem.finishUsingItem(this.level, this);
-                if (itemStack != this.useItem) {
-                    this.setItemInHand(interactionHand, itemStack);
+        if (!this.level.isClientSide || this.isHandRaised()) {
+            EnumHand interactionHand = this.getRaisedHand();
+            if (!this.useItem.equals(this.getItemInHand(interactionHand))) {
+                this.releaseActiveItem();
+            } else {
+                if (!this.useItem.isEmpty() && this.isHandRaised()) {
+                    this.triggerItemUseEffects(this.useItem, 16);
+                    ItemStack itemStack = this.useItem.finishUsingItem(this.level, this);
+                    if (itemStack != this.useItem) {
+                        this.setItemInHand(interactionHand, itemStack);
+                    }
+
+                    this.clearActiveItem();
                 }
 
-                this.clearActiveItem();
             }
-
         }
     }
 
@@ -3319,6 +3323,8 @@ public abstract class EntityLiving extends Entity {
         this.setPacketCoordinates(d, e, f);
         this.yBodyRot = (float)(packet.getyHeadRot() * 360) / 256.0F;
         this.yHeadRot = (float)(packet.getyHeadRot() * 360) / 256.0F;
+        this.yBodyRotO = this.yBodyRot;
+        this.yHeadRotO = this.yHeadRot;
         this.setId(packet.getId());
         this.setUUID(packet.getUUID());
         this.setLocation(d, e, f, g, h);

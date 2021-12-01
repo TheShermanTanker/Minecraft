@@ -20,7 +20,6 @@ import net.minecraft.network.chat.ChatComponentText;
 public class GameTestHarnessTestFunctionArgument implements ArgumentType<GameTestHarnessTestFunction> {
     private static final Collection<String> EXAMPLES = Arrays.asList("techtests.piston", "techtests");
 
-    @Override
     public GameTestHarnessTestFunction parse(StringReader stringReader) throws CommandSyntaxException {
         String string = stringReader.readUnquotedString();
         Optional<GameTestHarnessTestFunction> optional = GameTestHarnessRegistry.findTestFunction(string);
@@ -40,13 +39,11 @@ public class GameTestHarnessTestFunctionArgument implements ArgumentType<GameTes
         return context.getArgument(name, GameTestHarnessTestFunction.class);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         Stream<String> stream = GameTestHarnessRegistry.getAllTestFunctions().stream().map(GameTestHarnessTestFunction::getTestName);
         return ICompletionProvider.suggest(stream, suggestionsBuilder);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

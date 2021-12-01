@@ -83,15 +83,7 @@ public abstract class LightEngineStorage<M extends LightEngineStorageArray<M>> e
 
         NibbleArray dataLayer = this.getDataLayer(l, true);
         dataLayer.set(SectionPosition.sectionRelative(BlockPosition.getX(blockPos)), SectionPosition.sectionRelative(BlockPosition.getY(blockPos)), SectionPosition.sectionRelative(BlockPosition.getZ(blockPos)), value);
-
-        for(int i = -1; i <= 1; ++i) {
-            for(int j = -1; j <= 1; ++j) {
-                for(int k = -1; k <= 1; ++k) {
-                    this.sectionsAffectedByLightUpdates.add(SectionPosition.blockToSection(BlockPosition.offset(blockPos, j, k, i)));
-                }
-            }
-        }
-
+        SectionPosition.aroundAndAtBlockPos(blockPos, this.sectionsAffectedByLightUpdates::add);
     }
 
     @Override
@@ -134,11 +126,14 @@ public abstract class LightEngineStorage<M extends LightEngineStorageArray<M>> e
                 this.updatingSectionData.setLayer(id, this.createDataLayer(id));
                 this.changedSections.add(id);
                 this.onNodeAdded(id);
+                int j = SectionPosition.x(id);
+                int k = SectionPosition.y(id);
+                int l = SectionPosition.z(id);
 
-                for(int j = -1; j <= 1; ++j) {
-                    for(int k = -1; k <= 1; ++k) {
-                        for(int l = -1; l <= 1; ++l) {
-                            this.sectionsAffectedByLightUpdates.add(SectionPosition.blockToSection(BlockPosition.offset(id, k, l, j)));
+                for(int m = -1; m <= 1; ++m) {
+                    for(int n = -1; n <= 1; ++n) {
+                        for(int o = -1; o <= 1; ++o) {
+                            this.sectionsAffectedByLightUpdates.add(SectionPosition.asLong(j + n, k + o, l + m));
                         }
                     }
                 }
@@ -158,24 +153,26 @@ public abstract class LightEngineStorage<M extends LightEngineStorageArray<M>> e
     }
 
     protected void clearQueuedSectionBlocks(LightEngineLayer<?, ?> storage, long sectionPos) {
-        if (storage.getQueueSize() < 8192) {
-            storage.removeIf((mx) -> {
-                return SectionPosition.blockToSection(mx) == sectionPos;
-            });
-        } else {
-            int i = SectionPosition.sectionToBlockCoord(SectionPosition.x(sectionPos));
-            int j = SectionPosition.sectionToBlockCoord(SectionPosition.y(sectionPos));
-            int k = SectionPosition.sectionToBlockCoord(SectionPosition.z(sectionPos));
+        if (storage.getQueueSize() != 0) {
+            if (storage.getQueueSize() < 8192) {
+                storage.removeIf((mx) -> {
+                    return SectionPosition.blockToSection(mx) == sectionPos;
+                });
+            } else {
+                int i = SectionPosition.sectionToBlockCoord(SectionPosition.x(sectionPos));
+                int j = SectionPosition.sectionToBlockCoord(SectionPosition.y(sectionPos));
+                int k = SectionPosition.sectionToBlockCoord(SectionPosition.z(sectionPos));
 
-            for(int l = 0; l < 16; ++l) {
-                for(int m = 0; m < 16; ++m) {
-                    for(int n = 0; n < 16; ++n) {
-                        long o = BlockPosition.asLong(i + l, j + m, k + n);
-                        storage.removeFromQueue(o);
+                for(int l = 0; l < 16; ++l) {
+                    for(int m = 0; m < 16; ++m) {
+                        for(int n = 0; n < 16; ++n) {
+                            long o = BlockPosition.asLong(i + l, j + m, k + n);
+                            storage.removeFromQueue(o);
+                        }
                     }
                 }
-            }
 
+            }
         }
     }
 
@@ -311,10 +308,10 @@ public abstract class LightEngineStorage<M extends LightEngineStorageArray<M>> e
 
     }
 
-    protected void queueSectionData(long sectionPos, @Nullable NibbleArray array, boolean bl) {
+    protected void queueSectionData(long sectionPos, @Nullable NibbleArray array, boolean nonEdge) {
         if (array != null) {
             this.queuedSections.put(sectionPos, array);
-            if (!bl) {
+            if (!nonEdge) {
                 this.untrustedSections.add(sectionPos);
             }
         } else {

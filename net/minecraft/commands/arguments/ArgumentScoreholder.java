@@ -23,9 +23,9 @@ import net.minecraft.network.chat.ChatMessage;
 import net.minecraft.world.entity.Entity;
 
 public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Result> {
-    public static final SuggestionProvider<CommandListenerWrapper> SUGGEST_SCORE_HOLDERS = (commandContext, suggestionsBuilder) -> {
-        StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
-        stringReader.setCursor(suggestionsBuilder.getStart());
+    public static final SuggestionProvider<CommandListenerWrapper> SUGGEST_SCORE_HOLDERS = (context, builder) -> {
+        StringReader stringReader = new StringReader(builder.getInput());
+        stringReader.setCursor(builder.getStart());
         ArgumentParserSelector entitySelectorParser = new ArgumentParserSelector(stringReader);
 
         try {
@@ -33,8 +33,8 @@ public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Res
         } catch (CommandSyntaxException var5) {
         }
 
-        return entitySelectorParser.fillSuggestions(suggestionsBuilder, (suggestionsBuilderx) -> {
-            ICompletionProvider.suggest(commandContext.getSource().getOnlinePlayerNames(), suggestionsBuilderx);
+        return entitySelectorParser.fillSuggestions(builder, (builderx) -> {
+            ICompletionProvider.suggest(context.getSource().getOnlinePlayerNames(), builderx);
         });
     };
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "*", "@e");
@@ -75,7 +75,6 @@ public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Res
         return new ArgumentScoreholder(true);
     }
 
-    @Override
     public ArgumentScoreholder.Result parse(StringReader stringReader) throws CommandSyntaxException {
         if (stringReader.canRead() && stringReader.peek() == '@') {
             ArgumentParserSelector entitySelectorParser = new ArgumentParserSelector(stringReader);
@@ -94,8 +93,8 @@ public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Res
 
             String string = stringReader.getString().substring(i, stringReader.getCursor());
             if (string.equals("*")) {
-                return (commandSourceStack, supplier) -> {
-                    Collection<String> collection = supplier.get();
+                return (source, players) -> {
+                    Collection<String> collection = players.get();
                     if (collection.isEmpty()) {
                         throw ERROR_NO_RESULTS.create();
                     } else {
@@ -104,32 +103,31 @@ public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Res
                 };
             } else {
                 Collection<String> collection = Collections.singleton(string);
-                return (commandSourceStack, supplier) -> {
+                return (source, players) -> {
                     return collection;
                 };
             }
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
 
     @FunctionalInterface
     public interface Result {
-        Collection<String> getNames(CommandListenerWrapper source, Supplier<Collection<String>> supplier) throws CommandSyntaxException;
+        Collection<String> getNames(CommandListenerWrapper source, Supplier<Collection<String>> players) throws CommandSyntaxException;
     }
 
     public static class SelectorResult implements ArgumentScoreholder.Result {
         private final EntitySelector selector;
 
-        public SelectorResult(EntitySelector entitySelector) {
-            this.selector = entitySelector;
+        public SelectorResult(EntitySelector selector) {
+            this.selector = selector;
         }
 
         @Override
-        public Collection<String> getNames(CommandListenerWrapper source, Supplier<Collection<String>> supplier) throws CommandSyntaxException {
+        public Collection<String> getNames(CommandListenerWrapper source, Supplier<Collection<String>> players) throws CommandSyntaxException {
             List<? extends Entity> list = this.selector.getEntities(source);
             if (list.isEmpty()) {
                 throw ArgumentEntity.NO_ENTITIES_FOUND.create();
@@ -147,13 +145,13 @@ public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Res
 
     public static class Serializer implements ArgumentSerializer<ArgumentScoreholder> {
         @Override
-        public void serializeToNetwork(ArgumentScoreholder scoreHolderArgument, PacketDataSerializer friendlyByteBuf) {
+        public void serializeToNetwork(ArgumentScoreholder type, PacketDataSerializer buf) {
             byte b = 0;
-            if (scoreHolderArgument.multiple) {
+            if (type.multiple) {
                 b = (byte)(b | 1);
             }
 
-            friendlyByteBuf.writeByte(b);
+            buf.writeByte(b);
         }
 
         @Override
@@ -164,8 +162,8 @@ public class ArgumentScoreholder implements ArgumentType<ArgumentScoreholder.Res
         }
 
         @Override
-        public void serializeToJson(ArgumentScoreholder scoreHolderArgument, JsonObject jsonObject) {
-            jsonObject.addProperty("amount", scoreHolderArgument.multiple ? "multiple" : "single");
+        public void serializeToJson(ArgumentScoreholder type, JsonObject json) {
+            json.addProperty("amount", type.multiple ? "multiple" : "single");
         }
     }
 }

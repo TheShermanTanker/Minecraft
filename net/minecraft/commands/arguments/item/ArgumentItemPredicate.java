@@ -25,27 +25,26 @@ import net.minecraft.world.item.ItemStack;
 
 public class ArgumentItemPredicate implements ArgumentType<ArgumentItemPredicate.Result> {
     private static final Collection<String> EXAMPLES = Arrays.asList("stick", "minecraft:stick", "#stick", "#stick{foo=bar}");
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("arguments.item.tag.unknown", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("arguments.item.tag.unknown", id);
     });
 
     public static ArgumentItemPredicate itemPredicate() {
         return new ArgumentItemPredicate();
     }
 
-    @Override
     public ArgumentItemPredicate.Result parse(StringReader stringReader) throws CommandSyntaxException {
         ArgumentParserItemStack itemParser = (new ArgumentParserItemStack(stringReader, true)).parse();
         if (itemParser.getItem() != null) {
             ArgumentItemPredicate.ItemPredicate itemPredicate = new ArgumentItemPredicate.ItemPredicate(itemParser.getItem(), itemParser.getNbt());
-            return (commandContext) -> {
+            return (context) -> {
                 return itemPredicate;
             };
         } else {
             MinecraftKey resourceLocation = itemParser.getTag();
-            return (commandContext) -> {
-                Tag<Item> tag = commandContext.getSource().getServer().getTagRegistry().getTagOrThrow(IRegistry.ITEM_REGISTRY, resourceLocation, (resourceLocationx) -> {
-                    return ERROR_UNKNOWN_TAG.create(resourceLocationx.toString());
+            return (context) -> {
+                Tag<Item> tag = context.getSource().getServer().getTagRegistry().getTagOrThrow(IRegistry.ITEM_REGISTRY, resourceLocation, (id) -> {
+                    return ERROR_UNKNOWN_TAG.create(id.toString());
                 });
                 return new ArgumentItemPredicate.TagPredicate(tag, itemParser.getNbt());
             };
@@ -56,7 +55,6 @@ public class ArgumentItemPredicate implements ArgumentType<ArgumentItemPredicate
         return context.getArgument(name, ArgumentItemPredicate.Result.class).create(context);
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
         stringReader.setCursor(suggestionsBuilder.getStart());
@@ -70,7 +68,6 @@ public class ArgumentItemPredicate implements ArgumentType<ArgumentItemPredicate
         return itemParser.fillSuggestions(suggestionsBuilder, TagsItem.getAllTags());
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
@@ -92,7 +89,7 @@ public class ArgumentItemPredicate implements ArgumentType<ArgumentItemPredicate
     }
 
     public interface Result {
-        Predicate<ItemStack> create(CommandContext<CommandListenerWrapper> commandContext) throws CommandSyntaxException;
+        Predicate<ItemStack> create(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException;
     }
 
     static class TagPredicate implements Predicate<ItemStack> {

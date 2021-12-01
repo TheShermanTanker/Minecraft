@@ -188,7 +188,7 @@ public class MethodProfilerResultsFilled implements MethodProfilerResults {
         stringBuilder.append("// ");
         stringBuilder.append(getComment());
         stringBuilder.append("\n\n");
-        stringBuilder.append("Version: ").append(SharedConstants.getGameVersion().getId()).append('\n');
+        stringBuilder.append("Version: ").append(SharedConstants.getCurrentVersion().getId()).append('\n');
         stringBuilder.append("Time span: ").append(timeSpan / 1000000L).append(" ms\n");
         stringBuilder.append("Tick span: ").append(tickSpan).append(" ticks\n");
         stringBuilder.append("// This is approximately ").append(String.format(Locale.ROOT, "%.2f", (float)tickSpan / ((float)timeSpan / 1.0E9F))).append(" ticks per second. It should be ").append((int)20).append(" ticks per second\n\n");
@@ -260,7 +260,7 @@ public class MethodProfilerResultsFilled implements MethodProfilerResults {
     }
 
     private static String getComment() {
-        String[] strings = new String[]{"Shiny numbers!", "Am I not running fast enough? :(", "I'm working as hard as I can!", "Will I ever be good enough for you? :(", "Speedy. Zoooooom!", "Hello world", "40% better than a crash report.", "Now with extra numbers", "Now with less numbers", "Now with the same numbers", "You should add flames to things, it makes them go faster!", "Do you feel the need for... optimization?", "*cracks redstone whip*", "Maybe if you treated it better then it'll have more motivation to work faster! Poor server."};
+        String[] strings = new String[]{"I'd Rather Be Surfing", "Shiny numbers!", "Am I not running fast enough? :(", "I'm working as hard as I can!", "Will I ever be good enough for you? :(", "Speedy. Zoooooom!", "Hello world", "40% better than a crash report.", "Now with extra numbers", "Now with less numbers", "Now with the same numbers", "You should add flames to things, it makes them go faster!", "Do you feel the need for... optimization?", "*cracks redstone whip*", "Maybe if you treated it better then it'll have more motivation to work faster! Poor server."};
 
         try {
             return strings[(int)(SystemUtils.getMonotonicNanos() % (long)strings.length)];

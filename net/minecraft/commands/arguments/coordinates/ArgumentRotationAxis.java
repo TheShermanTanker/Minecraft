@@ -20,11 +20,10 @@ public class ArgumentRotationAxis implements ArgumentType<EnumSet<EnumDirection.
         return new ArgumentRotationAxis();
     }
 
-    public static EnumSet<EnumDirection.EnumAxis> getSwizzle(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, EnumSet.class);
+    public static EnumSet<EnumDirection.EnumAxis> getSwizzle(CommandContext<CommandListenerWrapper> context, String name) {
+        return context.getArgument(name, EnumSet.class);
     }
 
-    @Override
     public EnumSet<EnumDirection.EnumAxis> parse(StringReader stringReader) throws CommandSyntaxException {
         EnumSet<EnumDirection.EnumAxis> enumSet = EnumSet.noneOf(EnumDirection.EnumAxis.class);
 
@@ -55,7 +54,6 @@ public class ArgumentRotationAxis implements ArgumentType<EnumSet<EnumDirection.
         return enumSet;
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

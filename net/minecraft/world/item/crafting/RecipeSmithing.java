@@ -34,7 +34,7 @@ public class RecipeSmithing implements IRecipe<IInventory> {
         ItemStack itemStack = this.result.cloneItemStack();
         NBTTagCompound compoundTag = inventory.getItem(0).getTag();
         if (compoundTag != null) {
-            itemStack.setTag(compoundTag.c());
+            itemStack.setTag(compoundTag.copy());
         }
 
         return itemStack;

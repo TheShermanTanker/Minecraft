@@ -1,11 +1,11 @@
 package net.minecraft.world.entity.item;
 
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.CrashReportSystemDetails;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.GameProfileSerializer;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.PacketPlayOutBlockChange;
@@ -42,6 +42,7 @@ import net.minecraft.world.phys.MovingObjectPositionBlock;
 import net.minecraft.world.phys.Vec3D;
 
 public class EntityFallingBlock extends Entity {
+    private static final int REMOVAL_DELAY_MILLIS = 50;
     private IBlockData blockState = Blocks.SAND.getBlockData();
     public int time;
     public boolean dropItem = true;
@@ -49,6 +50,8 @@ public class EntityFallingBlock extends Entity {
     public boolean hurtEntities;
     private int fallDamageMax = 40;
     private float fallDamagePerDistance;
+    private long removeAtMillis;
+    @Nullable
     public NBTTagCompound blockData;
     protected static final DataWatcherObject<BlockPosition> DATA_START_POS = DataWatcher.defineId(EntityFallingBlock.class, DataWatcherRegistry.BLOCK_POS);
 
@@ -100,6 +103,11 @@ public class EntityFallingBlock extends Entity {
     public void tick() {
         if (this.blockState.isAir()) {
             this.die();
+        } else if (this.level.isClientSide && this.removeAtMillis > 0L) {
+            if (System.currentTimeMillis() >= this.removeAtMillis) {
+                super.setRemoved(Entity.RemovalReason.DISCARDED);
+            }
+
         } else {
             Block block = this.blockState.getBlock();
             if (this.time++ == 0) {
@@ -161,19 +169,16 @@ public class EntityFallingBlock extends Entity {
                                     if (this.blockData != null && this.blockState.isTileEntity()) {
                                         TileEntity blockEntity = this.level.getTileEntity(blockPos2);
                                         if (blockEntity != null) {
-                                            NBTTagCompound compoundTag = blockEntity.save(new NBTTagCompound());
+                                            NBTTagCompound compoundTag = blockEntity.saveWithoutMetadata();
 
                                             for(String string : this.blockData.getKeys()) {
-                                                NBTBase tag = this.blockData.get(string);
-                                                if (!"x".equals(string) && !"y".equals(string) && !"z".equals(string)) {
-                                                    compoundTag.set(string, tag.clone());
-                                                }
+                                                compoundTag.set(string, this.blockData.get(string).clone());
                                             }
 
                                             try {
                                                 blockEntity.load(compoundTag);
-                                            } catch (Exception var16) {
-                                                LOGGER.error("Failed to load block entity from falling block", (Throwable)var16);
+                                            } catch (Exception var15) {
+                                                LOGGER.error("Failed to load block entity from falling block", (Throwable)var15);
                                             }
 
                                             blockEntity.update();
@@ -200,6 +205,15 @@ public class EntityFallingBlock extends Entity {
             }
 
             this.setMot(this.getMot().scale(0.98D));
+        }
+    }
+
+    @Override
+    public void setRemoved(Entity.RemovalReason reason) {
+        if (this.level.shouldDelayFallingBlockEntityRemoval(reason)) {
+            this.removeAtMillis = System.currentTimeMillis() + 50L;
+        } else {
+            super.setRemoved(reason);
         }
     }
 
@@ -287,10 +301,6 @@ public class EntityFallingBlock extends Entity {
             this.blockState = Blocks.SAND.getBlockData();
         }
 
-    }
-
-    public World getLevel() {
-        return this.level;
     }
 
     public void setHurtsEntities(float fallHurtAmount, int fallHurtMax) {

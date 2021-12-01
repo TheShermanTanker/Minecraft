@@ -23,13 +23,12 @@ public class TileEntityJukeBox extends TileEntity implements Clearable {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (!this.getRecord().isEmpty()) {
             nbt.set("RecordItem", this.getRecord().save(new NBTTagCompound()));
         }
 
-        return nbt;
     }
 
     public ItemStack getRecord() {

@@ -20,7 +20,6 @@ public class DataConverterBiomeBase extends DataFix {
         this.name = name;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<Pair<String, String>> type = DSL.named(DataConverterTypes.BIOME.typeName(), DataConverterSchemaNamed.namespacedString());
         if (!Objects.equals(type, this.getInputSchema().getType(DataConverterTypes.BIOME))) {

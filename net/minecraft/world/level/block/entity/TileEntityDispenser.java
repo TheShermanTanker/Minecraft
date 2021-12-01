@@ -73,13 +73,12 @@ public class TileEntityDispenser extends TileEntityLootable {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (!this.trySaveLootTable(nbt)) {
             ContainerUtil.saveAllItems(nbt, this.items);
         }
 
-        return nbt;
     }
 
     @Override

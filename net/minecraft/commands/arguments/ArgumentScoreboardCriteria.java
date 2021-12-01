@@ -22,8 +22,8 @@ import net.minecraft.world.scores.criteria.IScoreboardCriteria;
 
 public class ArgumentScoreboardCriteria implements ArgumentType<IScoreboardCriteria> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar.baz", "minecraft:foo");
-    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.criteria.invalid", object);
+    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType((name) -> {
+        return new ChatMessage("argument.criteria.invalid", name);
     });
 
     private ArgumentScoreboardCriteria() {
@@ -33,11 +33,10 @@ public class ArgumentScoreboardCriteria implements ArgumentType<IScoreboardCrite
         return new ArgumentScoreboardCriteria();
     }
 
-    public static IScoreboardCriteria getCriteria(CommandContext<CommandListenerWrapper> commandContext, String string) {
-        return commandContext.getArgument(string, IScoreboardCriteria.class);
+    public static IScoreboardCriteria getCriteria(CommandContext<CommandListenerWrapper> context, String name) {
+        return context.getArgument(name, IScoreboardCriteria.class);
     }
 
-    @Override
     public IScoreboardCriteria parse(StringReader stringReader) throws CommandSyntaxException {
         int i = stringReader.getCursor();
 
@@ -52,7 +51,6 @@ public class ArgumentScoreboardCriteria implements ArgumentType<IScoreboardCrite
         });
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         List<String> list = Lists.newArrayList(IScoreboardCriteria.getCustomCriteriaNames());
 
@@ -70,7 +68,6 @@ public class ArgumentScoreboardCriteria implements ArgumentType<IScoreboardCrite
         return Statistic.buildName(stat, (T)value);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

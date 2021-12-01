@@ -43,8 +43,8 @@ public class TileEntitySign extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
 
         for(int i = 0; i < 4; ++i) {
             IChatBaseComponent component = this.messages[i];
@@ -58,7 +58,6 @@ public class TileEntitySign extends TileEntity {
 
         nbt.setString("Color", this.color.getName());
         nbt.setBoolean("GlowingText", this.hasGlowingText);
-        return nbt;
     }
 
     @Override
@@ -138,15 +137,14 @@ public class TileEntitySign extends TileEntity {
         return filtered ? this.filteredMessages : this.messages;
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 9, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     @Override

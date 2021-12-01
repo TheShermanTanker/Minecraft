@@ -19,8 +19,6 @@ public interface VoxelShapeCollision {
 
     boolean isAbove(VoxelShape shape, BlockPosition pos, boolean defaultValue);
 
-    boolean hasItemOnFeet(Item item);
-
     boolean isHoldingItem(Item item);
 
     boolean canStandOnFluid(Fluid state, FluidTypeFlowing fluid);

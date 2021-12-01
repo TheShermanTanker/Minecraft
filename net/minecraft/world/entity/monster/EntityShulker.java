@@ -203,8 +203,8 @@ public class EntityShulker extends EntityGolem implements IMonster {
         return getProgressAabb(direction, f).move(this.locX() - (double)g, this.locY(), this.locZ() - (double)g);
     }
 
-    private static float getPhysicalPeek(float f) {
-        return 0.5F - MathHelper.sin((0.5F + f) * (float)Math.PI) * 0.5F;
+    private static float getPhysicalPeek(float openProgress) {
+        return 0.5F - MathHelper.sin((0.5F + openProgress) * (float)Math.PI) * 0.5F;
     }
 
     private boolean updatePeekAmount() {
@@ -241,13 +241,13 @@ public class EntityShulker extends EntityGolem implements IMonster {
         }
     }
 
-    public static AxisAlignedBB getProgressAabb(EnumDirection direction, float f) {
-        return getProgressDeltaAabb(direction, -1.0F, f);
+    public static AxisAlignedBB getProgressAabb(EnumDirection direction, float extraLength) {
+        return getProgressDeltaAabb(direction, -1.0F, extraLength);
     }
 
-    public static AxisAlignedBB getProgressDeltaAabb(EnumDirection direction, float f, float g) {
-        double d = (double)Math.max(f, g);
-        double e = (double)Math.min(f, g);
+    public static AxisAlignedBB getProgressDeltaAabb(EnumDirection direction, float prevExtraLength, float extraLength) {
+        double d = (double)Math.max(prevExtraLength, extraLength);
+        double e = (double)Math.min(prevExtraLength, extraLength);
         return (new AxisAlignedBB(BlockPosition.ZERO)).expandTowards((double)direction.getAdjacentX() * d, (double)direction.getAdjacentY() * d, (double)direction.getAdjacentZ() * d).contract((double)(-direction.getAdjacentX()) * (1.0D + e), (double)(-direction.getAdjacentY()) * (1.0D + e), (double)(-direction.getAdjacentZ()) * (1.0D + e));
     }
 
@@ -504,6 +504,7 @@ public class EntityShulker extends EntityGolem implements IMonster {
     public void recreateFromPacket(PacketPlayOutSpawnEntityLiving packet) {
         super.recreateFromPacket(packet);
         this.yBodyRot = 0.0F;
+        this.yBodyRotO = 0.0F;
     }
 
     @Override
@@ -620,23 +621,30 @@ public class EntityShulker extends EntityGolem implements IMonster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             if (EntityShulker.this.level.getDifficulty() != EnumDifficulty.PEACEFUL) {
                 --this.attackTime;
                 EntityLiving livingEntity = EntityShulker.this.getGoalTarget();
-                EntityShulker.this.getControllerLook().setLookAt(livingEntity, 180.0F, 180.0F);
-                double d = EntityShulker.this.distanceToSqr(livingEntity);
-                if (d < 400.0D) {
-                    if (this.attackTime <= 0) {
-                        this.attackTime = 20 + EntityShulker.this.random.nextInt(10) * 20 / 2;
-                        EntityShulker.this.level.addEntity(new EntityShulkerBullet(EntityShulker.this.level, EntityShulker.this, livingEntity, EntityShulker.this.getAttachFace().getAxis()));
-                        EntityShulker.this.playSound(SoundEffects.SHULKER_SHOOT, 2.0F, (EntityShulker.this.random.nextFloat() - EntityShulker.this.random.nextFloat()) * 0.2F + 1.0F);
+                if (livingEntity != null) {
+                    EntityShulker.this.getControllerLook().setLookAt(livingEntity, 180.0F, 180.0F);
+                    double d = EntityShulker.this.distanceToSqr(livingEntity);
+                    if (d < 400.0D) {
+                        if (this.attackTime <= 0) {
+                            this.attackTime = 20 + EntityShulker.this.random.nextInt(10) * 20 / 2;
+                            EntityShulker.this.level.addEntity(new EntityShulkerBullet(EntityShulker.this.level, EntityShulker.this, livingEntity, EntityShulker.this.getAttachFace().getAxis()));
+                            EntityShulker.this.playSound(SoundEffects.SHULKER_SHOOT, 2.0F, (EntityShulker.this.random.nextFloat() - EntityShulker.this.random.nextFloat()) * 0.2F + 1.0F);
+                        }
+                    } else {
+                        EntityShulker.this.setGoalTarget((EntityLiving)null);
                     }
-                } else {
-                    EntityShulker.this.setGoalTarget((EntityLiving)null);
-                }
 
-                super.tick();
+                    super.tick();
+                }
             }
         }
     }
@@ -690,7 +698,7 @@ public class EntityShulker extends EntityGolem implements IMonster {
 
         @Override
         public boolean canUse() {
-            return EntityShulker.this.getGoalTarget() == null && EntityShulker.this.random.nextInt(40) == 0 && EntityShulker.this.canStayAt(EntityShulker.this.getChunkCoordinates(), EntityShulker.this.getAttachFace());
+            return EntityShulker.this.getGoalTarget() == null && EntityShulker.this.random.nextInt(reducedTickDelay(40)) == 0 && EntityShulker.this.canStayAt(EntityShulker.this.getChunkCoordinates(), EntityShulker.this.getAttachFace());
         }
 
         @Override
@@ -700,7 +708,7 @@ public class EntityShulker extends EntityGolem implements IMonster {
 
         @Override
         public void start() {
-            this.peekTime = 20 * (1 + EntityShulker.this.random.nextInt(3));
+            this.peekTime = this.adjustedTickDelay(20 * (1 + EntityShulker.this.random.nextInt(3)));
             EntityShulker.this.setPeek(30);
         }
 

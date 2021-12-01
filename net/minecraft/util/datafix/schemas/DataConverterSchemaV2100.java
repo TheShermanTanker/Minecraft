@@ -18,7 +18,6 @@ public class DataConverterSchemaV2100 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         registerMob(schema, map, "minecraft:bee");
@@ -26,7 +25,6 @@ public class DataConverterSchemaV2100 extends DataConverterSchemaNamed {
         return map;
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerBlockEntities(schema);
         schema.register(map, "minecraft:beehive", () -> {

@@ -19,7 +19,7 @@ public class WorldGenFeatureHellFlowingLavaConfiguration implements WorldGenFeat
             return springConfiguration.rockCount;
         }), Codec.INT.fieldOf("hole_count").orElse(1).forGetter((springConfiguration) -> {
             return springConfiguration.holeCount;
-        }), IRegistry.BLOCK.listOf().fieldOf("valid_blocks").xmap(ImmutableSet::copyOf, ImmutableList::copyOf).forGetter((springConfiguration) -> {
+        }), IRegistry.BLOCK.byNameCodec().listOf().fieldOf("valid_blocks").xmap(ImmutableSet::copyOf, ImmutableList::copyOf).forGetter((springConfiguration) -> {
             return springConfiguration.validBlocks;
         })).apply(instance, WorldGenFeatureHellFlowingLavaConfiguration::new);
     });

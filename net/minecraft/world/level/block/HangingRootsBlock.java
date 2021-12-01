@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShapeCollision;
 
 public class HangingRootsBlock extends Block implements IBlockWaterlogged {
     private static final BlockStateBoolean WATERLOGGED = BlockProperties.WATERLOGGED;
-    protected static final VoxelShape SHAPE = Block.box(4.0D, 9.0D, 4.0D, 12.0D, 16.0D, 12.0D);
+    protected static final VoxelShape SHAPE = Block.box(2.0D, 10.0D, 2.0D, 14.0D, 16.0D, 14.0D);
 
     protected HangingRootsBlock(BlockBase.Info settings) {
         super(settings);
@@ -66,7 +66,7 @@ public class HangingRootsBlock extends Block implements IBlockWaterlogged {
             return Blocks.AIR.getBlockData();
         } else {
             if (state.get(WATERLOGGED)) {
-                world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
             }
 
             return super.updateState(state, direction, neighborState, world, pos, neighborPos);

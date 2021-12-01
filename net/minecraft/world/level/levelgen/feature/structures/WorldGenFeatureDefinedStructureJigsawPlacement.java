@@ -7,22 +7,28 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryCustom;
+import net.minecraft.core.QuartPos;
 import net.minecraft.data.worldgen.WorldGenFeaturePieces;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.level.IWorldHeightAccess;
+import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.BlockJigsaw;
 import net.minecraft.world.level.block.EnumBlockRotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.SeededRandom;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureVillageConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
-import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.WorldGenFeaturePillagerOutpostPoolPiece;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGenerator;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
 import net.minecraft.world.phys.AxisAlignedBB;
@@ -36,70 +42,84 @@ import org.apache.logging.log4j.Logger;
 public class WorldGenFeatureDefinedStructureJigsawPlacement {
     static final Logger LOGGER = LogManager.getLogger();
 
-    public static void addPieces(IRegistryCustom dynamicRegistries, WorldGenFeatureVillageConfiguration config, WorldGenFeatureDefinedStructureJigsawPlacement.PieceFactory pieceFactory, ChunkGenerator chunkGenerator, DefinedStructureManager structureManager, BlockPosition pos, StructurePieceAccessor children, Random random, boolean modifyBoundingBox, boolean surface, IWorldHeightAccess world) {
+    public static Optional<PieceGenerator<WorldGenFeatureVillageConfiguration>> addPieces(PieceGeneratorSupplier.Context<WorldGenFeatureVillageConfiguration> context, WorldGenFeatureDefinedStructureJigsawPlacement.PieceFactory pieceFactory, BlockPosition pos, boolean bl, boolean bl2) {
+        SeededRandom worldgenRandom = new SeededRandom(new LegacyRandomSource(0L));
+        worldgenRandom.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
+        IRegistryCustom registryAccess = context.registryAccess();
+        WorldGenFeatureVillageConfiguration jigsawConfiguration = context.config();
+        ChunkGenerator chunkGenerator = context.chunkGenerator();
+        DefinedStructureManager structureManager = context.structureManager();
+        IWorldHeightAccess levelHeightAccessor = context.heightAccessor();
+        Predicate<BiomeBase> predicate = context.validBiome();
         StructureGenerator.bootstrap();
-        List<WorldGenFeaturePillagerOutpostPoolPiece> list = Lists.newArrayList();
-        IRegistry<WorldGenFeatureDefinedStructurePoolTemplate> registry = dynamicRegistries.registryOrThrow(IRegistry.TEMPLATE_POOL_REGISTRY);
-        EnumBlockRotation rotation = EnumBlockRotation.getRandom(random);
-        WorldGenFeatureDefinedStructurePoolTemplate structureTemplatePool = config.startPool().get();
-        WorldGenFeatureDefinedStructurePoolStructure structurePoolElement = structureTemplatePool.getRandomTemplate(random);
-        if (structurePoolElement != WorldGenFeatureDefinedStructurePoolEmpty.INSTANCE) {
+        IRegistry<WorldGenFeatureDefinedStructurePoolTemplate> registry = registryAccess.registryOrThrow(IRegistry.TEMPLATE_POOL_REGISTRY);
+        EnumBlockRotation rotation = EnumBlockRotation.getRandom(worldgenRandom);
+        WorldGenFeatureDefinedStructurePoolTemplate structureTemplatePool = jigsawConfiguration.startPool().get();
+        WorldGenFeatureDefinedStructurePoolStructure structurePoolElement = structureTemplatePool.getRandomTemplate(worldgenRandom);
+        if (structurePoolElement == WorldGenFeatureDefinedStructurePoolEmpty.INSTANCE) {
+            return Optional.empty();
+        } else {
             WorldGenFeaturePillagerOutpostPoolPiece poolElementStructurePiece = pieceFactory.create(structureManager, structurePoolElement, pos, structurePoolElement.getGroundLevelDelta(), rotation, structurePoolElement.getBoundingBox(structureManager, pos, rotation));
             StructureBoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
             int i = (boundingBox.maxX() + boundingBox.minX()) / 2;
             int j = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
             int k;
-            if (surface) {
-                k = pos.getY() + chunkGenerator.getFirstFreeHeight(i, j, HeightMap.Type.WORLD_SURFACE_WG, world);
+            if (bl2) {
+                k = pos.getY() + chunkGenerator.getFirstFreeHeight(i, j, HeightMap.Type.WORLD_SURFACE_WG, levelHeightAccessor);
             } else {
                 k = pos.getY();
             }
 
-            int m = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
-            poolElementStructurePiece.move(0, k - m, 0);
-            list.add(poolElementStructurePiece);
-            if (config.maxDepth() > 0) {
-                int n = 80;
-                AxisAlignedBB aABB = new AxisAlignedBB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
-                WorldGenFeatureDefinedStructureJigsawPlacement.Placer placer = new WorldGenFeatureDefinedStructureJigsawPlacement.Placer(registry, config.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, random);
-                placer.placing.addLast(new WorldGenFeatureDefinedStructureJigsawPlacement.PieceState(poolElementStructurePiece, new MutableObject<>(VoxelShapes.join(VoxelShapes.create(aABB), VoxelShapes.create(AxisAlignedBB.of(boundingBox)), OperatorBoolean.ONLY_FIRST)), k + 80, 0));
+            if (!predicate.test(chunkGenerator.getBiome(QuartPos.fromBlock(i), QuartPos.fromBlock(k), QuartPos.fromBlock(j)))) {
+                return Optional.empty();
+            } else {
+                int m = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
+                poolElementStructurePiece.move(0, k - m, 0);
+                return Optional.of((structurePiecesBuilder, contextx) -> {
+                    List<WorldGenFeaturePillagerOutpostPoolPiece> list = Lists.newArrayList();
+                    list.add(poolElementStructurePiece);
+                    if (jigsawConfiguration.maxDepth() > 0) {
+                        int l = 80;
+                        AxisAlignedBB aABB = new AxisAlignedBB((double)(i - 80), (double)(k - 80), (double)(j - 80), (double)(i + 80 + 1), (double)(k + 80 + 1), (double)(j + 80 + 1));
+                        WorldGenFeatureDefinedStructureJigsawPlacement.Placer placer = new WorldGenFeatureDefinedStructureJigsawPlacement.Placer(registry, jigsawConfiguration.maxDepth(), pieceFactory, chunkGenerator, structureManager, list, worldgenRandom);
+                        placer.placing.addLast(new WorldGenFeatureDefinedStructureJigsawPlacement.PieceState(poolElementStructurePiece, new MutableObject<>(VoxelShapes.join(VoxelShapes.create(aABB), VoxelShapes.create(AxisAlignedBB.of(boundingBox)), OperatorBoolean.ONLY_FIRST)), 0));
 
-                while(!placer.placing.isEmpty()) {
-                    WorldGenFeatureDefinedStructureJigsawPlacement.PieceState pieceState = placer.placing.removeFirst();
-                    placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, modifyBoundingBox, world);
-                }
+                        while(!placer.placing.isEmpty()) {
+                            WorldGenFeatureDefinedStructureJigsawPlacement.PieceState pieceState = placer.placing.removeFirst();
+                            placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor);
+                        }
 
-                list.forEach(children::addPiece);
+                        list.forEach(structurePiecesBuilder::addPiece);
+                    }
+                });
             }
         }
     }
 
-    public static void addPieces(IRegistryCustom registryAccess, WorldGenFeaturePillagerOutpostPoolPiece poolElementStructurePiece, int i, WorldGenFeatureDefinedStructureJigsawPlacement.PieceFactory pieceFactory, ChunkGenerator chunkGenerator, DefinedStructureManager structureManager, List<? super WorldGenFeaturePillagerOutpostPoolPiece> list, Random random, IWorldHeightAccess levelHeightAccessor) {
-        IRegistry<WorldGenFeatureDefinedStructurePoolTemplate> registry = registryAccess.registryOrThrow(IRegistry.TEMPLATE_POOL_REGISTRY);
-        WorldGenFeatureDefinedStructureJigsawPlacement.Placer placer = new WorldGenFeatureDefinedStructureJigsawPlacement.Placer(registry, i, pieceFactory, chunkGenerator, structureManager, list, random);
-        placer.placing.addLast(new WorldGenFeatureDefinedStructureJigsawPlacement.PieceState(poolElementStructurePiece, new MutableObject<>(VoxelShapes.INFINITY), 0, 0));
+    public static void addPieces(IRegistryCustom registryManager, WorldGenFeaturePillagerOutpostPoolPiece piece, int maxDepth, WorldGenFeatureDefinedStructureJigsawPlacement.PieceFactory pieceFactory, ChunkGenerator chunkGenerator, DefinedStructureManager structureManager, List<? super WorldGenFeaturePillagerOutpostPoolPiece> results, Random random, IWorldHeightAccess world) {
+        IRegistry<WorldGenFeatureDefinedStructurePoolTemplate> registry = registryManager.registryOrThrow(IRegistry.TEMPLATE_POOL_REGISTRY);
+        WorldGenFeatureDefinedStructureJigsawPlacement.Placer placer = new WorldGenFeatureDefinedStructureJigsawPlacement.Placer(registry, maxDepth, pieceFactory, chunkGenerator, structureManager, results, random);
+        placer.placing.addLast(new WorldGenFeatureDefinedStructureJigsawPlacement.PieceState(piece, new MutableObject<>(VoxelShapes.INFINITY), 0));
 
         while(!placer.placing.isEmpty()) {
             WorldGenFeatureDefinedStructureJigsawPlacement.PieceState pieceState = placer.placing.removeFirst();
-            placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, false, levelHeightAccessor);
+            placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, false, world);
         }
 
     }
 
     public interface PieceFactory {
-        WorldGenFeaturePillagerOutpostPoolPiece create(DefinedStructureManager structureManager, WorldGenFeatureDefinedStructurePoolStructure poolElement, BlockPosition pos, int i, EnumBlockRotation rotation, StructureBoundingBox elementBounds);
+        WorldGenFeaturePillagerOutpostPoolPiece create(DefinedStructureManager structureManager, WorldGenFeatureDefinedStructurePoolStructure poolElement, BlockPosition pos, int groundLevelDelta, EnumBlockRotation rotation, StructureBoundingBox elementBounds);
     }
 
     static final class PieceState {
         final WorldGenFeaturePillagerOutpostPoolPiece piece;
         final MutableObject<VoxelShape> free;
-        final int boundsTop;
         final int depth;
 
-        PieceState(WorldGenFeaturePillagerOutpostPoolPiece piece, MutableObject<VoxelShape> pieceShape, int minY, int currentSize) {
+        PieceState(WorldGenFeaturePillagerOutpostPoolPiece piece, MutableObject<VoxelShape> pieceShape, int currentSize) {
             this.piece = piece;
             this.free = pieceShape;
-            this.boundsTop = minY;
             this.depth = currentSize;
         }
     }
@@ -124,7 +144,7 @@ public class WorldGenFeatureDefinedStructureJigsawPlacement {
             this.random = random;
         }
 
-        void tryPlacingChildren(WorldGenFeaturePillagerOutpostPoolPiece piece, MutableObject<VoxelShape> pieceShape, int minY, int currentSize, boolean modifyBoundingBox, IWorldHeightAccess world) {
+        void tryPlacingChildren(WorldGenFeaturePillagerOutpostPoolPiece piece, MutableObject<VoxelShape> pieceShape, int minY, boolean modifyBoundingBox, IWorldHeightAccess world) {
             WorldGenFeatureDefinedStructurePoolStructure structurePoolElement = piece.getElement();
             BlockPosition blockPos = piece.getPosition();
             EnumBlockRotation rotation = piece.getRotation();
@@ -149,20 +169,17 @@ public class WorldGenFeatureDefinedStructureJigsawPlacement {
                     if (optional2.isPresent() && (optional2.get().size() != 0 || Objects.equals(resourceLocation2, WorldGenFeaturePieces.EMPTY.location()))) {
                         boolean bl2 = boundingBox.isInside(blockPos3);
                         MutableObject<VoxelShape> mutableObject2;
-                        int l;
                         if (bl2) {
                             mutableObject2 = mutableObject;
-                            l = i;
                             if (mutableObject.getValue() == null) {
                                 mutableObject.setValue(VoxelShapes.create(AxisAlignedBB.of(boundingBox)));
                             }
                         } else {
                             mutableObject2 = pieceShape;
-                            l = minY;
                         }
 
                         List<WorldGenFeatureDefinedStructurePoolStructure> list = Lists.newArrayList();
-                        if (currentSize != this.maxDepth) {
+                        if (minY != this.maxDepth) {
                             list.addAll(optional.get().getShuffledTemplates(this.random));
                         }
 
@@ -176,28 +193,28 @@ public class WorldGenFeatureDefinedStructureJigsawPlacement {
                             for(EnumBlockRotation rotation2 : EnumBlockRotation.getShuffled(this.random)) {
                                 List<DefinedStructure.BlockInfo> list2 = structurePoolElement2.getShuffledJigsawBlocks(this.structureManager, BlockPosition.ZERO, rotation2, this.random);
                                 StructureBoundingBox boundingBox2 = structurePoolElement2.getBoundingBox(this.structureManager, BlockPosition.ZERO, rotation2);
-                                int o;
+                                int m;
                                 if (modifyBoundingBox && boundingBox2.getYSpan() <= 16) {
-                                    o = list2.stream().mapToInt((structureBlockInfox) -> {
+                                    m = list2.stream().mapToInt((structureBlockInfox) -> {
                                         if (!boundingBox2.isInside(structureBlockInfox.pos.relative(BlockJigsaw.getFrontFacing(structureBlockInfox.state)))) {
                                             return 0;
                                         } else {
                                             MinecraftKey resourceLocation = new MinecraftKey(structureBlockInfox.nbt.getString("pool"));
                                             Optional<WorldGenFeatureDefinedStructurePoolTemplate> optional = this.pools.getOptional(resourceLocation);
-                                            Optional<WorldGenFeatureDefinedStructurePoolTemplate> optional2 = optional.flatMap((structureTemplatePool) -> {
-                                                return this.pools.getOptional(structureTemplatePool.getFallback());
+                                            Optional<WorldGenFeatureDefinedStructurePoolTemplate> optional2 = optional.flatMap((pool) -> {
+                                                return this.pools.getOptional(pool.getFallback());
                                             });
-                                            int i = optional.map((structureTemplatePool) -> {
-                                                return structureTemplatePool.getMaxSize(this.structureManager);
+                                            int i = optional.map((pool) -> {
+                                                return pool.getMaxSize(this.structureManager);
                                             }).orElse(0);
-                                            int j = optional2.map((structureTemplatePool) -> {
-                                                return structureTemplatePool.getMaxSize(this.structureManager);
+                                            int j = optional2.map((pool) -> {
+                                                return pool.getMaxSize(this.structureManager);
                                             }).orElse(0);
                                             return Math.max(i, j);
                                         }
                                     }).max().orElse(0);
                                 } else {
-                                    o = 0;
+                                    m = 0;
                                 }
 
                                 for(DefinedStructure.BlockInfo structureBlockInfo2 : list2) {
@@ -205,59 +222,59 @@ public class WorldGenFeatureDefinedStructureJigsawPlacement {
                                         BlockPosition blockPos4 = structureBlockInfo2.pos;
                                         BlockPosition blockPos5 = blockPos3.subtract(blockPos4);
                                         StructureBoundingBox boundingBox3 = structurePoolElement2.getBoundingBox(this.structureManager, blockPos5, rotation2);
-                                        int p = boundingBox3.minY();
+                                        int n = boundingBox3.minY();
                                         WorldGenFeatureDefinedStructurePoolTemplate.Matching projection2 = structurePoolElement2.getProjection();
                                         boolean bl3 = projection2 == WorldGenFeatureDefinedStructurePoolTemplate.Matching.RIGID;
-                                        int q = blockPos4.getY();
-                                        int r = j - q + BlockJigsaw.getFrontFacing(structureBlockInfo.state).getAdjacentY();
-                                        int s;
+                                        int o = blockPos4.getY();
+                                        int p = j - o + BlockJigsaw.getFrontFacing(structureBlockInfo.state).getAdjacentY();
+                                        int q;
                                         if (bl && bl3) {
-                                            s = i + r;
+                                            q = i + p;
                                         } else {
                                             if (k == -1) {
                                                 k = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), HeightMap.Type.WORLD_SURFACE_WG, world);
                                             }
 
-                                            s = k - q;
+                                            q = k - o;
                                         }
 
-                                        int u = s - p;
-                                        StructureBoundingBox boundingBox4 = boundingBox3.moved(0, u, 0);
-                                        BlockPosition blockPos6 = blockPos5.offset(0, u, 0);
-                                        if (o > 0) {
-                                            int v = Math.max(o + 1, boundingBox4.maxY() - boundingBox4.minY());
-                                            boundingBox4.encapsulate(new BlockPosition(boundingBox4.minX(), boundingBox4.minY() + v, boundingBox4.minZ()));
+                                        int s = q - n;
+                                        StructureBoundingBox boundingBox4 = boundingBox3.moved(0, s, 0);
+                                        BlockPosition blockPos6 = blockPos5.offset(0, s, 0);
+                                        if (m > 0) {
+                                            int t = Math.max(m + 1, boundingBox4.maxY() - boundingBox4.minY());
+                                            boundingBox4.encapsulate(new BlockPosition(boundingBox4.minX(), boundingBox4.minY() + t, boundingBox4.minZ()));
                                         }
 
                                         if (!VoxelShapes.joinIsNotEmpty(mutableObject2.getValue(), VoxelShapes.create(AxisAlignedBB.of(boundingBox4).shrink(0.25D)), OperatorBoolean.ONLY_SECOND)) {
                                             mutableObject2.setValue(VoxelShapes.joinUnoptimized(mutableObject2.getValue(), VoxelShapes.create(AxisAlignedBB.of(boundingBox4)), OperatorBoolean.ONLY_FIRST));
-                                            int w = piece.getGroundLevelDelta();
-                                            int x;
+                                            int u = piece.getGroundLevelDelta();
+                                            int v;
                                             if (bl3) {
-                                                x = w - r;
+                                                v = u - p;
                                             } else {
-                                                x = structurePoolElement2.getGroundLevelDelta();
+                                                v = structurePoolElement2.getGroundLevelDelta();
                                             }
 
-                                            WorldGenFeaturePillagerOutpostPoolPiece poolElementStructurePiece = this.factory.create(this.structureManager, structurePoolElement2, blockPos6, x, rotation2, boundingBox4);
-                                            int z;
+                                            WorldGenFeaturePillagerOutpostPoolPiece poolElementStructurePiece = this.factory.create(this.structureManager, structurePoolElement2, blockPos6, v, rotation2, boundingBox4);
+                                            int x;
                                             if (bl) {
-                                                z = i + j;
+                                                x = i + j;
                                             } else if (bl3) {
-                                                z = s + q;
+                                                x = q + o;
                                             } else {
                                                 if (k == -1) {
                                                     k = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), HeightMap.Type.WORLD_SURFACE_WG, world);
                                                 }
 
-                                                z = k + r / 2;
+                                                x = k + p / 2;
                                             }
 
-                                            piece.addJunction(new WorldGenFeatureDefinedStructureJigsawJunction(blockPos3.getX(), z - j + w, blockPos3.getZ(), r, projection2));
-                                            poolElementStructurePiece.addJunction(new WorldGenFeatureDefinedStructureJigsawJunction(blockPos2.getX(), z - q + x, blockPos2.getZ(), -r, projection));
+                                            piece.addJunction(new WorldGenFeatureDefinedStructureJigsawJunction(blockPos3.getX(), x - j + u, blockPos3.getZ(), p, projection2));
+                                            poolElementStructurePiece.addJunction(new WorldGenFeatureDefinedStructureJigsawJunction(blockPos2.getX(), x - o + v, blockPos2.getZ(), -p, projection));
                                             this.pieces.add(poolElementStructurePiece);
-                                            if (currentSize + 1 <= this.maxDepth) {
-                                                this.placing.addLast(new WorldGenFeatureDefinedStructureJigsawPlacement.PieceState(poolElementStructurePiece, mutableObject2, l, currentSize + 1));
+                                            if (minY + 1 <= this.maxDepth) {
+                                                this.placing.addLast(new WorldGenFeatureDefinedStructureJigsawPlacement.PieceState(poolElementStructurePiece, mutableObject2, minY + 1));
                                             }
                                             continue label139;
                                         }

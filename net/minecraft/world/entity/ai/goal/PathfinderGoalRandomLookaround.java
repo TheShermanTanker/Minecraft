@@ -33,6 +33,11 @@ public class PathfinderGoalRandomLookaround extends PathfinderGoal {
     }
 
     @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
+    }
+
+    @Override
     public void tick() {
         --this.lookTime;
         this.mob.getControllerLook().setLookAt(this.mob.locX() + this.relX, this.mob.getHeadY(), this.mob.locZ() + this.relZ);

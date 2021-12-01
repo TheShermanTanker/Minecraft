@@ -54,11 +54,13 @@ public class Item implements IMaterial {
     public static final int MAX_STACK_SIZE = 64;
     public static final int EAT_DURATION = 32;
     public static final int MAX_BAR_WIDTH = 13;
+    @Nullable
     protected final CreativeModeTab category;
     public final EnumItemRarity rarity;
     private final int maxStackSize;
     private final int maxDamage;
     private final boolean isFireResistant;
+    @Nullable
     private final Item craftingRemainingItem;
     @Nullable
     private String descriptionId;
@@ -73,6 +75,7 @@ public class Item implements IMaterial {
         return IRegistry.ITEM.fromId(id);
     }
 
+    /** @deprecated */
     @Deprecated
     public static Item getItemOf(Block block) {
         return BY_BLOCK.getOrDefault(block, Items.AIR);
@@ -376,9 +379,12 @@ public class Item implements IMaterial {
     public static class Info {
         int maxStackSize = 64;
         int maxDamage;
+        @Nullable
         Item craftingRemainingItem;
+        @Nullable
         CreativeModeTab category;
         EnumItemRarity rarity = EnumItemRarity.COMMON;
+        @Nullable
         FoodInfo foodProperties;
         boolean isFireResistant;
 

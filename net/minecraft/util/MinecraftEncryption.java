@@ -51,19 +51,19 @@ public class MinecraftEncryption {
         }
     }
 
-    private static byte[] digestData(byte[]... bs) throws Exception {
+    private static byte[] digestData(byte[]... bytes) throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
 
-        for(byte[] cs : bs) {
-            messageDigest.update(cs);
+        for(byte[] bs : bytes) {
+            messageDigest.update(bs);
         }
 
         return messageDigest.digest();
     }
 
-    public static PublicKey byteToPublicKey(byte[] bs) throws CryptographyException {
+    public static PublicKey byteToPublicKey(byte[] bytes) throws CryptographyException {
         try {
-            EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(bs);
+            EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(bytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePublic(encodedKeySpec);
         } catch (Exception var3) {

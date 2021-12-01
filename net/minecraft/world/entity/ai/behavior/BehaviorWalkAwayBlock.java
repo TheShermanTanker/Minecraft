@@ -39,14 +39,14 @@ public class BehaviorWalkAwayBlock extends Behavior<EntityVillager> {
     @Override
     protected void start(WorldServer world, EntityVillager entity, long time) {
         BehaviorController<?> brain = entity.getBehaviorController();
-        brain.getMemory(this.memoryType).ifPresent((globalPos) -> {
-            if (!this.wrongDimension(world, globalPos) && !this.tiredOfTryingToFindTarget(world, entity)) {
-                if (this.tooFar(entity, globalPos)) {
+        brain.getMemory(this.memoryType).ifPresent((pos) -> {
+            if (!this.wrongDimension(world, pos) && !this.tiredOfTryingToFindTarget(world, entity)) {
+                if (this.tooFar(entity, pos)) {
                     Vec3D vec3 = null;
                     int i = 0;
 
                     for(int j = 1000; i < 1000 && (vec3 == null || this.tooFar(entity, GlobalPos.create(world.getDimensionKey(), new BlockPosition(vec3)))); ++i) {
-                        vec3 = DefaultRandomPos.getPosTowards(entity, 15, 7, Vec3D.atBottomCenterOf(globalPos.getBlockPosition()), (double)((float)Math.PI / 2F));
+                        vec3 = DefaultRandomPos.getPosTowards(entity, 15, 7, Vec3D.atBottomCenterOf(pos.getBlockPosition()), (double)((float)Math.PI / 2F));
                     }
 
                     if (i == 1000) {
@@ -55,8 +55,8 @@ public class BehaviorWalkAwayBlock extends Behavior<EntityVillager> {
                     }
 
                     brain.setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(vec3, this.speedModifier, this.closeEnoughDist));
-                } else if (!this.closeEnough(world, entity, globalPos)) {
-                    brain.setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(globalPos.getBlockPosition(), this.speedModifier, this.closeEnoughDist));
+                } else if (!this.closeEnough(world, entity, pos)) {
+                    brain.setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(pos.getBlockPosition(), this.speedModifier, this.closeEnoughDist));
                 }
             } else {
                 this.dropPOI(entity, time);

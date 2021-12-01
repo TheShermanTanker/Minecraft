@@ -130,7 +130,7 @@ public class BlockFire extends BlockFireAbstract {
 
     @Override
     public void tickAlways(IBlockData state, WorldServer world, BlockPosition pos, Random random) {
-        world.getBlockTicks().scheduleTick(pos, this, getFireTickDelay(world.random));
+        world.scheduleTick(pos, this, getFireTickDelay(world.random));
         if (world.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             if (!state.canPlace(world, pos)) {
                 world.removeBlock(pos, false);
@@ -275,7 +275,7 @@ public class BlockFire extends BlockFireAbstract {
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         super.onPlace(state, world, pos, oldState, notify);
-        world.getBlockTickList().scheduleTick(pos, this, getFireTickDelay(world.random));
+        world.scheduleTick(pos, this, getFireTickDelay(world.random));
     }
 
     private static int getFireTickDelay(Random random) {

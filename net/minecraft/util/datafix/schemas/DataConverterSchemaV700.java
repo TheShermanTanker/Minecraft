@@ -16,7 +16,6 @@ public class DataConverterSchemaV700 extends Schema {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         registerMob(schema, map, "ElderGuardian");

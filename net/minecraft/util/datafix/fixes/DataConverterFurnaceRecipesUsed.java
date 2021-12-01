@@ -20,7 +20,6 @@ public class DataConverterFurnaceRecipesUsed extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.cap(this.getOutputSchema().getTypeRaw(DataConverterTypes.RECIPE));
     }

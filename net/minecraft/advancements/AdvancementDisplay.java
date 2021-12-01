@@ -20,6 +20,7 @@ public class AdvancementDisplay {
     private final IChatBaseComponent title;
     private final IChatBaseComponent description;
     private final ItemStack icon;
+    @Nullable
     private final MinecraftKey background;
     private final AdvancementFrameType frame;
     private final boolean showToast;

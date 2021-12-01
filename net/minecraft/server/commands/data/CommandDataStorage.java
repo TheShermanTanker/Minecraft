@@ -19,32 +19,32 @@ import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.level.storage.PersistentCommandStorage;
 
 public class CommandDataStorage implements CommandDataAccessor {
-    static final SuggestionProvider<CommandListenerWrapper> SUGGEST_STORAGE = (commandContext, suggestionsBuilder) -> {
-        return ICompletionProvider.suggestResource(getGlobalTags(commandContext).keys(), suggestionsBuilder);
+    static final SuggestionProvider<CommandListenerWrapper> SUGGEST_STORAGE = (context, builder) -> {
+        return ICompletionProvider.suggestResource(getGlobalTags(context).keys(), builder);
     };
-    public static final Function<String, CommandData.DataProvider> PROVIDER = (string) -> {
+    public static final Function<String, CommandData.DataProvider> PROVIDER = (argumentName) -> {
         return new CommandData.DataProvider() {
             @Override
             public CommandDataAccessor access(CommandContext<CommandListenerWrapper> context) {
-                return new CommandDataStorage(CommandDataStorage.getGlobalTags(context), ArgumentMinecraftKeyRegistered.getId(context, string));
+                return new CommandDataStorage(CommandDataStorage.getGlobalTags(context), ArgumentMinecraftKeyRegistered.getId(context, argumentName));
             }
 
             @Override
             public ArgumentBuilder<CommandListenerWrapper, ?> wrap(ArgumentBuilder<CommandListenerWrapper, ?> argument, Function<ArgumentBuilder<CommandListenerWrapper, ?>, ArgumentBuilder<CommandListenerWrapper, ?>> argumentAdder) {
-                return argument.then(CommandDispatcher.literal("storage").then(argumentAdder.apply(CommandDispatcher.argument(string, ArgumentMinecraftKeyRegistered.id()).suggests(CommandDataStorage.SUGGEST_STORAGE))));
+                return argument.then(CommandDispatcher.literal("storage").then(argumentAdder.apply(CommandDispatcher.argument(argumentName, ArgumentMinecraftKeyRegistered.id()).suggests(CommandDataStorage.SUGGEST_STORAGE))));
             }
         };
     };
     private final PersistentCommandStorage storage;
     private final MinecraftKey id;
 
-    static PersistentCommandStorage getGlobalTags(CommandContext<CommandListenerWrapper> commandContext) {
-        return commandContext.getSource().getServer().getCommandStorage();
+    static PersistentCommandStorage getGlobalTags(CommandContext<CommandListenerWrapper> context) {
+        return context.getSource().getServer().getCommandStorage();
     }
 
-    CommandDataStorage(PersistentCommandStorage commandStorage, MinecraftKey resourceLocation) {
-        this.storage = commandStorage;
-        this.id = resourceLocation;
+    CommandDataStorage(PersistentCommandStorage storage, MinecraftKey id) {
+        this.storage = storage;
+        this.id = id;
     }
 
     @Override

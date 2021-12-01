@@ -16,7 +16,7 @@ public class StructureSettingsFeature {
             return config.salt;
         })).apply(instance, StructureSettingsFeature::new);
     }).comapFlatMap((config) -> {
-        return config.spacing <= config.separation ? DataResult.error("Spacing has to be smaller than separation") : DataResult.success(config);
+        return config.spacing <= config.separation ? DataResult.error("Spacing has to be larger than separation") : DataResult.success(config);
     }, Function.identity());
     private final int spacing;
     private final int separation;

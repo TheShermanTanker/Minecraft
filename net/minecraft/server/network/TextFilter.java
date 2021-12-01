@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -28,7 +29,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.SystemUtils;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.util.thread.ThreadedMailbox;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -77,7 +77,7 @@ public class TextFilter implements AutoCloseable {
                     int j = ChatDeserializer.getAsInt(jsonObject, "hashesToDrop", -1);
                     int k = ChatDeserializer.getAsInt(jsonObject, "maxConcurrentRequests", 7);
                     TextFilter.IgnoreStrategy ignoreStrategy = TextFilter.IgnoreStrategy.select(j);
-                    return new TextFilter(uRI, (new Base64()).encodeToString(string.getBytes(StandardCharsets.US_ASCII)), i, string2, ignoreStrategy, k);
+                    return new TextFilter(uRI, Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.US_ASCII)), i, string2, ignoreStrategy, k);
                 }
             } catch (Exception var9) {
                 LOGGER.warn("Failed to parse chat filter config {}", config, var9);
@@ -227,7 +227,7 @@ public class TextFilter implements AutoCloseable {
         httpURLConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
         httpURLConnection.setRequestProperty("Accept", "application/json");
         httpURLConnection.setRequestProperty("Authorization", "Basic " + this.authKey);
-        httpURLConnection.setRequestProperty("User-Agent", "Minecraft server" + SharedConstants.getGameVersion().getName());
+        httpURLConnection.setRequestProperty("User-Agent", "Minecraft server" + SharedConstants.getCurrentVersion().getName());
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream(), StandardCharsets.UTF_8);
 
         try {

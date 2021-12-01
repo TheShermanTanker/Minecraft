@@ -21,6 +21,7 @@ import net.minecraft.core.IRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.item.Item;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 
 public class ChatDeserializer {
     private static final Gson GSON = (new GsonBuilder()).create();
@@ -85,7 +86,9 @@ public class ChatDeserializer {
         }
     }
 
-    public static String getAsString(JsonObject object, String element, String defaultStr) {
+    @Nullable
+    @Contract("_,_,!null->!null;_,_,null->_")
+    public static String getAsString(JsonObject object, String element, @Nullable String defaultStr) {
         return object.has(element) ? convertToString(object.get(element), element) : defaultStr;
     }
 
@@ -108,7 +111,9 @@ public class ChatDeserializer {
         }
     }
 
-    public static Item getAsItem(JsonObject object, String key, Item defaultItem) {
+    @Nullable
+    @Contract("_,_,!null->!null;_,_,null->_")
+    public static Item getAsItem(JsonObject object, String key, @Nullable Item defaultItem) {
         return object.has(key) ? convertToItem(object.get(key), key) : defaultItem;
     }
 
@@ -328,7 +333,9 @@ public class ChatDeserializer {
         }
     }
 
-    public static JsonObject getAsJsonObject(JsonObject object, String element, JsonObject defaultObject) {
+    @Nullable
+    @Contract("_,_,!null->!null;_,_,null->_")
+    public static JsonObject getAsJsonObject(JsonObject object, String element, @Nullable JsonObject defaultObject) {
         return object.has(element) ? convertToJsonObject(object.get(element), element) : defaultObject;
     }
 
@@ -349,6 +356,7 @@ public class ChatDeserializer {
     }
 
     @Nullable
+    @Contract("_,_,!null->!null;_,_,null->_")
     public static JsonArray getAsJsonArray(JsonObject object, String name, @Nullable JsonArray defaultArray) {
         return object.has(name) ? convertToJsonArray(object.get(name), name) : defaultArray;
     }
@@ -369,11 +377,13 @@ public class ChatDeserializer {
         }
     }
 
-    public static <T> T getAsObject(JsonObject object, String element, T defaultValue, JsonDeserializationContext context, Class<? extends T> type) {
+    @Nullable
+    @Contract("_,_,!null,_,_->!null;_,_,null,_,_->_")
+    public static <T> T getAsObject(JsonObject object, String element, @Nullable T defaultValue, JsonDeserializationContext context, Class<? extends T> type) {
         return (T)(object.has(element) ? convertToObject(object.get(element), element, context, type) : defaultValue);
     }
 
-    public static String getType(JsonElement element) {
+    public static String getType(@Nullable JsonElement element) {
         String string = StringUtils.abbreviateMiddle(String.valueOf((Object)element), "...", 10);
         if (element == null) {
             return "null (missing)";

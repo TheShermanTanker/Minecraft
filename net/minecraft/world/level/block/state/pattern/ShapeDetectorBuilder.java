@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block.state.pattern;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.lang.reflect.Array;
@@ -20,7 +19,9 @@ public class ShapeDetectorBuilder {
     private int width;
 
     private ShapeDetectorBuilder() {
-        this.lookup.put(' ', Predicates.alwaysTrue());
+        this.lookup.put(' ', (pos) -> {
+            return true;
+        });
     }
 
     public ShapeDetectorBuilder aisle(String... pattern) {

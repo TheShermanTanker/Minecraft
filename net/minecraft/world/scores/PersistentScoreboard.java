@@ -34,10 +34,6 @@ public class PersistentScoreboard extends PersistentBase {
         for(int i = 0; i < nbt.size(); ++i) {
             NBTTagCompound compoundTag = nbt.getCompound(i);
             String string = compoundTag.getString("Name");
-            if (string.length() > 16) {
-                string = string.substring(0, 16);
-            }
-
             ScoreboardTeam playerTeam = this.scoreboard.createTeam(string);
             IChatBaseComponent component = IChatBaseComponent.ChatSerializer.fromJson(compoundTag.getString("DisplayName"));
             if (component != null) {
@@ -117,15 +113,11 @@ public class PersistentScoreboard extends PersistentBase {
     private void loadObjectives(NBTTagList nbt) {
         for(int i = 0; i < nbt.size(); ++i) {
             NBTTagCompound compoundTag = nbt.getCompound(i);
-            IScoreboardCriteria.byName(compoundTag.getString("CriteriaName")).ifPresent((objectiveCriteria) -> {
+            IScoreboardCriteria.byName(compoundTag.getString("CriteriaName")).ifPresent((criterion) -> {
                 String string = compoundTag.getString("Name");
-                if (string.length() > 16) {
-                    string = string.substring(0, 16);
-                }
-
                 IChatBaseComponent component = IChatBaseComponent.ChatSerializer.fromJson(compoundTag.getString("DisplayName"));
                 IScoreboardCriteria.EnumScoreboardHealthDisplay renderType = IScoreboardCriteria.EnumScoreboardHealthDisplay.byId(compoundTag.getString("RenderType"));
-                this.scoreboard.registerObjective(string, objectiveCriteria, component, renderType);
+                this.scoreboard.registerObjective(string, criterion, component, renderType);
             });
         }
 

@@ -21,11 +21,11 @@ import net.minecraft.world.level.block.state.IBlockData;
 
 public class CommandDataAccessorTile implements CommandDataAccessor {
     static final SimpleCommandExceptionType ERROR_NOT_A_BLOCK_ENTITY = new SimpleCommandExceptionType(new ChatMessage("commands.data.block.invalid"));
-    public static final Function<String, CommandData.DataProvider> PROVIDER = (string) -> {
+    public static final Function<String, CommandData.DataProvider> PROVIDER = (argumentName) -> {
         return new CommandData.DataProvider() {
             @Override
             public CommandDataAccessor access(CommandContext<CommandListenerWrapper> context) throws CommandSyntaxException {
-                BlockPosition blockPos = ArgumentPosition.getLoadedBlockPos(context, string + "Pos");
+                BlockPosition blockPos = ArgumentPosition.getLoadedBlockPos(context, argumentName + "Pos");
                 TileEntity blockEntity = context.getSource().getWorld().getTileEntity(blockPos);
                 if (blockEntity == null) {
                     throw CommandDataAccessorTile.ERROR_NOT_A_BLOCK_ENTITY.create();
@@ -36,7 +36,7 @@ public class CommandDataAccessorTile implements CommandDataAccessor {
 
             @Override
             public ArgumentBuilder<CommandListenerWrapper, ?> wrap(ArgumentBuilder<CommandListenerWrapper, ?> argument, Function<ArgumentBuilder<CommandListenerWrapper, ?>, ArgumentBuilder<CommandListenerWrapper, ?>> argumentAdder) {
-                return argument.then(CommandDispatcher.literal("block").then(argumentAdder.apply(CommandDispatcher.argument(string + "Pos", ArgumentPosition.blockPos()))));
+                return argument.then(CommandDispatcher.literal("block").then(argumentAdder.apply(CommandDispatcher.argument(argumentName + "Pos", ArgumentPosition.blockPos()))));
             }
         };
     };
@@ -50,9 +50,6 @@ public class CommandDataAccessorTile implements CommandDataAccessor {
 
     @Override
     public void setData(NBTTagCompound nbt) {
-        nbt.setInt("x", this.pos.getX());
-        nbt.setInt("y", this.pos.getY());
-        nbt.setInt("z", this.pos.getZ());
         IBlockData blockState = this.entity.getWorld().getType(this.pos);
         this.entity.load(nbt);
         this.entity.update();
@@ -61,7 +58,7 @@ public class CommandDataAccessorTile implements CommandDataAccessor {
 
     @Override
     public NBTTagCompound getData() {
-        return this.entity.save(new NBTTagCompound());
+        return this.entity.saveWithFullMetadata();
     }
 
     @Override

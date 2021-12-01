@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -24,6 +25,7 @@ import net.minecraft.util.TimeRange;
 import net.minecraft.util.valueproviders.IntProviderUniform;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSourceIndirect;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityPose;
@@ -45,7 +47,11 @@ import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackable
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalUniversalAngerReset;
 import net.minecraft.world.entity.ai.targeting.PathfinderTargetCondition;
 import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.entity.projectile.EntityPotion;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionRegistry;
+import net.minecraft.world.item.alchemy.PotionUtil;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.RayTrace;
 import net.minecraft.world.level.World;
@@ -70,6 +76,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
     private int targetChangeTime;
     private static final IntProviderUniform PERSISTENT_ANGER_TIME = TimeRange.rangeOfSeconds(20, 39);
     private int remainingPersistentAngerTime;
+    @Nullable
     private UUID persistentAngerTarget;
 
     public EntityEnderman(EntityTypes<? extends EntityEnderman> type, World world) {
@@ -145,6 +152,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
         this.persistentAngerTarget = uuid;
     }
 
+    @Nullable
     @Override
     public UUID getAngerTarget() {
         return this.persistentAngerTarget;
@@ -331,21 +339,37 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
         if (this.isInvulnerable(source)) {
             return false;
         } else if (source instanceof EntityDamageSourceIndirect) {
+            Entity entity = source.getDirectEntity();
+            boolean bl;
+            if (entity instanceof EntityPotion) {
+                bl = this.hurtWithCleanWater(source, (EntityPotion)entity, amount);
+            } else {
+                bl = false;
+            }
+
             for(int i = 0; i < 64; ++i) {
                 if (this.teleport()) {
                     return true;
                 }
             }
 
-            return false;
+            return bl;
         } else {
-            boolean bl = super.damageEntity(source, amount);
+            boolean bl3 = super.damageEntity(source, amount);
             if (!this.level.isClientSide() && !(source.getEntity() instanceof EntityLiving) && this.random.nextInt(10) != 0) {
                 this.teleport();
             }
 
-            return bl;
+            return bl3;
         }
+    }
+
+    private boolean hurtWithCleanWater(DamageSource source, EntityPotion potion, float amount) {
+        ItemStack itemStack = potion.getSuppliedItem();
+        PotionRegistry potion2 = PotionUtil.getPotion(itemStack);
+        List<MobEffect> list = PotionUtil.getEffects(itemStack);
+        boolean bl = potion2 == Potions.WATER && list.isEmpty();
+        return bl ? super.damageEntity(source, amount) : false;
     }
 
     public boolean isCreepy() {
@@ -367,6 +391,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
 
     static class EndermanFreezeWhenLookedAt extends PathfinderGoal {
         private final EntityEnderman enderman;
+        @Nullable
         private EntityLiving target;
 
         public EndermanFreezeWhenLookedAt(EntityEnderman enderman) {
@@ -410,7 +435,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
             } else if (!this.enderman.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                 return false;
             } else {
-                return this.enderman.getRandom().nextInt(20) == 0;
+                return this.enderman.getRandom().nextInt(reducedTickDelay(20)) == 0;
             }
         }
 
@@ -450,7 +475,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
             } else if (!this.enderman.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                 return false;
             } else {
-                return this.enderman.getRandom().nextInt(2000) == 0;
+                return this.enderman.getRandom().nextInt(reducedTickDelay(2000)) == 0;
             }
         }
 
@@ -484,14 +509,15 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
 
     static class PathfinderGoalPlayerWhoLookedAtTarget extends PathfinderGoalNearestAttackableTarget<EntityHuman> {
         private final EntityEnderman enderman;
+        @Nullable
         private EntityHuman pendingTarget;
         private int aggroTime;
         private int teleportTime;
         private final PathfinderTargetCondition startAggroTargetConditions;
         private final PathfinderTargetCondition continueAggroTargetConditions = PathfinderTargetCondition.forCombat().ignoreLineOfSight();
 
-        public PathfinderGoalPlayerWhoLookedAtTarget(EntityEnderman enderman, @Nullable Predicate<EntityLiving> predicate) {
-            super(enderman, EntityHuman.class, 10, false, false, predicate);
+        public PathfinderGoalPlayerWhoLookedAtTarget(EntityEnderman enderman, @Nullable Predicate<EntityLiving> targetPredicate) {
+            super(enderman, EntityHuman.class, 10, false, false, targetPredicate);
             this.enderman = enderman;
             this.startAggroTargetConditions = PathfinderTargetCondition.forCombat().range(this.getFollowDistance()).selector((playerEntity) -> {
                 return enderman.isLookingAtMe((EntityHuman)playerEntity);
@@ -506,7 +532,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
 
         @Override
         public void start() {
-            this.aggroTime = 5;
+            this.aggroTime = this.adjustedTickDelay(5);
             this.teleportTime = 0;
             this.enderman.setBeingStaredAt();
         }
@@ -551,7 +577,7 @@ public class EntityEnderman extends EntityMonster implements IEntityAngerable {
                         }
 
                         this.teleportTime = 0;
-                    } else if (this.target.distanceToSqr(this.enderman) > 256.0D && this.teleportTime++ >= 30 && this.enderman.teleportTowards(this.target)) {
+                    } else if (this.target.distanceToSqr(this.enderman) > 256.0D && this.teleportTime++ >= this.adjustedTickDelay(30) && this.enderman.teleportTowards(this.target)) {
                         this.teleportTime = 0;
                     }
                 }

@@ -13,8 +13,8 @@ import net.minecraft.world.level.gameevent.vibrations.VibrationPath;
 
 public class ParticleParamVibration implements ParticleParam {
     public static final Codec<ParticleParamVibration> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(VibrationPath.CODEC.fieldOf("vibration").forGetter((vibrationParticleOption) -> {
-            return vibrationParticleOption.vibrationPath;
+        return instance.group(VibrationPath.CODEC.fieldOf("vibration").forGetter((effect) -> {
+            return effect.vibrationPath;
         })).apply(instance, ParticleParamVibration::new);
     });
     public static final ParticleParam.Deserializer<ParticleParamVibration> DESERIALIZER = new ParticleParam.Deserializer<ParticleParamVibration>() {

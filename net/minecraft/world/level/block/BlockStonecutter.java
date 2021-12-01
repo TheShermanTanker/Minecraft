@@ -54,8 +54,8 @@ public class BlockStonecutter extends Block {
     @Nullable
     @Override
     public ITileInventory getInventory(IBlockData state, World world, BlockPosition pos) {
-        return new TileInventory((i, inventory, player) -> {
-            return new ContainerStonecutter(i, inventory, ContainerAccess.at(world, pos));
+        return new TileInventory((syncId, playerInventory, player) -> {
+            return new ContainerStonecutter(syncId, playerInventory, ContainerAccess.at(world, pos));
         }, CONTAINER_TITLE);
     }
 

@@ -55,7 +55,7 @@ public class EntityMinecartMobSpawner extends EntityMinecartAbstract {
     @Override
     protected void saveData(NBTTagCompound nbt) {
         super.saveData(nbt);
-        this.spawner.save(this.level, this.getChunkCoordinates(), nbt);
+        this.spawner.save(nbt);
     }
 
     @Override

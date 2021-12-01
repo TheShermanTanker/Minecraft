@@ -1,8 +1,10 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
@@ -10,7 +12,6 @@ import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.DynamicOpsNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.IBlockAccess;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.NoiseEffect;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,7 +71,7 @@ public abstract class StructurePiece {
         return EnumDirection.EnumDirectionLimit.HORIZONTAL.getRandomDirection(random);
     }
 
-    public final NBTTagCompound createTag(WorldServer world) {
+    public final NBTTagCompound createTag(StructurePieceSerializationContext context) {
         NBTTagCompound compoundTag = new NBTTagCompound();
         compoundTag.setString("id", IRegistry.STRUCTURE_PIECE.getKey(this.getType()).toString());
         StructureBoundingBox.CODEC.encodeStart(DynamicOpsNBT.INSTANCE, this.boundingBox).resultOrPartial(LOGGER::error).ifPresent((tag) -> {
@@ -78,20 +80,20 @@ public abstract class StructurePiece {
         EnumDirection direction = this.getOrientation();
         compoundTag.setInt("O", direction == null ? -1 : direction.get2DRotationValue());
         compoundTag.setInt("GD", this.genDepth);
-        this.addAdditionalSaveData(world, compoundTag);
+        this.addAdditionalSaveData(context, compoundTag);
         return compoundTag;
     }
 
-    protected abstract void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt);
+    protected abstract void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt);
 
     public NoiseEffect getNoiseEffect() {
         return NoiseEffect.BEARD;
     }
 
-    public void addChildren(StructurePiece start, StructurePieceAccessor structurePieceAccessor, Random random) {
+    public void addChildren(StructurePiece start, StructurePieceAccessor holder, Random random) {
     }
 
-    public abstract boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos);
+    public abstract void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos);
 
     public StructureBoundingBox getBoundingBox() {
         return this.boundingBox;
@@ -172,7 +174,7 @@ public abstract class StructurePiece {
                 world.setTypeAndData(blockPos, block, 2);
                 Fluid fluidState = world.getFluid(blockPos);
                 if (!fluidState.isEmpty()) {
-                    world.getFluidTickList().scheduleTick(blockPos, fluidState.getType(), 0);
+                    world.scheduleTick(blockPos, fluidState.getType(), 0);
                 }
 
                 if (SHAPE_CHECK_BLOCKS.contains(block.getBlock())) {
@@ -400,6 +402,23 @@ public abstract class StructurePiece {
 
     public void move(int x, int y, int z) {
         this.boundingBox.move(x, y, z);
+    }
+
+    public static StructureBoundingBox createBoundingBox(Stream<StructurePiece> pieces) {
+        return StructureBoundingBox.encapsulatingBoxes(pieces.map(StructurePiece::getBoundingBox)::iterator).orElseThrow(() -> {
+            return new IllegalStateException("Unable to calculate boundingbox without pieces");
+        });
+    }
+
+    @Nullable
+    public static StructurePiece findCollisionPiece(List<StructurePiece> pieces, StructureBoundingBox box) {
+        for(StructurePiece structurePiece : pieces) {
+            if (structurePiece.getBoundingBox().intersects(box)) {
+                return structurePiece;
+            }
+        }
+
+        return null;
     }
 
     @Nullable

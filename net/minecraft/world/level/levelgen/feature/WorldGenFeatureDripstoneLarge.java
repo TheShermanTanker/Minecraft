@@ -13,6 +13,7 @@ import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Column;
+import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.phys.Vec3D;
 
@@ -70,14 +71,14 @@ public class WorldGenFeatureDripstoneLarge extends WorldGenerator<LargeDripstone
         return new WorldGenFeatureDripstoneLarge.LargeDripstone(pos, isStalagmite, scale, (double)bluntness.sample(random), (double)heightScale.sample(random));
     }
 
-    private void placeDebugMarkers(GeneratorAccessSeed worldGenLevel, BlockPosition blockPos, Column.Range range, WorldGenFeatureDripstoneLarge.WindOffsetter windOffsetter) {
-        worldGenLevel.setTypeAndData(windOffsetter.offset(blockPos.atY(range.ceiling() - 1)), Blocks.DIAMOND_BLOCK.getBlockData(), 2);
-        worldGenLevel.setTypeAndData(windOffsetter.offset(blockPos.atY(range.floor() + 1)), Blocks.GOLD_BLOCK.getBlockData(), 2);
+    private void placeDebugMarkers(GeneratorAccessSeed world, BlockPosition pos, Column.Range surface, WorldGenFeatureDripstoneLarge.WindOffsetter wind) {
+        world.setTypeAndData(wind.offset(pos.atY(surface.ceiling() - 1)), Blocks.DIAMOND_BLOCK.getBlockData(), 2);
+        world.setTypeAndData(wind.offset(pos.atY(surface.floor() + 1)), Blocks.GOLD_BLOCK.getBlockData(), 2);
 
-        for(BlockPosition.MutableBlockPosition mutableBlockPos = blockPos.atY(range.floor() + 2).mutable(); mutableBlockPos.getY() < range.ceiling() - 1; mutableBlockPos.move(EnumDirection.UP)) {
-            BlockPosition blockPos2 = windOffsetter.offset(mutableBlockPos);
-            if (DripstoneUtils.isEmptyOrWater(worldGenLevel, blockPos2) || worldGenLevel.getType(blockPos2).is(Blocks.DRIPSTONE_BLOCK)) {
-                worldGenLevel.setTypeAndData(blockPos2, Blocks.CREEPER_HEAD.getBlockData(), 2);
+        for(BlockPosition.MutableBlockPosition mutableBlockPos = pos.atY(surface.floor() + 2).mutable(); mutableBlockPos.getY() < surface.ceiling() - 1; mutableBlockPos.move(EnumDirection.UP)) {
+            BlockPosition blockPos = wind.offset(mutableBlockPos);
+            if (DripstoneUtils.isEmptyOrWater(world, blockPos) || world.getType(blockPos).is(Blocks.DRIPSTONE_BLOCK)) {
+                world.setTypeAndData(blockPos, Blocks.CREEPER_HEAD.getBlockData(), 2);
             }
         }
 
@@ -90,12 +91,12 @@ public class WorldGenFeatureDripstoneLarge extends WorldGenerator<LargeDripstone
         private final double bluntness;
         private final double scale;
 
-        LargeDripstone(BlockPosition blockPos, boolean bl, int i, double d, double e) {
-            this.root = blockPos;
-            this.pointingUp = bl;
-            this.radius = i;
-            this.bluntness = d;
-            this.scale = e;
+        LargeDripstone(BlockPosition pos, boolean isStalagmite, int scale, double bluntness, double heightScale) {
+            this.root = pos;
+            this.pointingUp = isStalagmite;
+            this.radius = scale;
+            this.bluntness = bluntness;
+            this.scale = heightScale;
         }
 
         private int getHeight() {
@@ -151,8 +152,9 @@ public class WorldGenFeatureDripstoneLarge extends WorldGenerator<LargeDripstone
 
                             BlockPosition.MutableBlockPosition mutableBlockPos = this.root.offset(i, 0, j).mutable();
                             boolean bl = false;
+                            int l = this.pointingUp ? world.getHeight(HeightMap.Type.WORLD_SURFACE_WG, mutableBlockPos.getX(), mutableBlockPos.getZ()) : Integer.MAX_VALUE;
 
-                            for(int l = 0; l < k; ++l) {
+                            for(int m = 0; m < k && mutableBlockPos.getY() < l; ++m) {
                                 BlockPosition blockPos = wind.offset(mutableBlockPos);
                                 if (DripstoneUtils.isEmptyOrWaterOrLava(world, blockPos)) {
                                     bl = true;

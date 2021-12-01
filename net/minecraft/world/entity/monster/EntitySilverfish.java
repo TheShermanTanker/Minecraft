@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.sounds.SoundEffect;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.BlockMonsterEggs;
 import net.minecraft.world.level.block.state.IBlockData;
 
 public class EntitySilverfish extends EntityMonster {
+    @Nullable
     private EntitySilverfish.PathfinderGoalSilverfishWakeOthers friendsGoal;
 
     public EntitySilverfish(EntityTypes<? extends EntitySilverfish> type, World world) {
@@ -118,7 +120,7 @@ public class EntitySilverfish extends EntityMonster {
         return BlockMonsterEggs.isCompatibleHostBlock(world.getType(pos.below())) ? 10.0F : super.getWalkTargetValue(pos, world);
     }
 
-    public static boolean checkSliverfishSpawnRules(EntityTypes<EntitySilverfish> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
+    public static boolean checkSilverfishSpawnRules(EntityTypes<EntitySilverfish> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
         if (checkAnyLightMonsterSpawnRules(type, world, spawnReason, pos, random)) {
             EntityHuman player = world.getNearestPlayer((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, 5.0D, true);
             return player == null;
@@ -133,6 +135,7 @@ public class EntitySilverfish extends EntityMonster {
     }
 
     static class PathfinderGoalSilverfishHideInBlock extends PathfinderGoalRandomStroll {
+        @Nullable
         private EnumDirection selectedDirection;
         private boolean doMerge;
 
@@ -149,7 +152,7 @@ public class EntitySilverfish extends EntityMonster {
                 return false;
             } else {
                 Random random = this.mob.getRandom();
-                if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(10) == 0) {
+                if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(reducedTickDelay(10)) == 0) {
                     this.selectedDirection = EnumDirection.getRandom(random);
                     BlockPosition blockPos = (new BlockPosition(this.mob.locX(), this.mob.locY() + 0.5D, this.mob.locZ())).relative(this.selectedDirection);
                     IBlockData blockState = this.mob.level.getType(blockPos);
@@ -197,7 +200,7 @@ public class EntitySilverfish extends EntityMonster {
 
         public void notifyHurt() {
             if (this.lookForFriends == 0) {
-                this.lookForFriends = 20;
+                this.lookForFriends = this.adjustedTickDelay(20);
             }
 
         }

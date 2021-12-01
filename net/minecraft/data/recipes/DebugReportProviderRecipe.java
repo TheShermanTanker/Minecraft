@@ -95,14 +95,14 @@ public class DebugReportProviderRecipe implements DebugReportProvider {
     public void run(HashCache cache) {
         Path path = this.generator.getOutputFolder();
         Set<MinecraftKey> set = Sets.newHashSet();
-        buildCraftingRecipes((finishedRecipe) -> {
-            if (!set.add(finishedRecipe.getId())) {
-                throw new IllegalStateException("Duplicate recipe " + finishedRecipe.getId());
+        buildCraftingRecipes((provider) -> {
+            if (!set.add(provider.getId())) {
+                throw new IllegalStateException("Duplicate recipe " + provider.getId());
             } else {
-                saveRecipe(cache, finishedRecipe.serializeRecipe(), path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/recipes/" + finishedRecipe.getId().getKey() + ".json"));
-                JsonObject jsonObject = finishedRecipe.serializeAdvancement();
+                saveRecipe(cache, provider.serializeRecipe(), path.resolve("data/" + provider.getId().getNamespace() + "/recipes/" + provider.getId().getKey() + ".json"));
+                JsonObject jsonObject = provider.serializeAdvancement();
                 if (jsonObject != null) {
-                    saveAdvancement(cache, jsonObject, path.resolve("data/" + finishedRecipe.getId().getNamespace() + "/advancements/" + finishedRecipe.getAdvancementId().getKey() + ".json"));
+                    saveAdvancement(cache, jsonObject, path.resolve("data/" + provider.getId().getNamespace() + "/advancements/" + provider.getAdvancementId().getKey() + ".json"));
                 }
 
             }
@@ -910,30 +910,30 @@ public class DebugReportProviderRecipe implements DebugReportProvider {
         stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER);
         stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB, Blocks.WAXED_OXIDIZED_CUT_COPPER, 2);
         stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Blocks.WAXED_OXIDIZED_CUT_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK);
-        stonecutterResultFromBase(exporter, Blocks.CUT_COPPER_STAIRS, Blocks.COPPER_BLOCK);
-        stonecutterResultFromBase(exporter, Blocks.CUT_COPPER_SLAB, Blocks.COPPER_BLOCK, 2);
-        stonecutterResultFromBase(exporter, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.EXPOSED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_COPPER, 2);
-        stonecutterResultFromBase(exporter, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.WEATHERED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_COPPER, 2);
-        stonecutterResultFromBase(exporter, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_COPPER, 2);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_COPPER_BLOCK);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_COPPER_BLOCK, 2);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_COPPER, 2);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_COPPER, 2);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER, Blocks.WAXED_OXIDIZED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Blocks.WAXED_OXIDIZED_COPPER);
-        stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB, Blocks.WAXED_OXIDIZED_COPPER, 2);
+        stonecutterResultFromBase(exporter, Blocks.CUT_COPPER, Blocks.COPPER_BLOCK, 4);
+        stonecutterResultFromBase(exporter, Blocks.CUT_COPPER_STAIRS, Blocks.COPPER_BLOCK, 4);
+        stonecutterResultFromBase(exporter, Blocks.CUT_COPPER_SLAB, Blocks.COPPER_BLOCK, 8);
+        stonecutterResultFromBase(exporter, Blocks.EXPOSED_CUT_COPPER, Blocks.EXPOSED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.EXPOSED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_COPPER, 8);
+        stonecutterResultFromBase(exporter, Blocks.WEATHERED_CUT_COPPER, Blocks.WEATHERED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.WEATHERED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_COPPER, 8);
+        stonecutterResultFromBase(exporter, Blocks.OXIDIZED_CUT_COPPER, Blocks.OXIDIZED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_COPPER, 8);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_COPPER_BLOCK, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_COPPER_BLOCK, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_COPPER_BLOCK, 8);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_EXPOSED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_COPPER, 8);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_WEATHERED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_COPPER, 8);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER, Blocks.WAXED_OXIDIZED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Blocks.WAXED_OXIDIZED_COPPER, 4);
+        stonecutterResultFromBase(exporter, Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB, Blocks.WAXED_OXIDIZED_COPPER, 8);
         stonecutterResultFromBase(exporter, Blocks.COBBLED_DEEPSLATE_SLAB, Blocks.COBBLED_DEEPSLATE, 2);
         stonecutterResultFromBase(exporter, Blocks.COBBLED_DEEPSLATE_STAIRS, Blocks.COBBLED_DEEPSLATE);
         stonecutterResultFromBase(exporter, Blocks.COBBLED_DEEPSLATE_WALL, Blocks.COBBLED_DEEPSLATE);

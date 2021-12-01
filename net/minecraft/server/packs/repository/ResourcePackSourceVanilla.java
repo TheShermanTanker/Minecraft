@@ -8,7 +8,7 @@ import net.minecraft.server.packs.ResourcePackVanilla;
 import net.minecraft.server.packs.metadata.pack.ResourcePackInfo;
 
 public class ResourcePackSourceVanilla implements ResourcePackSource {
-    public static final ResourcePackInfo BUILT_IN_METADATA = new ResourcePackInfo(new ChatMessage("dataPack.vanilla.description"), EnumResourcePackType.SERVER_DATA.getVersion(SharedConstants.getGameVersion()));
+    public static final ResourcePackInfo BUILT_IN_METADATA = new ResourcePackInfo(new ChatMessage("dataPack.vanilla.description"), EnumResourcePackType.SERVER_DATA.getVersion(SharedConstants.getCurrentVersion()));
     public static final String VANILLA_ID = "vanilla";
     private final ResourcePackVanilla vanillaPack = new ResourcePackVanilla(BUILT_IN_METADATA, "minecraft");
 

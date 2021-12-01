@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.goal.target;
 
 import java.util.EnumSet;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.goal.PathfinderGoal;
 import net.minecraft.world.entity.ai.targeting.PathfinderTargetCondition;
@@ -12,6 +13,7 @@ import net.minecraft.world.phys.AxisAlignedBB;
 
 public class PathfinderGoalDefendVillage extends PathfinderGoalTarget {
     private final EntityIronGolem golem;
+    @Nullable
     private EntityLiving potentialTarget;
     private final PathfinderTargetCondition attackTargeting = PathfinderTargetCondition.forCombat().range(64.0D);
 

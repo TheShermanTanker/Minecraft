@@ -3,11 +3,13 @@ package net.minecraft.world.level.chunk.storage;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.util.ExceptionSuppressor;
 import net.minecraft.world.level.ChunkCoordIntPair;
 
@@ -15,10 +17,10 @@ public class RegionFileCache implements AutoCloseable {
     public static final String ANVIL_EXTENSION = ".mca";
     private static final int MAX_CACHE_SIZE = 256;
     public final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap<>();
-    private final File folder;
+    private final Path folder;
     private final boolean sync;
 
-    RegionFileCache(File directory, boolean dsync) {
+    RegionFileCache(Path directory, boolean dsync) {
         this.folder = directory;
         this.sync = dsync;
     }
@@ -33,12 +35,9 @@ public class RegionFileCache implements AutoCloseable {
                 this.regionCache.removeLast().close();
             }
 
-            if (!this.folder.exists()) {
-                this.folder.mkdirs();
-            }
-
-            File file = new File(this.folder, "r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
-            RegionFile regionFile2 = new RegionFile(file, this.folder, this.sync);
+            Files.createDirectories(this.folder);
+            Path path = this.folder.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
+            RegionFile regionFile2 = new RegionFile(path, this.folder, this.sync);
             this.regionCache.putAndMoveToFirst(l, regionFile2);
             return regionFile2;
         }
@@ -82,6 +81,32 @@ public class RegionFileCache implements AutoCloseable {
         }
 
         return var8;
+    }
+
+    public void scanChunk(ChunkCoordIntPair chunkPos, StreamTagVisitor streamTagVisitor) throws IOException {
+        RegionFile regionFile = this.getFile(chunkPos);
+        DataInputStream dataInputStream = regionFile.getChunkDataInputStream(chunkPos);
+
+        try {
+            if (dataInputStream != null) {
+                NBTCompressedStreamTools.parse(dataInputStream, streamTagVisitor);
+            }
+        } catch (Throwable var8) {
+            if (dataInputStream != null) {
+                try {
+                    dataInputStream.close();
+                } catch (Throwable var7) {
+                    var8.addSuppressed(var7);
+                }
+            }
+
+            throw var8;
+        }
+
+        if (dataInputStream != null) {
+            dataInputStream.close();
+        }
+
     }
 
     protected void write(ChunkCoordIntPair pos, @Nullable NBTTagCompound nbt) throws IOException {

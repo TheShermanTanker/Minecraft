@@ -12,7 +12,9 @@ import net.minecraft.world.phys.Vec3D;
 
 public class DragonControllerFly extends DragonControllerAbstract {
     private boolean firstTick;
+    @Nullable
     private PathEntity currentPath;
+    @Nullable
     private Vec3D targetLocation;
 
     public DragonControllerFly(EntityEnderDragon dragon) {

@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal.goat;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
+import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
@@ -14,6 +15,7 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.EnumSoundCategory;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
+import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumHand;
@@ -39,6 +41,7 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemLiquidUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
@@ -256,6 +259,10 @@ public class EntityGoat extends EntityAnimal {
     @Override
     protected NavigationAbstract createNavigation(World world) {
         return new EntityGoat.NavigationGoat(this, world);
+    }
+
+    public static boolean checkGoatSpawnRules(EntityTypes<? extends EntityAnimal> entityType, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
+        return world.getType(pos.below()).is(TagsBlock.GOATS_SPAWNABLE_ON) && isBrightEnoughToSpawn(world, pos);
     }
 
     static class NavigationGoat extends Navigation {

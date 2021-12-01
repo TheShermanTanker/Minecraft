@@ -53,7 +53,6 @@ public class DataConverterSchemaV99 extends Schema {
         hashMap.put("minecraft:shield", "Banner");
     });
     protected static final HookFunction ADD_NAMES = new HookFunction() {
-        @Override
         public <T> T apply(DynamicOps<T> dynamicOps, T object) {
             return DataConverterSchemaV99.addNames(new Dynamic<>(dynamicOps, object), DataConverterSchemaV99.ITEM_TO_BLOCKENTITY, "ArmorStand");
         }
@@ -91,7 +90,6 @@ public class DataConverterSchemaV99 extends Schema {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = Maps.newHashMap();
         schema.register(map, "Item", (string) -> {
@@ -193,7 +191,6 @@ public class DataConverterSchemaV99 extends Schema {
         return map;
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = Maps.newHashMap();
         registerInventory(schema, map, "Furnace");
@@ -228,7 +225,6 @@ public class DataConverterSchemaV99 extends Schema {
         return map;
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         schema.registerType(false, DataConverterTypes.LEVEL, DSL::remainder);
         schema.registerType(false, DataConverterTypes.PLAYER, () -> {

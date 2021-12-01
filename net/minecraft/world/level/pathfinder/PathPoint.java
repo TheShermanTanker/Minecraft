@@ -1,5 +1,6 @@
 package net.minecraft.world.level.pathfinder;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.util.MathHelper;
@@ -14,6 +15,7 @@ public class PathPoint {
     public float g;
     public float h;
     public float f;
+    @Nullable
     public PathPoint cameFrom;
     public boolean closed;
     public float walkedDistance;

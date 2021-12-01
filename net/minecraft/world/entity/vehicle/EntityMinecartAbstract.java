@@ -393,7 +393,7 @@ public abstract class EntityMinecartAbstract extends Entity {
     }
 
     protected void moveAlongTrack(BlockPosition pos, IBlockData state) {
-        this.fallDistance = 0.0F;
+        this.resetFallDistance();
         double d = this.locX();
         double e = this.locY();
         double f = this.locZ();

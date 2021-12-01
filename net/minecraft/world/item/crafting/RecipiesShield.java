@@ -4,9 +4,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.world.inventory.InventoryCrafting;
 import net.minecraft.world.item.ItemBanner;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.block.entity.TileEntityTypes;
 
 public class RecipiesShield extends IRecipeComplex {
     public RecipiesShield(MinecraftKey id) {
@@ -36,7 +38,7 @@ public class RecipiesShield extends IRecipeComplex {
                         return false;
                     }
 
-                    if (itemStack3.getTagElement("BlockEntityTag") != null) {
+                    if (ItemBlock.getBlockEntityData(itemStack3) != null) {
                         return false;
                     }
 
@@ -67,10 +69,10 @@ public class RecipiesShield extends IRecipeComplex {
         if (itemStack2.isEmpty()) {
             return itemStack2;
         } else {
-            NBTTagCompound compoundTag = itemStack.getTagElement("BlockEntityTag");
-            NBTTagCompound compoundTag2 = compoundTag == null ? new NBTTagCompound() : compoundTag.c();
+            NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(itemStack);
+            NBTTagCompound compoundTag2 = compoundTag == null ? new NBTTagCompound() : compoundTag.copy();
             compoundTag2.setInt("Base", ((ItemBanner)itemStack.getItem()).getColor().getColorIndex());
-            itemStack2.addTagElement("BlockEntityTag", compoundTag2);
+            ItemBlock.setBlockEntityData(itemStack2, TileEntityTypes.BANNER, compoundTag2);
             return itemStack2;
         }
     }

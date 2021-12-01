@@ -1,21 +1,17 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.biome.BiomeBase;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.IChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class WorldGenCanyon extends WorldGenCarverAbstract<CanyonCarverConfiguration> {
-    private static final Logger LOGGER = LogManager.getLogger();
-
     public WorldGenCanyon(Codec<CanyonCarverConfiguration> configCodec) {
         super(configCodec);
     }
@@ -26,7 +22,7 @@ public class WorldGenCanyon extends WorldGenCarverAbstract<CanyonCarverConfigura
     }
 
     @Override
-    public boolean carve(CarvingContext context, CanyonCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, Random random, Aquifer aquifer, ChunkCoordIntPair pos, BitSet carvingMask) {
+    public boolean carve(CarvingContext context, CanyonCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, Random random, Aquifer aquiferSampler, ChunkCoordIntPair pos, CarvingMask mask) {
         int i = (this.getRange() * 2 - 1) * 16;
         double d = (double)pos.getBlockX(random.nextInt(16));
         int j = config.y.sample(random, context);
@@ -37,11 +33,11 @@ public class WorldGenCanyon extends WorldGenCarverAbstract<CanyonCarverConfigura
         float k = config.shape.thickness.sample(random);
         int l = (int)((float)i * config.shape.distanceFactor.sample(random));
         int m = 0;
-        this.doCarve(context, config, chunk, posToBiome, random.nextLong(), aquifer, d, (double)j, e, k, f, g, 0, l, h, carvingMask);
+        this.doCarve(context, config, chunk, posToBiome, random.nextLong(), aquiferSampler, d, (double)j, e, k, f, g, 0, l, h, mask);
         return true;
     }
 
-    private void doCarve(CarvingContext context, CanyonCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, long seed, Aquifer aquifer, double x, double y, double z, float width, float yaw, float pitch, int branchStartIndex, int branchCount, double yawPitchRatio, BitSet carvingMask) {
+    private void doCarve(CarvingContext context, CanyonCarverConfiguration config, IChunkAccess chunk, Function<BlockPosition, BiomeBase> posToBiome, long seed, Aquifer aquiferSampler, double x, double y, double z, float width, float yaw, float pitch, int branchStartIndex, int branchCount, double yawPitchRatio, CarvingMask mask) {
         Random random = new Random(seed);
         float[] fs = this.initWidthFactors(context, config, random);
         float f = 0.0F;
@@ -69,8 +65,8 @@ public class WorldGenCanyon extends WorldGenCarverAbstract<CanyonCarverConfigura
                     return;
                 }
 
-                this.carveEllipsoid(context, config, chunk, posToBiome, seed, aquifer, x, y, z, d, e, carvingMask, (contextx, dx, ex, fx, yx) -> {
-                    return this.shouldSkip(contextx, fs, dx, ex, fx, yx);
+                this.carveEllipsoid(context, config, chunk, posToBiome, aquiferSampler, x, y, z, d, e, mask, (contextx, scaledRelativeX, scaledRelativeY, scaledRelativeZ, yx) -> {
+                    return this.shouldSkip(contextx, fs, scaledRelativeX, scaledRelativeY, scaledRelativeZ, yx);
                 });
             }
         }

@@ -19,7 +19,6 @@ import net.minecraft.util.datafix.fixes.DataConverterTypes;
 public class DataConverterSchemaV1451_6 extends DataConverterSchemaNamed {
     public static final String SPECIAL_OBJECTIVE_MARKER = "_special";
     protected static final HookFunction UNPACK_OBJECTIVE_ID = new HookFunction() {
-        @Override
         public <T> T apply(DynamicOps<T> dynamicOps, T object) {
             Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
             return DataFixUtils.orElse(dynamic.get("CriteriaName").asString().get().left().map((string) -> {
@@ -46,7 +45,6 @@ public class DataConverterSchemaV1451_6 extends DataConverterSchemaNamed {
             return resourceLocation != null ? resourceLocation.getNamespace() + "." + resourceLocation.getKey() : string;
         }
 
-        @Override
         public <T> T apply(DynamicOps<T> dynamicOps, T object) {
             Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
             Optional<Dynamic<T>> optional = dynamic.get("CriteriaType").get().get().left().flatMap((dynamic2) -> {
@@ -69,7 +67,6 @@ public class DataConverterSchemaV1451_6 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
         Supplier<TypeTemplate> supplier = () -> {

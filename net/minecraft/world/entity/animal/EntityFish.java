@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.animal;
 
-import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.syncher.DataWatcher;
@@ -16,7 +15,6 @@ import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityPose;
 import net.minecraft.world.entity.EntitySize;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.EnumMobSpawn;
 import net.minecraft.world.entity.EnumMoveType;
 import net.minecraft.world.entity.IEntitySelector;
 import net.minecraft.world.entity.ai.attributes.AttributeProvider;
@@ -29,9 +27,7 @@ import net.minecraft.world.entity.ai.navigation.NavigationAbstract;
 import net.minecraft.world.entity.ai.navigation.NavigationGuardian;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.World;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.phys.Vec3D;
 
@@ -55,10 +51,6 @@ public abstract class EntityFish extends EntityWaterAnimal implements IBucketabl
     @Override
     public boolean isSpecialPersistence() {
         return super.isSpecialPersistence() || this.isFromBucket();
-    }
-
-    public static boolean checkFishSpawnRules(EntityTypes<? extends EntityFish> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        return world.getType(pos).is(Blocks.WATER) && world.getType(pos.above()).is(Blocks.WATER);
     }
 
     @Override

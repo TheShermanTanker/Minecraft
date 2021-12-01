@@ -84,13 +84,12 @@ public class TileEntityChest extends TileEntityLootable implements LidBlockEntit
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (!this.trySaveLootTable(nbt)) {
             ContainerUtil.saveAllItems(nbt, this.items);
         }
 
-        return nbt;
     }
 
     public static void lidAnimateTick(World world, BlockPosition pos, IBlockData state, TileEntityChest blockEntity) {

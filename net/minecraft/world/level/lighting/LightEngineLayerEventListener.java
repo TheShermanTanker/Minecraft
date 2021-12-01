@@ -40,7 +40,7 @@ public interface LightEngineLayerEventListener extends ILightEngine {
         }
 
         @Override
-        public int runUpdates(int i, boolean bl, boolean bl2) {
+        public int runUpdates(int i, boolean doSkylight, boolean skipEdgeLightPropagation) {
             return i;
         }
 
@@ -49,7 +49,7 @@ public interface LightEngineLayerEventListener extends ILightEngine {
         }
 
         @Override
-        public void enableLightSources(ChunkCoordIntPair chunkPos, boolean bl) {
+        public void enableLightSources(ChunkCoordIntPair pos, boolean retainData) {
         }
     }
 }

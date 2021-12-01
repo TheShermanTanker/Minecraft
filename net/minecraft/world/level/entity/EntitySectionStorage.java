@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.Spliterators;
 import java.util.PrimitiveIterator.OfLong;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -33,7 +32,7 @@ public class EntitySectionStorage<T extends EntityAccess> {
         this.intialSectionVisibility = chunkStatusDiscriminator;
     }
 
-    public void forEachAccessibleSection(AxisAlignedBB box, Consumer<EntitySection<T>> action) {
+    public void forEachAccessibleNonEmptySection(AxisAlignedBB box, Consumer<EntitySection<T>> action) {
         int i = SectionPosition.posToSectionCoord(box.minX - 2.0D);
         int j = SectionPosition.posToSectionCoord(box.minY - 2.0D);
         int k = SectionPosition.posToSectionCoord(box.minZ - 2.0D);
@@ -52,7 +51,7 @@ public class EntitySectionStorage<T extends EntityAccess> {
                 int t = SectionPosition.z(r);
                 if (s >= j && s <= m && t >= k && t <= n) {
                     EntitySection<T> entitySection = this.sections.get(r);
-                    if (entitySection != null && entitySection.getStatus().isAccessible()) {
+                    if (entitySection != null && !entitySection.isEmpty() && entitySection.getStatus().isAccessible()) {
                         action.accept(entitySection);
                     }
                 }
@@ -111,21 +110,15 @@ public class EntitySectionStorage<T extends EntityAccess> {
         return longSet;
     }
 
-    private static <T extends EntityAccess> Predicate<T> createBoundingBoxCheck(AxisAlignedBB box) {
-        return (entityAccess) -> {
-            return entityAccess.getBoundingBox().intersects(box);
-        };
-    }
-
     public void getEntities(AxisAlignedBB box, Consumer<T> action) {
-        this.forEachAccessibleSection(box, (entitySection) -> {
-            entitySection.getEntities(createBoundingBoxCheck(box), action);
+        this.forEachAccessibleNonEmptySection(box, (section) -> {
+            section.getEntities(box, action);
         });
     }
 
     public <U extends T> void getEntities(EntityTypeTest<T, U> filter, AxisAlignedBB box, Consumer<U> action) {
-        this.forEachAccessibleSection(box, (entitySection) -> {
-            entitySection.getEntities(filter, createBoundingBoxCheck(box), action);
+        this.forEachAccessibleNonEmptySection(box, (section) -> {
+            section.getEntities(filter, box, action);
         });
     }
 

@@ -11,6 +11,7 @@ import net.minecraft.world.level.IBlockAccess;
 import net.minecraft.world.phys.Vec3D;
 
 public class PathfinderGoalPanic extends PathfinderGoal {
+    public static final int WATER_CHECK_DISTANCE_VERTICAL = 1;
     protected final EntityCreature mob;
     protected final double speedModifier;
     protected double posX;
@@ -30,7 +31,7 @@ public class PathfinderGoalPanic extends PathfinderGoal {
             return false;
         } else {
             if (this.mob.isBurning()) {
-                BlockPosition blockPos = this.lookForWater(this.mob.level, this.mob, 5, 4);
+                BlockPosition blockPos = this.lookForWater(this.mob.level, this.mob, 5);
                 if (blockPos != null) {
                     this.posX = (double)blockPos.getX();
                     this.posY = (double)blockPos.getY();
@@ -76,30 +77,10 @@ public class PathfinderGoalPanic extends PathfinderGoal {
     }
 
     @Nullable
-    protected BlockPosition lookForWater(IBlockAccess blockView, Entity entity, int rangeX, int rangeY) {
+    protected BlockPosition lookForWater(IBlockAccess blockView, Entity entity, int rangeX) {
         BlockPosition blockPos = entity.getChunkCoordinates();
-        int i = blockPos.getX();
-        int j = blockPos.getY();
-        int k = blockPos.getZ();
-        float f = (float)(rangeX * rangeX * rangeY * 2);
-        BlockPosition blockPos2 = null;
-        BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
-
-        for(int l = i - rangeX; l <= i + rangeX; ++l) {
-            for(int m = j - rangeY; m <= j + rangeY; ++m) {
-                for(int n = k - rangeX; n <= k + rangeX; ++n) {
-                    mutableBlockPos.set(l, m, n);
-                    if (blockView.getFluid(mutableBlockPos).is(TagsFluid.WATER)) {
-                        float g = (float)((l - i) * (l - i) + (m - j) * (m - j) + (n - k) * (n - k));
-                        if (g < f) {
-                            f = g;
-                            blockPos2 = new BlockPosition(mutableBlockPos);
-                        }
-                    }
-                }
-            }
-        }
-
-        return blockPos2;
+        return !blockView.getType(blockPos).getCollisionShape(blockView, blockPos).isEmpty() ? null : BlockPosition.findClosestMatch(entity.getChunkCoordinates(), rangeX, 1, (blockPosx) -> {
+            return blockView.getFluid(blockPosx).is(TagsFluid.WATER);
+        }).orElse((BlockPosition)null);
     }
 }

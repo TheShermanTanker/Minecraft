@@ -30,11 +30,11 @@ public class BlockStateList<O, S extends IBlockDataHolder<O, S>> {
     private final ImmutableSortedMap<String, IBlockState<?>> propertiesByName;
     private final ImmutableList<S> states;
 
-    protected BlockStateList(Function<O, S> function, O object, BlockStateList.Factory<O, S> factory, Map<String, IBlockState<?>> propertiesMap) {
-        this.owner = object;
+    protected BlockStateList(Function<O, S> defaultStateGetter, O owner, BlockStateList.Factory<O, S> factory, Map<String, IBlockState<?>> propertiesMap) {
+        this.owner = owner;
         this.propertiesByName = ImmutableSortedMap.copyOf(propertiesMap);
         Supplier<S> supplier = () -> {
-            return function.apply(object);
+            return defaultStateGetter.apply(owner);
         };
         MapCodec<S> mapCodec = MapCodec.of(Encoder.empty(), Decoder.unit(supplier));
 
@@ -59,7 +59,7 @@ public class BlockStateList<O, S extends IBlockDataHolder<O, S>> {
 
         stream.forEach((list2) -> {
             ImmutableMap<IBlockState<?>, Comparable<?>> immutableMap = list2.stream().collect(ImmutableMap.toImmutableMap(Pair::getFirst, Pair::getSecond));
-            S stateHolder = factory.create(object, immutableMap, mapCodec2);
+            S stateHolder = factory.create(owner, immutableMap, mapCodec2);
             map.put(immutableMap, stateHolder);
             list.add(stateHolder);
         });
@@ -71,9 +71,10 @@ public class BlockStateList<O, S extends IBlockDataHolder<O, S>> {
         this.states = ImmutableList.copyOf(list);
     }
 
-    private static <S extends IBlockDataHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(MapCodec<S> mapCodec, Supplier<S> supplier, String string, IBlockState<T> property) {
-        return Codec.mapPair(mapCodec, property.valueCodec().fieldOf(string).setPartial(() -> {
-            return property.value(supplier.get());
+    private static <S extends IBlockDataHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(MapCodec<S> mapCodec, Supplier<S> defaultStateGetter, String key, IBlockState<T> property) {
+        return Codec.mapPair(mapCodec, property.valueCodec().fieldOf(key).orElseGet((string) -> {
+        }, () -> {
+            return property.value(defaultStateGetter.get());
         })).xmap((pair) -> {
             return pair.getFirst().set(property, pair.getSecond().value());
         }, (stateHolder) -> {
@@ -147,8 +148,8 @@ public class BlockStateList<O, S extends IBlockDataHolder<O, S>> {
             }
         }
 
-        public BlockStateList<O, S> create(Function<O, S> ownerToStateFunction, BlockStateList.Factory<O, S> factory) {
-            return new BlockStateList<>(ownerToStateFunction, this.owner, factory, this.properties);
+        public BlockStateList<O, S> create(Function<O, S> defaultStateGetter, BlockStateList.Factory<O, S> factory) {
+            return new BlockStateList<>(defaultStateGetter, this.owner, factory, this.properties);
         }
     }
 

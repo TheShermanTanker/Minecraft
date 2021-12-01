@@ -5,17 +5,16 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.EnumMainHand;
 import net.minecraft.world.entity.player.EnumChatVisibility;
 
-public class PacketPlayInSettings implements Packet<PacketListenerPlayIn> {
-    public static final int MAX_LANGUAGE_LENGTH = 16;
+public record PacketPlayInSettings(String language, int viewDistance, EnumChatVisibility chatVisibility, boolean chatColors, int modelCustomisation, EnumMainHand mainHand, boolean textFilteringEnabled, boolean allowsListing) implements Packet<PacketListenerPlayIn> {
     public final String language;
     public final int viewDistance;
-    private final EnumChatVisibility chatVisibility;
-    private final boolean chatColors;
-    private final int modelCustomisation;
-    private final EnumMainHand mainHand;
-    private final boolean textFilteringEnabled;
+    public static final int MAX_LANGUAGE_LENGTH = 16;
 
-    public PacketPlayInSettings(String language, int viewDistance, EnumChatVisibility chatVisibility, boolean chatColors, int modelBitMask, EnumMainHand mainArm, boolean filterText) {
+    public PacketPlayInSettings(PacketDataSerializer buf) {
+        this(buf.readUtf(16), buf.readByte(), buf.readEnum(EnumChatVisibility.class), buf.readBoolean(), buf.readUnsignedByte(), buf.readEnum(EnumMainHand.class), buf.readBoolean(), buf.readBoolean());
+    }
+
+    public PacketPlayInSettings(String language, int viewDistance, EnumChatVisibility chatVisibility, boolean chatColors, int modelBitMask, EnumMainHand mainArm, boolean filterText, boolean bl) {
         this.language = language;
         this.viewDistance = viewDistance;
         this.chatVisibility = chatVisibility;
@@ -23,16 +22,7 @@ public class PacketPlayInSettings implements Packet<PacketListenerPlayIn> {
         this.modelCustomisation = modelBitMask;
         this.mainHand = mainArm;
         this.textFilteringEnabled = filterText;
-    }
-
-    public PacketPlayInSettings(PacketDataSerializer buf) {
-        this.language = buf.readUtf(16);
-        this.viewDistance = buf.readByte();
-        this.chatVisibility = buf.readEnum(EnumChatVisibility.class);
-        this.chatColors = buf.readBoolean();
-        this.modelCustomisation = buf.readUnsignedByte();
-        this.mainHand = buf.readEnum(EnumMainHand.class);
-        this.textFilteringEnabled = buf.readBoolean();
+        this.allowsListing = bl;
     }
 
     @Override
@@ -44,6 +34,7 @@ public class PacketPlayInSettings implements Packet<PacketListenerPlayIn> {
         buf.writeByte(this.modelCustomisation);
         buf.writeEnum(this.mainHand);
         buf.writeBoolean(this.textFilteringEnabled);
+        buf.writeBoolean(this.allowsListing);
     }
 
     @Override
@@ -51,31 +42,35 @@ public class PacketPlayInSettings implements Packet<PacketListenerPlayIn> {
         listener.handleClientInformation(this);
     }
 
-    public String getLanguage() {
+    public String language() {
         return this.language;
     }
 
-    public int getViewDistance() {
+    public int viewDistance() {
         return this.viewDistance;
     }
 
-    public EnumChatVisibility getChatVisibility() {
+    public EnumChatVisibility chatVisibility() {
         return this.chatVisibility;
     }
 
-    public boolean getChatColors() {
+    public boolean chatColors() {
         return this.chatColors;
     }
 
-    public int getModelCustomisation() {
+    public int modelCustomisation() {
         return this.modelCustomisation;
     }
 
-    public EnumMainHand getMainHand() {
+    public EnumMainHand mainHand() {
         return this.mainHand;
     }
 
-    public boolean isTextFilteringEnabled() {
+    public boolean textFilteringEnabled() {
         return this.textFilteringEnabled;
+    }
+
+    public boolean allowsListing() {
+        return this.allowsListing;
     }
 }

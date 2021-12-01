@@ -15,7 +15,6 @@ public class PacketCompressor extends MessageToByteEncoder<ByteBuf> {
         this.deflater = new Deflater();
     }
 
-    @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
         int i = byteBuf.readableBytes();
         PacketDataSerializer friendlyByteBuf = new PacketDataSerializer(byteBuf2);

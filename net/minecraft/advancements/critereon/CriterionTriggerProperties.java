@@ -63,8 +63,8 @@ public class CriterionTriggerProperties {
     }
 
     public void checkState(BlockStateList<?, ?> factory, Consumer<String> reporter) {
-        this.properties.forEach((propertyMatcher) -> {
-            propertyMatcher.checkState(factory, reporter);
+        this.properties.forEach((condition) -> {
+            condition.checkState(factory, reporter);
         });
     }
 
@@ -89,8 +89,8 @@ public class CriterionTriggerProperties {
         } else {
             JsonObject jsonObject = new JsonObject();
             if (!this.properties.isEmpty()) {
-                this.properties.forEach((propertyMatcher) -> {
-                    jsonObject.add(propertyMatcher.getName(), propertyMatcher.toJson());
+                this.properties.forEach((condition) -> {
+                    jsonObject.add(condition.getName(), condition.toJson());
                 });
             }
 

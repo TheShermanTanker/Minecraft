@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import javax.annotation.Nullable;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.monster.IRangedEntity;
 public class PathfinderGoalArrowAttack extends PathfinderGoal {
     private final EntityInsentient mob;
     private final IRangedEntity rangedAttackMob;
+    @Nullable
     private EntityLiving target;
     private int attackTime = -1;
     private final double speedModifier;
@@ -58,6 +60,11 @@ public class PathfinderGoalArrowAttack extends PathfinderGoal {
         this.target = null;
         this.seeTime = 0;
         this.attackTime = -1;
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     @Override

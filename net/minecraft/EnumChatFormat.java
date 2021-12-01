@@ -53,7 +53,7 @@ public enum EnumChatFormat {
         return name.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
     }
 
-    private EnumChatFormat(String name, @Nullable char code, int colorIndex, Integer colorValue) {
+    private EnumChatFormat(String name, char code, int colorIndex, @Nullable Integer colorValue) {
         this(name, code, false, colorIndex, colorValue);
     }
 
@@ -61,7 +61,7 @@ public enum EnumChatFormat {
         this(name, code, modifier, -1, (Integer)null);
     }
 
-    private EnumChatFormat(String name, char code, @Nullable boolean modifier, int colorIndex, Integer colorValue) {
+    private EnumChatFormat(String name, char code, boolean modifier, int colorIndex, @Nullable Integer colorValue) {
         this.name = name;
         this.code = code;
         this.isFormat = modifier;

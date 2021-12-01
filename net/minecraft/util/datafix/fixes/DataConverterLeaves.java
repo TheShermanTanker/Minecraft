@@ -45,13 +45,13 @@ public class DataConverterLeaves extends DataFix {
     private static final int DECAY_DISTANCE = 7;
     private static final int SIZE_BITS = 12;
     private static final int SIZE = 4096;
-    static final Object2IntMap<String> LEAVES = DataFixUtils.make(new Object2IntOpenHashMap<>(), (object2IntOpenHashMap) -> {
-        object2IntOpenHashMap.put("minecraft:acacia_leaves", 0);
-        object2IntOpenHashMap.put("minecraft:birch_leaves", 1);
-        object2IntOpenHashMap.put("minecraft:dark_oak_leaves", 2);
-        object2IntOpenHashMap.put("minecraft:jungle_leaves", 3);
-        object2IntOpenHashMap.put("minecraft:oak_leaves", 4);
-        object2IntOpenHashMap.put("minecraft:spruce_leaves", 5);
+    static final Object2IntMap<String> LEAVES = DataFixUtils.make(new Object2IntOpenHashMap<>(), (map) -> {
+        map.put("minecraft:acacia_leaves", 0);
+        map.put("minecraft:birch_leaves", 1);
+        map.put("minecraft:dark_oak_leaves", 2);
+        map.put("minecraft:jungle_leaves", 3);
+        map.put("minecraft:oak_leaves", 4);
+        map.put("minecraft:spruce_leaves", 5);
     });
     static final Set<String> LOGS = ImmutableSet.of("minecraft:acacia_bark", "minecraft:birch_bark", "minecraft:dark_oak_bark", "minecraft:jungle_bark", "minecraft:oak_bark", "minecraft:spruce_bark", "minecraft:acacia_log", "minecraft:birch_log", "minecraft:dark_oak_log", "minecraft:jungle_log", "minecraft:oak_log", "minecraft:spruce_log", "minecraft:stripped_acacia_log", "minecraft:stripped_birch_log", "minecraft:stripped_dark_oak_log", "minecraft:stripped_jungle_log", "minecraft:stripped_oak_log", "minecraft:stripped_spruce_log");
 
@@ -59,7 +59,6 @@ public class DataConverterLeaves extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.CHUNK);
         OpticFinder<?> opticFinder = type.findField("Level");

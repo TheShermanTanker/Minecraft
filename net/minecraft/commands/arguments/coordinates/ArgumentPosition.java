@@ -48,12 +48,10 @@ public class ArgumentPosition implements ArgumentType<IVectorPosition> {
         }
     }
 
-    @Override
     public IVectorPosition parse(StringReader stringReader) throws CommandSyntaxException {
         return (IVectorPosition)(stringReader.canRead() && stringReader.peek() == '^' ? ArgumentVectorPosition.parse(stringReader) : VectorPosition.parseInt(stringReader));
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         if (!(commandContext.getSource() instanceof ICompletionProvider)) {
             return Suggestions.empty();
@@ -70,7 +68,6 @@ public class ArgumentPosition implements ArgumentType<IVectorPosition> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

@@ -24,16 +24,16 @@ public class PersistentCommandStorage {
 
     public NBTTagCompound get(MinecraftKey id) {
         String string = id.getNamespace();
-        PersistentCommandStorage.Container container = this.storage.get((compoundTag) -> {
-            return this.newStorage(string).load(compoundTag);
+        PersistentCommandStorage.Container container = this.storage.get((data) -> {
+            return this.newStorage(string).load(data);
         }, createId(string));
         return container != null ? container.get(id.getKey()) : new NBTTagCompound();
     }
 
     public void set(MinecraftKey id, NBTTagCompound nbt) {
         String string = id.getNamespace();
-        this.storage.computeIfAbsent((compoundTag) -> {
-            return this.newStorage(string).load(compoundTag);
+        this.storage.computeIfAbsent((data) -> {
+            return this.newStorage(string).load(data);
         }, () -> {
             return this.newStorage(string);
         }, createId(string)).put(id.getKey(), nbt);
@@ -66,8 +66,8 @@ public class PersistentCommandStorage {
         @Override
         public NBTTagCompound save(NBTTagCompound nbt) {
             NBTTagCompound compoundTag = new NBTTagCompound();
-            this.storage.forEach((string, compoundTag2) -> {
-                compoundTag.set(string, compoundTag2.c());
+            this.storage.forEach((key, value) -> {
+                compoundTag.set(key, value.copy());
             });
             nbt.set("contents", compoundTag);
             return nbt;
@@ -89,8 +89,8 @@ public class PersistentCommandStorage {
         }
 
         public Stream<MinecraftKey> getKeys(String namespace) {
-            return this.storage.keySet().stream().map((string2) -> {
-                return new MinecraftKey(namespace, string2);
+            return this.storage.keySet().stream().map((key) -> {
+                return new MinecraftKey(namespace, key);
             });
         }
     }

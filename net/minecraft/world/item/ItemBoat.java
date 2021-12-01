@@ -51,7 +51,7 @@ public class ItemBoat extends Item {
                 EntityBoat boat = new EntityBoat(world, hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z);
                 boat.setType(this.type);
                 boat.setYRot(user.getYRot());
-                if (!world.getCubes(boat, boat.getBoundingBox().inflate(-0.1D))) {
+                if (!world.getCubes(boat, boat.getBoundingBox())) {
                     return InteractionResultWrapper.fail(itemStack);
                 } else {
                     if (!world.isClientSide) {

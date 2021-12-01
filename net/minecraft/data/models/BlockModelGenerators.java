@@ -76,32 +76,32 @@ public class BlockModelGenerators {
         textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CUT_RED_SANDSTONE));
     })).put(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.QUARTZ_BLOCK)).put(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).put(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.BLACKSTONE)).put(Blocks.DEEPSLATE, TexturedModel.COLUMN_WITH_WALL.get(Blocks.DEEPSLATE)).put(Blocks.CHISELED_QUARTZ_BLOCK, TexturedModel.COLUMN.get(Blocks.CHISELED_QUARTZ_BLOCK).updateTextures((textureMapping) -> {
         textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_QUARTZ_BLOCK));
-    })).put(Blocks.CHISELED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.CHISELED_SANDSTONE).updateTextures((textureMapping) -> {
-        textureMapping.put(TextureSlot.END, TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"));
-        textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_SANDSTONE));
-    })).put(Blocks.CHISELED_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.CHISELED_RED_SANDSTONE).updateTextures((textureMapping) -> {
-        textureMapping.put(TextureSlot.END, TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"));
-        textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_RED_SANDSTONE));
+    })).put(Blocks.CHISELED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.CHISELED_SANDSTONE).updateTextures((texture) -> {
+        texture.put(TextureSlot.END, TextureMapping.getBlockTexture(Blocks.SANDSTONE, "_top"));
+        texture.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_SANDSTONE));
+    })).put(Blocks.CHISELED_RED_SANDSTONE, TexturedModel.COLUMN.get(Blocks.CHISELED_RED_SANDSTONE).updateTextures((texture) -> {
+        texture.put(TextureSlot.END, TextureMapping.getBlockTexture(Blocks.RED_SANDSTONE, "_top"));
+        texture.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_RED_SANDSTONE));
     })).build();
     static final Map<BlockFamily.Variant, BiConsumer<BlockModelGenerators.BlockFamilyProvider, Block>> SHAPE_CONSUMERS = ImmutableMap.<BlockFamily.Variant, BiConsumer<BlockModelGenerators.BlockFamilyProvider, Block>>builder().put(BlockFamily.Variant.BUTTON, BlockModelGenerators.BlockFamilyProvider::button).put(BlockFamily.Variant.DOOR, BlockModelGenerators.BlockFamilyProvider::door).put(BlockFamily.Variant.CHISELED, BlockModelGenerators.BlockFamilyProvider::fullBlockVariant).put(BlockFamily.Variant.CRACKED, BlockModelGenerators.BlockFamilyProvider::fullBlockVariant).put(BlockFamily.Variant.FENCE, BlockModelGenerators.BlockFamilyProvider::fence).put(BlockFamily.Variant.FENCE_GATE, BlockModelGenerators.BlockFamilyProvider::fenceGate).put(BlockFamily.Variant.SIGN, BlockModelGenerators.BlockFamilyProvider::sign).put(BlockFamily.Variant.SLAB, BlockModelGenerators.BlockFamilyProvider::slab).put(BlockFamily.Variant.STAIRS, BlockModelGenerators.BlockFamilyProvider::stairs).put(BlockFamily.Variant.PRESSURE_PLATE, BlockModelGenerators.BlockFamilyProvider::pressurePlate).put(BlockFamily.Variant.TRAPDOOR, BlockModelGenerators.BlockFamilyProvider::trapdoor).put(BlockFamily.Variant.WALL, BlockModelGenerators.BlockFamilyProvider::wall).build();
-    public static final Map<BlockStateBoolean, Function<MinecraftKey, Variant>> MULTIFACE_GENERATOR = SystemUtils.make(Maps.newHashMap(), (hashMap) -> {
-        hashMap.put(BlockProperties.NORTH, (resourceLocation) -> {
-            return Variant.variant().with(VariantProperties.MODEL, resourceLocation);
+    public static final Map<BlockStateBoolean, Function<MinecraftKey, Variant>> MULTIFACE_GENERATOR = SystemUtils.make(Maps.newHashMap(), (map) -> {
+        map.put(BlockProperties.NORTH, (id) -> {
+            return Variant.variant().with(VariantProperties.MODEL, id);
         });
-        hashMap.put(BlockProperties.EAST, (resourceLocation) -> {
-            return Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true);
+        map.put(BlockProperties.EAST, (id) -> {
+            return Variant.variant().with(VariantProperties.MODEL, id).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true);
         });
-        hashMap.put(BlockProperties.SOUTH, (resourceLocation) -> {
-            return Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180).with(VariantProperties.UV_LOCK, true);
+        map.put(BlockProperties.SOUTH, (id) -> {
+            return Variant.variant().with(VariantProperties.MODEL, id).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180).with(VariantProperties.UV_LOCK, true);
         });
-        hashMap.put(BlockProperties.WEST, (resourceLocation) -> {
-            return Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true);
+        map.put(BlockProperties.WEST, (id) -> {
+            return Variant.variant().with(VariantProperties.MODEL, id).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true);
         });
-        hashMap.put(BlockProperties.UP, (resourceLocation) -> {
-            return Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true);
+        map.put(BlockProperties.UP, (id) -> {
+            return Variant.variant().with(VariantProperties.MODEL, id).with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.UV_LOCK, true);
         });
-        hashMap.put(BlockProperties.DOWN, (resourceLocation) -> {
-            return Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true);
+        map.put(BlockProperties.DOWN, (id) -> {
+            return Variant.variant().with(VariantProperties.MODEL, id).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.UV_LOCK, true);
         });
     });
 
@@ -448,8 +448,8 @@ public class BlockModelGenerators {
         MinecraftKey resourceLocation4 = this.createSuffixedVariant(rail, "_on", ModelTemplates.RAIL_FLAT, TextureMapping::rail);
         MinecraftKey resourceLocation5 = this.createSuffixedVariant(rail, "_on", ModelTemplates.RAIL_RAISED_NE, TextureMapping::rail);
         MinecraftKey resourceLocation6 = this.createSuffixedVariant(rail, "_on", ModelTemplates.RAIL_RAISED_SW, TextureMapping::rail);
-        PropertyDispatch propertyDispatch = PropertyDispatch.properties(BlockProperties.POWERED, BlockProperties.RAIL_SHAPE_STRAIGHT).generate((boolean_, railShape) -> {
-            switch(railShape) {
+        PropertyDispatch propertyDispatch = PropertyDispatch.properties(BlockProperties.POWERED, BlockProperties.RAIL_SHAPE_STRAIGHT).generate((boolean_, shape) -> {
+            switch(shape) {
             case NORTH_SOUTH:
                 return Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation4 : resourceLocation);
             case EAST_WEST:
@@ -526,8 +526,8 @@ public class BlockModelGenerators {
     private void createCommandBlock(Block commandBlock) {
         TextureMapping textureMapping = TextureMapping.commandBlock(commandBlock);
         MinecraftKey resourceLocation = ModelTemplates.COMMAND_BLOCK.create(commandBlock, textureMapping, this.modelOutput);
-        MinecraftKey resourceLocation2 = this.createSuffixedVariant(commandBlock, "_conditional", ModelTemplates.COMMAND_BLOCK, (resourceLocationx) -> {
-            return textureMapping.copyAndUpdate(TextureSlot.SIDE, resourceLocationx);
+        MinecraftKey resourceLocation2 = this.createSuffixedVariant(commandBlock, "_conditional", ModelTemplates.COMMAND_BLOCK, (id) -> {
+            return textureMapping.copyAndUpdate(TextureSlot.SIDE, id);
         });
         this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(commandBlock).with(createBooleanModelDispatch(BlockProperties.CONDITIONAL, resourceLocation2, resourceLocation)).with(createFacingDispatch()));
     }
@@ -610,8 +610,8 @@ public class BlockModelGenerators {
     private void createFurnace(Block cooker, TexturedModel.Provider modelFactory) {
         MinecraftKey resourceLocation = modelFactory.create(cooker, this.modelOutput);
         MinecraftKey resourceLocation2 = TextureMapping.getBlockTexture(cooker, "_front_on");
-        MinecraftKey resourceLocation3 = modelFactory.get(cooker).updateTextures((textureMapping) -> {
-            textureMapping.put(TextureSlot.FRONT, resourceLocation2);
+        MinecraftKey resourceLocation3 = modelFactory.get(cooker).updateTextures((texture) -> {
+            texture.put(TextureSlot.FRONT, resourceLocation2);
         }).createWithSuffix(cooker, "_on", this.modelOutput);
         this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(cooker).with(createBooleanModelDispatch(BlockProperties.LIT, resourceLocation3, resourceLocation)).with(createHorizontalFacingDispatch()));
     }
@@ -718,8 +718,8 @@ public class BlockModelGenerators {
     private void createChorusFlower() {
         TextureMapping textureMapping = TextureMapping.defaultTexture(Blocks.CHORUS_FLOWER);
         MinecraftKey resourceLocation = ModelTemplates.CHORUS_FLOWER.create(Blocks.CHORUS_FLOWER, textureMapping, this.modelOutput);
-        MinecraftKey resourceLocation2 = this.createSuffixedVariant(Blocks.CHORUS_FLOWER, "_dead", ModelTemplates.CHORUS_FLOWER, (resourceLocationx) -> {
-            return textureMapping.copyAndUpdate(TextureSlot.TEXTURE, resourceLocationx);
+        MinecraftKey resourceLocation2 = this.createSuffixedVariant(Blocks.CHORUS_FLOWER, "_dead", ModelTemplates.CHORUS_FLOWER, (id) -> {
+            return textureMapping.copyAndUpdate(TextureSlot.TEXTURE, id);
         });
         this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(Blocks.CHORUS_FLOWER).with(createEmptyOrFullDispatch(BlockProperties.AGE_5, 5, resourceLocation2, resourceLocation)));
     }
@@ -764,7 +764,7 @@ public class BlockModelGenerators {
     }
 
     private void createPointedDripstone() {
-        this.createSimpleFlatItemModel(Blocks.POINTED_DRIPSTONE.getItem());
+        this.skipAutoItemBlock(Blocks.POINTED_DRIPSTONE);
         PropertyDispatch.C2<EnumDirection, DripstoneThickness> c2 = PropertyDispatch.properties(BlockProperties.VERTICAL_DIRECTION, BlockProperties.DRIPSTONE_THICKNESS);
 
         for(DripstoneThickness dripstoneThickness : DripstoneThickness.values()) {
@@ -895,12 +895,12 @@ public class BlockModelGenerators {
         TextureMapping textureMapping = (new TextureMapping()).put(TextureSlot.BOTTOM, resourceLocation).copyForced(TextureSlot.BOTTOM, TextureSlot.PARTICLE).put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.GRASS_BLOCK, "_top")).put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.GRASS_BLOCK, "_snow"));
         Variant variant = Variant.variant().with(VariantProperties.MODEL, ModelTemplates.CUBE_BOTTOM_TOP.createWithSuffix(Blocks.GRASS_BLOCK, "_snow", textureMapping, this.modelOutput));
         this.createGrassLikeBlock(Blocks.GRASS_BLOCK, ModelLocationUtils.getModelLocation(Blocks.GRASS_BLOCK), variant);
-        MinecraftKey resourceLocation2 = TexturedModel.CUBE_TOP_BOTTOM.get(Blocks.MYCELIUM).updateTextures((textureMappingx) -> {
-            textureMappingx.put(TextureSlot.BOTTOM, resourceLocation);
+        MinecraftKey resourceLocation2 = TexturedModel.CUBE_TOP_BOTTOM.get(Blocks.MYCELIUM).updateTextures((texture) -> {
+            texture.put(TextureSlot.BOTTOM, resourceLocation);
         }).create(Blocks.MYCELIUM, this.modelOutput);
         this.createGrassLikeBlock(Blocks.MYCELIUM, resourceLocation2, variant);
-        MinecraftKey resourceLocation3 = TexturedModel.CUBE_TOP_BOTTOM.get(Blocks.PODZOL).updateTextures((textureMappingx) -> {
-            textureMappingx.put(TextureSlot.BOTTOM, resourceLocation);
+        MinecraftKey resourceLocation3 = TexturedModel.CUBE_TOP_BOTTOM.get(Blocks.PODZOL).updateTextures((texture) -> {
+            texture.put(TextureSlot.BOTTOM, resourceLocation);
         }).create(Blocks.PODZOL, this.modelOutput);
         this.createGrassLikeBlock(Blocks.PODZOL, resourceLocation3, variant);
     }
@@ -1163,16 +1163,16 @@ public class BlockModelGenerators {
         MinecraftKey resourceLocation = ModelLocationUtils.getModelLocation(block);
         BlockStateGeneratorMultiPart multiPartGenerator = BlockStateGeneratorMultiPart.multiPart(block);
         Condition.TerminalCondition terminalCondition = SystemUtils.make(Condition.condition(), (terminalConditionx) -> {
-            MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
-                if (block.getBlockData().hasProperty(booleanProperty)) {
-                    terminalConditionx.term(booleanProperty, false);
+            MULTIFACE_GENERATOR.forEach((property, function) -> {
+                if (block.getBlockData().hasProperty(property)) {
+                    terminalConditionx.term(property, false);
                 }
 
             });
         });
-        MULTIFACE_GENERATOR.forEach((booleanProperty, function) -> {
-            if (block.getBlockData().hasProperty(booleanProperty)) {
-                multiPartGenerator.with(Condition.condition().term(booleanProperty, true), function.apply(resourceLocation));
+        MULTIFACE_GENERATOR.forEach((property, function) -> {
+            if (block.getBlockData().hasProperty(property)) {
+                multiPartGenerator.with(Condition.condition().term(property, true), function.apply(resourceLocation));
                 multiPartGenerator.with(terminalCondition, function.apply(resourceLocation));
             }
 
@@ -1290,8 +1290,8 @@ public class BlockModelGenerators {
     }
 
     public void run() {
-        BlockFamilies.getAllFamilies().filter(BlockFamily::shouldGenerateModel).forEach((blockFamily) -> {
-            this.family(blockFamily.getBaseBlock()).generateFor(blockFamily);
+        BlockFamilies.getAllFamilies().filter(BlockFamily::shouldGenerateModel).forEach((family) -> {
+            this.family(family.getBaseBlock()).generateFor(family);
         });
         this.family(Blocks.CUT_COPPER).generateFor(BlockFamilies.CUT_COPPER).fullBlockCopies(Blocks.WAXED_CUT_COPPER).generateFor(BlockFamilies.WAXED_CUT_COPPER);
         this.family(Blocks.EXPOSED_CUT_COPPER).generateFor(BlockFamilies.EXPOSED_CUT_COPPER).fullBlockCopies(Blocks.WAXED_EXPOSED_CUT_COPPER).generateFor(BlockFamilies.WAXED_EXPOSED_CUT_COPPER);
@@ -1342,8 +1342,7 @@ public class BlockModelGenerators {
         this.createFullAndCarpetBlocks(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET);
         this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
         this.createSimpleFlatItemModel(Items.BARRIER);
-        this.createAirLikeBlock(Blocks.LIGHT, Items.LIGHT);
-        this.createLightBlockItems();
+        this.createLightBlock();
         this.createAirLikeBlock(Blocks.STRUCTURE_VOID, Items.STRUCTURE_VOID);
         this.createSimpleFlatItemModel(Items.STRUCTURE_VOID);
         this.createAirLikeBlock(Blocks.MOVING_PISTON, TextureMapping.getBlockTexture(Blocks.PISTON, "_side"));
@@ -1737,22 +1736,26 @@ public class BlockModelGenerators {
         this.createInfestedStone();
         this.copyModel(Blocks.STONE_BRICKS, Blocks.INFESTED_STONE_BRICKS);
         this.createInfestedDeepslate();
-        ItemMonsterEgg.eggs().forEach((spawnEggItem) -> {
-            this.delegateItemModel(spawnEggItem, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg"));
+        ItemMonsterEgg.eggs().forEach((item) -> {
+            this.delegateItemModel(item, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg"));
         });
     }
 
-    private void createLightBlockItems() {
+    private void createLightBlock() {
         this.skipAutoItemBlock(Blocks.LIGHT);
+        PropertyDispatch.C1<Integer> c1 = PropertyDispatch.property(BlockProperties.LEVEL);
 
         for(int i = 0; i < 16; ++i) {
             String string = String.format("_%02d", i);
-            ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(TextureMapping.getItemTexture(Items.LIGHT, string)), this.modelOutput);
+            MinecraftKey resourceLocation = TextureMapping.getItemTexture(Items.LIGHT, string);
+            c1.select(i, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PARTICLE_ONLY.createWithSuffix(Blocks.LIGHT, string, TextureMapping.particle(resourceLocation), this.modelOutput)));
+            ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(resourceLocation), this.modelOutput);
         }
 
+        this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(Blocks.LIGHT).with(c1));
     }
 
-    private void createCandleAndCandleCake(Block candle, Block block) {
+    private void createCandleAndCandleCake(Block candle, Block cake) {
         this.createSimpleFlatItemModel(candle.getItem());
         TextureMapping textureMapping = TextureMapping.cube(TextureMapping.getBlockTexture(candle));
         TextureMapping textureMapping2 = TextureMapping.cube(TextureMapping.getBlockTexture(candle, "_lit"));
@@ -1765,9 +1768,9 @@ public class BlockModelGenerators {
         MinecraftKey resourceLocation7 = ModelTemplates.THREE_CANDLES.createWithSuffix(candle, "_three_candles_lit", textureMapping2, this.modelOutput);
         MinecraftKey resourceLocation8 = ModelTemplates.FOUR_CANDLES.createWithSuffix(candle, "_four_candles_lit", textureMapping2, this.modelOutput);
         this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(candle).with(PropertyDispatch.properties(BlockProperties.CANDLES, BlockProperties.LIT).select(1, false, Variant.variant().with(VariantProperties.MODEL, resourceLocation)).select(2, false, Variant.variant().with(VariantProperties.MODEL, resourceLocation2)).select(3, false, Variant.variant().with(VariantProperties.MODEL, resourceLocation3)).select(4, false, Variant.variant().with(VariantProperties.MODEL, resourceLocation4)).select(1, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation5)).select(2, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation6)).select(3, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation7)).select(4, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation8))));
-        MinecraftKey resourceLocation9 = ModelTemplates.CANDLE_CAKE.create(block, TextureMapping.candleCake(candle, false), this.modelOutput);
-        MinecraftKey resourceLocation10 = ModelTemplates.CANDLE_CAKE.createWithSuffix(block, "_lit", TextureMapping.candleCake(candle, true), this.modelOutput);
-        this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(block).with(createBooleanModelDispatch(BlockProperties.LIT, resourceLocation10, resourceLocation9)));
+        MinecraftKey resourceLocation9 = ModelTemplates.CANDLE_CAKE.create(cake, TextureMapping.candleCake(candle, false), this.modelOutput);
+        MinecraftKey resourceLocation10 = ModelTemplates.CANDLE_CAKE.createWithSuffix(cake, "_lit", TextureMapping.candleCake(candle, true), this.modelOutput);
+        this.blockStateOutput.accept(BlockStateGeneratorMultiVariant.multiVariant(cake).with(createBooleanModelDispatch(BlockProperties.LIT, resourceLocation10, resourceLocation9)));
     }
 
     class BlockEntityModelGenerator {

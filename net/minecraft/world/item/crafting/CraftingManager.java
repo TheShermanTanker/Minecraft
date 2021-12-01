@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -37,6 +36,7 @@ public class CraftingManager extends ResourceDataJson {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Logger LOGGER = LogManager.getLogger();
     public Map<Recipes<?>, Map<MinecraftKey, IRecipe<?>>> recipes = ImmutableMap.of();
+    public Map<MinecraftKey, IRecipe<?>> byName = ImmutableMap.of();
     private boolean hasErrors;
 
     public CraftingManager() {
@@ -47,6 +47,7 @@ public class CraftingManager extends ResourceDataJson {
     protected void apply(Map<MinecraftKey, JsonElement> prepared, IResourceManager manager, GameProfilerFiller profiler) {
         this.hasErrors = false;
         Map<Recipes<?>, Builder<MinecraftKey, IRecipe<?>>> map = Maps.newHashMap();
+        Builder<MinecraftKey, IRecipe<?>> builder = ImmutableMap.builder();
 
         for(Entry<MinecraftKey, JsonElement> entry : prepared.entrySet()) {
             MinecraftKey resourceLocation = entry.getKey();
@@ -56,14 +57,16 @@ public class CraftingManager extends ResourceDataJson {
                 map.computeIfAbsent(recipe.getType(), (recipeType) -> {
                     return ImmutableMap.builder();
                 }).put(resourceLocation, recipe);
-            } catch (IllegalArgumentException | JsonParseException var9) {
-                LOGGER.error("Parsing error loading recipe {}", resourceLocation, var9);
+                builder.put(resourceLocation, recipe);
+            } catch (IllegalArgumentException | JsonParseException var10) {
+                LOGGER.error("Parsing error loading recipe {}", resourceLocation, var10);
             }
         }
 
         this.recipes = map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, (entryx) -> {
             return entryx.getValue().build();
         }));
+        this.byName = builder.build();
         LOGGER.info("Loaded {} recipes", (int)map.size());
     }
 
@@ -77,8 +80,8 @@ public class CraftingManager extends ResourceDataJson {
         }).findFirst();
     }
 
-    public <C extends IInventory, T extends IRecipe<C>> List<T> getAllRecipesFor(Recipes<T> recipeType) {
-        return this.byType(recipeType).values().stream().map((recipe) -> {
+    public <C extends IInventory, T extends IRecipe<C>> List<T> getAllRecipesFor(Recipes<T> type) {
+        return this.byType(type).values().stream().map((recipe) -> {
             return recipe;
         }).collect(Collectors.toList());
     }
@@ -95,8 +98,8 @@ public class CraftingManager extends ResourceDataJson {
         return this.recipes.getOrDefault(type, Collections.emptyMap());
     }
 
-    public <C extends IInventory, T extends IRecipe<C>> NonNullList<ItemStack> getRemainingItemsFor(Recipes<T> recipeType, C inventory, World world) {
-        Optional<T> optional = this.craft(recipeType, inventory, world);
+    public <C extends IInventory, T extends IRecipe<C>> NonNullList<ItemStack> getRemainingItemsFor(Recipes<T> type, C inventory, World world) {
+        Optional<T> optional = this.craft(type, inventory, world);
         if (optional.isPresent()) {
             return optional.get().getRemainingItems(inventory);
         } else {
@@ -111,9 +114,7 @@ public class CraftingManager extends ResourceDataJson {
     }
 
     public Optional<? extends IRecipe<?>> getRecipe(MinecraftKey id) {
-        return this.recipes.values().stream().map((map) -> {
-            return map.get(id);
-        }).filter(Objects::nonNull).findFirst();
+        return Optional.ofNullable(this.byName.get(id));
     }
 
     public Collection<IRecipe<?>> getRecipes() {
@@ -138,15 +139,19 @@ public class CraftingManager extends ResourceDataJson {
     public void replaceRecipes(Iterable<IRecipe<?>> recipes) {
         this.hasErrors = false;
         Map<Recipes<?>, Map<MinecraftKey, IRecipe<?>>> map = Maps.newHashMap();
+        Builder<MinecraftKey, IRecipe<?>> builder = ImmutableMap.builder();
         recipes.forEach((recipe) -> {
-            Map<MinecraftKey, IRecipe<?>> map2 = map.computeIfAbsent(recipe.getType(), (recipeType) -> {
+            Map<MinecraftKey, IRecipe<?>> map2 = map.computeIfAbsent(recipe.getType(), (t) -> {
                 return Maps.newHashMap();
             });
-            IRecipe<?> recipe2 = map2.put(recipe.getKey(), recipe);
+            MinecraftKey resourceLocation = recipe.getKey();
+            IRecipe<?> recipe2 = map2.put(resourceLocation, recipe);
+            builder.put(resourceLocation, recipe);
             if (recipe2 != null) {
-                throw new IllegalStateException("Duplicate recipe ignored with ID " + recipe.getKey());
+                throw new IllegalStateException("Duplicate recipe ignored with ID " + resourceLocation);
             }
         });
         this.recipes = ImmutableMap.copyOf(map);
+        this.byName = builder.build();
     }
 }

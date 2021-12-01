@@ -43,8 +43,8 @@ public abstract class ScoreboardTeamBase {
         HIDE_FOR_OTHER_TEAMS("hideForOtherTeams", 2),
         HIDE_FOR_OWN_TEAM("hideForOwnTeam", 3);
 
-        private static final Map<String, ScoreboardTeamBase.EnumNameTagVisibility> BY_NAME = Arrays.stream(values()).collect(Collectors.toMap((visibility) -> {
-            return visibility.name;
+        private static final Map<String, ScoreboardTeamBase.EnumNameTagVisibility> BY_NAME = Arrays.stream(values()).collect(Collectors.toMap((visibilityRule) -> {
+            return visibilityRule.name;
         }, (visibility) -> {
             return visibility;
         }));
@@ -52,7 +52,7 @@ public abstract class ScoreboardTeamBase {
         public final int id;
 
         public static String[] getAllNames() {
-            return BY_NAME.keySet().toArray(new String[BY_NAME.size()]);
+            return BY_NAME.keySet().toArray(new String[0]);
         }
 
         @Nullable

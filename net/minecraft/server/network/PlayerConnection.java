@@ -709,7 +709,7 @@ public class PlayerConnection implements PlayerConnectionServer, PacketListenerP
             ItemStack itemStack2 = new ItemStack(Items.WRITTEN_BOOK);
             NBTTagCompound compoundTag = itemStack.getTag();
             if (compoundTag != null) {
-                itemStack2.setTag(compoundTag.c());
+                itemStack2.setTag(compoundTag.copy());
             }
 
             itemStack2.addTagElement("author", NBTTagString.valueOf(this.player.getDisplayName().getString()));
@@ -773,7 +773,7 @@ public class PlayerConnection implements PlayerConnectionServer, PacketListenerP
         PlayerConnectionUtils.ensureMainThread(packet, this, this.player.getWorldServer());
         if (this.player.hasPermissions(2)) {
             TileEntity blockEntity = this.player.getWorldServer().getTileEntity(packet.getPos());
-            NBTTagCompound compoundTag = blockEntity != null ? blockEntity.save(new NBTTagCompound()) : null;
+            NBTTagCompound compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
             this.player.connection.sendPacket(new PacketPlayOutNBTQuery(packet.getTransactionId(), compoundTag));
         }
     }
@@ -869,7 +869,7 @@ public class PlayerConnection implements PlayerConnectionServer, PacketListenerP
                                 this.player.doCheckFallDamage(this.player.locY() - l, packet.isOnGround());
                                 this.player.setOnGround(packet.isOnGround());
                                 if (bl) {
-                                    this.player.fallDistance = 0.0F;
+                                    this.player.resetFallDistance();
                                 }
 
                                 this.player.checkMovement(this.player.locX() - i, this.player.locY() - j, this.player.locZ() - k);
@@ -887,13 +887,16 @@ public class PlayerConnection implements PlayerConnectionServer, PacketListenerP
     }
 
     private boolean isPlayerCollidingWithAnythingNew(IWorldReader world, AxisAlignedBB box) {
-        Stream<VoxelShape> stream = world.getCollisions(this.player, this.player.getBoundingBox().shrink((double)1.0E-5F), (entity) -> {
-            return true;
-        });
+        Iterable<VoxelShape> iterable = world.getCollisions(this.player, this.player.getBoundingBox().shrink((double)1.0E-5F));
         VoxelShape voxelShape = VoxelShapes.create(box.shrink((double)1.0E-5F));
-        return stream.anyMatch((voxelShape2) -> {
-            return !VoxelShapes.joinIsNotEmpty(voxelShape2, voxelShape, OperatorBoolean.AND);
-        });
+
+        for(VoxelShape voxelShape2 : iterable) {
+            if (!VoxelShapes.joinIsNotEmpty(voxelShape2, voxelShape, OperatorBoolean.AND)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void dismount(double x, double y, double z, float yaw, float pitch) {
@@ -1225,6 +1228,10 @@ public class PlayerConnection implements PlayerConnectionServer, PacketListenerP
         this.player.resetIdleTimer();
         this.player.setSneaking(packet.isUsingSecondaryAction());
         if (entity != null) {
+            if (!serverLevel.getWorldBorder().isWithinBounds(entity.getChunkCoordinates())) {
+                return;
+            }
+
             double d = 36.0D;
             if (this.player.distanceToSqr(entity) < 36.0D) {
                 packet.dispatch(new PacketPlayInUseEntity.Handler() {
@@ -1358,16 +1365,12 @@ public class PlayerConnection implements PlayerConnectionServer, PacketListenerP
         if (this.player.gameMode.isCreative()) {
             boolean bl = packet.getSlotNum() < 0;
             ItemStack itemStack = packet.getItemStack();
-            NBTTagCompound compoundTag = itemStack.getTagElement("BlockEntityTag");
+            NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(itemStack);
             if (!itemStack.isEmpty() && compoundTag != null && compoundTag.hasKey("x") && compoundTag.hasKey("y") && compoundTag.hasKey("z")) {
-                BlockPosition blockPos = new BlockPosition(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
+                BlockPosition blockPos = TileEntity.getPosFromTag(compoundTag);
                 TileEntity blockEntity = this.player.level.getTileEntity(blockPos);
                 if (blockEntity != null) {
-                    NBTTagCompound compoundTag2 = blockEntity.save(new NBTTagCompound());
-                    compoundTag2.remove("x");
-                    compoundTag2.remove("y");
-                    compoundTag2.remove("z");
-                    itemStack.addTagElement("BlockEntityTag", compoundTag2);
+                    blockEntity.saveToItem(itemStack);
                 }
             }
 

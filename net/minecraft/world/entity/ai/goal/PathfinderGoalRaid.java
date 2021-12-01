@@ -13,8 +13,10 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.phys.Vec3D;
 
 public class PathfinderGoalRaid<T extends EntityRaider> extends PathfinderGoal {
+    private static final int RECRUITMENT_SEARCH_TICK_DELAY = 20;
     private static final float SPEED_MODIFIER = 1.0F;
     private final T mob;
+    private int recruitmentTick;
 
     public PathfinderGoalRaid(T actor) {
         this.mob = actor;
@@ -35,7 +37,8 @@ public class PathfinderGoalRaid<T extends EntityRaider> extends PathfinderGoal {
     public void tick() {
         if (this.mob.hasActiveRaid()) {
             Raid raid = this.mob.getCurrentRaid();
-            if (this.mob.tickCount % 20 == 0) {
+            if (this.mob.tickCount > this.recruitmentTick) {
+                this.recruitmentTick = this.mob.tickCount + 20;
                 this.recruitNearby(raid);
             }
 

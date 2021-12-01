@@ -22,10 +22,10 @@ public class LootEnchantFunction extends LootItemFunctionConditional {
     final NumberProvider value;
     final int limit;
 
-    LootEnchantFunction(LootItemCondition[] conditions, NumberProvider numberProvider, int i) {
+    LootEnchantFunction(LootItemCondition[] conditions, NumberProvider countRange, int limit) {
         super(conditions);
-        this.value = numberProvider;
-        this.limit = i;
+        this.value = countRange;
+        this.limit = limit;
     }
 
     @Override

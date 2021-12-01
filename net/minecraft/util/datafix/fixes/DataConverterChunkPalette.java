@@ -51,84 +51,84 @@ public class DataConverterChunkPalette extends DataFix {
     static final Dynamic<?> UPPER_LARGE_FERN = DataConverterFlattenData.parse("{Name:'minecraft:large_fern',Properties:{half:'upper'}}");
     static final Dynamic<?> UPPER_ROSE_BUSH = DataConverterFlattenData.parse("{Name:'minecraft:rose_bush',Properties:{half:'upper'}}");
     static final Dynamic<?> UPPER_PEONY = DataConverterFlattenData.parse("{Name:'minecraft:peony',Properties:{half:'upper'}}");
-    static final Map<String, Dynamic<?>> FLOWER_POT_MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
-        hashMap.put("minecraft:air0", DataConverterFlattenData.parse("{Name:'minecraft:flower_pot'}"));
-        hashMap.put("minecraft:red_flower0", DataConverterFlattenData.parse("{Name:'minecraft:potted_poppy'}"));
-        hashMap.put("minecraft:red_flower1", DataConverterFlattenData.parse("{Name:'minecraft:potted_blue_orchid'}"));
-        hashMap.put("minecraft:red_flower2", DataConverterFlattenData.parse("{Name:'minecraft:potted_allium'}"));
-        hashMap.put("minecraft:red_flower3", DataConverterFlattenData.parse("{Name:'minecraft:potted_azure_bluet'}"));
-        hashMap.put("minecraft:red_flower4", DataConverterFlattenData.parse("{Name:'minecraft:potted_red_tulip'}"));
-        hashMap.put("minecraft:red_flower5", DataConverterFlattenData.parse("{Name:'minecraft:potted_orange_tulip'}"));
-        hashMap.put("minecraft:red_flower6", DataConverterFlattenData.parse("{Name:'minecraft:potted_white_tulip'}"));
-        hashMap.put("minecraft:red_flower7", DataConverterFlattenData.parse("{Name:'minecraft:potted_pink_tulip'}"));
-        hashMap.put("minecraft:red_flower8", DataConverterFlattenData.parse("{Name:'minecraft:potted_oxeye_daisy'}"));
-        hashMap.put("minecraft:yellow_flower0", DataConverterFlattenData.parse("{Name:'minecraft:potted_dandelion'}"));
-        hashMap.put("minecraft:sapling0", DataConverterFlattenData.parse("{Name:'minecraft:potted_oak_sapling'}"));
-        hashMap.put("minecraft:sapling1", DataConverterFlattenData.parse("{Name:'minecraft:potted_spruce_sapling'}"));
-        hashMap.put("minecraft:sapling2", DataConverterFlattenData.parse("{Name:'minecraft:potted_birch_sapling'}"));
-        hashMap.put("minecraft:sapling3", DataConverterFlattenData.parse("{Name:'minecraft:potted_jungle_sapling'}"));
-        hashMap.put("minecraft:sapling4", DataConverterFlattenData.parse("{Name:'minecraft:potted_acacia_sapling'}"));
-        hashMap.put("minecraft:sapling5", DataConverterFlattenData.parse("{Name:'minecraft:potted_dark_oak_sapling'}"));
-        hashMap.put("minecraft:red_mushroom0", DataConverterFlattenData.parse("{Name:'minecraft:potted_red_mushroom'}"));
-        hashMap.put("minecraft:brown_mushroom0", DataConverterFlattenData.parse("{Name:'minecraft:potted_brown_mushroom'}"));
-        hashMap.put("minecraft:deadbush0", DataConverterFlattenData.parse("{Name:'minecraft:potted_dead_bush'}"));
-        hashMap.put("minecraft:tallgrass2", DataConverterFlattenData.parse("{Name:'minecraft:potted_fern'}"));
-        hashMap.put("minecraft:cactus0", DataConverterFlattenData.getTag(2240));
+    static final Map<String, Dynamic<?>> FLOWER_POT_MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
+        map.put("minecraft:air0", DataConverterFlattenData.parse("{Name:'minecraft:flower_pot'}"));
+        map.put("minecraft:red_flower0", DataConverterFlattenData.parse("{Name:'minecraft:potted_poppy'}"));
+        map.put("minecraft:red_flower1", DataConverterFlattenData.parse("{Name:'minecraft:potted_blue_orchid'}"));
+        map.put("minecraft:red_flower2", DataConverterFlattenData.parse("{Name:'minecraft:potted_allium'}"));
+        map.put("minecraft:red_flower3", DataConverterFlattenData.parse("{Name:'minecraft:potted_azure_bluet'}"));
+        map.put("minecraft:red_flower4", DataConverterFlattenData.parse("{Name:'minecraft:potted_red_tulip'}"));
+        map.put("minecraft:red_flower5", DataConverterFlattenData.parse("{Name:'minecraft:potted_orange_tulip'}"));
+        map.put("minecraft:red_flower6", DataConverterFlattenData.parse("{Name:'minecraft:potted_white_tulip'}"));
+        map.put("minecraft:red_flower7", DataConverterFlattenData.parse("{Name:'minecraft:potted_pink_tulip'}"));
+        map.put("minecraft:red_flower8", DataConverterFlattenData.parse("{Name:'minecraft:potted_oxeye_daisy'}"));
+        map.put("minecraft:yellow_flower0", DataConverterFlattenData.parse("{Name:'minecraft:potted_dandelion'}"));
+        map.put("minecraft:sapling0", DataConverterFlattenData.parse("{Name:'minecraft:potted_oak_sapling'}"));
+        map.put("minecraft:sapling1", DataConverterFlattenData.parse("{Name:'minecraft:potted_spruce_sapling'}"));
+        map.put("minecraft:sapling2", DataConverterFlattenData.parse("{Name:'minecraft:potted_birch_sapling'}"));
+        map.put("minecraft:sapling3", DataConverterFlattenData.parse("{Name:'minecraft:potted_jungle_sapling'}"));
+        map.put("minecraft:sapling4", DataConverterFlattenData.parse("{Name:'minecraft:potted_acacia_sapling'}"));
+        map.put("minecraft:sapling5", DataConverterFlattenData.parse("{Name:'minecraft:potted_dark_oak_sapling'}"));
+        map.put("minecraft:red_mushroom0", DataConverterFlattenData.parse("{Name:'minecraft:potted_red_mushroom'}"));
+        map.put("minecraft:brown_mushroom0", DataConverterFlattenData.parse("{Name:'minecraft:potted_brown_mushroom'}"));
+        map.put("minecraft:deadbush0", DataConverterFlattenData.parse("{Name:'minecraft:potted_dead_bush'}"));
+        map.put("minecraft:tallgrass2", DataConverterFlattenData.parse("{Name:'minecraft:potted_fern'}"));
+        map.put("minecraft:cactus0", DataConverterFlattenData.getTag(2240));
     });
-    static final Map<String, Dynamic<?>> SKULL_MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
-        mapSkull(hashMap, 0, "skeleton", "skull");
-        mapSkull(hashMap, 1, "wither_skeleton", "skull");
-        mapSkull(hashMap, 2, "zombie", "head");
-        mapSkull(hashMap, 3, "player", "head");
-        mapSkull(hashMap, 4, "creeper", "head");
-        mapSkull(hashMap, 5, "dragon", "head");
+    static final Map<String, Dynamic<?>> SKULL_MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
+        mapSkull(map, 0, "skeleton", "skull");
+        mapSkull(map, 1, "wither_skeleton", "skull");
+        mapSkull(map, 2, "zombie", "head");
+        mapSkull(map, 3, "player", "head");
+        mapSkull(map, 4, "creeper", "head");
+        mapSkull(map, 5, "dragon", "head");
     });
-    static final Map<String, Dynamic<?>> DOOR_MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
-        mapDoor(hashMap, "oak_door", 1024);
-        mapDoor(hashMap, "iron_door", 1136);
-        mapDoor(hashMap, "spruce_door", 3088);
-        mapDoor(hashMap, "birch_door", 3104);
-        mapDoor(hashMap, "jungle_door", 3120);
-        mapDoor(hashMap, "acacia_door", 3136);
-        mapDoor(hashMap, "dark_oak_door", 3152);
+    static final Map<String, Dynamic<?>> DOOR_MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
+        mapDoor(map, "oak_door", 1024);
+        mapDoor(map, "iron_door", 1136);
+        mapDoor(map, "spruce_door", 3088);
+        mapDoor(map, "birch_door", 3104);
+        mapDoor(map, "jungle_door", 3120);
+        mapDoor(map, "acacia_door", 3136);
+        mapDoor(map, "dark_oak_door", 3152);
     });
-    static final Map<String, Dynamic<?>> NOTE_BLOCK_MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
+    static final Map<String, Dynamic<?>> NOTE_BLOCK_MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
         for(int i = 0; i < 26; ++i) {
-            hashMap.put("true" + i, DataConverterFlattenData.parse("{Name:'minecraft:note_block',Properties:{powered:'true',note:'" + i + "'}}"));
-            hashMap.put("false" + i, DataConverterFlattenData.parse("{Name:'minecraft:note_block',Properties:{powered:'false',note:'" + i + "'}}"));
+            map.put("true" + i, DataConverterFlattenData.parse("{Name:'minecraft:note_block',Properties:{powered:'true',note:'" + i + "'}}"));
+            map.put("false" + i, DataConverterFlattenData.parse("{Name:'minecraft:note_block',Properties:{powered:'false',note:'" + i + "'}}"));
         }
 
     });
-    private static final Int2ObjectMap<String> DYE_COLOR_MAP = DataFixUtils.make(new Int2ObjectOpenHashMap<>(), (int2ObjectOpenHashMap) -> {
-        int2ObjectOpenHashMap.put(0, "white");
-        int2ObjectOpenHashMap.put(1, "orange");
-        int2ObjectOpenHashMap.put(2, "magenta");
-        int2ObjectOpenHashMap.put(3, "light_blue");
-        int2ObjectOpenHashMap.put(4, "yellow");
-        int2ObjectOpenHashMap.put(5, "lime");
-        int2ObjectOpenHashMap.put(6, "pink");
-        int2ObjectOpenHashMap.put(7, "gray");
-        int2ObjectOpenHashMap.put(8, "light_gray");
-        int2ObjectOpenHashMap.put(9, "cyan");
-        int2ObjectOpenHashMap.put(10, "purple");
-        int2ObjectOpenHashMap.put(11, "blue");
-        int2ObjectOpenHashMap.put(12, "brown");
-        int2ObjectOpenHashMap.put(13, "green");
-        int2ObjectOpenHashMap.put(14, "red");
-        int2ObjectOpenHashMap.put(15, "black");
+    private static final Int2ObjectMap<String> DYE_COLOR_MAP = DataFixUtils.make(new Int2ObjectOpenHashMap<>(), (map) -> {
+        map.put(0, "white");
+        map.put(1, "orange");
+        map.put(2, "magenta");
+        map.put(3, "light_blue");
+        map.put(4, "yellow");
+        map.put(5, "lime");
+        map.put(6, "pink");
+        map.put(7, "gray");
+        map.put(8, "light_gray");
+        map.put(9, "cyan");
+        map.put(10, "purple");
+        map.put(11, "blue");
+        map.put(12, "brown");
+        map.put(13, "green");
+        map.put(14, "red");
+        map.put(15, "black");
     });
-    static final Map<String, Dynamic<?>> BED_BLOCK_MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
+    static final Map<String, Dynamic<?>> BED_BLOCK_MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
         for(Entry<String> entry : DYE_COLOR_MAP.int2ObjectEntrySet()) {
             if (!Objects.equals(entry.getValue(), "red")) {
-                addBeds(hashMap, entry.getIntKey(), entry.getValue());
+                addBeds(map, entry.getIntKey(), entry.getValue());
             }
         }
 
     });
-    static final Map<String, Dynamic<?>> BANNER_BLOCK_MAP = DataFixUtils.make(Maps.newHashMap(), (hashMap) -> {
+    static final Map<String, Dynamic<?>> BANNER_BLOCK_MAP = DataFixUtils.make(Maps.newHashMap(), (map) -> {
         for(Entry<String> entry : DYE_COLOR_MAP.int2ObjectEntrySet()) {
             if (!Objects.equals(entry.getValue(), "white")) {
-                addBanners(hashMap, 15 - entry.getIntKey(), entry.getValue());
+                addBanners(map, 15 - entry.getIntKey(), entry.getValue());
             }
         }
 
@@ -219,30 +219,30 @@ public class DataConverterChunkPalette extends DataFix {
         out.put("minecraft:" + name + "westupperrighttruetrue", DataConverterFlattenData.parse("{Name:'minecraft:" + name + "',Properties:{facing:'west',half:'upper',hinge:'right',open:'true',powered:'true'}}"));
     }
 
-    private static void addBeds(Map<String, Dynamic<?>> out, int i, String string) {
-        out.put("southfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'south',occupied:'false',part:'foot'}}"));
-        out.put("westfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'west',occupied:'false',part:'foot'}}"));
-        out.put("northfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'north',occupied:'false',part:'foot'}}"));
-        out.put("eastfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'east',occupied:'false',part:'foot'}}"));
-        out.put("southfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'south',occupied:'false',part:'head'}}"));
-        out.put("westfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'west',occupied:'false',part:'head'}}"));
-        out.put("northfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'north',occupied:'false',part:'head'}}"));
-        out.put("eastfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'east',occupied:'false',part:'head'}}"));
-        out.put("southtruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'south',occupied:'true',part:'head'}}"));
-        out.put("westtruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'west',occupied:'true',part:'head'}}"));
-        out.put("northtruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'north',occupied:'true',part:'head'}}"));
-        out.put("easttruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_bed',Properties:{facing:'east',occupied:'true',part:'head'}}"));
+    private static void addBeds(Map<String, Dynamic<?>> out, int i, String color) {
+        out.put("southfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'south',occupied:'false',part:'foot'}}"));
+        out.put("westfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'west',occupied:'false',part:'foot'}}"));
+        out.put("northfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'north',occupied:'false',part:'foot'}}"));
+        out.put("eastfalsefoot" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'east',occupied:'false',part:'foot'}}"));
+        out.put("southfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'south',occupied:'false',part:'head'}}"));
+        out.put("westfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'west',occupied:'false',part:'head'}}"));
+        out.put("northfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'north',occupied:'false',part:'head'}}"));
+        out.put("eastfalsehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'east',occupied:'false',part:'head'}}"));
+        out.put("southtruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'south',occupied:'true',part:'head'}}"));
+        out.put("westtruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'west',occupied:'true',part:'head'}}"));
+        out.put("northtruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'north',occupied:'true',part:'head'}}"));
+        out.put("easttruehead" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_bed',Properties:{facing:'east',occupied:'true',part:'head'}}"));
     }
 
-    private static void addBanners(Map<String, Dynamic<?>> out, int i, String string) {
+    private static void addBanners(Map<String, Dynamic<?>> out, int i, String color) {
         for(int j = 0; j < 16; ++j) {
-            out.put(j + "_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_banner',Properties:{rotation:'" + j + "'}}"));
+            out.put(j + "_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_banner',Properties:{rotation:'" + j + "'}}"));
         }
 
-        out.put("north_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_wall_banner',Properties:{facing:'north'}}"));
-        out.put("south_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_wall_banner',Properties:{facing:'south'}}"));
-        out.put("west_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_wall_banner',Properties:{facing:'west'}}"));
-        out.put("east_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + string + "_wall_banner',Properties:{facing:'east'}}"));
+        out.put("north_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_wall_banner',Properties:{facing:'north'}}"));
+        out.put("south_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_wall_banner',Properties:{facing:'south'}}"));
+        out.put("west_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_wall_banner',Properties:{facing:'west'}}"));
+        out.put("east_" + i, DataConverterFlattenData.parse("{Name:'minecraft:" + color + "_wall_banner',Properties:{facing:'east'}}"));
     }
 
     public static String getName(Dynamic<?> dynamic) {
@@ -267,7 +267,6 @@ public class DataConverterChunkPalette extends DataFix {
         return optional.isPresent() && optional.get().get("Sections").asStreamOpt().result().isPresent() ? dynamic.set("Level", (new DataConverterChunkPalette.UpgradeChunk(optional.get())).write()) : dynamic;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.CHUNK);
         Type<?> type2 = this.getOutputSchema().getType(DataConverterTypes.CHUNK);
@@ -441,7 +440,7 @@ public class DataConverterChunkPalette extends DataFix {
     }
 
     static class Section {
-        private final RegistryID<Dynamic<?>> palette = new RegistryID<>(32);
+        private final RegistryID<Dynamic<?>> palette = RegistryID.create(32);
         private final List<Dynamic<?>> listTag;
         private final Dynamic<?> section;
         private final boolean hasData;

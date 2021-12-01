@@ -11,9 +11,9 @@ public class PacketPlayOutChat implements Packet<PacketListenerPlayOut> {
     private final ChatMessageType type;
     private final UUID sender;
 
-    public PacketPlayOutChat(IChatBaseComponent message, ChatMessageType location, UUID sender) {
+    public PacketPlayOutChat(IChatBaseComponent message, ChatMessageType type, UUID sender) {
         this.message = message;
-        this.type = location;
+        this.type = type;
         this.sender = sender;
     }
 

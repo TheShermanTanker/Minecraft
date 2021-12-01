@@ -9,11 +9,11 @@ public class VillagerData {
     public static final int MAX_VILLAGER_LEVEL = 5;
     private static final int[] NEXT_LEVEL_XP_THRESHOLDS = new int[]{0, 10, 70, 150, 250};
     public static final Codec<VillagerData> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(IRegistry.VILLAGER_TYPE.fieldOf("type").orElseGet(() -> {
+        return instance.group(IRegistry.VILLAGER_TYPE.byNameCodec().fieldOf("type").orElseGet(() -> {
             return VillagerType.PLAINS;
         }).forGetter((villagerData) -> {
             return villagerData.type;
-        }), IRegistry.VILLAGER_PROFESSION.fieldOf("profession").orElseGet(() -> {
+        }), IRegistry.VILLAGER_PROFESSION.byNameCodec().fieldOf("profession").orElseGet(() -> {
             return VillagerProfession.NONE;
         }).forGetter((villagerData) -> {
             return villagerData.profession;

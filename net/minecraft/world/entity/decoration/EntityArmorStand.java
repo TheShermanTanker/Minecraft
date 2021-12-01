@@ -28,6 +28,7 @@ import net.minecraft.world.entity.EntitySize;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.entity.EnumMainHand;
+import net.minecraft.world.entity.LivingEntity$Fallsounds;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.projectile.EntityArrow;
 import net.minecraft.world.entity.vehicle.EntityMinecartAbstract;
@@ -739,8 +740,8 @@ public class EntityArmorStand extends EntityLiving {
     }
 
     @Override
-    protected SoundEffect getSoundFall(int distance) {
-        return SoundEffects.ARMOR_STAND_FALL;
+    public LivingEntity$Fallsounds getFallSounds() {
+        return new LivingEntity$Fallsounds(SoundEffects.ARMOR_STAND_FALL, SoundEffects.ARMOR_STAND_FALL);
     }
 
     @Nullable

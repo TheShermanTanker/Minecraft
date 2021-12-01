@@ -97,12 +97,16 @@ public class EntityDrowned extends EntityZombie implements IRangedEntity {
     }
 
     public static boolean checkDrownedSpawnRules(EntityTypes<EntityDrowned> type, WorldAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        Optional<ResourceKey<BiomeBase>> optional = world.getBiomeName(pos);
-        boolean bl = world.getDifficulty() != EnumDifficulty.PEACEFUL && isDarkEnoughToSpawn(world, pos, random) && (spawnReason == EnumMobSpawn.SPAWNER || world.getFluid(pos).is(TagsFluid.WATER));
-        if (!Objects.equals(optional, Optional.of(Biomes.RIVER)) && !Objects.equals(optional, Optional.of(Biomes.FROZEN_RIVER))) {
-            return random.nextInt(40) == 0 && isDeepEnoughToSpawn(world, pos) && bl;
+        if (!world.getFluid(pos.below()).is(TagsFluid.WATER)) {
+            return false;
         } else {
-            return random.nextInt(15) == 0 && bl;
+            Optional<ResourceKey<BiomeBase>> optional = world.getBiomeName(pos);
+            boolean bl = world.getDifficulty() != EnumDifficulty.PEACEFUL && isDarkEnoughToSpawn(world, pos, random) && (spawnReason == EnumMobSpawn.SPAWNER || world.getFluid(pos).is(TagsFluid.WATER));
+            if (!Objects.equals(optional, Optional.of(Biomes.RIVER)) && !Objects.equals(optional, Optional.of(Biomes.FROZEN_RIVER))) {
+                return random.nextInt(40) == 0 && isDeepEnoughToSpawn(world, pos) && bl;
+            } else {
+                return random.nextInt(15) == 0 && bl;
+            }
         }
     }
 

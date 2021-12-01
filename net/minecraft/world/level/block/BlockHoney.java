@@ -95,7 +95,7 @@ public class BlockHoney extends BlockHalfTransparent {
             entity.setMot(new Vec3D(vec3.x, -0.05D, vec3.z));
         }
 
-        entity.fallDistance = 0.0F;
+        entity.resetFallDistance();
     }
 
     private void maybeDoSlideEffects(World world, Entity entity) {

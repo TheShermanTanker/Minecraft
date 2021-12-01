@@ -20,7 +20,6 @@ public class DataConverterRecipeBase extends DataFix {
         this.renamer = renamer;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<Pair<String, String>> type = DSL.named(DataConverterTypes.RECIPE.typeName(), DataConverterSchemaNamed.namespacedString());
         if (!Objects.equals(type, this.getInputSchema().getType(DataConverterTypes.RECIPE))) {

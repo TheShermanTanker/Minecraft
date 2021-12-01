@@ -26,7 +26,6 @@ public class DataConverterSchemaV1460 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = Maps.newHashMap();
         schema.registerSimple(map, "minecraft:area_effect_cloud");
@@ -159,7 +158,6 @@ public class DataConverterSchemaV1460 extends DataConverterSchemaNamed {
         return map;
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerBlockEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = Maps.newHashMap();
         registerInventory(schema, map, "minecraft:furnace");
@@ -195,7 +193,6 @@ public class DataConverterSchemaV1460 extends DataConverterSchemaNamed {
         return map;
     }
 
-    @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         schema.registerType(false, DataConverterTypes.LEVEL, DSL::remainder);
         schema.registerType(false, DataConverterTypes.RECIPE, () -> {

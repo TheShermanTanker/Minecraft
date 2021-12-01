@@ -15,7 +15,6 @@ public class DataConverterBlockName extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.BLOCK_NAME);
         Type<?> type2 = this.getOutputSchema().getType(DataConverterTypes.BLOCK_NAME);

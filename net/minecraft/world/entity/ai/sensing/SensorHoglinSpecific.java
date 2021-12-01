@@ -11,6 +11,7 @@ import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.monster.hoglin.EntityHoglin;
 import net.minecraft.world.entity.monster.piglin.EntityPiglin;
 
@@ -27,17 +28,22 @@ public class SensorHoglinSpecific extends Sensor<EntityHoglin> {
         Optional<EntityPiglin> optional = Optional.empty();
         int i = 0;
         List<EntityHoglin> list = Lists.newArrayList();
+        NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
 
-        for(EntityLiving livingEntity : brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList())) {
-            if (livingEntity instanceof EntityPiglin && !livingEntity.isBaby()) {
+        for(EntityLiving livingEntity : nearestVisibleLivingEntities.findAll((livingEntityx) -> {
+            return !livingEntityx.isBaby() && (livingEntityx instanceof EntityPiglin || livingEntityx instanceof EntityHoglin);
+        })) {
+            if (livingEntity instanceof EntityPiglin) {
+                EntityPiglin piglin = (EntityPiglin)livingEntity;
                 ++i;
-                if (!optional.isPresent()) {
-                    optional = Optional.of((EntityPiglin)livingEntity);
+                if (optional.isEmpty()) {
+                    optional = Optional.of(piglin);
                 }
             }
 
-            if (livingEntity instanceof EntityHoglin && !livingEntity.isBaby()) {
-                list.add((EntityHoglin)livingEntity);
+            if (livingEntity instanceof EntityHoglin) {
+                EntityHoglin hoglin = (EntityHoglin)livingEntity;
+                list.add(hoglin);
             }
         }
 
@@ -48,8 +54,8 @@ public class SensorHoglinSpecific extends Sensor<EntityHoglin> {
     }
 
     private Optional<BlockPosition> findNearestRepellent(WorldServer world, EntityHoglin hoglin) {
-        return BlockPosition.findClosestMatch(hoglin.getChunkCoordinates(), 8, 4, (blockPos) -> {
-            return world.getType(blockPos).is(TagsBlock.HOGLIN_REPELLENTS);
+        return BlockPosition.findClosestMatch(hoglin.getChunkCoordinates(), 8, 4, (pos) -> {
+            return world.getType(pos).is(TagsBlock.HOGLIN_REPELLENTS);
         });
     }
 }

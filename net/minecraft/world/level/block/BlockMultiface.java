@@ -189,8 +189,8 @@ public class BlockMultiface extends Block {
     public boolean spreadFromFaceTowardRandomDirection(IBlockData state, GeneratorAccess world, BlockPosition pos, EnumDirection from, Random random, boolean postProcess) {
         List<EnumDirection> list = Arrays.asList(DIRECTIONS);
         Collections.shuffle(list, random);
-        return list.stream().anyMatch((direction2) -> {
-            return this.spreadFromFaceTowardDirection(state, world, pos, from, direction2, postProcess);
+        return list.stream().anyMatch((to) -> {
+            return this.spreadFromFaceTowardDirection(state, world, pos, from, to, postProcess);
         });
     }
 

@@ -21,7 +21,7 @@ public class PathfinderGoalNearestVillage extends PathfinderGoal {
 
     public PathfinderGoalNearestVillage(EntityCreature mob, int searchRange) {
         this.mob = mob;
-        this.interval = searchRange;
+        this.interval = reducedTickDelay(searchRange);
         this.setFlags(EnumSet.of(PathfinderGoal.Type.MOVE));
     }
 

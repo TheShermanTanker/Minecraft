@@ -17,7 +17,7 @@ public class VillagePlaceRecord {
         return RecordCodecBuilder.create((instance) -> {
             return instance.group(BlockPosition.CODEC.fieldOf("pos").forGetter((poi) -> {
                 return poi.pos;
-            }), IRegistry.POINT_OF_INTEREST_TYPE.fieldOf("type").forGetter((poi) -> {
+            }), IRegistry.POINT_OF_INTEREST_TYPE.byNameCodec().fieldOf("type").forGetter((poi) -> {
                 return poi.poiType;
             }), Codec.INT.fieldOf("free_tickets").orElse(0).forGetter((poi) -> {
                 return poi.freeTickets;
@@ -36,6 +36,7 @@ public class VillagePlaceRecord {
         this(pos, type, type.getMaxTickets(), updateListener);
     }
 
+    /** @deprecated */
     @Deprecated
     @VisibleForDebug
     public int getFreeTickets() {

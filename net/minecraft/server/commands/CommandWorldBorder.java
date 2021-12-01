@@ -19,6 +19,7 @@ public class CommandWorldBorder {
     private static final SimpleCommandExceptionType ERROR_SAME_SIZE = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.set.failed.nochange"));
     private static final SimpleCommandExceptionType ERROR_TOO_SMALL = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.set.failed.small"));
     private static final SimpleCommandExceptionType ERROR_TOO_BIG = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.set.failed.big", 5.9999968E7D));
+    private static final SimpleCommandExceptionType ERROR_TOO_FAR_OUT = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.set.failed.far", 2.9999984E7D));
     private static final SimpleCommandExceptionType ERROR_SAME_WARNING_TIME = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.warning.time.failed"));
     private static final SimpleCommandExceptionType ERROR_SAME_WARNING_DISTANCE = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.warning.distance.failed"));
     private static final SimpleCommandExceptionType ERROR_SAME_DAMAGE_BUFFER = new SimpleCommandExceptionType(new ChatMessage("commands.worldborder.damage.buffer.failed"));
@@ -51,7 +52,7 @@ public class CommandWorldBorder {
     }
 
     private static int setDamageBuffer(CommandListenerWrapper source, float distance) throws CommandSyntaxException {
-        WorldBorder worldBorder = source.getWorld().getWorldBorder();
+        WorldBorder worldBorder = source.getServer().overworld().getWorldBorder();
         if (worldBorder.getDamageBuffer() == (double)distance) {
             throw ERROR_SAME_DAMAGE_BUFFER.create();
         } else {
@@ -62,7 +63,7 @@ public class CommandWorldBorder {
     }
 
     private static int setDamageAmount(CommandListenerWrapper source, float damagePerBlock) throws CommandSyntaxException {
-        WorldBorder worldBorder = source.getWorld().getWorldBorder();
+        WorldBorder worldBorder = source.getServer().overworld().getWorldBorder();
         if (worldBorder.getDamageAmount() == (double)damagePerBlock) {
             throw ERROR_SAME_DAMAGE_AMOUNT.create();
         } else {
@@ -73,7 +74,7 @@ public class CommandWorldBorder {
     }
 
     private static int setWarningTime(CommandListenerWrapper source, int time) throws CommandSyntaxException {
-        WorldBorder worldBorder = source.getWorld().getWorldBorder();
+        WorldBorder worldBorder = source.getServer().overworld().getWorldBorder();
         if (worldBorder.getWarningTime() == time) {
             throw ERROR_SAME_WARNING_TIME.create();
         } else {
@@ -84,7 +85,7 @@ public class CommandWorldBorder {
     }
 
     private static int setWarningDistance(CommandListenerWrapper source, int distance) throws CommandSyntaxException {
-        WorldBorder worldBorder = source.getWorld().getWorldBorder();
+        WorldBorder worldBorder = source.getServer().overworld().getWorldBorder();
         if (worldBorder.getWarningDistance() == distance) {
             throw ERROR_SAME_WARNING_DISTANCE.create();
         } else {
@@ -95,24 +96,26 @@ public class CommandWorldBorder {
     }
 
     private static int getSize(CommandListenerWrapper source) {
-        double d = source.getWorld().getWorldBorder().getSize();
+        double d = source.getServer().overworld().getWorldBorder().getSize();
         source.sendMessage(new ChatMessage("commands.worldborder.get", String.format(Locale.ROOT, "%.0f", d)), false);
         return MathHelper.floor(d + 0.5D);
     }
 
     private static int setCenter(CommandListenerWrapper source, Vec2F pos) throws CommandSyntaxException {
-        WorldBorder worldBorder = source.getWorld().getWorldBorder();
+        WorldBorder worldBorder = source.getServer().overworld().getWorldBorder();
         if (worldBorder.getCenterX() == (double)pos.x && worldBorder.getCenterZ() == (double)pos.y) {
             throw ERROR_SAME_CENTER.create();
-        } else {
+        } else if (!((double)Math.abs(pos.x) > 2.9999984E7D) && !((double)Math.abs(pos.y) > 2.9999984E7D)) {
             worldBorder.setCenter((double)pos.x, (double)pos.y);
             source.sendMessage(new ChatMessage("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", pos.x), String.format("%.2f", pos.y)), true);
             return 0;
+        } else {
+            throw ERROR_TOO_FAR_OUT.create();
         }
     }
 
     private static int setSize(CommandListenerWrapper source, double distance, long time) throws CommandSyntaxException {
-        WorldBorder worldBorder = source.getWorld().getWorldBorder();
+        WorldBorder worldBorder = source.getServer().overworld().getWorldBorder();
         double d = worldBorder.getSize();
         if (d == distance) {
             throw ERROR_SAME_SIZE.create();

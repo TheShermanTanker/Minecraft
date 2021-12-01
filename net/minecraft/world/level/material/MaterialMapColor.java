@@ -1,5 +1,7 @@
 package net.minecraft.world.level.material;
 
+import com.google.common.base.Preconditions;
+
 public class MaterialMapColor {
     public static final MaterialMapColor[] MATERIAL_COLORS = new MaterialMapColor[64];
     public static final MaterialMapColor NONE = new MaterialMapColor(0, 0);
@@ -77,27 +79,34 @@ public class MaterialMapColor {
         }
     }
 
-    public int calculateRGBColor(int shade) {
-        int i = 220;
-        if (shade == 3) {
-            i = 135;
+    public int calculateRGBColor(MaterialColor$Brightness brightness) {
+        if (this == NONE) {
+            return 0;
+        } else {
+            int i = brightness.modifier;
+            int j = (this.col >> 16 & 255) * i / 255;
+            int k = (this.col >> 8 & 255) * i / 255;
+            int l = (this.col & 255) * i / 255;
+            return -16777216 | l << 16 | k << 8 | j;
         }
+    }
 
-        if (shade == 2) {
-            i = 255;
-        }
+    public static MaterialMapColor byId(int id) {
+        Preconditions.checkPositionIndex(id, MATERIAL_COLORS.length, "material id");
+        return byIdUnsafe(id);
+    }
 
-        if (shade == 1) {
-            i = 220;
-        }
+    private static MaterialMapColor byIdUnsafe(int id) {
+        MaterialMapColor materialColor = MATERIAL_COLORS[id];
+        return materialColor != null ? materialColor : NONE;
+    }
 
-        if (shade == 0) {
-            i = 180;
-        }
+    public static int getColorFromPackedId(int colorByte) {
+        int i = colorByte & 255;
+        return byIdUnsafe(i >> 2).calculateRGBColor(MaterialColor$Brightness.byIdUnsafe(i & 3));
+    }
 
-        int j = (this.col >> 16 & 255) * i / 255;
-        int k = (this.col >> 8 & 255) * i / 255;
-        int l = (this.col & 255) * i / 255;
-        return -16777216 | l << 16 | k << 8 | j;
+    public byte getPackedId(MaterialColor$Brightness brightness) {
+        return (byte)(this.id << 2 | brightness.id & 3);
     }
 }

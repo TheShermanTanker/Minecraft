@@ -13,6 +13,7 @@ public class PathfinderGoalBreed extends PathfinderGoal {
     protected final EntityAnimal animal;
     private final Class<? extends EntityAnimal> partnerClass;
     protected final World level;
+    @Nullable
     protected EntityAnimal partner;
     private int loveTime;
     private final double speedModifier;
@@ -55,7 +56,7 @@ public class PathfinderGoalBreed extends PathfinderGoal {
         this.animal.getControllerLook().setLookAt(this.partner, 10.0F, (float)this.animal.getMaxHeadXRot());
         this.animal.getNavigation().moveTo(this.partner, this.speedModifier);
         ++this.loveTime;
-        if (this.loveTime >= 60 && this.animal.distanceToSqr(this.partner) < 9.0D) {
+        if (this.loveTime >= this.adjustedTickDelay(60) && this.animal.distanceToSqr(this.partner) < 9.0D) {
             this.breed();
         }
 

@@ -47,7 +47,7 @@ public class BlockTarget extends Block {
     private static int updateRedstoneOutput(GeneratorAccess world, IBlockData state, MovingObjectPositionBlock hitResult, Entity entity) {
         int i = getRedstoneStrength(hitResult, hitResult.getPos());
         int j = entity instanceof EntityArrow ? 20 : 8;
-        if (!world.getBlockTickList().hasScheduledTick(hitResult.getBlockPosition(), state.getBlock())) {
+        if (!world.getBlockTicks().hasScheduledTick(hitResult.getBlockPosition(), state.getBlock())) {
             setOutputPower(world, state, i, hitResult.getBlockPosition(), j);
         }
 
@@ -74,7 +74,7 @@ public class BlockTarget extends Block {
 
     private static void setOutputPower(GeneratorAccess world, IBlockData state, int power, BlockPosition pos, int delay) {
         world.setTypeAndData(pos, state.set(OUTPUT_POWER, Integer.valueOf(power)), 3);
-        world.getBlockTickList().scheduleTick(pos, state.getBlock(), delay);
+        world.scheduleTick(pos, state.getBlock(), delay);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class BlockTarget extends Block {
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         if (!world.isClientSide() && !state.is(oldState.getBlock())) {
-            if (state.get(OUTPUT_POWER) > 0 && !world.getBlockTickList().hasScheduledTick(pos, this)) {
+            if (state.get(OUTPUT_POWER) > 0 && !world.getBlockTicks().hasScheduledTick(pos, this)) {
                 world.setTypeAndData(pos, state.set(OUTPUT_POWER, Integer.valueOf(0)), 18);
             }
 

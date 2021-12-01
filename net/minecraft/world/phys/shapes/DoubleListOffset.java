@@ -12,12 +12,10 @@ public class DoubleListOffset extends AbstractDoubleList {
         this.offset = offset;
     }
 
-    @Override
     public double getDouble(int i) {
         return this.delegate.getDouble(i) + this.offset;
     }
 
-    @Override
     public int size() {
         return this.delegate.size();
     }

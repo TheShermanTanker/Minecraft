@@ -15,8 +15,8 @@ public class ExplosionDamageCalculatorEntity extends ExplosionDamageCalculator {
 
     @Override
     public Optional<Float> getBlockExplosionResistance(Explosion explosion, IBlockAccess world, BlockPosition pos, IBlockData blockState, Fluid fluidState) {
-        return super.getBlockExplosionResistance(explosion, world, pos, blockState, fluidState).map((float_) -> {
-            return this.source.getBlockExplosionResistance(explosion, world, pos, blockState, fluidState, float_);
+        return super.getBlockExplosionResistance(explosion, world, pos, blockState, fluidState).map((max) -> {
+            return this.source.getBlockExplosionResistance(explosion, world, pos, blockState, fluidState, max);
         });
     }
 

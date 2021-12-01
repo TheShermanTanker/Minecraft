@@ -79,7 +79,7 @@ public class ItemCompass extends Item implements ItemVanishable {
                 this.addLodestoneTags(level.getDimensionKey(), blockPos, itemStack.getOrCreateTag());
             } else {
                 ItemStack itemStack2 = new ItemStack(Items.COMPASS, 1);
-                NBTTagCompound compoundTag = itemStack.hasTag() ? itemStack.getTag().c() : new NBTTagCompound();
+                NBTTagCompound compoundTag = itemStack.hasTag() ? itemStack.getTag().copy() : new NBTTagCompound();
                 itemStack2.setTag(compoundTag);
                 if (!player.getAbilities().instabuild) {
                     itemStack.subtract(1);

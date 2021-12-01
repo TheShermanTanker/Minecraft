@@ -1,12 +1,11 @@
 package net.minecraft.world.phys.shapes;
 
-import java.util.Optional;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityLiving;
-import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -14,9 +13,9 @@ import net.minecraft.world.level.material.FluidType;
 import net.minecraft.world.level.material.FluidTypeFlowing;
 
 public class VoxelShapeCollisionEntity implements VoxelShapeCollision {
-    protected static final VoxelShapeCollision EMPTY = new VoxelShapeCollisionEntity(false, -Double.MAX_VALUE, ItemStack.EMPTY, ItemStack.EMPTY, (fluid) -> {
+    protected static final VoxelShapeCollision EMPTY = new VoxelShapeCollisionEntity(false, -Double.MAX_VALUE, ItemStack.EMPTY, (fluid) -> {
         return false;
-    }, Optional.empty()) {
+    }, (Entity)null) {
         @Override
         public boolean isAbove(VoxelShape shape, BlockPosition pos, boolean defaultValue) {
             return defaultValue;
@@ -25,29 +24,24 @@ public class VoxelShapeCollisionEntity implements VoxelShapeCollision {
     private final boolean descending;
     private final double entityBottom;
     private final ItemStack heldItem;
-    private final ItemStack footItem;
     private final Predicate<FluidType> canStandOnFluid;
-    private final Optional<Entity> entity;
+    @Nullable
+    private final Entity entity;
 
-    protected VoxelShapeCollisionEntity(boolean descending, double minY, ItemStack boots, ItemStack heldItem, Predicate<FluidType> walkOnFluidPredicate, Optional<Entity> entity) {
+    protected VoxelShapeCollisionEntity(boolean descending, double minY, ItemStack heldItem, Predicate<FluidType> walkOnFluidPrecicate, @Nullable Entity entity) {
         this.descending = descending;
         this.entityBottom = minY;
-        this.footItem = boots;
         this.heldItem = heldItem;
-        this.canStandOnFluid = walkOnFluidPredicate;
+        this.canStandOnFluid = walkOnFluidPrecicate;
         this.entity = entity;
     }
 
+    /** @deprecated */
     @Deprecated
     protected VoxelShapeCollisionEntity(Entity entity) {
-        this(entity.isDescending(), entity.locY(), entity instanceof EntityLiving ? ((EntityLiving)entity).getEquipment(EnumItemSlot.FEET) : ItemStack.EMPTY, entity instanceof EntityLiving ? ((EntityLiving)entity).getItemInMainHand() : ItemStack.EMPTY, entity instanceof EntityLiving ? ((EntityLiving)entity)::canStandOnFluid : (fluid) -> {
+        this(entity.isDescending(), entity.locY(), entity instanceof EntityLiving ? ((EntityLiving)entity).getItemInMainHand() : ItemStack.EMPTY, entity instanceof EntityLiving ? ((EntityLiving)entity)::canStandOnFluid : (fluid) -> {
             return false;
-        }, Optional.of(entity));
-    }
-
-    @Override
-    public boolean hasItemOnFeet(Item item) {
-        return this.footItem.is(item);
+        }, entity);
     }
 
     @Override
@@ -70,7 +64,8 @@ public class VoxelShapeCollisionEntity implements VoxelShapeCollision {
         return this.entityBottom > (double)pos.getY() + shape.max(EnumDirection.EnumAxis.Y) - (double)1.0E-5F;
     }
 
-    public Optional<Entity> getEntity() {
+    @Nullable
+    public Entity getEntity() {
         return this.entity;
     }
 }

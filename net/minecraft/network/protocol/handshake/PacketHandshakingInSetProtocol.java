@@ -13,7 +13,7 @@ public class PacketHandshakingInSetProtocol implements Packet<PacketHandshakingI
     private final EnumProtocol intention;
 
     public PacketHandshakingInSetProtocol(String address, int port, EnumProtocol intendedState) {
-        this.protocolVersion = SharedConstants.getGameVersion().getProtocolVersion();
+        this.protocolVersion = SharedConstants.getCurrentVersion().getProtocolVersion();
         this.hostName = address;
         this.port = port;
         this.intention = intendedState;

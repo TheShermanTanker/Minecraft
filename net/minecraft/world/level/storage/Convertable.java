@@ -33,16 +33,13 @@ import javax.annotation.Nullable;
 import net.minecraft.FileUtils;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemUtils;
-import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryCustom;
 import net.minecraft.nbt.DynamicOpsNBT;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTCompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.chat.ChatMessage;
-import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.SessionLock;
 import net.minecraft.util.datafix.DataConverterRegistry;
@@ -51,9 +48,7 @@ import net.minecraft.util.datafix.fixes.DataConverterTypes;
 import net.minecraft.world.level.DataPackConfiguration;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldSettings;
-import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.dimension.DimensionManager;
-import net.minecraft.world.level.levelgen.GeneratorSettingBase;
 import net.minecraft.world.level.levelgen.GeneratorSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -94,19 +89,11 @@ public class Convertable {
             }
         }
 
-        Dynamic<T> dynamic2 = dataFixer.update(DataConverterTypes.WORLD_GEN_SETTINGS, dynamic, version, SharedConstants.getGameVersion().getWorldVersion());
+        Dynamic<T> dynamic2 = dataFixer.update(DataConverterTypes.WORLD_GEN_SETTINGS, dynamic, version, SharedConstants.getCurrentVersion().getWorldVersion());
         DataResult<GeneratorSettings> dataResult = GeneratorSettings.CODEC.parse(dynamic2);
         return Pair.of(dataResult.resultOrPartial(SystemUtils.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(() -> {
-            IRegistry<DimensionManager> registry = RegistryLookupCodec.create(IRegistry.DIMENSION_TYPE_REGISTRY).codec().parse(dynamic2).resultOrPartial(SystemUtils.prefix("Dimension type registry: ", LOGGER::error)).orElseThrow(() -> {
-                return new IllegalStateException("Failed to get dimension registry");
-            });
-            IRegistry<BiomeBase> registry2 = RegistryLookupCodec.create(IRegistry.BIOME_REGISTRY).codec().parse(dynamic2).resultOrPartial(SystemUtils.prefix("Biome registry: ", LOGGER::error)).orElseThrow(() -> {
-                return new IllegalStateException("Failed to get biome registry");
-            });
-            IRegistry<GeneratorSettingBase> registry3 = RegistryLookupCodec.create(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY).codec().parse(dynamic2).resultOrPartial(SystemUtils.prefix("Noise settings registry: ", LOGGER::error)).orElseThrow(() -> {
-                return new IllegalStateException("Failed to get noise settings registry");
-            });
-            return GeneratorSettings.makeDefault(registry, registry2, registry3);
+            IRegistryCustom registryAccess = IRegistryCustom.Dimension.readFromDisk(dynamic2);
+            return GeneratorSettings.makeDefault(registryAccess);
         }), dataResult.lifecycle());
     }
 
@@ -153,7 +140,7 @@ public class Convertable {
         }
     }
 
-    int getStorageVersion() {
+    private int getStorageVersion() {
         return 19133;
     }
 
@@ -182,7 +169,7 @@ public class Convertable {
             NBTTagCompound compoundTag2 = compoundTag.getCompound("Data");
             compoundTag2.remove("Player");
             int i = compoundTag2.hasKeyOfType("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-            Dynamic<NBTBase> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<>(DynamicOpsNBT.INSTANCE, compoundTag2), i, SharedConstants.getGameVersion().getWorldVersion());
+            Dynamic<NBTBase> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<>(DynamicOpsNBT.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion());
             return dynamic.get("DataPacks").result().map(Convertable::readDataPackConfig).orElse(DataPackConfiguration.DEFAULT);
         } catch (Exception var6) {
             LOGGER.error("Exception reading {}", file, var6);
@@ -190,7 +177,7 @@ public class Convertable {
         }
     }
 
-    static BiFunction<File, DataFixer, WorldDataServer> getLevelData(DynamicOps<NBTBase> dynamicOps, DataPackConfiguration dataPackConfig) {
+    static BiFunction<File, DataFixer, WorldDataServer> getLevelData(DynamicOps<NBTBase> dynamicOps, DataPackConfiguration dataPackSettings) {
         return (file, dataFixer) -> {
             try {
                 NBTTagCompound compoundTag = NBTCompressedStreamTools.readCompressed(file);
@@ -198,10 +185,10 @@ public class Convertable {
                 NBTTagCompound compoundTag3 = compoundTag2.hasKeyOfType("Player", 10) ? compoundTag2.getCompound("Player") : null;
                 compoundTag2.remove("Player");
                 int i = compoundTag2.hasKeyOfType("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-                Dynamic<NBTBase> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<>(dynamicOps, compoundTag2), i, SharedConstants.getGameVersion().getWorldVersion());
+                Dynamic<NBTBase> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<>(dynamicOps, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion());
                 Pair<GeneratorSettings, Lifecycle> pair = readWorldGenSettings(dynamic, dataFixer, i);
                 LevelVersion levelVersion = LevelVersion.parse(dynamic);
-                WorldSettings levelSettings = WorldSettings.parse(dynamic, dataPackConfig);
+                WorldSettings levelSettings = WorldSettings.parse(dynamic, dataPackSettings);
                 return WorldDataServer.parse(dynamic, dataFixer, i, compoundTag3, levelSettings, levelVersion, pair.getFirst(), pair.getSecond());
             } catch (Exception var12) {
                 LOGGER.error("Exception reading {}", file, var12);
@@ -211,13 +198,13 @@ public class Convertable {
     }
 
     BiFunction<File, DataFixer, WorldInfo> levelSummaryReader(File file, boolean locked) {
-        return (file2, dataFixer) -> {
+        return (filex, dataFixer) -> {
             try {
-                NBTTagCompound compoundTag = NBTCompressedStreamTools.readCompressed(file2);
+                NBTTagCompound compoundTag = NBTCompressedStreamTools.readCompressed(filex);
                 NBTTagCompound compoundTag2 = compoundTag.getCompound("Data");
                 compoundTag2.remove("Player");
                 int i = compoundTag2.hasKeyOfType("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-                Dynamic<NBTBase> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<>(DynamicOpsNBT.INSTANCE, compoundTag2), i, SharedConstants.getGameVersion().getWorldVersion());
+                Dynamic<NBTBase> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<>(DynamicOpsNBT.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion());
                 LevelVersion levelVersion = LevelVersion.parse(dynamic);
                 int j = levelVersion.levelDataVersion();
                 if (j != 19132 && j != 19133) {
@@ -230,7 +217,7 @@ public class Convertable {
                     return new WorldInfo(levelSettings, levelVersion, file.getName(), bl2, locked, file3);
                 }
             } catch (Exception var15) {
-                LOGGER.error("Exception reading {}", file2, var15);
+                LOGGER.error("Exception reading {}", filex, var15);
                 return null;
             }
         };
@@ -285,8 +272,8 @@ public class Convertable {
             });
         }
 
-        public File getDimensionPath(ResourceKey<World> key) {
-            return DimensionManager.getStorageFolder(key, this.levelPath.toFile());
+        public Path getDimensionPath(ResourceKey<World> key) {
+            return DimensionManager.getStorageFolder(key, this.levelPath);
         }
 
         private void checkSession() {
@@ -300,16 +287,6 @@ public class Convertable {
             return new WorldNBTStorage(this, Convertable.this.fixerUpper);
         }
 
-        public boolean isConvertable() {
-            WorldInfo levelSummary = this.getSummary();
-            return levelSummary != null && levelSummary.levelVersion().levelDataVersion() != Convertable.this.getStorageVersion();
-        }
-
-        public boolean convert(IProgressUpdate progressListener) {
-            this.checkSession();
-            return WorldUpgraderIterator.convertLevel(this, progressListener);
-        }
-
         @Nullable
         public WorldInfo getSummary() {
             this.checkSession();
@@ -317,9 +294,9 @@ public class Convertable {
         }
 
         @Nullable
-        public SaveData getDataTag(DynamicOps<NBTBase> dynamicOps, DataPackConfiguration dataPackConfig) {
+        public SaveData getDataTag(DynamicOps<NBTBase> dynamicOps, DataPackConfiguration dataPackSettings) {
             this.checkSession();
-            return Convertable.this.readLevelData(this.levelPath.toFile(), Convertable.getLevelData(dynamicOps, dataPackConfig));
+            return Convertable.this.readLevelData(this.levelPath.toFile(), Convertable.getLevelData(dynamicOps, dataPackSettings));
         }
 
         @Nullable
@@ -328,19 +305,19 @@ public class Convertable {
             return Convertable.this.readLevelData(this.levelPath.toFile(), Convertable::getDataPacks);
         }
 
-        public void saveDataTag(IRegistryCustom registryAccess, SaveData worldData) {
-            this.saveDataTag(registryAccess, worldData, (NBTTagCompound)null);
+        public void saveDataTag(IRegistryCustom registryManager, SaveData saveProperties) {
+            this.saveDataTag(registryManager, saveProperties, (NBTTagCompound)null);
         }
 
-        public void saveDataTag(IRegistryCustom registryAccess, SaveData worldData, @Nullable NBTTagCompound compoundTag) {
+        public void saveDataTag(IRegistryCustom registryManager, SaveData saveProperties, @Nullable NBTTagCompound nbt) {
             File file = this.levelPath.toFile();
-            NBTTagCompound compoundTag2 = worldData.createTag(registryAccess, compoundTag);
-            NBTTagCompound compoundTag3 = new NBTTagCompound();
-            compoundTag3.set("Data", compoundTag2);
+            NBTTagCompound compoundTag = saveProperties.createTag(registryManager, nbt);
+            NBTTagCompound compoundTag2 = new NBTTagCompound();
+            compoundTag2.set("Data", compoundTag);
 
             try {
                 File file2 = File.createTempFile("level", ".dat", file);
-                NBTCompressedStreamTools.writeCompressed(compoundTag3, file2);
+                NBTCompressedStreamTools.writeCompressed(compoundTag2, file2);
                 File file3 = new File(file, "level.dat_old");
                 File file4 = new File(file, "level.dat");
                 SystemUtils.safeReplaceFile(file4, file2, file3);

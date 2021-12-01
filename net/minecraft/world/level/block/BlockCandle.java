@@ -89,7 +89,7 @@ public class BlockCandle extends BlockCandleAbstract implements IBlockWaterlogge
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -130,7 +130,7 @@ public class BlockCandle extends BlockCandleAbstract implements IBlockWaterlogge
                 world.setTypeAndData(pos, blockState, 3);
             }
 
-            world.getFluidTickList().scheduleTick(pos, fluidState.getType(), fluidState.getType().getTickDelay(world));
+            world.scheduleTick(pos, fluidState.getType(), fluidState.getType().getTickDelay(world));
             return true;
         } else {
             return false;

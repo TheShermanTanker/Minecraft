@@ -14,9 +14,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class LootSelectorDynamic extends LootSelectorEntry {
     final MinecraftKey name;
 
-    LootSelectorDynamic(MinecraftKey resourceLocation, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
+    LootSelectorDynamic(MinecraftKey name, int weight, int quality, LootItemCondition[] conditions, LootItemFunction[] functions) {
         super(weight, quality, conditions, functions);
-        this.name = resourceLocation;
+        this.name = name;
     }
 
     @Override

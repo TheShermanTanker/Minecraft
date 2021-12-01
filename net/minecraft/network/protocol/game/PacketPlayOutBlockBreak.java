@@ -8,25 +8,23 @@ import net.minecraft.world.level.block.state.IBlockData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PacketPlayOutBlockBreak implements Packet<PacketListenerPlayOut> {
+public record PacketPlayOutBlockBreak(BlockPosition pos, IBlockData state, PacketPlayInBlockDig.EnumPlayerDigType action, boolean allGood) implements Packet<PacketListenerPlayOut> {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final BlockPosition pos;
-    private final IBlockData state;
-    private final PacketPlayInBlockDig.EnumPlayerDigType action;
-    private final boolean allGood;
 
     public PacketPlayOutBlockBreak(BlockPosition pos, IBlockData state, PacketPlayInBlockDig.EnumPlayerDigType action, boolean approved, String reason) {
-        this.pos = pos.immutableCopy();
+        this(pos, state, action, approved);
+    }
+
+    public PacketPlayOutBlockBreak(BlockPosition pos, IBlockData state, PacketPlayInBlockDig.EnumPlayerDigType action, boolean approved) {
+        pos = pos.immutableCopy();
+        this.pos = pos;
         this.state = state;
         this.action = action;
         this.allGood = approved;
     }
 
     public PacketPlayOutBlockBreak(PacketDataSerializer buf) {
-        this.pos = buf.readBlockPos();
-        this.state = Block.BLOCK_STATE_REGISTRY.fromId(buf.readVarInt());
-        this.action = buf.readEnum(PacketPlayInBlockDig.EnumPlayerDigType.class);
-        this.allGood = buf.readBoolean();
+        this(buf.readBlockPos(), Block.BLOCK_STATE_REGISTRY.fromId(buf.readVarInt()), buf.readEnum(PacketPlayInBlockDig.EnumPlayerDigType.class), buf.readBoolean());
     }
 
     @Override
@@ -42,19 +40,19 @@ public class PacketPlayOutBlockBreak implements Packet<PacketListenerPlayOut> {
         listener.handleBlockBreakAck(this);
     }
 
-    public IBlockData getState() {
-        return this.state;
-    }
-
-    public BlockPosition getPos() {
+    public BlockPosition pos() {
         return this.pos;
     }
 
-    public boolean allGood() {
-        return this.allGood;
+    public IBlockData state() {
+        return this.state;
     }
 
     public PacketPlayInBlockDig.EnumPlayerDigType action() {
         return this.action;
+    }
+
+    public boolean allGood() {
+        return this.allGood;
     }
 }

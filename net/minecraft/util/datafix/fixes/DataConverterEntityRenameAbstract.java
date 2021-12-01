@@ -18,7 +18,6 @@ public abstract class DataConverterEntityRenameAbstract extends DataFix {
         this.name = name;
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         TaggedChoiceType<String> taggedChoiceType = this.getInputSchema().findChoiceType(DataConverterTypes.ENTITY);
         TaggedChoiceType<String> taggedChoiceType2 = this.getOutputSchema().findChoiceType(DataConverterTypes.ENTITY);

@@ -6,17 +6,10 @@ import com.google.common.math.IntMath;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Objects;
-import java.util.stream.Stream;
 import net.minecraft.SystemUtils;
-import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumAxisCycle;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.level.IWorldReader;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.phys.AxisAlignedBB;
 
 public final class VoxelShapes {
@@ -175,97 +168,16 @@ public final class VoxelShapes {
         });
     }
 
-    public static double collide(EnumDirection.EnumAxis axis, AxisAlignedBB box, Stream<VoxelShape> shapes, double maxDist) {
-        for(Iterator<VoxelShape> iterator = shapes.iterator(); iterator.hasNext(); maxDist = iterator.next().collide(axis, box, maxDist)) {
+    public static double collide(EnumDirection.EnumAxis axis, AxisAlignedBB box, Iterable<VoxelShape> shapes, double maxDist) {
+        for(VoxelShape voxelShape : shapes) {
             if (Math.abs(maxDist) < 1.0E-7D) {
                 return 0.0D;
             }
+
+            maxDist = voxelShape.collide(axis, box, maxDist);
         }
 
         return maxDist;
-    }
-
-    public static double collide(EnumDirection.EnumAxis axis, AxisAlignedBB box, IWorldReader world, double initial, VoxelShapeCollision context, Stream<VoxelShape> shapes) {
-        return collide(box, world, initial, context, EnumAxisCycle.between(axis, EnumDirection.EnumAxis.Z), shapes);
-    }
-
-    private static double collide(AxisAlignedBB box, IWorldReader world, double initial, VoxelShapeCollision context, EnumAxisCycle direction, Stream<VoxelShape> shapes) {
-        if (!(box.getXsize() < 1.0E-6D) && !(box.getYsize() < 1.0E-6D) && !(box.getZsize() < 1.0E-6D)) {
-            if (Math.abs(initial) < 1.0E-7D) {
-                return 0.0D;
-            } else {
-                EnumAxisCycle axisCycle = direction.inverse();
-                EnumDirection.EnumAxis axis = axisCycle.cycle(EnumDirection.EnumAxis.X);
-                EnumDirection.EnumAxis axis2 = axisCycle.cycle(EnumDirection.EnumAxis.Y);
-                EnumDirection.EnumAxis axis3 = axisCycle.cycle(EnumDirection.EnumAxis.Z);
-                BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
-                int i = MathHelper.floor(box.min(axis) - 1.0E-7D) - 1;
-                int j = MathHelper.floor(box.max(axis) + 1.0E-7D) + 1;
-                int k = MathHelper.floor(box.min(axis2) - 1.0E-7D) - 1;
-                int l = MathHelper.floor(box.max(axis2) + 1.0E-7D) + 1;
-                double d = box.min(axis3) - 1.0E-7D;
-                double e = box.max(axis3) + 1.0E-7D;
-                boolean bl = initial > 0.0D;
-                int m = bl ? MathHelper.floor(box.max(axis3) - 1.0E-7D) - 1 : MathHelper.floor(box.min(axis3) + 1.0E-7D) + 1;
-                int n = lastC(initial, d, e);
-                int o = bl ? 1 : -1;
-                int p = m;
-
-                while(true) {
-                    if (bl) {
-                        if (p > n) {
-                            break;
-                        }
-                    } else if (p < n) {
-                        break;
-                    }
-
-                    for(int q = i; q <= j; ++q) {
-                        for(int r = k; r <= l; ++r) {
-                            int s = 0;
-                            if (q == i || q == j) {
-                                ++s;
-                            }
-
-                            if (r == k || r == l) {
-                                ++s;
-                            }
-
-                            if (p == m || p == n) {
-                                ++s;
-                            }
-
-                            if (s < 3) {
-                                mutableBlockPos.set(axisCycle, q, r, p);
-                                IBlockData blockState = world.getType(mutableBlockPos);
-                                if ((s != 1 || blockState.hasLargeCollisionShape()) && (s != 2 || blockState.is(Blocks.MOVING_PISTON))) {
-                                    initial = blockState.getCollisionShape(world, mutableBlockPos, context).collide(axis3, box.move((double)(-mutableBlockPos.getX()), (double)(-mutableBlockPos.getY()), (double)(-mutableBlockPos.getZ())), initial);
-                                    if (Math.abs(initial) < 1.0E-7D) {
-                                        return 0.0D;
-                                    }
-
-                                    n = lastC(initial, d, e);
-                                }
-                            }
-                        }
-                    }
-
-                    p += o;
-                }
-
-                double[] ds = new double[]{initial};
-                shapes.forEach((voxelShape) -> {
-                    ds[0] = voxelShape.collide(axis3, box, ds[0]);
-                });
-                return ds[0];
-            }
-        } else {
-            return initial;
-        }
-    }
-
-    private static int lastC(double value, double min, double max) {
-        return value > 0.0D ? MathHelper.floor(max + value) + 1 : MathHelper.floor(min + value) - 1;
     }
 
     public static boolean blockOccudes(VoxelShape shape, VoxelShape neighbor, EnumDirection direction) {

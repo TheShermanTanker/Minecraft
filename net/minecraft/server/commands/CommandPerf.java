@@ -66,7 +66,7 @@ public class CommandPerf {
     }
 
     private static void saveResults(CommandListenerWrapper source, Path tempProfilingDirectory, MinecraftServer server) {
-        String string = String.format("%s-%s-%s", (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()), server.getSaveData().getName(), SharedConstants.getGameVersion().getId());
+        String string = String.format("%s-%s-%s", (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()), server.getSaveData().getName(), SharedConstants.getCurrentVersion().getId());
 
         String string2;
         try {

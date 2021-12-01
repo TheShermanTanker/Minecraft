@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.IRegistry;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.WorldGenBuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.WorldGenDesertPyramidPiece;
@@ -21,6 +20,7 @@ import net.minecraft.world.level.levelgen.structure.WorldGenShipwreck;
 import net.minecraft.world.level.levelgen.structure.WorldGenStrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.WorldGenWitchHut;
 import net.minecraft.world.level.levelgen.structure.WorldGenWoodlandMansionPieces;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 public interface WorldGenFeatureStructurePieceType {
     WorldGenFeatureStructurePieceType MINE_SHAFT_CORRIDOR = setPieceId(WorldGenMineshaftPieces.WorldGenMineshaftCorridor::new, "MSCorridor");
@@ -56,9 +56,9 @@ public interface WorldGenFeatureStructurePieceType {
     WorldGenFeatureStructurePieceType STRONGHOLD_STRAIGHT = setPieceId(WorldGenStrongholdPieces.WorldGenStrongholdStairs::new, "SHS");
     WorldGenFeatureStructurePieceType STRONGHOLD_STRAIGHT_STAIRS_DOWN = setPieceId(WorldGenStrongholdPieces.WorldGenStrongholdStairsStraight::new, "SHSSD");
     WorldGenFeatureStructurePieceType JUNGLE_PYRAMID_PIECE = setPieceId(WorldGenJunglePyramidPiece::new, "TeJP");
-    WorldGenFeatureStructurePieceType OCEAN_RUIN = setPieceId(WorldGenFeatureOceanRuinPieces.OceanRuinPiece::new, "ORP");
-    WorldGenFeatureStructurePieceType IGLOO = setPieceId(WorldGenIglooPiece.IglooPiece::new, "Iglu");
-    WorldGenFeatureStructurePieceType RUINED_PORTAL = setPieceId(WorldGenFeatureRuinedPortalPieces::new, "RUPO");
+    WorldGenFeatureStructurePieceType OCEAN_RUIN = setTemplatePieceId(WorldGenFeatureOceanRuinPieces.OceanRuinPiece::new, "ORP");
+    WorldGenFeatureStructurePieceType IGLOO = setTemplatePieceId(WorldGenIglooPiece.IglooPiece::new, "Iglu");
+    WorldGenFeatureStructurePieceType RUINED_PORTAL = setTemplatePieceId(WorldGenFeatureRuinedPortalPieces::new, "RUPO");
     WorldGenFeatureStructurePieceType SWAMPLAND_HUT = setPieceId(WorldGenWitchHut::new, "TeSH");
     WorldGenFeatureStructurePieceType DESERT_PYRAMID_PIECE = setPieceId(WorldGenDesertPyramidPiece::new, "TeDP");
     WorldGenFeatureStructurePieceType OCEAN_MONUMENT_BUILDING = setPieceId(WorldGenMonumentPieces.WorldGenMonumentPiece1::new, "OMB");
@@ -73,16 +73,24 @@ public interface WorldGenFeatureStructurePieceType {
     WorldGenFeatureStructurePieceType OCEAN_MONUMENT_SIMPLE_ROOM = setPieceId(WorldGenMonumentPieces.WorldGenMonumentPieceSimple::new, "OMSimple");
     WorldGenFeatureStructurePieceType OCEAN_MONUMENT_SIMPLE_TOP_ROOM = setPieceId(WorldGenMonumentPieces.WorldGenMonumentPieceSimpleT::new, "OMSimpleT");
     WorldGenFeatureStructurePieceType OCEAN_MONUMENT_WING_ROOM = setPieceId(WorldGenMonumentPieces.WorldGenMonumentPiece8::new, "OMWR");
-    WorldGenFeatureStructurePieceType END_CITY_PIECE = setPieceId(WorldGenEndCityPieces.Piece::new, "ECP");
-    WorldGenFeatureStructurePieceType WOODLAND_MANSION_PIECE = setPieceId(WorldGenWoodlandMansionPieces.WoodlandMansionPiece::new, "WMP");
+    WorldGenFeatureStructurePieceType END_CITY_PIECE = setTemplatePieceId(WorldGenEndCityPieces.Piece::new, "ECP");
+    WorldGenFeatureStructurePieceType WOODLAND_MANSION_PIECE = setTemplatePieceId(WorldGenWoodlandMansionPieces.WoodlandMansionPiece::new, "WMP");
     WorldGenFeatureStructurePieceType BURIED_TREASURE_PIECE = setPieceId(WorldGenBuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
-    WorldGenFeatureStructurePieceType SHIPWRECK_PIECE = setPieceId(WorldGenShipwreck.ShipwreckPiece::new, "Shipwreck");
-    WorldGenFeatureStructurePieceType NETHER_FOSSIL = setPieceId(WorldGenNetherFossil.NetherFossilPiece::new, "NeFos");
-    WorldGenFeatureStructurePieceType JIGSAW = setPieceId(WorldGenFeaturePillagerOutpostPoolPiece::new, "jigsaw");
+    WorldGenFeatureStructurePieceType SHIPWRECK_PIECE = setTemplatePieceId(WorldGenShipwreck.ShipwreckPiece::new, "Shipwreck");
+    WorldGenFeatureStructurePieceType NETHER_FOSSIL = setTemplatePieceId(WorldGenNetherFossil.NetherFossilPiece::new, "NeFos");
+    WorldGenFeatureStructurePieceType JIGSAW = setFullContextPieceId(WorldGenFeaturePillagerOutpostPoolPiece::new, "jigsaw");
 
-    StructurePiece load(WorldServer world, NBTTagCompound nbt);
+    StructurePiece load(StructurePieceSerializationContext context, NBTTagCompound nbt);
 
-    static WorldGenFeatureStructurePieceType setPieceId(WorldGenFeatureStructurePieceType pieceType, String id) {
-        return IRegistry.register(IRegistry.STRUCTURE_PIECE, id.toLowerCase(Locale.ROOT), pieceType);
+    private static WorldGenFeatureStructurePieceType setFullContextPieceId(WorldGenFeatureStructurePieceType type, String id) {
+        return IRegistry.register(IRegistry.STRUCTURE_PIECE, id.toLowerCase(Locale.ROOT), type);
+    }
+
+    private static WorldGenFeatureStructurePieceType setPieceId(StructurePieceType$ContextlessType type, String id) {
+        return setFullContextPieceId(type, id);
+    }
+
+    private static WorldGenFeatureStructurePieceType setTemplatePieceId(StructurePieceType$StructureTemplateType type, String id) {
+        return setFullContextPieceId(type, id);
     }
 }

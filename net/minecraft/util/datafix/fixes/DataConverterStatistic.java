@@ -31,7 +31,6 @@ public class DataConverterStatistic extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getOutputSchema().getType(DataConverterTypes.STATS);
         return this.fixTypeEverywhereTyped("StatsCounterFix", this.getInputSchema().getType(DataConverterTypes.STATS), type, (typed) -> {

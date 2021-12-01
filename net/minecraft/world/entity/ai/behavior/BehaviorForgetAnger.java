@@ -15,8 +15,8 @@ public class BehaviorForgetAnger<E extends EntityInsentient> extends Behavior<E>
 
     @Override
     protected void start(WorldServer world, E entity, long time) {
-        BehaviorUtil.getLivingEntityFromUUIDMemory(entity, MemoryModuleType.ANGRY_AT).ifPresent((livingEntity) -> {
-            if (livingEntity.isDeadOrDying() && (livingEntity.getEntityType() != EntityTypes.PLAYER || world.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS))) {
+        BehaviorUtil.getLivingEntityFromUUIDMemory(entity, MemoryModuleType.ANGRY_AT).ifPresent((target) -> {
+            if (target.isDeadOrDying() && (target.getEntityType() != EntityTypes.PLAYER || world.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS))) {
                 entity.getBehaviorController().removeMemory(MemoryModuleType.ANGRY_AT);
             }
 

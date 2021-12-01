@@ -9,6 +9,7 @@ import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockActionContext;
 import net.minecraft.world.level.CommandBlockListenerAbstract;
@@ -57,7 +58,7 @@ public class BlockCommand extends BlockTileEntity implements GameMasterBlock {
                 if (!bl2 && !commandBlockEntity.isAutomatic() && commandBlockEntity.getMode() != TileEntityCommand.Type.SEQUENCE) {
                     if (bl) {
                         commandBlockEntity.markConditionMet();
-                        world.getBlockTickList().scheduleTick(pos, this, 1);
+                        world.scheduleTick(pos, this, 1);
                     }
 
                 }
@@ -83,7 +84,7 @@ public class BlockCommand extends BlockTileEntity implements GameMasterBlock {
                 }
 
                 if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-                    world.getBlockTicks().scheduleTick(pos, this, 1);
+                    world.scheduleTick(pos, this, 1);
                 }
             } else if (mode == TileEntityCommand.Type.REDSTONE) {
                 if (bl2) {
@@ -141,7 +142,7 @@ public class BlockCommand extends BlockTileEntity implements GameMasterBlock {
             }
 
             if (!world.isClientSide) {
-                if (itemStack.getTagElement("BlockEntityTag") == null) {
+                if (ItemBlock.getBlockEntityData(itemStack) == null) {
                     baseCommandBlock.setTrackOutput(world.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
                     commandBlockEntity.setAutomatic(this.automatic);
                 }

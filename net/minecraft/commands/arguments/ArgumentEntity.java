@@ -62,28 +62,28 @@ public class ArgumentEntity implements ArgumentType<EntitySelector> {
         }
     }
 
-    public static Collection<? extends Entity> getOptionalEntities(CommandContext<CommandListenerWrapper> commandContext, String string) throws CommandSyntaxException {
-        return commandContext.getArgument(string, EntitySelector.class).getEntities(commandContext.getSource());
+    public static Collection<? extends Entity> getOptionalEntities(CommandContext<CommandListenerWrapper> context, String name) throws CommandSyntaxException {
+        return context.getArgument(name, EntitySelector.class).getEntities(context.getSource());
     }
 
-    public static Collection<EntityPlayer> getOptionalPlayers(CommandContext<CommandListenerWrapper> commandContext, String string) throws CommandSyntaxException {
-        return commandContext.getArgument(string, EntitySelector.class).findPlayers(commandContext.getSource());
+    public static Collection<EntityPlayer> getOptionalPlayers(CommandContext<CommandListenerWrapper> context, String name) throws CommandSyntaxException {
+        return context.getArgument(name, EntitySelector.class).findPlayers(context.getSource());
     }
 
     public static ArgumentEntity player() {
         return new ArgumentEntity(true, true);
     }
 
-    public static EntityPlayer getPlayer(CommandContext<CommandListenerWrapper> commandContext, String string) throws CommandSyntaxException {
-        return commandContext.getArgument(string, EntitySelector.class).findSinglePlayer(commandContext.getSource());
+    public static EntityPlayer getPlayer(CommandContext<CommandListenerWrapper> context, String name) throws CommandSyntaxException {
+        return context.getArgument(name, EntitySelector.class).findSinglePlayer(context.getSource());
     }
 
     public static ArgumentEntity players() {
         return new ArgumentEntity(false, true);
     }
 
-    public static Collection<EntityPlayer> getPlayers(CommandContext<CommandListenerWrapper> commandContext, String string) throws CommandSyntaxException {
-        List<EntityPlayer> list = commandContext.getArgument(string, EntitySelector.class).findPlayers(commandContext.getSource());
+    public static Collection<EntityPlayer> getPlayers(CommandContext<CommandListenerWrapper> context, String name) throws CommandSyntaxException {
+        List<EntityPlayer> list = context.getArgument(name, EntitySelector.class).findPlayers(context.getSource());
         if (list.isEmpty()) {
             throw NO_PLAYERS_FOUND.create();
         } else {
@@ -91,7 +91,6 @@ public class ArgumentEntity implements ArgumentType<EntitySelector> {
         }
     }
 
-    @Override
     public EntitySelector parse(StringReader stringReader) throws CommandSyntaxException {
         int i = 0;
         ArgumentParserSelector entitySelectorParser = new ArgumentParserSelector(stringReader);
@@ -112,7 +111,6 @@ public class ArgumentEntity implements ArgumentType<EntitySelector> {
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         if (commandContext.getSource() instanceof ICompletionProvider) {
             StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
@@ -125,34 +123,33 @@ public class ArgumentEntity implements ArgumentType<EntitySelector> {
             } catch (CommandSyntaxException var7) {
             }
 
-            return entitySelectorParser.fillSuggestions(suggestionsBuilder, (suggestionsBuilderx) -> {
+            return entitySelectorParser.fillSuggestions(suggestionsBuilder, (builder) -> {
                 Collection<String> collection = sharedSuggestionProvider.getOnlinePlayerNames();
                 Iterable<String> iterable = (Iterable<String>)(this.playersOnly ? collection : Iterables.concat(collection, sharedSuggestionProvider.getSelectedEntities()));
-                ICompletionProvider.suggest(iterable, suggestionsBuilderx);
+                ICompletionProvider.suggest(iterable, builder);
             });
         } else {
             return Suggestions.empty();
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
 
     public static class Serializer implements ArgumentSerializer<ArgumentEntity> {
         @Override
-        public void serializeToNetwork(ArgumentEntity entityArgument, PacketDataSerializer friendlyByteBuf) {
+        public void serializeToNetwork(ArgumentEntity type, PacketDataSerializer buf) {
             byte b = 0;
-            if (entityArgument.single) {
+            if (type.single) {
                 b = (byte)(b | 1);
             }
 
-            if (entityArgument.playersOnly) {
+            if (type.playersOnly) {
                 b = (byte)(b | 2);
             }
 
-            friendlyByteBuf.writeByte(b);
+            buf.writeByte(b);
         }
 
         @Override
@@ -162,9 +159,9 @@ public class ArgumentEntity implements ArgumentType<EntitySelector> {
         }
 
         @Override
-        public void serializeToJson(ArgumentEntity entityArgument, JsonObject jsonObject) {
-            jsonObject.addProperty("amount", entityArgument.single ? "single" : "multiple");
-            jsonObject.addProperty("type", entityArgument.playersOnly ? "players" : "entities");
+        public void serializeToJson(ArgumentEntity type, JsonObject json) {
+            json.addProperty("amount", type.single ? "single" : "multiple");
+            json.addProperty("type", type.playersOnly ? "players" : "entities");
         }
     }
 }

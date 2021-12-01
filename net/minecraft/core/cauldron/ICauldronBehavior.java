@@ -51,7 +51,7 @@ public interface ICauldronBehavior {
             if (!world.isClientSide) {
                 ItemStack itemStack = new ItemStack(Blocks.SHULKER_BOX);
                 if (stack.hasTag()) {
-                    itemStack.setTag(stack.getTag().c());
+                    itemStack.setTag(stack.getTag().copy());
                 }
 
                 player.setItemInHand(hand, itemStack);

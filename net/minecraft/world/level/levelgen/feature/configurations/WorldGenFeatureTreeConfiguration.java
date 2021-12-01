@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.WorldGenFoilagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProvider;
-import net.minecraft.world.level.levelgen.feature.stateproviders.WorldGenFeatureStateProviderSimpl;
 import net.minecraft.world.level.levelgen.feature.treedecorators.WorldGenFeatureTree;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 
@@ -20,8 +19,6 @@ public class WorldGenFeatureTreeConfiguration implements WorldGenFeatureConfigur
             return treeConfiguration.trunkPlacer;
         }), WorldGenFeatureStateProvider.CODEC.fieldOf("foliage_provider").forGetter((treeConfiguration) -> {
             return treeConfiguration.foliageProvider;
-        }), WorldGenFeatureStateProvider.CODEC.fieldOf("sapling_provider").forGetter((treeConfiguration) -> {
-            return treeConfiguration.saplingProvider;
         }), WorldGenFoilagePlacer.CODEC.fieldOf("foliage_placer").forGetter((treeConfiguration) -> {
             return treeConfiguration.foliagePlacer;
         }), WorldGenFeatureStateProvider.CODEC.fieldOf("dirt_provider").forGetter((treeConfiguration) -> {
@@ -40,35 +37,28 @@ public class WorldGenFeatureTreeConfiguration implements WorldGenFeatureConfigur
     public final WorldGenFeatureStateProvider dirtProvider;
     public final TrunkPlacer trunkPlacer;
     public final WorldGenFeatureStateProvider foliageProvider;
-    public final WorldGenFeatureStateProvider saplingProvider;
     public final WorldGenFoilagePlacer foliagePlacer;
     public final FeatureSize minimumSize;
     public final List<WorldGenFeatureTree> decorators;
     public final boolean ignoreVines;
     public final boolean forceDirt;
 
-    protected WorldGenFeatureTreeConfiguration(WorldGenFeatureStateProvider trunkProvider, TrunkPlacer trunkPlacer, WorldGenFeatureStateProvider foliageProvider, WorldGenFeatureStateProvider saplingProvider, WorldGenFoilagePlacer foliagePlacer, WorldGenFeatureStateProvider dirtProvider, FeatureSize minimumSize, List<WorldGenFeatureTree> decorators, boolean ignoreVines, boolean forceDirt) {
+    protected WorldGenFeatureTreeConfiguration(WorldGenFeatureStateProvider trunkProvider, TrunkPlacer trunkPlacer, WorldGenFeatureStateProvider foliageProvider, WorldGenFoilagePlacer foliagePlacer, WorldGenFeatureStateProvider dirtProvider, FeatureSize minimumSize, List<WorldGenFeatureTree> decorators, boolean ignoreVines, boolean forceDirt) {
         this.trunkProvider = trunkProvider;
         this.trunkPlacer = trunkPlacer;
         this.foliageProvider = foliageProvider;
         this.foliagePlacer = foliagePlacer;
         this.dirtProvider = dirtProvider;
-        this.saplingProvider = saplingProvider;
         this.minimumSize = minimumSize;
         this.decorators = decorators;
         this.ignoreVines = ignoreVines;
         this.forceDirt = forceDirt;
     }
 
-    public WorldGenFeatureTreeConfiguration withDecorators(List<WorldGenFeatureTree> decorators) {
-        return new WorldGenFeatureTreeConfiguration(this.trunkProvider, this.trunkPlacer, this.foliageProvider, this.saplingProvider, this.foliagePlacer, this.dirtProvider, this.minimumSize, decorators, this.ignoreVines, this.forceDirt);
-    }
-
     public static class TreeConfigurationBuilder {
         public final WorldGenFeatureStateProvider trunkProvider;
         private final TrunkPlacer trunkPlacer;
         public final WorldGenFeatureStateProvider foliageProvider;
-        public final WorldGenFeatureStateProvider saplingProvider;
         private final WorldGenFoilagePlacer foliagePlacer;
         private WorldGenFeatureStateProvider dirtProvider;
         private final FeatureSize minimumSize;
@@ -76,12 +66,11 @@ public class WorldGenFeatureTreeConfiguration implements WorldGenFeatureConfigur
         private boolean ignoreVines;
         private boolean forceDirt;
 
-        public TreeConfigurationBuilder(WorldGenFeatureStateProvider trunkProvider, TrunkPlacer trunkPlacer, WorldGenFeatureStateProvider foliageProvider, WorldGenFeatureStateProvider saplingProvider, WorldGenFoilagePlacer foliagePlacer, FeatureSize minimumSize) {
+        public TreeConfigurationBuilder(WorldGenFeatureStateProvider trunkProvider, TrunkPlacer trunkPlacer, WorldGenFeatureStateProvider foliageProvider, WorldGenFoilagePlacer foliagePlacer, FeatureSize minimumSize) {
             this.trunkProvider = trunkProvider;
             this.trunkPlacer = trunkPlacer;
             this.foliageProvider = foliageProvider;
-            this.saplingProvider = saplingProvider;
-            this.dirtProvider = new WorldGenFeatureStateProviderSimpl(Blocks.DIRT.getBlockData());
+            this.dirtProvider = WorldGenFeatureStateProvider.simple(Blocks.DIRT);
             this.foliagePlacer = foliagePlacer;
             this.minimumSize = minimumSize;
         }
@@ -107,7 +96,7 @@ public class WorldGenFeatureTreeConfiguration implements WorldGenFeatureConfigur
         }
 
         public WorldGenFeatureTreeConfiguration build() {
-            return new WorldGenFeatureTreeConfiguration(this.trunkProvider, this.trunkPlacer, this.foliageProvider, this.saplingProvider, this.foliagePlacer, this.dirtProvider, this.minimumSize, this.decorators, this.ignoreVines, this.forceDirt);
+            return new WorldGenFeatureTreeConfiguration(this.trunkProvider, this.trunkPlacer, this.foliageProvider, this.foliagePlacer, this.dirtProvider, this.minimumSize, this.decorators, this.ignoreVines, this.forceDirt);
         }
     }
 }

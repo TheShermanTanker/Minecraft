@@ -51,9 +51,9 @@ public class PathfinderGoalJumpOnBlock extends PathfinderGoalGotoTarget {
             if (blockState.is(Blocks.CHEST)) {
                 return TileEntityChest.getOpenCount(world, pos) < 1;
             } else {
-                return blockState.is(Blocks.FURNACE) && blockState.get(BlockFurnaceFurace.LIT) ? true : blockState.is(TagsBlock.BEDS, (blockStateBase) -> {
-                    return blockStateBase.<BlockPropertyBedPart>getOptionalValue(BlockBed.PART).map((bedPart) -> {
-                        return bedPart != BlockPropertyBedPart.HEAD;
+                return blockState.is(Blocks.FURNACE) && blockState.get(BlockFurnaceFurace.LIT) ? true : blockState.is(TagsBlock.BEDS, (state) -> {
+                    return state.<BlockPropertyBedPart>getOptionalValue(BlockBed.PART).map((part) -> {
+                        return part != BlockPropertyBedPart.HEAD;
                     }).orElse(true);
                 });
             }

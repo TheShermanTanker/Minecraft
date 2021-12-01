@@ -29,28 +29,28 @@ public class LightEngineStorageSky extends LightEngineStorage<LightEngineStorage
         return this.getLightValue(blockPos, false);
     }
 
-    protected int getLightValue(long l, boolean bl) {
-        long m = SectionPosition.blockToSection(l);
-        int i = SectionPosition.y(m);
-        LightEngineStorageSky.SkyDataLayerStorageMap skyDataLayerStorageMap = bl ? this.updatingSectionData : this.visibleSectionData;
-        int j = skyDataLayerStorageMap.topSections.get(SectionPosition.getZeroNode(m));
+    protected int getLightValue(long blockPos, boolean cached) {
+        long l = SectionPosition.blockToSection(blockPos);
+        int i = SectionPosition.y(l);
+        LightEngineStorageSky.SkyDataLayerStorageMap skyDataLayerStorageMap = cached ? this.updatingSectionData : this.visibleSectionData;
+        int j = skyDataLayerStorageMap.topSections.get(SectionPosition.getZeroNode(l));
         if (j != skyDataLayerStorageMap.currentLowestY && i < j) {
-            NibbleArray dataLayer = this.getDataLayer(skyDataLayerStorageMap, m);
+            NibbleArray dataLayer = this.getDataLayer(skyDataLayerStorageMap, l);
             if (dataLayer == null) {
-                for(l = BlockPosition.getFlatIndex(l); dataLayer == null; dataLayer = this.getDataLayer(skyDataLayerStorageMap, m)) {
+                for(blockPos = BlockPosition.getFlatIndex(blockPos); dataLayer == null; dataLayer = this.getDataLayer(skyDataLayerStorageMap, l)) {
                     ++i;
                     if (i >= j) {
                         return 15;
                     }
 
-                    l = BlockPosition.offset(l, 0, 16, 0);
-                    m = SectionPosition.offset(m, EnumDirection.UP);
+                    blockPos = BlockPosition.offset(blockPos, 0, 16, 0);
+                    l = SectionPosition.offset(l, EnumDirection.UP);
                 }
             }
 
-            return dataLayer.get(SectionPosition.sectionRelative(BlockPosition.getX(l)), SectionPosition.sectionRelative(BlockPosition.getY(l)), SectionPosition.sectionRelative(BlockPosition.getZ(l)));
+            return dataLayer.get(SectionPosition.sectionRelative(BlockPosition.getX(blockPos)), SectionPosition.sectionRelative(BlockPosition.getY(blockPos)), SectionPosition.sectionRelative(BlockPosition.getZ(blockPos)));
         } else {
-            return bl && !this.lightOnInSection(m) ? 0 : 15;
+            return cached && !this.lightOnInSection(l) ? 0 : 15;
         }
     }
 

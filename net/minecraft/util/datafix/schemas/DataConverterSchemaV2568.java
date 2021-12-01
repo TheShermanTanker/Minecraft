@@ -16,7 +16,6 @@ public class DataConverterSchemaV2568 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         registerMob(schema, map, "minecraft:piglin_brute");

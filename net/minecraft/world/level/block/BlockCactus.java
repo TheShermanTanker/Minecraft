@@ -77,7 +77,7 @@ public class BlockCactus extends Block {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (!state.canPlace(world, pos)) {
-            world.getBlockTickList().scheduleTick(pos, this, 1);
+            world.scheduleTick(pos, this, 1);
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);

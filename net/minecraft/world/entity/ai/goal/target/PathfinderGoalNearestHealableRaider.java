@@ -37,7 +37,7 @@ public class PathfinderGoalNearestHealableRaider<T extends EntityLiving> extends
 
     @Override
     public void start() {
-        this.cooldown = 200;
+        this.cooldown = reducedTickDelay(200);
         super.start();
     }
 }

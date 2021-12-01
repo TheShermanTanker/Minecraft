@@ -4,16 +4,23 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPosition;
+import net.minecraft.core.IRegistry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.RegionLimitedWorldAccess;
 import net.minecraft.world.level.BlockColumn;
 import net.minecraft.world.level.IWorldHeightAccess;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.biome.BiomeBase;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.WorldChunkManagerHell;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.IChunkAccess;
+import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.flat.GeneratorSettingsFlat;
 
 public class ChunkProviderFlat extends ChunkGenerator {
@@ -40,7 +47,7 @@ public class ChunkProviderFlat extends ChunkGenerator {
     }
 
     @Override
-    public void buildBase(RegionLimitedWorldAccess region, IChunkAccess chunk) {
+    public void buildSurface(RegionLimitedWorldAccess region, StructureManager structures, IChunkAccess chunk) {
     }
 
     @Override
@@ -49,7 +56,12 @@ public class ChunkProviderFlat extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<IChunkAccess> buildNoise(Executor executor, StructureManager accessor, IChunkAccess chunk) {
+    protected boolean validBiome(IRegistry<BiomeBase> registry, Predicate<ResourceKey<BiomeBase>> condition, BiomeBase biome) {
+        return registry.getResourceKey(this.settings.getBiome()).filter(condition).isPresent();
+    }
+
+    @Override
+    public CompletableFuture<IChunkAccess> fillFromNoise(Executor executor, Blender blender, StructureManager structureAccessor, IChunkAccess chunk) {
         List<IBlockData> list = this.settings.getLayers();
         BlockPosition.MutableBlockPosition mutableBlockPos = new BlockPosition.MutableBlockPosition();
         HeightMap heightmap = chunk.getOrCreateHeightmapUnprimed(HeightMap.Type.OCEAN_FLOOR_WG);
@@ -94,5 +106,35 @@ public class ChunkProviderFlat extends ChunkGenerator {
         }).toArray((i) -> {
             return new IBlockData[i];
         }));
+    }
+
+    @Override
+    public Climate.Sampler climateSampler() {
+        return (i, j, k) -> {
+            return Climate.target(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        };
+    }
+
+    @Override
+    public void applyCarvers(RegionLimitedWorldAccess chunkRegion, long seed, BiomeManager biomeAccess, StructureManager structureAccessor, IChunkAccess chunk, WorldGenStage.Features generationStep) {
+    }
+
+    @Override
+    public void addMobs(RegionLimitedWorldAccess region) {
+    }
+
+    @Override
+    public int getMinY() {
+        return 0;
+    }
+
+    @Override
+    public int getGenerationDepth() {
+        return 384;
+    }
+
+    @Override
+    public int getSeaLevel() {
+        return -63;
     }
 }

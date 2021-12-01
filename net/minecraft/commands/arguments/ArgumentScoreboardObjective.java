@@ -18,14 +18,11 @@ import net.minecraft.world.scores.ScoreboardObjective;
 
 public class ArgumentScoreboardObjective implements ArgumentType<String> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "*", "012");
-    private static final DynamicCommandExceptionType ERROR_OBJECTIVE_NOT_FOUND = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("arguments.objective.notFound", object);
+    private static final DynamicCommandExceptionType ERROR_OBJECTIVE_NOT_FOUND = new DynamicCommandExceptionType((name) -> {
+        return new ChatMessage("arguments.objective.notFound", name);
     });
-    private static final DynamicCommandExceptionType ERROR_OBJECTIVE_READ_ONLY = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("arguments.objective.readonly", object);
-    });
-    public static final DynamicCommandExceptionType ERROR_OBJECTIVE_NAME_TOO_LONG = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("commands.scoreboard.objectives.add.longName", object);
+    private static final DynamicCommandExceptionType ERROR_OBJECTIVE_READ_ONLY = new DynamicCommandExceptionType((name) -> {
+        return new ChatMessage("arguments.objective.readonly", name);
     });
 
     public static ArgumentScoreboardObjective objective() {
@@ -52,17 +49,10 @@ public class ArgumentScoreboardObjective implements ArgumentType<String> {
         }
     }
 
-    @Override
     public String parse(StringReader stringReader) throws CommandSyntaxException {
-        String string = stringReader.readUnquotedString();
-        if (string.length() > 16) {
-            throw ERROR_OBJECTIVE_NAME_TOO_LONG.create(16);
-        } else {
-            return string;
-        }
+        return stringReader.readUnquotedString();
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         if (commandContext.getSource() instanceof CommandListenerWrapper) {
             return ICompletionProvider.suggest(((CommandListenerWrapper)commandContext.getSource()).getServer().getScoreboard().getObjectiveNames(), suggestionsBuilder);
@@ -74,7 +64,6 @@ public class ArgumentScoreboardObjective implements ArgumentType<String> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

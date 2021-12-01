@@ -17,7 +17,9 @@ import net.minecraft.world.phys.Vec3D;
 
 public class DragonControllerHold extends DragonControllerAbstract {
     private static final PathfinderTargetCondition NEW_TARGET_TARGETING = PathfinderTargetCondition.forCombat().ignoreLineOfSight();
+    @Nullable
     private PathEntity currentPath;
+    @Nullable
     private Vec3D targetLocation;
     private boolean clockwise;
 

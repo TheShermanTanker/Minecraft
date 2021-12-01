@@ -230,7 +230,11 @@ public class EntityIllagerIllusioner extends EntityIllagerWizard implements IRan
         @Override
         public void start() {
             super.start();
-            this.lastTargetId = EntityIllagerIllusioner.this.getGoalTarget().getId();
+            EntityLiving livingEntity = EntityIllagerIllusioner.this.getGoalTarget();
+            if (livingEntity != null) {
+                this.lastTargetId = livingEntity.getId();
+            }
+
         }
 
         @Override

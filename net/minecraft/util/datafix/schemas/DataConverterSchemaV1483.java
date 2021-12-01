@@ -10,7 +10,6 @@ public class DataConverterSchemaV1483 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         map.put("minecraft:pufferfish", map.remove("minecraft:puffer_fish"));

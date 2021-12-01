@@ -8,13 +8,13 @@ import java.util.function.Function;
 import net.minecraft.core.IRegistry;
 
 public abstract class IntProvider {
-    private static final Codec<Either<Integer, IntProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(Codec.INT, IRegistry.INT_PROVIDER_TYPES.dispatch(IntProvider::getType, IntProviderType::codec));
+    private static final Codec<Either<Integer, IntProvider>> CONSTANT_OR_DISPATCH_CODEC = Codec.either(Codec.INT, IRegistry.INT_PROVIDER_TYPES.byNameCodec().dispatch(IntProvider::getType, IntProviderType::codec));
     public static final Codec<IntProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap((either) -> {
-        return either.map(IntProviderConstant::of, (intProvider) -> {
-            return intProvider;
+        return either.map(IntProviderConstant::of, (provider) -> {
+            return provider;
         });
-    }, (intProvider) -> {
-        return intProvider.getType() == IntProviderType.CONSTANT ? Either.left(((IntProviderConstant)intProvider).getValue()) : Either.right(intProvider);
+    }, (provider) -> {
+        return provider.getType() == IntProviderType.CONSTANT ? Either.left(((IntProviderConstant)provider).getValue()) : Either.right(provider);
     });
     public static final Codec<IntProvider> NON_NEGATIVE_CODEC = codec(0, Integer.MAX_VALUE);
     public static final Codec<IntProvider> POSITIVE_CODEC = codec(1, Integer.MAX_VALUE);

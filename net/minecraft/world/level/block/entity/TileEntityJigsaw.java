@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
@@ -86,14 +85,13 @@ public class TileEntityJigsaw extends TileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setString("name", this.name.toString());
         nbt.setString("target", this.target.toString());
         nbt.setString("pool", this.pool.toString());
         nbt.setString("final_state", this.finalState);
         nbt.setString("joint", this.joint.getSerializedName());
-        return nbt;
     }
 
     @Override
@@ -108,15 +106,14 @@ public class TileEntityJigsaw extends TileEntity {
         });
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 12, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     public void generate(WorldServer world, int maxDepth, boolean keepJigsaws) {
@@ -154,8 +151,8 @@ public class TileEntityJigsaw extends TileEntity {
         }
 
         public static Optional<TileEntityJigsaw.JointType> byName(String name) {
-            return Arrays.stream(values()).filter((jointType) -> {
-                return jointType.getSerializedName().equals(name);
+            return Arrays.stream(values()).filter((joint) -> {
+                return joint.getSerializedName().equals(name);
             }).findFirst();
         }
 

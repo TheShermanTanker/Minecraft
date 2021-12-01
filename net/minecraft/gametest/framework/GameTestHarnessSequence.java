@@ -25,8 +25,8 @@ public class GameTestHarnessSequence {
         return this;
     }
 
-    public GameTestHarnessSequence thenIdle(int i) {
-        return this.thenExecuteAfter(i, () -> {
+    public GameTestHarnessSequence thenIdle(int minDuration) {
+        return this.thenExecuteAfter(minDuration, () -> {
         });
     }
 
@@ -37,9 +37,9 @@ public class GameTestHarnessSequence {
         return this;
     }
 
-    public GameTestHarnessSequence thenExecuteAfter(int delay, Runnable task) {
+    public GameTestHarnessSequence thenExecuteAfter(int minDuration, Runnable task) {
         this.events.add(GameTestHarnessEvent.create(() -> {
-            if (this.parent.getTick() < this.lastTick + (long)delay) {
+            if (this.parent.getTick() < this.lastTick + (long)minDuration) {
                 throw new GameTestHarnessAssertion("Waiting");
             } else {
                 this.executeWithoutFail(task);
@@ -48,9 +48,9 @@ public class GameTestHarnessSequence {
         return this;
     }
 
-    public GameTestHarnessSequence thenExecuteFor(int i, Runnable task) {
+    public GameTestHarnessSequence thenExecuteFor(int minDuration, Runnable task) {
         this.events.add(GameTestHarnessEvent.create(() -> {
-            if (this.parent.getTick() < this.lastTick + (long)i) {
+            if (this.parent.getTick() < this.lastTick + (long)minDuration) {
                 this.executeWithoutFail(task);
                 throw new GameTestHarnessAssertion("Waiting");
             }
@@ -62,9 +62,9 @@ public class GameTestHarnessSequence {
         this.events.add(GameTestHarnessEvent.create(this.parent::succeed));
     }
 
-    public void thenFail(Supplier<Exception> supplier) {
+    public void thenFail(Supplier<Exception> exceptionSupplier) {
         this.events.add(GameTestHarnessEvent.create(() -> {
-            this.parent.fail(supplier.get());
+            this.parent.fail(exceptionSupplier.get());
         }));
     }
 

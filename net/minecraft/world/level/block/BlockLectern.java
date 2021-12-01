@@ -15,6 +15,7 @@ import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.ITileInventory;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockActionContext;
 import net.minecraft.world.level.IBlockAccess;
@@ -73,12 +74,11 @@ public class BlockLectern extends BlockTileEntity {
     public IBlockData getPlacedState(BlockActionContext ctx) {
         World level = ctx.getWorld();
         ItemStack itemStack = ctx.getItemStack();
-        NBTTagCompound compoundTag = itemStack.getTag();
         EntityHuman player = ctx.getEntity();
         boolean bl = false;
-        if (!level.isClientSide && player != null && compoundTag != null && player.isCreativeAndOp() && compoundTag.hasKey("BlockEntityTag")) {
-            NBTTagCompound compoundTag2 = compoundTag.getCompound("BlockEntityTag");
-            if (compoundTag2.hasKey("Book")) {
+        if (!level.isClientSide && player != null && player.isCreativeAndOp()) {
+            NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(itemStack);
+            if (compoundTag != null && compoundTag.hasKey("Book")) {
                 bl = true;
             }
         }
@@ -158,7 +158,7 @@ public class BlockLectern extends BlockTileEntity {
 
     public static void signalPageChange(World world, BlockPosition pos, IBlockData state) {
         changePowered(world, pos, state, true);
-        world.getBlockTickList().scheduleTick(pos, state.getBlock(), 2);
+        world.scheduleTick(pos, state.getBlock(), 2);
         world.triggerEffect(1043, pos, 0);
     }
 

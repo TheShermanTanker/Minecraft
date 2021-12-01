@@ -11,8 +11,8 @@ import com.mojang.serialization.OptionalDynamic;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -42,13 +42,13 @@ public class RegionFileSection<R> implements AutoCloseable {
     private final DataFixTypes type;
     protected final IWorldHeightAccess levelHeightAccessor;
 
-    public RegionFileSection(File directory, Function<Runnable, Codec<R>> codecFactory, Function<Runnable, R> factory, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean dsync, IWorldHeightAccess world) {
+    public RegionFileSection(Path path, Function<Runnable, Codec<R>> codecFactory, Function<Runnable, R> factory, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean dsync, IWorldHeightAccess world) {
         this.codec = codecFactory;
         this.factory = factory;
         this.fixerUpper = dataFixer;
         this.type = dataFixTypes;
         this.levelHeightAccessor = world;
-        this.worker = new IOWorker(directory, dsync, directory.getName());
+        this.worker = new IOWorker(path, dsync, path.getFileName().toString());
     }
 
     protected void tick(BooleanSupplier shouldKeepTicking) {
@@ -83,8 +83,8 @@ public class RegionFileSection<R> implements AutoCloseable {
         }
     }
 
-    protected boolean outsideStoredRange(long l) {
-        int i = SectionPosition.sectionToBlockCoord(SectionPosition.y(l));
+    protected boolean outsideStoredRange(long pos) {
+        int i = SectionPosition.sectionToBlockCoord(SectionPosition.y(pos));
         return this.levelHeightAccessor.isOutsideBuildHeight(i);
     }
 
@@ -127,7 +127,7 @@ public class RegionFileSection<R> implements AutoCloseable {
         } else {
             Dynamic<T> dynamic = new Dynamic<>(dynamicOps, data);
             int j = getVersion(dynamic);
-            int k = SharedConstants.getGameVersion().getWorldVersion();
+            int k = SharedConstants.getCurrentVersion().getWorldVersion();
             boolean bl = j != k;
             Dynamic<T> dynamic2 = this.fixerUpper.update(this.type.getType(), dynamic, j, k);
             OptionalDynamic<T> optionalDynamic = dynamic2.get("Sections");
@@ -181,11 +181,11 @@ public class RegionFileSection<R> implements AutoCloseable {
             }
         }
 
-        return new Dynamic<>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("Sections"), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getGameVersion().getWorldVersion()))));
+        return new Dynamic<>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("Sections"), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getWorldVersion()))));
     }
 
-    private static long getKey(ChunkCoordIntPair chunkPos, int i) {
-        return SectionPosition.asLong(chunkPos.x, i, chunkPos.z);
+    private static long getKey(ChunkCoordIntPair chunkPos, int y) {
+        return SectionPosition.asLong(chunkPos.x, y, chunkPos.z);
     }
 
     protected void onSectionLoad(long pos) {

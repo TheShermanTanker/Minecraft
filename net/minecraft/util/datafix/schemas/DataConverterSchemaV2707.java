@@ -16,7 +16,6 @@ public class DataConverterSchemaV2707 extends DataConverterSchemaNamed {
         });
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         registerEntity(schema, map, "minecraft:marker");

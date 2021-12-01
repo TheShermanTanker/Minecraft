@@ -122,9 +122,9 @@ public class BlockBubbleColumn extends Block implements IFluidSource {
 
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
-        world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+        world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         if (!state.canPlace(world, pos) || direction == EnumDirection.DOWN || direction == EnumDirection.UP && !neighborState.is(Blocks.BUBBLE_COLUMN) && canExistIn(neighborState)) {
-            world.getBlockTickList().scheduleTick(pos, this, 5);
+            world.scheduleTick(pos, this, 5);
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);

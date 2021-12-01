@@ -22,7 +22,7 @@ public class BehaviorBell extends Behavior<EntityLiving> {
     protected boolean checkExtraStartConditions(WorldServer world, EntityLiving entity) {
         BehaviorController<?> brain = entity.getBehaviorController();
         Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
-        return world.getRandom().nextInt(100) == 0 && optional.isPresent() && world.getDimensionKey() == optional.get().getDimensionManager() && optional.get().getBlockPosition().closerThan(entity.getPositionVector(), 4.0D) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().stream().anyMatch((livingEntity) -> {
+        return world.getRandom().nextInt(100) == 0 && optional.isPresent() && world.getDimensionKey() == optional.get().getDimensionManager() && optional.get().getBlockPosition().closerThan(entity.getPositionVector(), 4.0D) && brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).get().contains((livingEntity) -> {
             return EntityTypes.VILLAGER.equals(livingEntity.getEntityType());
         });
     }
@@ -30,16 +30,14 @@ public class BehaviorBell extends Behavior<EntityLiving> {
     @Override
     protected void start(WorldServer world, EntityLiving entity, long time) {
         BehaviorController<?> brain = entity.getBehaviorController();
-        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).ifPresent((list) -> {
-            list.stream().filter((livingEntity) -> {
-                return EntityTypes.VILLAGER.equals(livingEntity.getEntityType());
-            }).filter((livingEntity2) -> {
-                return livingEntity2.distanceToSqr(entity) <= 32.0D;
-            }).findFirst().ifPresent((livingEntity) -> {
-                brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
-                brain.setMemory(MemoryModuleType.LOOK_TARGET, new BehaviorPositionEntity(livingEntity, true));
-                brain.setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(new BehaviorPositionEntity(livingEntity, false), 0.3F, 1));
+        brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).flatMap((nearestVisibleLivingEntities) -> {
+            return nearestVisibleLivingEntities.findClosest((livingEntity2) -> {
+                return EntityTypes.VILLAGER.equals(livingEntity2.getEntityType()) && livingEntity2.distanceToSqr(entity) <= 32.0D;
             });
+        }).ifPresent((livingEntity) -> {
+            brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
+            brain.setMemory(MemoryModuleType.LOOK_TARGET, new BehaviorPositionEntity(livingEntity, true));
+            brain.setMemory(MemoryModuleType.WALK_TARGET, new MemoryTarget(new BehaviorPositionEntity(livingEntity, false), 0.3F, 1));
         });
     }
 }

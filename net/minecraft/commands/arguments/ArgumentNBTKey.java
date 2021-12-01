@@ -30,8 +30,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar", "foo[0]", "[0]", "[]", "{foo=bar}");
     public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(new ChatMessage("arguments.nbtpath.node.invalid"));
-    public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("arguments.nbtpath.nothing_found", object);
+    public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType((path) -> {
+        return new ChatMessage("arguments.nbtpath.nothing_found", path);
     });
     private static final char INDEX_MATCH_START = '[';
     private static final char INDEX_MATCH_END = ']';
@@ -47,7 +47,6 @@ public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
         return context.getArgument(name, ArgumentNBTKey.NbtPath.class);
     }
 
-    @Override
     public ArgumentNBTKey.NbtPath parse(StringReader stringReader) throws CommandSyntaxException {
         List<ArgumentNBTKey.Node> list = Lists.newArrayList();
         int i = stringReader.getCursor();
@@ -128,7 +127,6 @@ public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
@@ -379,12 +377,12 @@ public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
             MutableBoolean mutableBoolean = new MutableBoolean();
             if (current instanceof NBTTagList) {
                 NBTTagList listTag = (NBTTagList)current;
-                listTag.stream().filter(this.predicate).forEach((tag) -> {
-                    results.add(tag);
+                listTag.stream().filter(this.predicate).forEach((nbt) -> {
+                    results.add(nbt);
                     mutableBoolean.setTrue();
                 });
                 if (mutableBoolean.isFalse()) {
-                    NBTTagCompound compoundTag = this.pattern.c();
+                    NBTTagCompound compoundTag = this.pattern.copy();
                     listTag.add(compoundTag);
                     results.add(compoundTag);
                 }
@@ -468,7 +466,7 @@ public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
                 NBTTagCompound compoundTag = (NBTTagCompound)current;
                 NBTBase tag = compoundTag.get(this.name);
                 if (tag == null) {
-                    NBTBase var6 = this.pattern.c();
+                    NBTBase var6 = this.pattern.copy();
                     compoundTag.set(this.name, var6);
                     results.add(var6);
                 } else if (this.predicate.test(tag)) {
@@ -610,8 +608,8 @@ public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
         }
 
         private static int apply(List<NBTBase> elements, Function<NBTBase, Integer> operation) {
-            return elements.stream().map(operation).reduce(0, (integer, integer2) -> {
-                return integer + integer2;
+            return elements.stream().map(operation).reduce(0, (a, b) -> {
+                return a + b;
             });
         }
 
@@ -622,8 +620,8 @@ public class ArgumentNBTKey implements ArgumentType<ArgumentNBTKey.NbtPath> {
         public int set(NBTBase element, Supplier<NBTBase> source) throws CommandSyntaxException {
             List<NBTBase> list = this.getOrCreateParents(element);
             ArgumentNBTKey.Node node = this.nodes[this.nodes.length - 1];
-            return apply(list, (tag) -> {
-                return node.setTag(tag, source);
+            return apply(list, (nbt) -> {
+                return node.setTag(nbt, source);
             });
         }
 

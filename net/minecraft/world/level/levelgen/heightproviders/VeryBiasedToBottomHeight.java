@@ -11,12 +11,12 @@ import org.apache.logging.log4j.Logger;
 
 public class VeryBiasedToBottomHeight extends HeightProvider {
     public static final Codec<VeryBiasedToBottomHeight> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter((veryBiasedToBottomHeight) -> {
-            return veryBiasedToBottomHeight.minInclusive;
-        }), VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter((veryBiasedToBottomHeight) -> {
-            return veryBiasedToBottomHeight.maxInclusive;
-        }), Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("inner", 1).forGetter((veryBiasedToBottomHeight) -> {
-            return veryBiasedToBottomHeight.inner;
+        return instance.group(VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter((provider) -> {
+            return provider.minInclusive;
+        }), VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter((provider) -> {
+            return provider.maxInclusive;
+        }), Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("inner", 1).forGetter((provider) -> {
+            return provider.inner;
         })).apply(instance, VeryBiasedToBottomHeight::new);
     });
     private static final Logger LOGGER = LogManager.getLogger();

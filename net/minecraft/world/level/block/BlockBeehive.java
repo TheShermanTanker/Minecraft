@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.projectile.EntityWitherSkull;
 import net.minecraft.world.entity.vehicle.EntityMinecartTNT;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockActionContext;
@@ -263,7 +264,7 @@ public class BlockBeehive extends BlockTileEntity {
                     if (bl) {
                         NBTTagCompound compoundTag = new NBTTagCompound();
                         compoundTag.set("Bees", beehiveBlockEntity.writeBees());
-                        itemStack.addTagElement("BlockEntityTag", compoundTag);
+                        ItemBlock.setBlockEntityData(itemStack, TileEntityTypes.BEEHIVE, compoundTag);
                     }
 
                     NBTTagCompound compoundTag2 = new NBTTagCompound();

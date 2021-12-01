@@ -1,158 +1,154 @@
 package net.minecraft.world.level.chunk;
 
-import com.mojang.datafixers.util.Pair;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import java.util.concurrent.Semaphore;
-import java.util.function.Function;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
+import java.util.stream.LongStream;
 import javax.annotation.Nullable;
-import net.minecraft.core.RegistryBlockID;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.core.Registry;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.util.DataBits;
-import net.minecraft.util.DebugBuffer;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.ThreadingDetector;
+import net.minecraft.util.ZeroBitStorage;
 
 public class DataPaletteBlock<T> implements DataPaletteExpandable<T> {
-    private static final int SIZE = 4096;
-    public static final int GLOBAL_PALETTE_BITS = 9;
-    public static final int MIN_PALETTE_SIZE = 4;
-    private final DataPalette<T> globalPalette;
+    private static final int MIN_PALETTE_BITS = 0;
     private final DataPaletteExpandable<T> dummyPaletteResize = (newSize, added) -> {
         return 0;
     };
-    private final RegistryBlockID<T> registry;
-    private final Function<NBTTagCompound, T> reader;
-    private final Function<T, NBTTagCompound> writer;
-    private final T defaultValue;
-    protected DataBits storage;
-    private DataPalette<T> palette;
-    private int bits;
-    private final Semaphore lock = new Semaphore(1);
-    @Nullable
-    private final DebugBuffer<Pair<Thread, StackTraceElement[]>> traces = null;
+    public final Registry<T> registry;
+    private volatile PalettedContainer$Data<T> data;
+    private final PalettedContainer$Strategy strategy;
+    private final ThreadingDetector threadingDetector = new ThreadingDetector("PalettedContainer");
 
     public void acquire() {
-        if (this.traces != null) {
-            Thread thread = Thread.currentThread();
-            this.traces.push(Pair.of(thread, thread.getStackTrace()));
-        }
-
-        ThreadingDetector.checkAndLock(this.lock, this.traces, "PalettedContainer");
+        this.threadingDetector.checkAndLock();
     }
 
     public void release() {
-        this.lock.release();
+        this.threadingDetector.checkAndUnlock();
     }
 
-    public DataPaletteBlock(DataPalette<T> fallbackPalette, RegistryBlockID<T> idList, Function<NBTTagCompound, T> elementDeserializer, Function<T, NBTTagCompound> elementSerializer, T defaultElement) {
-        this.globalPalette = fallbackPalette;
+    public static <T> Codec<DataPaletteBlock<T>> codec(Registry<T> idList, Codec<T> entryCodec, PalettedContainer$Strategy provider, T object) {
+        return RecordCodecBuilder.create((instance) -> {
+            return instance.group(entryCodec.mapResult(ExtraCodecs.orElsePartial(object)).listOf().fieldOf("palette").forGetter(PalettedContainer$DiscData::paletteEntries), Codec.LONG_STREAM.optionalFieldOf("data").forGetter(PalettedContainer$DiscData::storage)).apply(instance, PalettedContainer$DiscData::new);
+        }).comapFlatMap((serialized) -> {
+            return read(idList, provider, serialized);
+        }, (container) -> {
+            return container.write(idList, provider);
+        });
+    }
+
+    public DataPaletteBlock(Registry<T> idList, PalettedContainer$Strategy paletteProvider, PalettedContainer$Configuration<T> dataProvider, DataBits storage, List<T> paletteEntries) {
         this.registry = idList;
-        this.reader = elementDeserializer;
-        this.writer = elementSerializer;
-        this.defaultValue = defaultElement;
-        this.setBits(4);
+        this.strategy = paletteProvider;
+        this.data = new PalettedContainer$Data<>(dataProvider, storage, dataProvider.factory().create(dataProvider.bits(), idList, this, paletteEntries));
     }
 
-    private static int getIndex(int x, int y, int z) {
-        return y << 8 | z << 4 | x;
+    private DataPaletteBlock(Registry<T> idList, PalettedContainer$Strategy paletteProvider, PalettedContainer$Data<T> data) {
+        this.registry = idList;
+        this.strategy = paletteProvider;
+        this.data = data;
     }
 
-    private void setBits(int size) {
-        if (size != this.bits) {
-            this.bits = size;
-            if (this.bits <= 4) {
-                this.bits = 4;
-                this.palette = new DataPaletteLinear<>(this.registry, this.bits, this, this.reader);
-            } else if (this.bits < 9) {
-                this.palette = new DataPaletteHash<>(this.registry, this.bits, this, this.reader, this.writer);
-            } else {
-                this.palette = this.globalPalette;
-                this.bits = MathHelper.ceillog2(this.registry.size());
-            }
+    public DataPaletteBlock(Registry<T> idList, T object, PalettedContainer$Strategy paletteProvider) {
+        this.strategy = paletteProvider;
+        this.registry = idList;
+        this.data = this.createOrReuseData((PalettedContainer$Data<T>)null, 0);
+        this.data.palette.idFor(object);
+    }
 
-            this.palette.idFor(this.defaultValue);
-            this.storage = new DataBits(this.bits, 4096);
-        }
+    private PalettedContainer$Data<T> createOrReuseData(@Nullable PalettedContainer$Data<T> previousData, int bits) {
+        PalettedContainer$Configuration<T> configuration = this.strategy.getConfiguration(this.registry, bits);
+        return previousData != null && configuration.equals(previousData.configuration()) ? previousData : configuration.createData(this.registry, this, this.strategy.size());
     }
 
     @Override
-    public int onResize(int newSize, T objectAdded) {
-        DataBits bitStorage = this.storage;
-        DataPalette<T> palette = this.palette;
-        this.setBits(newSize);
-
-        for(int i = 0; i < bitStorage.getSize(); ++i) {
-            T object = palette.valueFor(bitStorage.get(i));
-            if (object != null) {
-                this.setBlockIndex(i, object);
-            }
-        }
-
-        return this.palette.idFor(objectAdded);
+    public int onResize(int newBits, T object) {
+        PalettedContainer$Data<T> data = this.data;
+        PalettedContainer$Data<T> data2 = this.createOrReuseData(data, newBits);
+        data2.copyFrom(data.palette, data.storage);
+        this.data = data2;
+        return data2.palette.idFor(object);
     }
 
     public T setBlock(int x, int y, int z, T value) {
-        Object var6;
+        this.acquire();
+
+        Object var5;
         try {
-            this.acquire();
-            T object = this.getAndSet(getIndex(x, y, z), value);
-            var6 = object;
+            var5 = this.getAndSet(this.strategy.getIndex(x, y, z), value);
         } finally {
             this.release();
         }
 
-        return (T)var6;
+        return (T)var5;
     }
 
     public T getAndSetUnchecked(int x, int y, int z, T value) {
-        return this.getAndSet(getIndex(x, y, z), value);
+        return this.getAndSet(this.strategy.getIndex(x, y, z), value);
     }
 
     private T getAndSet(int index, T value) {
-        int i = this.palette.idFor(value);
-        int j = this.storage.getAndSet(index, i);
-        T object = this.palette.valueFor(j);
-        return (T)(object == null ? this.defaultValue : object);
+        int i = this.data.palette.idFor(value);
+        int j = this.data.storage.getAndSet(index, i);
+        return this.data.palette.valueFor(j);
     }
 
-    public void set(int i, int j, int k, T object) {
+    public void set(int x, int y, int z, T value) {
+        this.acquire();
+
         try {
-            this.acquire();
-            this.setBlockIndex(getIndex(i, j, k), object);
+            this.setBlockIndex(this.strategy.getIndex(x, y, z), value);
         } finally {
             this.release();
         }
 
     }
 
-    private void setBlockIndex(int index, T object) {
-        int i = this.palette.idFor(object);
-        this.storage.set(index, i);
+    private void setBlockIndex(int index, T value) {
+        int i = this.data.palette.idFor(value);
+        this.data.storage.set(index, i);
     }
 
     public T get(int x, int y, int z) {
-        return this.get(getIndex(x, y, z));
+        return this.get(this.strategy.getIndex(x, y, z));
     }
 
     protected T get(int index) {
-        T object = this.palette.valueFor(this.storage.get(index));
-        return (T)(object == null ? this.defaultValue : object);
+        PalettedContainer$Data<T> data = this.data;
+        return data.palette.valueFor(data.storage.get(index));
+    }
+
+    public void getAll(Consumer<T> consumer) {
+        DataPalette<T> palette = this.data.palette();
+        IntSet intSet = new IntArraySet();
+        this.data.storage.getAll(intSet::add);
+        intSet.forEach((id) -> {
+            consumer.accept(palette.valueFor(id));
+        });
     }
 
     public void read(PacketDataSerializer buf) {
-        try {
-            this.acquire();
-            int i = buf.readByte();
-            if (this.bits != i) {
-                this.setBits(i);
-            }
+        this.acquire();
 
-            this.palette.read(buf);
-            buf.readLongArray(this.storage.getRaw());
+        try {
+            int i = buf.readByte();
+            PalettedContainer$Data<T> data = this.createOrReuseData(this.data, i);
+            data.palette.read(buf);
+            buf.readLongArray(data.storage.getRaw());
+            this.data = data;
         } finally {
             this.release();
         }
@@ -160,101 +156,124 @@ public class DataPaletteBlock<T> implements DataPaletteExpandable<T> {
     }
 
     public void write(PacketDataSerializer buf) {
+        this.acquire();
+
         try {
-            this.acquire();
-            buf.writeByte(this.bits);
-            this.palette.write(buf);
-            buf.writeLongArray(this.storage.getRaw());
+            this.data.write(buf);
         } finally {
             this.release();
         }
 
     }
 
-    public void read(NBTTagList paletteNbt, long[] data) {
-        try {
-            this.acquire();
-            int i = Math.max(4, MathHelper.ceillog2(paletteNbt.size()));
-            if (i != this.bits) {
-                this.setBits(i);
+    private static <T> DataResult<DataPaletteBlock<T>> read(Registry<T> idList, PalettedContainer$Strategy provider, PalettedContainer$DiscData<T> serialized) {
+        List<T> list = serialized.paletteEntries();
+        int i = provider.size();
+        int j = provider.calculateBitsForSerialization(idList, list.size());
+        PalettedContainer$Configuration<T> configuration = provider.getConfiguration(idList, j);
+        DataBits bitStorage;
+        if (j == 0) {
+            bitStorage = new ZeroBitStorage(i);
+        } else {
+            Optional<LongStream> optional = serialized.storage();
+            if (optional.isEmpty()) {
+                return DataResult.error("Missing values for non-zero storage");
             }
 
-            this.palette.read(paletteNbt);
-            int j = data.length * 64 / 4096;
-            if (this.palette == this.globalPalette) {
-                DataPalette<T> palette = new DataPaletteHash<>(this.registry, i, this.dummyPaletteResize, this.reader, this.writer);
-                palette.read(paletteNbt);
-                DataBits bitStorage = new DataBits(i, 4096, data);
+            long[] ls = optional.get().toArray();
 
-                for(int k = 0; k < 4096; ++k) {
-                    this.storage.set(k, this.globalPalette.idFor(palette.valueFor(bitStorage.get(k))));
+            try {
+                if (configuration.factory() == PalettedContainer$Strategy.GLOBAL_PALETTE_FACTORY) {
+                    DataPalette<T> palette = new DataPaletteHash<>(idList, j, (ix, object) -> {
+                        return 0;
+                    }, list);
+                    SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, i, ls);
+                    int[] is = new int[i];
+                    simpleBitStorage.unpack(is);
+                    swapPalette(is, (ix) -> {
+                        return idList.getId(palette.valueFor(ix));
+                    });
+                    bitStorage = new SimpleBitStorage(configuration.bits(), i, is);
+                } else {
+                    bitStorage = new SimpleBitStorage(configuration.bits(), i, ls);
                 }
-            } else if (j == this.bits) {
-                System.arraycopy(data, 0, this.storage.getRaw(), 0, data.length);
+            } catch (SimpleBitStorage.InitializationException var13) {
+                return DataResult.error("Failed to read PalettedContainer: " + var13.getMessage());
+            }
+        }
+
+        return DataResult.success(new DataPaletteBlock<>(idList, provider, configuration, bitStorage, list));
+    }
+
+    private PalettedContainer$DiscData<T> write(Registry<T> idList, PalettedContainer$Strategy provider) {
+        this.acquire();
+
+        PalettedContainer$DiscData var12;
+        try {
+            DataPaletteHash<T> hashMapPalette = new DataPaletteHash<>(idList, this.data.storage.getBits(), this.dummyPaletteResize);
+            int i = provider.size();
+            int[] is = new int[i];
+            this.data.storage.unpack(is);
+            swapPalette(is, (id) -> {
+                return hashMapPalette.idFor(this.data.palette.valueFor(id));
+            });
+            int j = provider.calculateBitsForSerialization(idList, hashMapPalette.getSize());
+            Optional<LongStream> optional;
+            if (j != 0) {
+                SimpleBitStorage simpleBitStorage = new SimpleBitStorage(j, i, is);
+                optional = Optional.of(Arrays.stream(simpleBitStorage.getRaw()));
             } else {
-                DataBits bitStorage2 = new DataBits(j, 4096, data);
-
-                for(int l = 0; l < 4096; ++l) {
-                    this.storage.set(l, bitStorage2.get(l));
-                }
+                optional = Optional.empty();
             }
+
+            var12 = new PalettedContainer$DiscData<>(hashMapPalette.getEntries(), optional);
         } finally {
             this.release();
         }
 
+        return var12;
     }
 
-    public void write(NBTTagCompound nbt, String paletteKey, String dataKey) {
-        try {
-            this.acquire();
-            DataPaletteHash<T> hashMapPalette = new DataPaletteHash<>(this.registry, this.bits, this.dummyPaletteResize, this.reader, this.writer);
-            T object = this.defaultValue;
-            int i = hashMapPalette.idFor(this.defaultValue);
-            int[] is = new int[4096];
+    private static <T> void swapPalette(int[] is, IntUnaryOperator intUnaryOperator) {
+        int i = -1;
+        int j = -1;
 
-            for(int j = 0; j < 4096; ++j) {
-                T object2 = this.get(j);
-                if (object2 != object) {
-                    object = object2;
-                    i = hashMapPalette.idFor(object2);
-                }
-
-                is[j] = i;
+        for(int k = 0; k < is.length; ++k) {
+            int l = is[k];
+            if (l != i) {
+                i = l;
+                j = intUnaryOperator.applyAsInt(l);
             }
 
-            NBTTagList listTag = new NBTTagList();
-            hashMapPalette.write(listTag);
-            nbt.set(paletteKey, listTag);
-            int k = Math.max(4, MathHelper.ceillog2(listTag.size()));
-            DataBits bitStorage = new DataBits(k, 4096);
-
-            for(int l = 0; l < is.length; ++l) {
-                bitStorage.set(l, is[l]);
-            }
-
-            nbt.putLongArray(dataKey, bitStorage.getRaw());
-        } finally {
-            this.release();
+            is[k] = j;
         }
 
     }
 
     public int getSerializedSize() {
-        return 1 + this.palette.getSerializedSize() + PacketDataSerializer.getVarIntSize(this.storage.getSize()) + this.storage.getRaw().length * 8;
+        return this.data.getSerializedSize();
     }
 
     public boolean contains(Predicate<T> predicate) {
-        return this.palette.maybeHas(predicate);
+        return this.data.palette.maybeHas(predicate);
     }
 
-    public void count(DataPaletteBlock.CountConsumer<T> consumer) {
-        Int2IntMap int2IntMap = new Int2IntOpenHashMap();
-        this.storage.getAll((i) -> {
-            int2IntMap.put(i, int2IntMap.get(i) + 1);
-        });
-        int2IntMap.int2IntEntrySet().forEach((entry) -> {
-            consumer.accept(this.palette.valueFor(entry.getIntKey()), entry.getIntValue());
-        });
+    public DataPaletteBlock<T> copy() {
+        return new DataPaletteBlock<>(this.registry, this.strategy, new PalettedContainer$Data<>(this.data.configuration(), this.data.storage().copy(), this.data.palette().copy()));
+    }
+
+    public void count(DataPaletteBlock.CountConsumer<T> counter) {
+        if (this.data.palette.getSize() == 1) {
+            counter.accept(this.data.palette.valueFor(0), this.data.storage.getSize());
+        } else {
+            Int2IntOpenHashMap int2IntOpenHashMap = new Int2IntOpenHashMap();
+            this.data.storage.getAll((key) -> {
+                int2IntOpenHashMap.addTo(key, 1);
+            });
+            int2IntOpenHashMap.int2IntEntrySet().forEach((entry) -> {
+                counter.accept(this.data.palette.valueFor(entry.getIntKey()), entry.getIntValue());
+            });
+        }
     }
 
     @FunctionalInterface

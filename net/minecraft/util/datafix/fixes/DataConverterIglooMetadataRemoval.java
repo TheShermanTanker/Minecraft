@@ -11,7 +11,6 @@ public class DataConverterIglooMetadataRemoval extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE);
         Type<?> type2 = this.getOutputSchema().getType(DataConverterTypes.STRUCTURE_FEATURE);

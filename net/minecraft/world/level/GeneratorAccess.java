@@ -16,6 +16,9 @@ import net.minecraft.world.level.chunk.IChunkProvider;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidType;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
 
 public interface GeneratorAccess extends ICombinedAccess, IWorldTime {
     @Override
@@ -23,9 +26,35 @@ public interface GeneratorAccess extends ICombinedAccess, IWorldTime {
         return this.getWorldData().getDayTime();
     }
 
-    TickList<Block> getBlockTickList();
+    long nextSubTickCount();
 
-    TickList<FluidType> getFluidTickList();
+    LevelTickAccess<Block> getBlockTicks();
+
+    private default <T> ScheduledTick<T> createTick(BlockPosition pos, T type, int delay, TickPriority priority) {
+        return new ScheduledTick<>(type, pos, this.getWorldData().getTime() + (long)delay, priority, this.nextSubTickCount());
+    }
+
+    private default <T> ScheduledTick<T> createTick(BlockPosition pos, T type, int delay) {
+        return new ScheduledTick<>(type, pos, this.getWorldData().getTime() + (long)delay, this.nextSubTickCount());
+    }
+
+    default void scheduleTick(BlockPosition pos, Block block, int delay, TickPriority priority) {
+        this.getBlockTicks().schedule(this.createTick(pos, block, delay, priority));
+    }
+
+    default void scheduleTick(BlockPosition pos, Block block, int delay) {
+        this.getBlockTicks().schedule(this.createTick(pos, block, delay));
+    }
+
+    LevelTickAccess<FluidType> getFluidTicks();
+
+    default void scheduleTick(BlockPosition pos, FluidType fluid, int delay, TickPriority priority) {
+        this.getFluidTicks().schedule(this.createTick(pos, fluid, delay, priority));
+    }
+
+    default void scheduleTick(BlockPosition pos, FluidType fluid, int delay) {
+        this.getFluidTicks().schedule(this.createTick(pos, fluid, delay));
+    }
 
     WorldData getWorldData();
 
@@ -55,10 +84,6 @@ public interface GeneratorAccess extends ICombinedAccess, IWorldTime {
     void addParticle(ParticleParam parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ);
 
     void triggerEffect(@Nullable EntityHuman player, int eventId, BlockPosition pos, int data);
-
-    default int getLogicalHeight() {
-        return this.getDimensionManager().getLogicalHeight();
-    }
 
     default void triggerEffect(int eventId, BlockPosition pos, int data) {
         this.triggerEffect((EntityHuman)null, eventId, pos, data);

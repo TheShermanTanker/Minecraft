@@ -41,13 +41,13 @@ public class ModelTemplate {
         Map<TextureSlot, MinecraftKey> map = this.createMap(texture);
         modelCollector.accept(id, () -> {
             JsonObject jsonObject = new JsonObject();
-            this.model.ifPresent((resourceLocation) -> {
-                jsonObject.addProperty("parent", resourceLocation.toString());
+            this.model.ifPresent((parentId) -> {
+                jsonObject.addProperty("parent", parentId.toString());
             });
             if (!map.isEmpty()) {
                 JsonObject jsonObject2 = new JsonObject();
-                map.forEach((textureSlot, resourceLocation) -> {
-                    jsonObject2.addProperty(textureSlot.getId(), resourceLocation.toString());
+                map.forEach((textureKey, textureId) -> {
+                    jsonObject2.addProperty(textureKey.getId(), textureId.toString());
                 });
                 jsonObject.add("textures", jsonObject2);
             }

@@ -15,21 +15,24 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.scores.criteria.IScoreboardCriteria;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Scoreboard {
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final int DISPLAY_SLOT_LIST = 0;
     public static final int DISPLAY_SLOT_SIDEBAR = 1;
     public static final int DISPLAY_SLOT_BELOW_NAME = 2;
     public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_START = 3;
     public static final int DISPLAY_SLOT_TEAMS_SIDEBAR_END = 18;
     public static final int DISPLAY_SLOTS = 19;
-    public static final int MAX_NAME_LENGTH = 40;
     private final Map<String, ScoreboardObjective> objectivesByName = Maps.newHashMap();
     private final Map<IScoreboardCriteria, List<ScoreboardObjective>> objectivesByCriteria = Maps.newHashMap();
     private final Map<String, Map<ScoreboardObjective, ScoreboardScore>> playerScores = Maps.newHashMap();
     private final ScoreboardObjective[] displayObjectives = new ScoreboardObjective[19];
     private final Map<String, ScoreboardTeam> teamsByName = Maps.newHashMap();
     private final Map<String, ScoreboardTeam> teamsByPlayer = Maps.newHashMap();
+    @Nullable
     private static String[] displaySlotNames;
 
     public boolean hasObjective(String name) {
@@ -46,9 +49,7 @@ public class Scoreboard {
     }
 
     public ScoreboardObjective registerObjective(String name, IScoreboardCriteria criterion, IChatBaseComponent displayName, IScoreboardCriteria.EnumScoreboardHealthDisplay renderType) {
-        if (name.length() > 16) {
-            throw new IllegalArgumentException("The objective name '" + name + "' is too long!");
-        } else if (this.objectivesByName.containsKey(name)) {
+        if (this.objectivesByName.containsKey(name)) {
             throw new IllegalArgumentException("An objective with the name '" + name + "' already exists!");
         } else {
             ScoreboardObjective objective = new ScoreboardObjective(this, name, criterion, displayName, renderType);
@@ -77,19 +78,15 @@ public class Scoreboard {
         }
     }
 
-    public ScoreboardScore getPlayerScoreForObjective(String player, ScoreboardObjective objective) {
-        if (player.length() > 40) {
-            throw new IllegalArgumentException("The player name '" + player + "' is too long!");
-        } else {
-            Map<ScoreboardObjective, ScoreboardScore> map = this.playerScores.computeIfAbsent(player, (string) -> {
-                return Maps.newHashMap();
-            });
-            return map.computeIfAbsent(objective, (objectivex) -> {
-                ScoreboardScore score = new ScoreboardScore(this, objectivex, player);
-                score.setScore(0);
-                return score;
-            });
-        }
+    public ScoreboardScore getPlayerScoreForObjective(String playerName, ScoreboardObjective objective) {
+        Map<ScoreboardObjective, ScoreboardScore> map = this.playerScores.computeIfAbsent(playerName, (string) -> {
+            return Maps.newHashMap();
+        });
+        return map.computeIfAbsent(objective, (objectivex) -> {
+            ScoreboardScore score = new ScoreboardScore(this, objectivex, playerName);
+            score.setScore(0);
+            return score;
+        });
     }
 
     public Collection<ScoreboardScore> getScoresForObjective(ScoreboardObjective objective) {
@@ -141,8 +138,8 @@ public class Scoreboard {
 
     }
 
-    public Map<ScoreboardObjective, ScoreboardScore> getPlayerObjectives(String string) {
-        Map<ScoreboardObjective, ScoreboardScore> map = this.playerScores.get(string);
+    public Map<ScoreboardObjective, ScoreboardScore> getPlayerObjectives(String playerName) {
+        Map<ScoreboardObjective, ScoreboardScore> map = this.playerScores.get(playerName);
         if (map == null) {
             map = Maps.newHashMap();
         }
@@ -186,18 +183,15 @@ public class Scoreboard {
     }
 
     public ScoreboardTeam createTeam(String name) {
-        if (name.length() > 16) {
-            throw new IllegalArgumentException("The team name '" + name + "' is too long!");
+        ScoreboardTeam playerTeam = this.getTeam(name);
+        if (playerTeam != null) {
+            LOGGER.warn("Requested creation of existing team '{}'", (Object)name);
+            return playerTeam;
         } else {
-            ScoreboardTeam playerTeam = this.getTeam(name);
-            if (playerTeam != null) {
-                throw new IllegalArgumentException("A team with the name '" + name + "' already exists!");
-            } else {
-                playerTeam = new ScoreboardTeam(this, name);
-                this.teamsByName.put(name, playerTeam);
-                this.handleTeamAdded(playerTeam);
-                return playerTeam;
-            }
+            playerTeam = new ScoreboardTeam(this, name);
+            this.teamsByName.put(name, playerTeam);
+            this.handleTeamAdded(playerTeam);
+            return playerTeam;
         }
     }
 
@@ -212,16 +206,12 @@ public class Scoreboard {
     }
 
     public boolean addPlayerToTeam(String playerName, ScoreboardTeam team) {
-        if (playerName.length() > 40) {
-            throw new IllegalArgumentException("The player name '" + playerName + "' is too long!");
-        } else {
-            if (this.getPlayerTeam(playerName) != null) {
-                this.removePlayerFromTeam(playerName);
-            }
-
-            this.teamsByPlayer.put(playerName, team);
-            return team.getPlayerNameSet().add(playerName);
+        if (this.getPlayerTeam(playerName) != null) {
+            this.removePlayerFromTeam(playerName);
         }
+
+        this.teamsByPlayer.put(playerName, team);
+        return team.getPlayerNameSet().add(playerName);
     }
 
     public boolean removePlayerFromTeam(String playerName) {
@@ -345,8 +335,8 @@ public class Scoreboard {
 
     protected NBTTagList savePlayerScores() {
         NBTTagList listTag = new NBTTagList();
-        this.playerScores.values().stream().map(Map::values).forEach((collection) -> {
-            collection.stream().filter((score) -> {
+        this.playerScores.values().stream().map(Map::values).forEach((scores) -> {
+            scores.stream().filter((score) -> {
                 return score.getObjective() != null;
             }).forEach((score) -> {
                 NBTTagCompound compoundTag = new NBTTagCompound();
@@ -365,10 +355,6 @@ public class Scoreboard {
             NBTTagCompound compoundTag = list.getCompound(i);
             ScoreboardObjective objective = this.getOrCreateObjective(compoundTag.getString("Objective"));
             String string = compoundTag.getString("Name");
-            if (string.length() > 40) {
-                string = string.substring(0, 40);
-            }
-
             ScoreboardScore score = this.getPlayerScoreForObjective(string, objective);
             score.setScore(compoundTag.getInt("Score"));
             if (compoundTag.hasKey("Locked")) {

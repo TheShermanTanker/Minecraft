@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import net.minecraft.util.MathHelper;
 
 public abstract class PathfinderGoal {
     private final EnumSet<PathfinderGoal.Type> flags = EnumSet.noneOf(PathfinderGoal.Type.class);
@@ -21,6 +22,10 @@ public abstract class PathfinderGoal {
     public void stop() {
     }
 
+    public boolean requiresUpdateEveryTick() {
+        return false;
+    }
+
     public void tick() {
     }
 
@@ -36,6 +41,14 @@ public abstract class PathfinderGoal {
 
     public EnumSet<PathfinderGoal.Type> getFlags() {
         return this.flags;
+    }
+
+    protected int adjustedTickDelay(int ticks) {
+        return this.requiresUpdateEveryTick() ? ticks : reducedTickDelay(ticks);
+    }
+
+    protected static int reducedTickDelay(int serverTicks) {
+        return MathHelper.positiveCeilDiv(serverTicks, 2);
     }
 
     public static enum Type {

@@ -47,7 +47,7 @@ public class LoginListener implements PacketLoginInListener {
     public LoginListener.EnumProtocolState state = LoginListener.EnumProtocolState.HELLO;
     private int tick;
     @Nullable
-    GameProfile gameProfile;
+    public GameProfile gameProfile;
     private final String serverId = "";
     @Nullable
     private EntityPlayer delayedAcceptPlayer;
@@ -120,6 +120,7 @@ public class LoginListener implements PacketLoginInListener {
                     this.placeNewPlayer(serverPlayer2);
                 }
             } catch (Exception var5) {
+                LOGGER.error("Couldn't place player in world", (Throwable)var5);
                 IChatBaseComponent component2 = new ChatMessage("multiplayer.disconnect.invalid_player_data");
                 this.connection.sendPacket(new PacketPlayOutKickDisconnect(component2));
                 this.connection.close(component2);

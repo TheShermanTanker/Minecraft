@@ -10,7 +10,6 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongIterator;
-import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -61,7 +61,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
 import net.minecraft.core.IRegistryCustom;
 import net.minecraft.core.RegistryMaterials;
-import net.minecraft.data.worldgen.WorldGenBiomeDecoratorGroups;
+import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestHarnessTicker;
 import net.minecraft.network.chat.ChatComponentText;
 import net.minecraft.network.chat.ChatMessage;
@@ -92,18 +92,21 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserCache;
 import net.minecraft.server.players.WhiteList;
 import net.minecraft.tags.ITagRegistry;
-import net.minecraft.tags.TagsBlock;
 import net.minecraft.util.CircularTimer;
 import net.minecraft.util.CryptographyException;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MinecraftEncryption;
+import net.minecraft.util.ModCheck;
+import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.GameProfilerFiller;
 import net.minecraft.util.profiling.GameProfilerTick;
 import net.minecraft.util.profiling.MethodProfilerResults;
 import net.minecraft.util.profiling.MethodProfilerResultsEmpty;
 import net.minecraft.util.profiling.MethodProfilerResultsField;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
+import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.util.profiling.metrics.profiling.IMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.MetricSamplerProviderServer;
 import net.minecraft.util.profiling.metrics.profiling.MetricsRecorderActive;
@@ -111,8 +114,6 @@ import net.minecraft.util.profiling.metrics.profiling.MetricsRecorderInactive;
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.IAsyncTaskHandlerReentrant;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.IMojangStatistics;
-import net.minecraft.world.MojangStatisticsGenerator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.MobSpawnerCat;
@@ -128,8 +129,6 @@ import net.minecraft.world.level.MobSpawner;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldSettings;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.WorldChunkManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.border.IWorldBorderListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -159,12 +158,12 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTask> implements IMojangStatistics, ICommandListener, AutoCloseable {
+public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTask> implements ICommandListener, AutoCloseable {
     public static final Logger LOGGER = LogManager.getLogger();
+    public static final String VANILLA_BRAND = "vanilla";
     private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8F;
     private static final int TICK_STATS_SPAN = 100;
     public static final int MS_PER_TICK = 50;
-    private static final int SNOOPER_UPDATE_INTERVAL = 6000;
     private static final int OVERLOADED_THRESHOLD = 2000;
     private static final int OVERLOADED_WARNING_INTERVAL = 15000;
     public static final String LEVEL_STORAGE_PROTOCOL = "level";
@@ -180,9 +179,9 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
     public static final WorldSettings DEMO_SETTINGS = new WorldSettings("Demo World", EnumGamemode.SURVIVAL, false, EnumDifficulty.NORMAL, false, new GameRules(), DataPackConfiguration.DEFAULT);
     private static final long DELAYED_TASKS_TICK_EXTENSION = 50L;
+    public static final GameProfile ANONYMOUS_PLAYER_PROFILE = new GameProfile(SystemUtils.NIL_UUID, "Anonymous Player");
     public Convertable.ConversionSession storageSource;
     public final WorldNBTStorage playerDataStorage;
-    private final MojangStatisticsGenerator snooper = new MojangStatisticsGenerator("server", this, SystemUtils.getMonotonicMillis());
     private final List<Runnable> tickables = Lists.newArrayList();
     private IMetricsRecorder metricsRecorder = MetricsRecorderInactive.INSTANCE;
     private GameProfilerFiller profiler = this.metricsRecorder.getProfiler();
@@ -251,6 +250,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     public DataPackResources resources;
     private final DefinedStructureManager structureManager;
     protected SaveData worldData;
+    private volatile boolean isSaving;
 
     public static <S extends MinecraftServer> S spin(Function<Thread, S> serverFactory) {
         AtomicReference<S> atomicReference = new AtomicReference<>();
@@ -260,6 +260,10 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         thread.setUncaughtExceptionHandler((threadx, throwable) -> {
             LOGGER.error(throwable);
         });
+        if (Runtime.getRuntime().availableProcessors() > 4) {
+            thread.setPriority(8);
+        }
+
         S minecraftServer = serverFactory.apply(thread);
         atomicReference.set(minecraftServer);
         thread.start();
@@ -297,48 +301,30 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
 
     protected abstract boolean init() throws IOException;
 
-    public static void convertWorld(Convertable.ConversionSession session) {
-        if (session.isConvertable()) {
-            LOGGER.info("Converting map!");
-            session.convert(new IProgressUpdate() {
-                private long timeStamp = SystemUtils.getMonotonicMillis();
-
-                @Override
-                public void progressStartNoAbort(IChatBaseComponent title) {
-                }
-
-                @Override
-                public void progressStart(IChatBaseComponent title) {
-                }
-
-                @Override
-                public void progressStagePercentage(int percentage) {
-                    if (SystemUtils.getMonotonicMillis() - this.timeStamp >= 1000L) {
-                        this.timeStamp = SystemUtils.getMonotonicMillis();
-                        MinecraftServer.LOGGER.info("Converting... {}%", (int)percentage);
-                    }
-
-                }
-
-                @Override
-                public void stop() {
-                }
-
-                @Override
-                public void progressStage(IChatBaseComponent task) {
-                }
-            });
+    protected void loadWorld() {
+        if (!JvmProfiler.INSTANCE.isRunning()) {
         }
 
-    }
-
-    protected void loadWorld() {
+        boolean bl = false;
+        ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
         this.loadResourcesZip();
-        this.worldData.setModdedInfo(this.getServerModName(), this.getModded().isPresent());
+        this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
         WorldLoadListener chunkProgressListener = this.progressListenerFactory.create(11);
         this.createLevels(chunkProgressListener);
         this.updateWorldSettings();
         this.loadSpawn(chunkProgressListener);
+        if (profiledDuration != null) {
+            profiledDuration.finish();
+        }
+
+        if (bl) {
+            try {
+                JvmProfiler.INSTANCE.stop();
+            } catch (Throwable var5) {
+                LOGGER.warn("Failed to stop JFR profiling", var5);
+            }
+        }
+
     }
 
     protected void updateWorldSettings() {
@@ -357,7 +343,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         DimensionManager dimensionType;
         if (levelStem == null) {
             dimensionType = this.registryHolder.<DimensionManager>registryOrThrow(IRegistry.DIMENSION_TYPE_REGISTRY).getOrThrow(DimensionManager.OVERWORLD_LOCATION);
-            chunkGenerator = GeneratorSettings.makeDefaultOverworld(this.registryHolder.registryOrThrow(IRegistry.BIOME_REGISTRY), this.registryHolder.registryOrThrow(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY), (new Random()).nextLong());
+            chunkGenerator = GeneratorSettings.makeDefaultOverworld(this.registryHolder, (new Random()).nextLong());
         } else {
             dimensionType = levelStem.type();
             chunkGenerator = levelStem.generator();
@@ -369,7 +355,6 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         this.initializeScoreboards(dimensionDataStorage);
         this.commandStorage = new PersistentCommandStorage(dimensionDataStorage);
         WorldBorder worldBorder = serverLevel.getWorldBorder();
-        worldBorder.applySettings(serverLevelData.getWorldBorder());
         if (!serverLevelData.isInitialized()) {
             try {
                 setInitialSpawn(serverLevel, serverLevelData, worldGenSettings.generateBonusChest(), bl);
@@ -391,7 +376,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             serverLevelData.setInitialized(true);
         }
 
-        this.getPlayerList().setPlayerFileData(serverLevel);
+        this.getPlayerList().addWorldborderListener(serverLevel);
         if (this.worldData.getCustomBossEvents() != null) {
             this.getBossBattleCustomData().load(this.worldData.getCustomBossEvents());
         }
@@ -409,6 +394,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             }
         }
 
+        worldBorder.applySettings(serverLevelData.getWorldBorder());
     }
 
     private static void setInitialSpawn(WorldServer world, IWorldDataServer worldProperties, boolean bonusChest, boolean debugWorld) {
@@ -416,29 +402,11 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             worldProperties.setSpawn(BlockPosition.ZERO.above(80), 0.0F);
         } else {
             ChunkGenerator chunkGenerator = world.getChunkSource().getChunkGenerator();
-            WorldChunkManager biomeSource = chunkGenerator.getWorldChunkManager();
-            Random random = new Random(world.getSeed());
-            BlockPosition blockPos = biomeSource.findBiomeHorizontal(0, world.getSeaLevel(), 0, 256, (biome) -> {
-                return biome.getMobSettings().playerSpawnFriendly();
-            }, random);
-            ChunkCoordIntPair chunkPos = blockPos == null ? new ChunkCoordIntPair(0, 0) : new ChunkCoordIntPair(blockPos);
-            if (blockPos == null) {
-                LOGGER.warn("Unable to find spawn biome");
-            }
-
-            boolean bl = false;
-
-            for(Block block : TagsBlock.VALID_SPAWN.getTagged()) {
-                if (biomeSource.getSurfaceBlocks().contains(block.getBlockData())) {
-                    bl = true;
-                    break;
-                }
-            }
-
+            ChunkCoordIntPair chunkPos = new ChunkCoordIntPair(chunkGenerator.climateSampler().findSpawnPosition());
             int i = chunkGenerator.getSpawnHeight(world);
             if (i < world.getMinBuildHeight()) {
-                BlockPosition blockPos2 = chunkPos.getWorldPosition();
-                i = world.getHeight(HeightMap.Type.WORLD_SURFACE, blockPos2.getX() + 8, blockPos2.getZ() + 8);
+                BlockPosition blockPos = chunkPos.getWorldPosition();
+                i = world.getHeight(HeightMap.Type.WORLD_SURFACE, blockPos.getX() + 8, blockPos.getZ() + 8);
             }
 
             worldProperties.setSpawn(chunkPos.getWorldPosition().offset(8, i, 8), 0.0F);
@@ -446,13 +414,13 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             int k = 0;
             int l = 0;
             int m = -1;
-            int n = 32;
+            int n = 5;
 
-            for(int o = 0; o < 1024; ++o) {
-                if (j > -16 && j <= 16 && k > -16 && k <= 16) {
-                    BlockPosition blockPos3 = WorldProviderNormal.getSpawnPosInChunk(world, new ChunkCoordIntPair(chunkPos.x + j, chunkPos.z + k), bl);
-                    if (blockPos3 != null) {
-                        worldProperties.setSpawn(blockPos3, 0.0F);
+            for(int o = 0; o < MathHelper.square(11); ++o) {
+                if (j >= -5 && j <= 5 && k >= -5 && k <= 5) {
+                    BlockPosition blockPos2 = WorldProviderNormal.getSpawnPosInChunk(world, new ChunkCoordIntPair(chunkPos.x + j, chunkPos.z + k));
+                    if (blockPos2 != null) {
+                        worldProperties.setSpawn(blockPos2, 0.0F);
                         break;
                     }
                 }
@@ -468,7 +436,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             }
 
             if (bonusChest) {
-                WorldGenFeatureConfigured<?, ?> configuredFeature = WorldGenBiomeDecoratorGroups.BONUS_CHEST;
+                WorldGenFeatureConfigured<?, ?> configuredFeature = MiscOverworldFeatures.BONUS_CHEST;
                 configuredFeature.place(world, chunkGenerator, world.random, new BlockPosition(worldProperties.getXSpawn(), worldProperties.getYSpawn(), worldProperties.getZSpawn()));
             }
 
@@ -580,6 +548,19 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         return bl;
     }
 
+    public boolean saveEverything(boolean suppressLogs, boolean flush, boolean force) {
+        boolean var4;
+        try {
+            this.isSaving = true;
+            this.getPlayerList().savePlayers();
+            var4 = this.saveChunks(suppressLogs, flush, force);
+        } finally {
+            this.isSaving = false;
+        }
+
+        return var4;
+    }
+
     @Override
     public void close() {
         this.stop();
@@ -591,6 +572,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             this.getServerConnection().stop();
         }
 
+        this.isSaving = true;
         if (this.playerList != null) {
             LOGGER.info("Saving players");
             this.playerList.savePlayers();
@@ -617,10 +599,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             }
         }
 
-        if (this.snooper.isStarted()) {
-            this.snooper.interrupt();
-        }
-
+        this.isSaving = false;
         this.resources.close();
 
         try {
@@ -660,7 +639,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             if (this.init()) {
                 this.nextTickTime = SystemUtils.getMonotonicMillis();
                 this.status.setMOTD(new ChatComponentText(this.motd));
-                this.status.setServerInfo(new ServerPing.ServerData(SharedConstants.getGameVersion().getName(), SharedConstants.getGameVersion().getProtocolVersion()));
+                this.status.setServerInfo(new ServerPing.ServerData(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
                 this.updateStatusIcon(this.status);
 
                 while(this.running) {
@@ -688,6 +667,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
                     this.profiler.exit();
                     this.endMetricsRecordingTick();
                     this.isReady = true;
+                    JvmProfiler.INSTANCE.onServerTick(this.averageTickTime);
                 }
             } else {
                 this.onServerCrash((CrashReport)null);
@@ -717,6 +697,10 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             } catch (Throwable var42) {
                 LOGGER.error("Exception stopping the server", var42);
             } finally {
+                if (this.profileCache != null) {
+                    this.profileCache.clearExecutor();
+                }
+
                 this.exit();
             }
 
@@ -736,7 +720,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     }
 
     @Override
-    protected TickTask wrapRunnable(Runnable runnable) {
+    public TickTask wrapRunnable(Runnable runnable) {
         return new TickTask(this.tickCount, runnable);
     }
 
@@ -817,36 +801,32 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         if (l - this.lastServerStatus >= 5000000000L) {
             this.lastServerStatus = l;
             this.status.setPlayerSample(new ServerPing.ServerPingPlayerSample(this.getMaxPlayers(), this.getPlayerCount()));
-            GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
-            int i = MathHelper.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
+            if (!this.hidesOnlinePlayers()) {
+                GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
+                int i = MathHelper.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
 
-            for(int j = 0; j < gameProfiles.length; ++j) {
-                gameProfiles[j] = this.playerList.getPlayers().get(i + j).getProfile();
+                for(int j = 0; j < gameProfiles.length; ++j) {
+                    EntityPlayer serverPlayer = this.playerList.getPlayers().get(i + j);
+                    if (serverPlayer.allowsListing()) {
+                        gameProfiles[j] = serverPlayer.getProfile();
+                    } else {
+                        gameProfiles[j] = ANONYMOUS_PLAYER_PROFILE;
+                    }
+                }
+
+                Collections.shuffle(Arrays.asList(gameProfiles));
+                this.status.getPlayers().setSample(gameProfiles);
             }
-
-            Collections.shuffle(Arrays.asList(gameProfiles));
-            this.status.getPlayers().setSample(gameProfiles);
         }
 
         if (this.tickCount % 6000 == 0) {
             LOGGER.debug("Autosave started");
             this.profiler.enter("save");
-            this.playerList.savePlayers();
-            this.saveChunks(true, false, false);
+            this.saveEverything(true, false, false);
             this.profiler.exit();
             LOGGER.debug("Autosave finished");
         }
 
-        this.profiler.enter("snooper");
-        if (!this.snooper.isStarted() && this.tickCount > 100) {
-            this.snooper.start();
-        }
-
-        if (this.tickCount % 6000 == 0) {
-            this.snooper.prepare();
-        }
-
-        this.profiler.exit();
         this.profiler.enter("tallying");
         long m = this.tickTimes[this.tickCount % 100] = SystemUtils.getMonotonicNanos() - l;
         this.averageTickTime = this.averageTickTime * 0.8F + (float)m / 1000000.0F * 0.19999999F;
@@ -939,7 +919,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     }
 
     public String getVersion() {
-        return SharedConstants.getGameVersion().getName();
+        return SharedConstants.getCurrentVersion().getName();
     }
 
     public int getPlayerCount() {
@@ -960,6 +940,9 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     }
 
     public SystemReport fillSystemReport(SystemReport details) {
+        details.setDetail("Server Running", () -> {
+            return Boolean.toString(this.running);
+        });
         if (this.playerList != null) {
             details.setDetail("Player Count", () -> {
                 return this.playerList.getPlayerCount() + " / " + this.playerList.getMaxPlayers() + "; " + this.playerList.getPlayers();
@@ -993,7 +976,9 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
 
     public abstract SystemReport fillServerSystemReport(SystemReport details);
 
-    public abstract Optional<String> getModded();
+    public ModCheck getModdedStatus() {
+        return ModCheck.identify("vanilla", this::getServerModName, "Server", MinecraftServer.class);
+    }
 
     @Override
     public void sendMessage(IChatBaseComponent message, UUID sender) {
@@ -1016,8 +1001,8 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         return this.singleplayerName;
     }
 
-    public void setSingleplayerName(String serverName) {
-        this.singleplayerName = serverName;
+    public void setSingleplayerName(String singlePlayerName) {
+        this.singleplayerName = singlePlayerName;
     }
 
     public boolean isEmbeddedServer() {
@@ -1086,50 +1071,6 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     public void setResourcePack(String url, String hash) {
         this.resourcePack = url;
         this.resourcePackHash = hash;
-    }
-
-    @Override
-    public void populateSnooper(MojangStatisticsGenerator snooper) {
-        snooper.setDynamicData("whitelist_enabled", false);
-        snooper.setDynamicData("whitelist_count", 0);
-        if (this.playerList != null) {
-            snooper.setDynamicData("players_current", this.getPlayerCount());
-            snooper.setDynamicData("players_max", this.getMaxPlayers());
-            snooper.setDynamicData("players_seen", this.playerDataStorage.getSeenPlayers().length);
-        }
-
-        snooper.setDynamicData("uses_auth", this.onlineMode);
-        snooper.setDynamicData("gui_state", this.hasGui() ? "enabled" : "disabled");
-        snooper.setDynamicData("run_time", (SystemUtils.getMonotonicMillis() - snooper.getStartupTime()) / 60L * 1000L);
-        snooper.setDynamicData("avg_tick_ms", (int)(MathHelper.average(this.tickTimes) * 1.0E-6D));
-        int i = 0;
-
-        for(WorldServer serverLevel : this.getWorlds()) {
-            if (serverLevel != null) {
-                snooper.setDynamicData("world[" + i + "][dimension]", serverLevel.getDimensionKey().location());
-                snooper.setDynamicData("world[" + i + "][mode]", this.worldData.getGameType());
-                snooper.setDynamicData("world[" + i + "][difficulty]", serverLevel.getDifficulty());
-                snooper.setDynamicData("world[" + i + "][hardcore]", this.worldData.isHardcore());
-                snooper.setDynamicData("world[" + i + "][height]", serverLevel.getMaxBuildHeight());
-                snooper.setDynamicData("world[" + i + "][chunks_loaded]", serverLevel.getChunkSource().getLoadedChunksCount());
-                ++i;
-            }
-        }
-
-        snooper.setDynamicData("worlds", i);
-    }
-
-    @Override
-    public void populateSnooperInitial(MojangStatisticsGenerator snooper) {
-        snooper.setFixedData("singleplayer", this.isEmbeddedServer());
-        snooper.setFixedData("server_brand", this.getServerModName());
-        snooper.setFixedData("gui_supported", GraphicsEnvironment.isHeadless() ? "headless" : "supported");
-        snooper.setFixedData("dedicated", this.isDedicatedServer());
-    }
-
-    @Override
-    public boolean isSnooperEnabled() {
-        return true;
     }
 
     public abstract boolean isDedicatedServer();
@@ -1227,10 +1168,6 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
         return this.tickCount;
     }
 
-    public MojangStatisticsGenerator getSnooper() {
-        return this.snooper;
-    }
-
     public int getSpawnProtection() {
         return 16;
     }
@@ -1241,6 +1178,10 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
 
     public boolean repliesToStatus() {
         return true;
+    }
+
+    public boolean hidesOnlinePlayers() {
+        return false;
     }
 
     public Proxy getProxy() {
@@ -1517,6 +1458,7 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
             this.dumpMiscStats(path.resolve("stats.txt"));
             this.dumpThreads(path.resolve("threads.txt"));
             this.dumpServerProperties(path.resolve("server.properties.txt"));
+            this.dumpNativeModules(path.resolve("modules.txt"));
         } catch (IOException var7) {
             LOGGER.warn("Failed to save debug report", (Throwable)var7);
         }
@@ -1641,6 +1583,60 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
 
     }
 
+    private void dumpNativeModules(Path path) throws IOException {
+        Writer writer = Files.newBufferedWriter(path);
+
+        label49: {
+            try {
+                label50: {
+                    List<NativeModuleLister.NativeModuleInfo> list;
+                    try {
+                        list = Lists.newArrayList(NativeModuleLister.listModules());
+                    } catch (Throwable var7) {
+                        LOGGER.warn("Failed to list native modules", var7);
+                        break label50;
+                    }
+
+                    list.sort(Comparator.comparing((module) -> {
+                        return module.name;
+                    }));
+                    Iterator throwable = list.iterator();
+
+                    while(true) {
+                        if (!throwable.hasNext()) {
+                            break label49;
+                        }
+
+                        NativeModuleLister.NativeModuleInfo nativeModuleInfo = (NativeModuleLister.NativeModuleInfo)throwable.next();
+                        writer.write(nativeModuleInfo.toString());
+                        writer.write(10);
+                    }
+                }
+            } catch (Throwable var8) {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (Throwable var6) {
+                        var8.addSuppressed(var6);
+                    }
+                }
+
+                throw var8;
+            }
+
+            if (writer != null) {
+                writer.close();
+            }
+
+            return;
+        }
+
+        if (writer != null) {
+            writer.close();
+        }
+
+    }
+
     private void startMetricsRecordingTick() {
         if (this.willStartRecordingMetrics) {
             this.metricsRecorder = MetricsRecorderActive.createStarted(new MetricSamplerProviderServer(SystemUtils.timeSource, this.isDedicatedServer()), SystemUtils.timeSource, SystemUtils.ioPool(), new MetricsPersister("server"), this.onMetricsRecordingStopped, (path) -> {
@@ -1727,6 +1723,10 @@ public abstract class MinecraftServer extends IAsyncTaskHandlerReentrant<TickTas
     @Nullable
     public IChatBaseComponent getResourcePackPrompt() {
         return null;
+    }
+
+    public boolean isCurrentlySaving() {
+        return this.isSaving;
     }
 
     public boolean isTimeProfilerRunning() {

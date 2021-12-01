@@ -25,7 +25,6 @@ public class ArgumentAngle implements ArgumentType<ArgumentAngle.SingleAngle> {
         return context.getArgument(name, ArgumentAngle.SingleAngle.class).getAngle(context.getSource());
     }
 
-    @Override
     public ArgumentAngle.SingleAngle parse(StringReader stringReader) throws CommandSyntaxException {
         if (!stringReader.canRead()) {
             throw ERROR_NOT_COMPLETE.createWithContext(stringReader);
@@ -40,7 +39,6 @@ public class ArgumentAngle implements ArgumentType<ArgumentAngle.SingleAngle> {
         }
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
@@ -49,9 +47,9 @@ public class ArgumentAngle implements ArgumentType<ArgumentAngle.SingleAngle> {
         private final float angle;
         private final boolean isRelative;
 
-        SingleAngle(float f, boolean bl) {
-            this.angle = f;
-            this.isRelative = bl;
+        SingleAngle(float angle, boolean relative) {
+            this.angle = angle;
+            this.isRelative = relative;
         }
 
         public float getAngle(CommandListenerWrapper source) {

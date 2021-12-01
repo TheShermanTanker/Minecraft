@@ -23,8 +23,7 @@ public class CommandSaveAll {
     private static int saveAll(CommandListenerWrapper source, boolean flush) throws CommandSyntaxException {
         source.sendMessage(new ChatMessage("commands.save.saving"), false);
         MinecraftServer minecraftServer = source.getServer();
-        minecraftServer.getPlayerList().savePlayers();
-        boolean bl = minecraftServer.saveChunks(true, flush, true);
+        boolean bl = minecraftServer.saveEverything(true, flush, true);
         if (!bl) {
             throw ERROR_FAILED.create();
         } else {

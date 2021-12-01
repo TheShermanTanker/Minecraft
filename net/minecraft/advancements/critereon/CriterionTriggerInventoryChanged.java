@@ -133,8 +133,8 @@ public class CriterionTriggerInventoryChanged extends CriterionTriggerAbstract<C
 
                         ItemStack itemStack = inventory.getItem(k);
                         if (!itemStack.isEmpty()) {
-                            list.removeIf((itemPredicate) -> {
-                                return itemPredicate.matches(itemStack);
+                            list.removeIf((item) -> {
+                                return item.matches(itemStack);
                             });
                         }
                     }

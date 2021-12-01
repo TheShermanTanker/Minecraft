@@ -38,13 +38,13 @@ public class LootItemFunctionExplorationMap extends LootItemFunctionConditional 
     final int searchRadius;
     final boolean skipKnownStructures;
 
-    LootItemFunctionExplorationMap(LootItemCondition[] conditions, StructureGenerator<?> structureFeature, MapIcon.Type type, byte b, int i, boolean bl) {
+    LootItemFunctionExplorationMap(LootItemCondition[] conditions, StructureGenerator<?> destination, MapIcon.Type decoration, byte zoom, int searchRadius, boolean skipExistingChunks) {
         super(conditions);
-        this.destination = structureFeature;
-        this.mapDecoration = type;
-        this.zoom = b;
-        this.searchRadius = i;
-        this.skipKnownStructures = bl;
+        this.destination = destination;
+        this.mapDecoration = decoration;
+        this.zoom = zoom;
+        this.searchRadius = searchRadius;
+        this.skipKnownStructures = skipExistingChunks;
     }
 
     @Override

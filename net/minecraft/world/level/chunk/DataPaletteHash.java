@@ -1,29 +1,36 @@
 package net.minecraft.world.level.chunk;
 
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import net.minecraft.core.RegistryBlockID;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.core.Registry;
 import net.minecraft.network.PacketDataSerializer;
 import net.minecraft.util.RegistryID;
 
 public class DataPaletteHash<T> implements DataPalette<T> {
-    private final RegistryBlockID<T> registry;
+    private final Registry<T> registry;
     private final RegistryID<T> values;
     private final DataPaletteExpandable<T> resizeHandler;
-    private final Function<NBTTagCompound, T> reader;
-    private final Function<T, NBTTagCompound> writer;
     private final int bits;
 
-    public DataPaletteHash(RegistryBlockID<T> idList, int indexBits, DataPaletteExpandable<T> resizeHandler, Function<NBTTagCompound, T> elementDeserializer, Function<T, NBTTagCompound> elementSerializer) {
-        this.registry = idList;
-        this.bits = indexBits;
-        this.resizeHandler = resizeHandler;
-        this.reader = elementDeserializer;
-        this.writer = elementSerializer;
-        this.values = new RegistryID<>(1 << indexBits);
+    public DataPaletteHash(Registry<T> idList, int bits, DataPaletteExpandable<T> listener, List<T> entries) {
+        this(idList, bits, listener);
+        entries.forEach(this.values::add);
+    }
+
+    public DataPaletteHash(Registry<T> idList, int indexBits, DataPaletteExpandable<T> listener) {
+        this(idList, indexBits, listener, RegistryID.create(1 << indexBits));
+    }
+
+    private DataPaletteHash(Registry<T> idMap, int i, DataPaletteExpandable<T> paletteResize, RegistryID<T> crudeIncrementalIntIdentityHashBiMap) {
+        this.registry = idMap;
+        this.bits = i;
+        this.resizeHandler = paletteResize;
+        this.values = crudeIncrementalIntIdentityHashBiMap;
+    }
+
+    public static <A> DataPalette<A> create(int bits, Registry<A> idList, DataPaletteExpandable<A> listener, List<A> entries) {
+        return new DataPaletteHash<>(idList, bits, listener, entries);
     }
 
     @Override
@@ -50,10 +57,14 @@ public class DataPaletteHash<T> implements DataPalette<T> {
         return false;
     }
 
-    @Nullable
     @Override
-    public T valueFor(int index) {
-        return this.values.fromId(index);
+    public T valueFor(int id) {
+        T object = this.values.fromId(id);
+        if (object == null) {
+            throw new MissingPaletteEntryException(id);
+        } else {
+            return object;
+        }
     }
 
     @Override
@@ -89,25 +100,19 @@ public class DataPaletteHash<T> implements DataPalette<T> {
         return i;
     }
 
+    public List<T> getEntries() {
+        ArrayList<T> arrayList = new ArrayList<>();
+        this.values.iterator().forEachRemaining(arrayList::add);
+        return arrayList;
+    }
+
     @Override
     public int getSize() {
         return this.values.size();
     }
 
     @Override
-    public void read(NBTTagList nbt) {
-        this.values.clear();
-
-        for(int i = 0; i < nbt.size(); ++i) {
-            this.values.add(this.reader.apply(nbt.getCompound(i)));
-        }
-
-    }
-
-    public void write(NBTTagList nbt) {
-        for(int i = 0; i < this.getSize(); ++i) {
-            nbt.add(this.writer.apply(this.values.fromId(i)));
-        }
-
+    public DataPalette<T> copy() {
+        return new DataPaletteHash<>(this.registry, this.bits, this.resizeHandler, this.values.copy());
     }
 }

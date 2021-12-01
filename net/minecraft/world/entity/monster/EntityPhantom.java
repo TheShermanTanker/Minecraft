@@ -305,12 +305,12 @@ public class EntityPhantom extends EntityFlying implements IMonster {
         @Override
         public boolean canUse() {
             EntityLiving livingEntity = EntityPhantom.this.getGoalTarget();
-            return livingEntity != null ? EntityPhantom.this.canAttack(EntityPhantom.this.getGoalTarget(), PathfinderTargetCondition.DEFAULT) : false;
+            return livingEntity != null ? EntityPhantom.this.canAttack(livingEntity, PathfinderTargetCondition.DEFAULT) : false;
         }
 
         @Override
         public void start() {
-            this.nextSweepTick = 10;
+            this.nextSweepTick = this.adjustedTickDelay(10);
             EntityPhantom.this.attackPhase = EntityPhantom.AttackPhase.CIRCLE;
             this.setAnchorAboveTarget();
         }
@@ -327,7 +327,7 @@ public class EntityPhantom extends EntityFlying implements IMonster {
                 if (this.nextSweepTick <= 0) {
                     EntityPhantom.this.attackPhase = EntityPhantom.AttackPhase.SWOOP;
                     this.setAnchorAboveTarget();
-                    this.nextSweepTick = (8 + EntityPhantom.this.random.nextInt(4)) * 20;
+                    this.nextSweepTick = this.adjustedTickDelay((8 + EntityPhantom.this.random.nextInt(4)) * 20);
                     EntityPhantom.this.playSound(SoundEffects.PHANTOM_SWOOP, 10.0F, 0.95F + EntityPhantom.this.random.nextFloat() * 0.1F);
                 }
             }
@@ -364,11 +364,11 @@ public class EntityPhantom extends EntityFlying implements IMonster {
 
         @Override
         public void tick() {
-            if (EntityPhantom.this.random.nextInt(350) == 0) {
+            if (EntityPhantom.this.random.nextInt(this.adjustedTickDelay(350)) == 0) {
                 this.height = -4.0F + EntityPhantom.this.random.nextFloat() * 9.0F;
             }
 
-            if (EntityPhantom.this.random.nextInt(250) == 0) {
+            if (EntityPhantom.this.random.nextInt(this.adjustedTickDelay(250)) == 0) {
                 ++this.distance;
                 if (this.distance > 15.0F) {
                     this.distance = 5.0F;
@@ -376,7 +376,7 @@ public class EntityPhantom extends EntityFlying implements IMonster {
                 }
             }
 
-            if (EntityPhantom.this.random.nextInt(450) == 0) {
+            if (EntityPhantom.this.random.nextInt(this.adjustedTickDelay(450)) == 0) {
                 this.angle = EntityPhantom.this.random.nextFloat() * 2.0F * (float)Math.PI;
                 this.selectNext();
             }
@@ -418,6 +418,10 @@ public class EntityPhantom extends EntityFlying implements IMonster {
     }
 
     class PathfinderGoalPhantomSweepAttack extends EntityPhantom.PathfinderGoalPhantomMoveTarget {
+        private static final int CAT_SEARCH_TICK_DELAY = 20;
+        private boolean isScaredOfCat;
+        private int catSearchTick;
+
         @Override
         public boolean canUse() {
             return EntityPhantom.this.getGoalTarget() != null && EntityPhantom.this.attackPhase == EntityPhantom.AttackPhase.SWOOP;
@@ -430,25 +434,30 @@ public class EntityPhantom extends EntityFlying implements IMonster {
                 return false;
             } else if (!livingEntity.isAlive()) {
                 return false;
-            } else if (!(livingEntity instanceof EntityHuman) || !((EntityHuman)livingEntity).isSpectator() && !((EntityHuman)livingEntity).isCreative()) {
+            } else {
+                if (livingEntity instanceof EntityHuman) {
+                    EntityHuman player = (EntityHuman)livingEntity;
+                    if (livingEntity.isSpectator() || player.isCreative()) {
+                        return false;
+                    }
+                }
+
                 if (!this.canUse()) {
                     return false;
                 } else {
-                    if (EntityPhantom.this.tickCount % 20 == 0) {
+                    if (EntityPhantom.this.tickCount > this.catSearchTick) {
+                        this.catSearchTick = EntityPhantom.this.tickCount + 20;
                         List<EntityCat> list = EntityPhantom.this.level.getEntitiesOfClass(EntityCat.class, EntityPhantom.this.getBoundingBox().inflate(16.0D), IEntitySelector.ENTITY_STILL_ALIVE);
-                        if (!list.isEmpty()) {
-                            for(EntityCat cat : list) {
-                                cat.hiss();
-                            }
 
-                            return false;
+                        for(EntityCat cat : list) {
+                            cat.hiss();
                         }
+
+                        this.isScaredOfCat = !list.isEmpty();
                     }
 
-                    return true;
+                    return !this.isScaredOfCat;
                 }
-            } else {
-                return false;
             }
         }
 
@@ -465,23 +474,25 @@ public class EntityPhantom extends EntityFlying implements IMonster {
         @Override
         public void tick() {
             EntityLiving livingEntity = EntityPhantom.this.getGoalTarget();
-            EntityPhantom.this.moveTargetPoint = new Vec3D(livingEntity.locX(), livingEntity.getY(0.5D), livingEntity.locZ());
-            if (EntityPhantom.this.getBoundingBox().inflate((double)0.2F).intersects(livingEntity.getBoundingBox())) {
-                EntityPhantom.this.attackEntity(livingEntity);
-                EntityPhantom.this.attackPhase = EntityPhantom.AttackPhase.CIRCLE;
-                if (!EntityPhantom.this.isSilent()) {
-                    EntityPhantom.this.level.triggerEffect(1039, EntityPhantom.this.getChunkCoordinates(), 0);
+            if (livingEntity != null) {
+                EntityPhantom.this.moveTargetPoint = new Vec3D(livingEntity.locX(), livingEntity.getY(0.5D), livingEntity.locZ());
+                if (EntityPhantom.this.getBoundingBox().inflate((double)0.2F).intersects(livingEntity.getBoundingBox())) {
+                    EntityPhantom.this.attackEntity(livingEntity);
+                    EntityPhantom.this.attackPhase = EntityPhantom.AttackPhase.CIRCLE;
+                    if (!EntityPhantom.this.isSilent()) {
+                        EntityPhantom.this.level.triggerEffect(1039, EntityPhantom.this.getChunkCoordinates(), 0);
+                    }
+                } else if (EntityPhantom.this.horizontalCollision || EntityPhantom.this.hurtTime > 0) {
+                    EntityPhantom.this.attackPhase = EntityPhantom.AttackPhase.CIRCLE;
                 }
-            } else if (EntityPhantom.this.horizontalCollision || EntityPhantom.this.hurtTime > 0) {
-                EntityPhantom.this.attackPhase = EntityPhantom.AttackPhase.CIRCLE;
-            }
 
+            }
         }
     }
 
     class PathfinderGoalPhantomTargetPlayer extends PathfinderGoal {
         private final PathfinderTargetCondition attackTargeting = PathfinderTargetCondition.forCombat().range(64.0D);
-        private int nextScanTick = 20;
+        private int nextScanTick = reducedTickDelay(20);
 
         @Override
         public boolean canUse() {
@@ -489,7 +500,7 @@ public class EntityPhantom extends EntityFlying implements IMonster {
                 --this.nextScanTick;
                 return false;
             } else {
-                this.nextScanTick = 60;
+                this.nextScanTick = reducedTickDelay(60);
                 List<EntityHuman> list = EntityPhantom.this.level.getNearbyPlayers(this.attackTargeting, EntityPhantom.this, EntityPhantom.this.getBoundingBox().grow(16.0D, 64.0D, 16.0D));
                 if (!list.isEmpty()) {
                     list.sort(Comparator.comparing(Entity::locY).reversed());

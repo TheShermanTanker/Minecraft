@@ -22,7 +22,7 @@ public class PacketPlayOutScoreboardDisplayObjective implements Packet<PacketLis
 
     public PacketPlayOutScoreboardDisplayObjective(PacketDataSerializer buf) {
         this.slot = buf.readByte();
-        this.objectiveName = buf.readUtf(16);
+        this.objectiveName = buf.readUtf();
     }
 
     @Override

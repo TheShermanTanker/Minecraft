@@ -2,6 +2,8 @@ package net.minecraft.core;
 
 import com.google.common.base.MoreObjects;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.SystemUtils;
@@ -20,6 +22,16 @@ public class BaseBlockPosition implements Comparable<BaseBlockPosition> {
     private int x;
     private int y;
     private int z;
+
+    private static Function<BaseBlockPosition, DataResult<BaseBlockPosition>> checkOffsetAxes(int maxAbsValue) {
+        return (vec) -> {
+            return Math.abs(vec.getX()) < maxAbsValue && Math.abs(vec.getY()) < maxAbsValue && Math.abs(vec.getZ()) < maxAbsValue ? DataResult.success(vec) : DataResult.error("Position out of range, expected at most " + maxAbsValue + ": " + vec);
+        };
+    }
+
+    public static Codec<BaseBlockPosition> offsetCodec(int maxAbsValue) {
+        return CODEC.flatXmap(checkOffsetAxes(maxAbsValue), checkOffsetAxes(maxAbsValue));
+    }
 
     public BaseBlockPosition(int x, int y, int z) {
         this.x = x;

@@ -50,6 +50,7 @@ public class CriterionTriggerSlideDownBlock extends CriterionTriggerAbstract<Cri
     }
 
     public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
+        @Nullable
         private final Block block;
         private final CriterionTriggerProperties state;
 

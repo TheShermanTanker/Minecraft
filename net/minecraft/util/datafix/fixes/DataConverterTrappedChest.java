@@ -28,7 +28,6 @@ public class DataConverterTrappedChest extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getOutputSchema().getType(DataConverterTypes.CHUNK);
         Type<?> type2 = type.findFieldType("Level");

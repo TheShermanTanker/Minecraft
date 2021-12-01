@@ -1,21 +1,16 @@
 package net.minecraft.world.level.levelgen.synth;
 
-import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.List;
-import java.util.stream.IntStream;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSource;
 import net.minecraft.world.level.levelgen.SeededRandom;
 
-public class NoiseGenerator3 implements NoiseGenerator {
+public class NoiseGenerator3 {
     private final NoiseGenerator3Handler[] noiseLevels;
     private final double highestFreqValueFactor;
     private final double highestFreqInputFactor;
-
-    public NoiseGenerator3(RandomSource random, IntStream octaves) {
-        this(random, octaves.boxed().collect(ImmutableList.toImmutableList()));
-    }
 
     public NoiseGenerator3(RandomSource random, List<Integer> octaves) {
         this(random, new IntRBTreeSet(octaves));
@@ -48,7 +43,7 @@ public class NoiseGenerator3 implements NoiseGenerator {
 
                 if (j > 0) {
                     long n = (long)(simplexNoise.getValue(simplexNoise.xo, simplexNoise.yo, simplexNoise.zo) * (double)9.223372E18F);
-                    RandomSource randomSource = new SeededRandom(n);
+                    RandomSource randomSource = new SeededRandom(new LegacyRandomSource(n));
 
                     for(int o = l - 1; o >= 0; --o) {
                         if (o < k && octaves.contains(l - o)) {
@@ -80,10 +75,5 @@ public class NoiseGenerator3 implements NoiseGenerator {
         }
 
         return d;
-    }
-
-    @Override
-    public double getSurfaceNoiseValue(double x, double y, double yScale, double yMax) {
-        return this.getValue(x, y, true) * 0.55D;
     }
 }

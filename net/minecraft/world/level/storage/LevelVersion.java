@@ -8,14 +8,14 @@ public class LevelVersion {
     private final int levelDataVersion;
     private final long lastPlayed;
     private final String minecraftVersionName;
-    private final int minecraftVersion;
+    private final DataVersion minecraftVersion;
     private final boolean snapshot;
 
-    public LevelVersion(int levelFormatVersion, long lastPlayed, String versionName, int versionId, boolean stable) {
+    private LevelVersion(int levelFormatVersion, long lastPlayed, String versionName, int versionId, String series, boolean stable) {
         this.levelDataVersion = levelFormatVersion;
         this.lastPlayed = lastPlayed;
         this.minecraftVersionName = versionName;
-        this.minecraftVersion = versionId;
+        this.minecraftVersion = new DataVersion(versionId, series);
         this.snapshot = stable;
     }
 
@@ -23,7 +23,7 @@ public class LevelVersion {
         int i = dynamic.get("version").asInt(0);
         long l = dynamic.get("LastPlayed").asLong(0L);
         OptionalDynamic<?> optionalDynamic = dynamic.get("Version");
-        return optionalDynamic.result().isPresent() ? new LevelVersion(i, l, optionalDynamic.get("Name").asString(SharedConstants.getGameVersion().getName()), optionalDynamic.get("Id").asInt(SharedConstants.getGameVersion().getWorldVersion()), optionalDynamic.get("Snapshot").asBoolean(!SharedConstants.getGameVersion().isStable())) : new LevelVersion(i, l, "", 0, false);
+        return optionalDynamic.result().isPresent() ? new LevelVersion(i, l, optionalDynamic.get("Name").asString(SharedConstants.getCurrentVersion().getName()), optionalDynamic.get("Id").asInt(SharedConstants.getCurrentVersion().getDataVersion().getVersion()), optionalDynamic.get("Series").asString(DataVersion.MAIN_SERIES), optionalDynamic.get("Snapshot").asBoolean(!SharedConstants.getCurrentVersion().isStable())) : new LevelVersion(i, l, "", 0, DataVersion.MAIN_SERIES, false);
     }
 
     public int levelDataVersion() {
@@ -38,7 +38,7 @@ public class LevelVersion {
         return this.minecraftVersionName;
     }
 
-    public int minecraftVersion() {
+    public DataVersion minecraftVersion() {
         return this.minecraftVersion;
     }
 

@@ -17,7 +17,7 @@ public class PathfinderGoalFishSchool extends PathfinderGoal {
     }
 
     protected int nextStartTick(EntityFishSchool fish) {
-        return 200 + fish.getRandom().nextInt(200) % 20;
+        return reducedTickDelay(200 + fish.getRandom().nextInt(200) % 20);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class PathfinderGoalFishSchool extends PathfinderGoal {
     @Override
     public void tick() {
         if (--this.timeToRecalcPath <= 0) {
-            this.timeToRecalcPath = 10;
+            this.timeToRecalcPath = this.adjustedTickDelay(10);
             this.mob.pathToLeader();
         }
     }

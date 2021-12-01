@@ -16,8 +16,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParameter;
 public class StorageNbtProvider implements NbtProvider {
     final MinecraftKey id;
 
-    StorageNbtProvider(MinecraftKey resourceLocation) {
-        this.id = resourceLocation;
+    StorageNbtProvider(MinecraftKey source) {
+        this.id = source;
     }
 
     @Override

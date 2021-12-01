@@ -83,21 +83,21 @@ public class BlockTall extends Block implements IBlockWaterlogged {
     }
 
     protected int getAABBIndex(IBlockData state) {
-        return this.stateToIndex.computeIntIfAbsent(state, (blockState) -> {
+        return this.stateToIndex.computeIntIfAbsent(state, (statex) -> {
             int i = 0;
-            if (blockState.get(NORTH)) {
+            if (statex.get(NORTH)) {
                 i |= indexFor(EnumDirection.NORTH);
             }
 
-            if (blockState.get(EAST)) {
+            if (statex.get(EAST)) {
                 i |= indexFor(EnumDirection.EAST);
             }
 
-            if (blockState.get(SOUTH)) {
+            if (statex.get(SOUTH)) {
                 i |= indexFor(EnumDirection.SOUTH);
             }
 
-            if (blockState.get(WEST)) {
+            if (statex.get(WEST)) {
                 i |= indexFor(EnumDirection.WEST);
             }
 

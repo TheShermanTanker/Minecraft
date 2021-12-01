@@ -4,8 +4,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.util.profiling.GameProfilerFiller;
@@ -54,39 +56,74 @@ public class PathfinderGoalSelector {
         });
     }
 
+    private static boolean goalContainsAnyFlags(PathfinderGoalWrapped goal, EnumSet<PathfinderGoal.Type> controls) {
+        for(PathfinderGoal.Type flag : goal.getFlags()) {
+            if (controls.contains(flag)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean goalCanBeReplacedForAllFlags(PathfinderGoalWrapped goal, Map<PathfinderGoal.Type, PathfinderGoalWrapped> goalsByControl) {
+        for(PathfinderGoal.Type flag : goal.getFlags()) {
+            if (!goalsByControl.getOrDefault(flag, NO_GOAL).canBeReplacedBy(goal)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public void doTick() {
         GameProfilerFiller profilerFiller = this.profiler.get();
         profilerFiller.enter("goalCleanup");
-        this.getRunningGoals().filter((wrappedGoal) -> {
-            return !wrappedGoal.isRunning() || wrappedGoal.getFlags().stream().anyMatch(this.disabledFlags::contains) || !wrappedGoal.canContinueToUse();
-        }).forEach(PathfinderGoal::stop);
-        this.lockedFlags.forEach((flag, wrappedGoal) -> {
-            if (!wrappedGoal.isRunning()) {
-                this.lockedFlags.remove(flag);
-            }
 
-        });
+        for(PathfinderGoalWrapped wrappedGoal : this.availableGoals) {
+            if (wrappedGoal.isRunning() && (goalContainsAnyFlags(wrappedGoal, this.disabledFlags) || !wrappedGoal.canContinueToUse())) {
+                wrappedGoal.stop();
+            }
+        }
+
+        Iterator<Entry<PathfinderGoal.Type, PathfinderGoalWrapped>> iterator = this.lockedFlags.entrySet().iterator();
+
+        while(iterator.hasNext()) {
+            Entry<PathfinderGoal.Type, PathfinderGoalWrapped> entry = iterator.next();
+            if (!entry.getValue().isRunning()) {
+                iterator.remove();
+            }
+        }
+
         profilerFiller.exit();
         profilerFiller.enter("goalUpdate");
-        this.availableGoals.stream().filter((wrappedGoal) -> {
-            return !wrappedGoal.isRunning();
-        }).filter((wrappedGoal) -> {
-            return wrappedGoal.getFlags().stream().noneMatch(this.disabledFlags::contains);
-        }).filter((wrappedGoal) -> {
-            return wrappedGoal.getFlags().stream().allMatch((flag) -> {
-                return this.lockedFlags.getOrDefault(flag, NO_GOAL).canBeReplacedBy(wrappedGoal);
-            });
-        }).filter(PathfinderGoalWrapped::canUse).forEach((wrappedGoal) -> {
-            wrappedGoal.getFlags().forEach((flag) -> {
-                PathfinderGoalWrapped wrappedGoal2 = this.lockedFlags.getOrDefault(flag, NO_GOAL);
-                wrappedGoal2.stop();
-                this.lockedFlags.put(flag, wrappedGoal);
-            });
-            wrappedGoal.start();
-        });
+
+        for(PathfinderGoalWrapped wrappedGoal2 : this.availableGoals) {
+            if (!wrappedGoal2.isRunning() && !goalContainsAnyFlags(wrappedGoal2, this.disabledFlags) && goalCanBeReplacedForAllFlags(wrappedGoal2, this.lockedFlags) && wrappedGoal2.canUse()) {
+                for(PathfinderGoal.Type flag : wrappedGoal2.getFlags()) {
+                    PathfinderGoalWrapped wrappedGoal3 = this.lockedFlags.getOrDefault(flag, NO_GOAL);
+                    wrappedGoal3.stop();
+                    this.lockedFlags.put(flag, wrappedGoal2);
+                }
+
+                wrappedGoal2.start();
+            }
+        }
+
         profilerFiller.exit();
+        this.tickRunningGoals(true);
+    }
+
+    public void tickRunningGoals(boolean tickAll) {
+        GameProfilerFiller profilerFiller = this.profiler.get();
         profilerFiller.enter("goalTick");
-        this.getRunningGoals().forEach(PathfinderGoalWrapped::tick);
+
+        for(PathfinderGoalWrapped wrappedGoal : this.availableGoals) {
+            if (wrappedGoal.isRunning() && (tickAll || wrappedGoal.requiresUpdateEveryTick())) {
+                wrappedGoal.tick();
+            }
+        }
+
         profilerFiller.exit();
     }
 

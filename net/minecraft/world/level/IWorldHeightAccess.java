@@ -43,4 +43,18 @@ public interface IWorldHeightAccess {
     default int getSectionYFromSectionIndex(int index) {
         return index + this.getMinSection();
     }
+
+    static IWorldHeightAccess create(int bottomY, int height) {
+        return new IWorldHeightAccess() {
+            @Override
+            public int getHeight() {
+                return height;
+            }
+
+            @Override
+            public int getMinBuildHeight() {
+                return bottomY;
+            }
+        };
+    }
 }

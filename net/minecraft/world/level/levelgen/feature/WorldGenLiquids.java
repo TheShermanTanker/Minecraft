@@ -70,7 +70,7 @@ public class WorldGenLiquids extends WorldGenerator<WorldGenFeatureHellFlowingLa
 
                 if (j == springConfiguration.rockCount && k == springConfiguration.holeCount) {
                     worldGenLevel.setTypeAndData(blockPos, springConfiguration.state.getBlockData(), 2);
-                    worldGenLevel.getFluidTickList().scheduleTick(blockPos, springConfiguration.state.getType(), 0);
+                    worldGenLevel.scheduleTick(blockPos, springConfiguration.state.getType(), 0);
                     ++i;
                 }
 

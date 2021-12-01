@@ -53,7 +53,7 @@ public class BlockLightningRod extends BlockRod implements IBlockWaterlogged {
     @Override
     public IBlockData updateState(IBlockData state, EnumDirection direction, IBlockData neighborState, GeneratorAccess world, BlockPosition pos, BlockPosition neighborPos) {
         if (state.get(WATERLOGGED)) {
-            world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+            world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
         }
 
         return super.updateState(state, direction, neighborState, world, pos, neighborPos);
@@ -77,7 +77,7 @@ public class BlockLightningRod extends BlockRod implements IBlockWaterlogged {
     public void onLightningStrike(IBlockData state, World world, BlockPosition pos) {
         world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(true)), 3);
         this.updateNeighbours(state, world, pos);
-        world.getBlockTickList().scheduleTick(pos, this, 8);
+        world.scheduleTick(pos, this, 8);
         world.triggerEffect(3002, pos, state.get(FACING).getAxis().ordinal());
     }
 
@@ -112,7 +112,7 @@ public class BlockLightningRod extends BlockRod implements IBlockWaterlogged {
     @Override
     public void onPlace(IBlockData state, World world, BlockPosition pos, IBlockData oldState, boolean notify) {
         if (!state.is(oldState.getBlock())) {
-            if (state.get(POWERED) && !world.getBlockTickList().hasScheduledTick(pos, this)) {
+            if (state.get(POWERED) && !world.getBlockTicks().hasScheduledTick(pos, this)) {
                 world.setTypeAndData(pos, state.set(POWERED, Boolean.valueOf(false)), 18);
             }
 

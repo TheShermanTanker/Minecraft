@@ -442,8 +442,8 @@ public abstract class Container {
                         if (itemStack8.getCount() > q) {
                             slot5.set(itemStack8.cloneAndSubtract(q));
                         } else {
-                            slot5.set(itemStack8);
                             inventory.setItem(button, ItemStack.EMPTY);
+                            slot5.set(itemStack8);
                         }
                     }
                 } else if (slot5.isAllowed(player) && slot5.isAllowed(itemStack8)) {
@@ -455,8 +455,8 @@ public abstract class Container {
                             player.drop(itemStack9, true);
                         }
                     } else {
-                        slot5.set(itemStack8);
                         inventory.setItem(button, itemStack9);
+                        slot5.set(itemStack8);
                         slot5.onTake(player, itemStack9);
                     }
                 }

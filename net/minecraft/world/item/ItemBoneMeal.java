@@ -83,7 +83,7 @@ public class ItemBoneMeal extends Item {
             } else {
                 Random random = world.getRandom();
 
-                label80:
+                label76:
                 for(int i = 0; i < 128; ++i) {
                     BlockPosition blockPos2 = blockPos;
                     IBlockData blockState = Blocks.SEAGRASS.getBlockData();
@@ -91,12 +91,12 @@ public class ItemBoneMeal extends Item {
                     for(int j = 0; j < i / 16; ++j) {
                         blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
                         if (world.getType(blockPos2).isCollisionShapeFullBlock(world, blockPos2)) {
-                            continue label80;
+                            continue label76;
                         }
                     }
 
                     Optional<ResourceKey<BiomeBase>> optional = world.getBiomeName(blockPos2);
-                    if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN)) || Objects.equals(optional, Optional.of(Biomes.DEEP_WARM_OCEAN))) {
+                    if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN))) {
                         if (i == 0 && facing != null && facing.getAxis().isHorizontal()) {
                             blockState = TagsBlock.WALL_CORALS.getRandomElement(world.random).getBlockData().set(BlockCoralFanWallAbstract.FACING, facing);
                         } else if (random.nextInt(4) == 0) {

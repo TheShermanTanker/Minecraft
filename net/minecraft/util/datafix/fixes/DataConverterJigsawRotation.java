@@ -24,7 +24,6 @@ public class DataConverterJigsawRotation extends DataFix {
         }) : dynamic;
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("jigsaw_rotation_fix", this.getInputSchema().getType(DataConverterTypes.BLOCK_STATE), (typed) -> {
             return typed.update(DSL.remainderFinder(), DataConverterJigsawRotation::fix);

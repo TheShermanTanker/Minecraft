@@ -15,9 +15,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class LootItemFunctionSetTag extends LootItemFunctionConditional {
     final NBTTagCompound tag;
 
-    LootItemFunctionSetTag(LootItemCondition[] conditions, NBTTagCompound compoundTag) {
+    LootItemFunctionSetTag(LootItemCondition[] conditions, NBTTagCompound nbt) {
         super(conditions);
-        this.tag = compoundTag;
+        this.tag = nbt;
     }
 
     @Override
@@ -31,6 +31,8 @@ public class LootItemFunctionSetTag extends LootItemFunctionConditional {
         return stack;
     }
 
+    /** @deprecated */
+    @Deprecated
     public static LootItemFunctionConditional.Builder<?> setTag(NBTTagCompound nbt) {
         return simpleBuilder((conditions) -> {
             return new LootItemFunctionSetTag(conditions, nbt);

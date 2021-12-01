@@ -176,6 +176,11 @@ public class EntityBlaze extends EntityMonster {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void tick() {
             --this.attackTime;
             EntityLiving livingEntity = this.blaze.getGoalTarget();

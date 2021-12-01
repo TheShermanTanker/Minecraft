@@ -96,9 +96,9 @@ public class AutoRecipeStackManager {
         private final BitSet data;
         private final IntList path = new IntArrayList();
 
-        public RecipePicker(IRecipe<?> recipe2) {
-            this.recipe = recipe2;
-            this.ingredients.addAll(recipe2.getIngredients());
+        public RecipePicker(IRecipe<?> recipe) {
+            this.recipe = recipe;
+            this.ingredients.addAll(recipe.getIngredients());
             this.ingredients.removeIf(RecipeItemStack::isEmpty);
             this.ingredientCount = this.ingredients.size();
             this.items = this.getUniqueAvailableIngredientItems();

@@ -196,11 +196,11 @@ public class PacketPlayOutCommands implements Packet<PacketListenerPlayOut> {
         @Nullable
         CommandNode<ICompletionProvider> node;
 
-        Entry(@Nullable ArgumentBuilder<ICompletionProvider, ?> argumentBuilder, byte b, int i, int[] is) {
+        Entry(@Nullable ArgumentBuilder<ICompletionProvider, ?> argumentBuilder, byte flags, int redirectNodeIndex, int[] childNodeIndices) {
             this.builder = argumentBuilder;
-            this.flags = b;
-            this.redirect = i;
-            this.children = is;
+            this.flags = flags;
+            this.redirect = redirectNodeIndex;
+            this.children = childNodeIndices;
         }
 
         public boolean build(List<PacketPlayOutCommands.Entry> list) {

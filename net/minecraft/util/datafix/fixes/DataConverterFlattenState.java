@@ -10,7 +10,6 @@ public class DataConverterFlattenState extends DataFix {
         super(outputSchema, changesType);
     }
 
-    @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("BlockStateStructureTemplateFix", this.getInputSchema().getType(DataConverterTypes.BLOCK_STATE), (typed) -> {
             return typed.update(DSL.remainderFinder(), DataConverterFlattenData::upgradeBlockStateTag);

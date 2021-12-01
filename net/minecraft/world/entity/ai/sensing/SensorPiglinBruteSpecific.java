@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.boss.wither.EntityWither;
 import net.minecraft.world.entity.monster.EntitySkeletonWither;
 import net.minecraft.world.entity.monster.piglin.EntityPiglinAbstract;
@@ -24,19 +25,15 @@ public class SensorPiglinBruteSpecific extends Sensor<EntityLiving> {
     @Override
     protected void doTick(WorldServer world, EntityLiving entity) {
         BehaviorController<?> brain = entity.getBehaviorController();
-        Optional<EntityInsentient> optional = Optional.empty();
         List<EntityPiglinAbstract> list = Lists.newArrayList();
+        NearestVisibleLivingEntities nearestVisibleLivingEntities = brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(NearestVisibleLivingEntities.empty());
+        Optional<EntityInsentient> optional = nearestVisibleLivingEntities.findClosest((livingEntityx) -> {
+            return livingEntityx instanceof EntitySkeletonWither || livingEntityx instanceof EntityWither;
+        }).map(EntityInsentient.class::cast);
 
-        for(EntityLiving livingEntity : brain.getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
-            if (livingEntity instanceof EntitySkeletonWither || livingEntity instanceof EntityWither) {
-                optional = Optional.of((EntityInsentient)livingEntity);
-                break;
-            }
-        }
-
-        for(EntityLiving livingEntity2 : brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of())) {
-            if (livingEntity2 instanceof EntityPiglinAbstract && ((EntityPiglinAbstract)livingEntity2).isAdult()) {
-                list.add((EntityPiglinAbstract)livingEntity2);
+        for(EntityLiving livingEntity : brain.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES).orElse(ImmutableList.of())) {
+            if (livingEntity instanceof EntityPiglinAbstract && ((EntityPiglinAbstract)livingEntity).isAdult()) {
+                list.add((EntityPiglinAbstract)livingEntity);
             }
         }
 

@@ -64,7 +64,7 @@ public class BlockLadder extends Block implements IBlockWaterlogged {
             return Blocks.AIR.getBlockData();
         } else {
             if (state.get(WATERLOGGED)) {
-                world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
             }
 
             return super.updateState(state, direction, neighborState, world, pos, neighborPos);

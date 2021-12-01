@@ -56,6 +56,7 @@ public class CriterionTriggerPlacedBlock extends CriterionTriggerAbstract<Criter
     }
 
     public static class CriterionInstanceTrigger extends CriterionInstanceAbstract {
+        @Nullable
         private final Block block;
         private final CriterionTriggerProperties state;
         private final CriterionConditionLocation location;

@@ -12,6 +12,7 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.PacketPlayOutTileEntityData;
 import net.minecraft.world.INamableTileEntity;
 import net.minecraft.world.item.EnumColor;
+import net.minecraft.world.item.ItemBlock;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BlockBanner;
 import net.minecraft.world.level.block.BlockBannerAbstract;
@@ -27,7 +28,6 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
     public EnumColor baseColor;
     @Nullable
     public NBTTagList itemPatterns;
-    private boolean receivedData;
     @Nullable
     private List<Pair<EnumBannerPatternType, EnumColor>> patterns;
 
@@ -44,7 +44,7 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
     @Nullable
     public static NBTTagList getItemPatterns(ItemStack stack) {
         NBTTagList listTag = null;
-        NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
         if (compoundTag != null && compoundTag.hasKeyOfType("Patterns", 9)) {
             listTag = compoundTag.getList("Patterns", 10).copy();
         }
@@ -53,10 +53,13 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
     }
 
     public void fromItem(ItemStack stack, EnumColor baseColor) {
-        this.itemPatterns = getItemPatterns(stack);
         this.baseColor = baseColor;
+        this.fromItem(stack);
+    }
+
+    public void fromItem(ItemStack stack) {
+        this.itemPatterns = getItemPatterns(stack);
         this.patterns = null;
-        this.receivedData = true;
         this.name = stack.hasName() ? stack.getName() : null;
     }
 
@@ -76,8 +79,8 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (this.itemPatterns != null) {
             nbt.set("Patterns", this.itemPatterns);
         }
@@ -86,7 +89,6 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
             nbt.setString("CustomName", IChatBaseComponent.ChatSerializer.toJson(this.name));
         }
 
-        return nbt;
     }
 
     @Override
@@ -98,27 +100,25 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
 
         this.itemPatterns = nbt.getList("Patterns", 10);
         this.patterns = null;
-        this.receivedData = true;
     }
 
-    @Nullable
     @Override
     public PacketPlayOutTileEntityData getUpdatePacket() {
-        return new PacketPlayOutTileEntityData(this.worldPosition, 6, this.getUpdateTag());
+        return PacketPlayOutTileEntityData.create(this);
     }
 
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.save(new NBTTagCompound());
+        return this.saveWithoutMetadata();
     }
 
     public static int getPatternCount(ItemStack stack) {
-        NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
         return compoundTag != null && compoundTag.hasKey("Patterns") ? compoundTag.getList("Patterns", 10).size() : 0;
     }
 
     public List<Pair<EnumBannerPatternType, EnumColor>> getPatterns() {
-        if (this.patterns == null && this.receivedData) {
+        if (this.patterns == null) {
             this.patterns = createPatterns(this.baseColor, this.itemPatterns);
         }
 
@@ -143,15 +143,16 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
     }
 
     public static void removeLastPattern(ItemStack stack) {
-        NBTTagCompound compoundTag = stack.getTagElement("BlockEntityTag");
+        NBTTagCompound compoundTag = ItemBlock.getBlockEntityData(stack);
         if (compoundTag != null && compoundTag.hasKeyOfType("Patterns", 9)) {
             NBTTagList listTag = compoundTag.getList("Patterns", 10);
             if (!listTag.isEmpty()) {
                 listTag.remove(listTag.size() - 1);
                 if (listTag.isEmpty()) {
-                    stack.removeTag("BlockEntityTag");
+                    compoundTag.remove("Patterns");
                 }
 
+                ItemBlock.setBlockEntityData(stack, TileEntityTypes.BANNER, compoundTag);
             }
         }
     }
@@ -159,7 +160,9 @@ public class TileEntityBanner extends TileEntity implements INamableTileEntity {
     public ItemStack getItem() {
         ItemStack itemStack = new ItemStack(BlockBanner.byColor(this.baseColor));
         if (this.itemPatterns != null && !this.itemPatterns.isEmpty()) {
-            itemStack.getOrCreateTagElement("BlockEntityTag").set("Patterns", this.itemPatterns.copy());
+            NBTTagCompound compoundTag = new NBTTagCompound();
+            compoundTag.set("Patterns", this.itemPatterns.copy());
+            ItemBlock.setBlockEntityData(itemStack, this.getTileType(), compoundTag);
         }
 
         if (this.name != null) {

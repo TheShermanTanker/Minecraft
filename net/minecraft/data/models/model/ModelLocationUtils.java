@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 public class ModelLocationUtils {
+    /** @deprecated */
     @Deprecated
     public static MinecraftKey decorateBlockModelLocation(String name) {
         return new MinecraftKey("minecraft", "block/" + name);

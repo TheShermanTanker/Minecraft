@@ -14,9 +14,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class LootItemFunctionLimitCount extends LootItemFunctionConditional {
     final IntRange limiter;
 
-    LootItemFunctionLimitCount(LootItemCondition[] conditions, IntRange intRange) {
+    LootItemFunctionLimitCount(LootItemCondition[] conditions, IntRange limit) {
         super(conditions);
-        this.limiter = intRange;
+        this.limiter = limit;
     }
 
     @Override

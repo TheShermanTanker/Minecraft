@@ -8,7 +8,6 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.pathfinder.PathEntity;
-import net.minecraft.world.level.pathfinder.PathMode;
 import net.minecraft.world.level.pathfinder.PathPoint;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Pathfinder;
@@ -113,101 +112,6 @@ public class Navigation extends NavigationAbstract {
 
     }
 
-    @Override
-    protected boolean canMoveDirectly(Vec3D origin, Vec3D target, int sizeX, int sizeY, int sizeZ) {
-        int i = MathHelper.floor(origin.x);
-        int j = MathHelper.floor(origin.z);
-        double d = target.x - origin.x;
-        double e = target.z - origin.z;
-        double f = d * d + e * e;
-        if (f < 1.0E-8D) {
-            return false;
-        } else {
-            double g = 1.0D / Math.sqrt(f);
-            d = d * g;
-            e = e * g;
-            sizeX = sizeX + 2;
-            sizeZ = sizeZ + 2;
-            if (!this.canWalkOn(i, MathHelper.floor(origin.y), j, sizeX, sizeY, sizeZ, origin, d, e)) {
-                return false;
-            } else {
-                sizeX = sizeX - 2;
-                sizeZ = sizeZ - 2;
-                double h = 1.0D / Math.abs(d);
-                double k = 1.0D / Math.abs(e);
-                double l = (double)i - origin.x;
-                double m = (double)j - origin.z;
-                if (d >= 0.0D) {
-                    ++l;
-                }
-
-                if (e >= 0.0D) {
-                    ++m;
-                }
-
-                l = l / d;
-                m = m / e;
-                int n = d < 0.0D ? -1 : 1;
-                int o = e < 0.0D ? -1 : 1;
-                int p = MathHelper.floor(target.x);
-                int q = MathHelper.floor(target.z);
-                int r = p - i;
-                int s = q - j;
-
-                while(r * n > 0 || s * o > 0) {
-                    if (l < m) {
-                        l += h;
-                        i += n;
-                        r = p - i;
-                    } else {
-                        m += k;
-                        j += o;
-                        s = q - j;
-                    }
-
-                    if (!this.canWalkOn(i, MathHelper.floor(origin.y), j, sizeX, sizeY, sizeZ, origin, d, e)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        }
-    }
-
-    private boolean canWalkOn(int centerX, int centerY, int centerZ, int sizeX, int sizeY, int sizeZ, Vec3D entityPos, double lookVecX, double lookVecZ) {
-        int i = centerX - sizeX / 2;
-        int j = centerZ - sizeZ / 2;
-        if (!this.canWalkAbove(i, centerY, j, sizeX, sizeY, sizeZ, entityPos, lookVecX, lookVecZ)) {
-            return false;
-        } else {
-            for(int k = i; k < i + sizeX; ++k) {
-                for(int l = j; l < j + sizeZ; ++l) {
-                    double d = (double)k + 0.5D - entityPos.x;
-                    double e = (double)l + 0.5D - entityPos.z;
-                    if (!(d * lookVecX + e * lookVecZ < 0.0D)) {
-                        PathType blockPathTypes = this.nodeEvaluator.getBlockPathType(this.level, k, centerY - 1, l, this.mob, sizeX, sizeY, sizeZ, true, true);
-                        if (!this.hasValidPathType(blockPathTypes)) {
-                            return false;
-                        }
-
-                        blockPathTypes = this.nodeEvaluator.getBlockPathType(this.level, k, centerY, l, this.mob, sizeX, sizeY, sizeZ, true, true);
-                        float f = this.mob.getPathfindingMalus(blockPathTypes);
-                        if (f < 0.0F || f >= 8.0F) {
-                            return false;
-                        }
-
-                        if (blockPathTypes == PathType.DAMAGE_FIRE || blockPathTypes == PathType.DANGER_FIRE || blockPathTypes == PathType.DAMAGE_OTHER) {
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            return true;
-        }
-    }
-
     protected boolean hasValidPathType(PathType pathType) {
         if (pathType == PathType.WATER) {
             return false;
@@ -216,18 +120,6 @@ public class Navigation extends NavigationAbstract {
         } else {
             return pathType != PathType.OPEN;
         }
-    }
-
-    private boolean canWalkAbove(int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3D entityPos, double lookVecX, double lookVecZ) {
-        for(BlockPosition blockPos : BlockPosition.betweenClosed(new BlockPosition(x, y, z), new BlockPosition(x + sizeX - 1, y + sizeY - 1, z + sizeZ - 1))) {
-            double d = (double)blockPos.getX() + 0.5D - entityPos.x;
-            double e = (double)blockPos.getZ() + 0.5D - entityPos.z;
-            if (!(d * lookVecX + e * lookVecZ < 0.0D) && !this.level.getType(blockPos).isPathfindable(this.level, blockPos, PathMode.LAND)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public void setCanOpenDoors(boolean canPathThroughDoors) {

@@ -26,7 +26,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ChatDeserializer;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.WorldChunkManagerOverworld;
+import net.minecraft.world.level.biome.WorldChunkManagerMultiNoise;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionManager;
 import net.minecraft.world.level.dimension.WorldDimension;
@@ -77,21 +77,30 @@ public class GeneratorSettings {
     }
 
     public static GeneratorSettings demoSettings(IRegistryCustom registryManager) {
-        IRegistry<BiomeBase> registry = registryManager.registryOrThrow(IRegistry.BIOME_REGISTRY);
         int i = "North Carolina".hashCode();
-        IRegistry<DimensionManager> registry2 = registryManager.registryOrThrow(IRegistry.DIMENSION_TYPE_REGISTRY);
-        IRegistry<GeneratorSettingBase> registry3 = registryManager.registryOrThrow(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-        return new GeneratorSettings((long)i, true, true, withOverworld(registry2, DimensionManager.defaultDimensions(registry2, registry, registry3, (long)i), makeDefaultOverworld(registry, registry3, (long)i)));
+        return new GeneratorSettings((long)i, true, true, withOverworld(registryManager.registryOrThrow(IRegistry.DIMENSION_TYPE_REGISTRY), DimensionManager.defaultDimensions(registryManager, (long)i), makeDefaultOverworld(registryManager, (long)i)));
     }
 
-    public static GeneratorSettings makeDefault(IRegistry<DimensionManager> registry, IRegistry<BiomeBase> registry2, IRegistry<GeneratorSettingBase> registry3) {
+    public static GeneratorSettings makeDefault(IRegistryCustom registryManager) {
         long l = (new Random()).nextLong();
-        return new GeneratorSettings(l, true, false, withOverworld(registry, DimensionManager.defaultDimensions(registry, registry2, registry3, l), makeDefaultOverworld(registry2, registry3, l)));
+        return new GeneratorSettings(l, true, false, withOverworld(registryManager.registryOrThrow(IRegistry.DIMENSION_TYPE_REGISTRY), DimensionManager.defaultDimensions(registryManager, l), makeDefaultOverworld(registryManager, l)));
     }
 
-    public static ChunkGeneratorAbstract makeDefaultOverworld(IRegistry<BiomeBase> biomeRegistry, IRegistry<GeneratorSettingBase> chunkGeneratorSettingsRegistry, long seed) {
-        return new ChunkGeneratorAbstract(new WorldChunkManagerOverworld(seed, false, false, biomeRegistry), seed, () -> {
-            return chunkGeneratorSettingsRegistry.getOrThrow(GeneratorSettingBase.OVERWORLD);
+    public static ChunkGeneratorAbstract makeDefaultOverworld(IRegistryCustom registryManager, long seed) {
+        return makeDefaultOverworld(registryManager, seed, true);
+    }
+
+    public static ChunkGeneratorAbstract makeDefaultOverworld(IRegistryCustom registryManager, long seed, boolean bl) {
+        return makeOverworld(registryManager, seed, GeneratorSettingBase.OVERWORLD, bl);
+    }
+
+    public static ChunkGeneratorAbstract makeOverworld(IRegistryCustom registryManager, long seed, ResourceKey<GeneratorSettingBase> settings) {
+        return makeOverworld(registryManager, seed, settings, true);
+    }
+
+    public static ChunkGeneratorAbstract makeOverworld(IRegistryCustom registryManager, long seed, ResourceKey<GeneratorSettingBase> settings, boolean bl) {
+        return new ChunkGeneratorAbstract(registryManager.registryOrThrow(IRegistry.NOISE_REGISTRY), WorldChunkManagerMultiNoise.Preset.OVERWORLD.biomeSource(registryManager.registryOrThrow(IRegistry.BIOME_REGISTRY), bl), seed, () -> {
+            return registryManager.registryOrThrow(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(settings);
         });
     }
 
@@ -143,9 +152,15 @@ public class GeneratorSettings {
     }
 
     public ImmutableSet<ResourceKey<World>> levels() {
-        return this.dimensions().entrySet().stream().map((entry) -> {
-            return ResourceKey.create(IRegistry.DIMENSION_REGISTRY, entry.getKey().location());
-        }).collect(ImmutableSet.toImmutableSet());
+        return this.dimensions().entrySet().stream().map(Entry::getKey).map(GeneratorSettings::levelStemToLevel).collect(ImmutableSet.toImmutableSet());
+    }
+
+    public static ResourceKey<World> levelStemToLevel(ResourceKey<WorldDimension> dimensionOptionsKey) {
+        return ResourceKey.create(IRegistry.DIMENSION_REGISTRY, dimensionOptionsKey.location());
+    }
+
+    public static ResourceKey<WorldDimension> levelToLevelStem(ResourceKey<World> worldKey) {
+        return ResourceKey.create(IRegistry.LEVEL_STEM_REGISTRY, worldKey.location());
     }
 
     public boolean isDebugWorld() {
@@ -192,15 +207,14 @@ public class GeneratorSettings {
                 if (m != 0L) {
                     l = m;
                 }
-            } catch (NumberFormatException var18) {
+            } catch (NumberFormatException var17) {
                 l = (long)string2.hashCode();
             }
         }
 
         IRegistry<DimensionManager> registry = registryManager.registryOrThrow(IRegistry.DIMENSION_TYPE_REGISTRY);
         IRegistry<BiomeBase> registry2 = registryManager.registryOrThrow(IRegistry.BIOME_REGISTRY);
-        IRegistry<GeneratorSettingBase> registry3 = registryManager.registryOrThrow(IRegistry.NOISE_GENERATOR_SETTINGS_REGISTRY);
-        RegistryMaterials<WorldDimension> mappedRegistry = DimensionManager.defaultDimensions(registry, registry2, registry3, l);
+        RegistryMaterials<WorldDimension> mappedRegistry = DimensionManager.defaultDimensions(registryManager, l);
         switch(string5) {
         case "flat":
             JsonObject jsonObject = !string.isEmpty() ? ChatDeserializer.parse(string) : new JsonObject();
@@ -211,15 +225,11 @@ public class GeneratorSettings {
         case "debug_all_block_states":
             return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, new ChunkProviderDebug(registry2)));
         case "amplified":
-            return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, new ChunkGeneratorAbstract(new WorldChunkManagerOverworld(l, false, false, registry2), l, () -> {
-                return registry3.getOrThrow(GeneratorSettingBase.AMPLIFIED);
-            })));
+            return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeOverworld(registryManager, l, GeneratorSettingBase.AMPLIFIED)));
         case "largebiomes":
-            return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, new ChunkGeneratorAbstract(new WorldChunkManagerOverworld(l, false, true, registry2), l, () -> {
-                return registry3.getOrThrow(GeneratorSettingBase.OVERWORLD);
-            })));
+            return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeOverworld(registryManager, l, GeneratorSettingBase.LARGE_BIOMES)));
         default:
-            return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeDefaultOverworld(registry2, registry3, l)));
+            return new GeneratorSettings(l, bl, false, withOverworld(registry, mappedRegistry, makeDefaultOverworld(registryManager, l)));
         }
     }
 

@@ -38,57 +38,57 @@ public final class ProjectileHelper {
     }
 
     @Nullable
-    public static MovingObjectPositionEntity getEntityHitResult(Entity entity, Vec3D vec3, Vec3D vec32, AxisAlignedBB aABB, Predicate<Entity> predicate, double d) {
+    public static MovingObjectPositionEntity getEntityHitResult(Entity entity, Vec3D min, Vec3D max, AxisAlignedBB box, Predicate<Entity> predicate, double d) {
         World level = entity.level;
         double e = d;
         Entity entity2 = null;
-        Vec3D vec33 = null;
+        Vec3D vec3 = null;
 
-        for(Entity entity3 : level.getEntities(entity, aABB, predicate)) {
-            AxisAlignedBB aABB2 = entity3.getBoundingBox().inflate((double)entity3.getPickRadius());
-            Optional<Vec3D> optional = aABB2.clip(vec3, vec32);
-            if (aABB2.contains(vec3)) {
+        for(Entity entity3 : level.getEntities(entity, box, predicate)) {
+            AxisAlignedBB aABB = entity3.getBoundingBox().inflate((double)entity3.getPickRadius());
+            Optional<Vec3D> optional = aABB.clip(min, max);
+            if (aABB.contains(min)) {
                 if (e >= 0.0D) {
                     entity2 = entity3;
-                    vec33 = optional.orElse(vec3);
+                    vec3 = optional.orElse(min);
                     e = 0.0D;
                 }
             } else if (optional.isPresent()) {
-                Vec3D vec34 = optional.get();
-                double f = vec3.distanceSquared(vec34);
+                Vec3D vec32 = optional.get();
+                double f = min.distanceSquared(vec32);
                 if (f < e || e == 0.0D) {
                     if (entity3.getRootVehicle() == entity.getRootVehicle()) {
                         if (e == 0.0D) {
                             entity2 = entity3;
-                            vec33 = vec34;
+                            vec3 = vec32;
                         }
                     } else {
                         entity2 = entity3;
-                        vec33 = vec34;
+                        vec3 = vec32;
                         e = f;
                     }
                 }
             }
         }
 
-        return entity2 == null ? null : new MovingObjectPositionEntity(entity2, vec33);
+        return entity2 == null ? null : new MovingObjectPositionEntity(entity2, vec3);
     }
 
     @Nullable
-    public static MovingObjectPositionEntity getEntityHitResult(World world, Entity entity, Vec3D vec3, Vec3D vec32, AxisAlignedBB aABB, Predicate<Entity> predicate) {
-        return getEntityHitResult(world, entity, vec3, vec32, aABB, predicate, 0.3F);
+    public static MovingObjectPositionEntity getEntityHitResult(World world, Entity entity, Vec3D min, Vec3D max, AxisAlignedBB box, Predicate<Entity> predicate) {
+        return getEntityHitResult(world, entity, min, max, box, predicate, 0.3F);
     }
 
     @Nullable
-    public static MovingObjectPositionEntity getEntityHitResult(World level, Entity entity, Vec3D vec3, Vec3D vec32, AxisAlignedBB aABB, Predicate<Entity> predicate, float f) {
+    public static MovingObjectPositionEntity getEntityHitResult(World world, Entity entity, Vec3D min, Vec3D max, AxisAlignedBB box, Predicate<Entity> predicate, float f) {
         double d = Double.MAX_VALUE;
         Entity entity2 = null;
 
-        for(Entity entity3 : level.getEntities(entity, aABB, predicate)) {
-            AxisAlignedBB aABB2 = entity3.getBoundingBox().inflate((double)f);
-            Optional<Vec3D> optional = aABB2.clip(vec3, vec32);
+        for(Entity entity3 : world.getEntities(entity, box, predicate)) {
+            AxisAlignedBB aABB = entity3.getBoundingBox().inflate((double)f);
+            Optional<Vec3D> optional = aABB.clip(min, max);
             if (optional.isPresent()) {
-                double e = vec3.distanceSquared(optional.get());
+                double e = min.distanceSquared(optional.get());
                 if (e < d) {
                     entity2 = entity3;
                     d = e;
@@ -99,7 +99,7 @@ public final class ProjectileHelper {
         return entity2 == null ? null : new MovingObjectPositionEntity(entity2);
     }
 
-    public static void rotateTowardsMovement(Entity entity, float f) {
+    public static void rotateTowardsMovement(Entity entity, float delta) {
         Vec3D vec3 = entity.getMot();
         if (vec3.lengthSqr() != 0.0D) {
             double d = vec3.horizontalDistance();
@@ -122,8 +122,8 @@ public final class ProjectileHelper {
                 entity.yRotO += 360.0F;
             }
 
-            entity.setXRot(MathHelper.lerp(f, entity.xRotO, entity.getXRot()));
-            entity.setYRot(MathHelper.lerp(f, entity.yRotO, entity.getYRot()));
+            entity.setXRot(MathHelper.lerp(delta, entity.xRotO, entity.getXRot()));
+            entity.setYRot(MathHelper.lerp(delta, entity.yRotO, entity.getYRot()));
         }
     }
 

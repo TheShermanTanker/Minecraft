@@ -153,7 +153,9 @@ public abstract class IBlockDataHolder<O, S> {
             return stateHolder.owner;
         }, (object) -> {
             S stateHolder = ownerToStateFunction.apply(object);
-            return stateHolder.getStateMap().isEmpty() ? Codec.unit(stateHolder) : stateHolder.propertiesCodec.fieldOf("Properties").codec();
+            return stateHolder.getStateMap().isEmpty() ? Codec.unit(stateHolder) : stateHolder.propertiesCodec.codec().optionalFieldOf("Properties").xmap((optional) -> {
+                return optional.orElse(stateHolder);
+            }, Optional::of).codec();
         });
     }
 }

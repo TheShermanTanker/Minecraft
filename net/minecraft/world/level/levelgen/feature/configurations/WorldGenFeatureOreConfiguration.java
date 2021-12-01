@@ -4,12 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.tags.TagsBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureRuleTest;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureTestBlock;
-import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureTestTag;
 
 public class WorldGenFeatureOreConfiguration implements WorldGenFeatureConfiguration {
     public static final Codec<WorldGenFeatureOreConfiguration> CODEC = RecordCodecBuilder.create((instance) -> {
@@ -47,14 +43,6 @@ public class WorldGenFeatureOreConfiguration implements WorldGenFeatureConfigura
         return new WorldGenFeatureOreConfiguration.TargetBlockState(test, state);
     }
 
-    public static final class Target {
-        public static final DefinedStructureRuleTest NATURAL_STONE = new DefinedStructureTestTag(TagsBlock.BASE_STONE_OVERWORLD);
-        public static final DefinedStructureRuleTest STONE_ORE_REPLACEABLES = new DefinedStructureTestTag(TagsBlock.STONE_ORE_REPLACEABLES);
-        public static final DefinedStructureRuleTest DEEPSLATE_ORE_REPLACEABLES = new DefinedStructureTestTag(TagsBlock.DEEPSLATE_ORE_REPLACEABLES);
-        public static final DefinedStructureRuleTest NETHERRACK = new DefinedStructureTestBlock(Blocks.NETHERRACK);
-        public static final DefinedStructureRuleTest NETHER_ORE_REPLACEABLES = new DefinedStructureTestTag(TagsBlock.BASE_STONE_NETHER);
-    }
-
     public static class TargetBlockState {
         public static final Codec<WorldGenFeatureOreConfiguration.TargetBlockState> CODEC = RecordCodecBuilder.create((instance) -> {
             return instance.group(DefinedStructureRuleTest.CODEC.fieldOf("target").forGetter((targetBlockState) -> {
@@ -66,9 +54,9 @@ public class WorldGenFeatureOreConfiguration implements WorldGenFeatureConfigura
         public final DefinedStructureRuleTest target;
         public final IBlockData state;
 
-        TargetBlockState(DefinedStructureRuleTest ruleTest, IBlockData blockState) {
-            this.target = ruleTest;
-            this.state = blockState;
+        TargetBlockState(DefinedStructureRuleTest target, IBlockData state) {
+            this.target = target;
+            this.state = state;
         }
     }
 }

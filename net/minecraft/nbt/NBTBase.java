@@ -40,4 +40,14 @@ public interface NBTBase {
     }
 
     void accept(TagVisitor visitor);
+
+    StreamTagVisitor.ValueResult accept(StreamTagVisitor visitor);
+
+    default void acceptAsRoot(StreamTagVisitor visitor) {
+        StreamTagVisitor.ValueResult valueResult = visitor.visitRootEntry(this.getType());
+        if (valueResult == StreamTagVisitor.ValueResult.CONTINUE) {
+            this.accept(visitor);
+        }
+
+    }
 }

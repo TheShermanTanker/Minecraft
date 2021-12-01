@@ -4,39 +4,39 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.tags.TagsBlock;
-import net.minecraft.world.level.GeneratorAccess;
+import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureBlockPileConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NetherForestVegetationConfig;
 
-public class WorldGenFeatureNetherForestVegetation extends WorldGenerator<WorldGenFeatureBlockPileConfiguration> {
-    public WorldGenFeatureNetherForestVegetation(Codec<WorldGenFeatureBlockPileConfiguration> configCodec) {
+public class WorldGenFeatureNetherForestVegetation extends WorldGenerator<NetherForestVegetationConfig> {
+    public WorldGenFeatureNetherForestVegetation(Codec<NetherForestVegetationConfig> configCodec) {
         super(configCodec);
     }
 
     @Override
-    public boolean generate(FeaturePlaceContext<WorldGenFeatureBlockPileConfiguration> context) {
-        return place(context.level(), context.random(), context.origin(), context.config(), 8, 4);
-    }
-
-    public static boolean place(GeneratorAccess world, Random random, BlockPosition pos, WorldGenFeatureBlockPileConfiguration config, int i, int j) {
-        IBlockData blockState = world.getType(pos.below());
+    public boolean generate(FeaturePlaceContext<NetherForestVegetationConfig> context) {
+        GeneratorAccessSeed worldGenLevel = context.level();
+        BlockPosition blockPos = context.origin();
+        IBlockData blockState = worldGenLevel.getType(blockPos.below());
+        NetherForestVegetationConfig netherForestVegetationConfig = context.config();
+        Random random = context.random();
         if (!blockState.is(TagsBlock.NYLIUM)) {
             return false;
         } else {
-            int k = pos.getY();
-            if (k >= world.getMinBuildHeight() + 1 && k + 1 < world.getMaxBuildHeight()) {
-                int l = 0;
+            int i = blockPos.getY();
+            if (i >= worldGenLevel.getMinBuildHeight() + 1 && i + 1 < worldGenLevel.getMaxBuildHeight()) {
+                int j = 0;
 
-                for(int m = 0; m < i * i; ++m) {
-                    BlockPosition blockPos = pos.offset(random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
-                    IBlockData blockState2 = config.stateProvider.getState(random, blockPos);
-                    if (world.isEmpty(blockPos) && blockPos.getY() > world.getMinBuildHeight() && blockState2.canPlace(world, blockPos)) {
-                        world.setTypeAndData(blockPos, blockState2, 2);
-                        ++l;
+                for(int k = 0; k < netherForestVegetationConfig.spreadWidth * netherForestVegetationConfig.spreadWidth; ++k) {
+                    BlockPosition blockPos2 = blockPos.offset(random.nextInt(netherForestVegetationConfig.spreadWidth) - random.nextInt(netherForestVegetationConfig.spreadWidth), random.nextInt(netherForestVegetationConfig.spreadHeight) - random.nextInt(netherForestVegetationConfig.spreadHeight), random.nextInt(netherForestVegetationConfig.spreadWidth) - random.nextInt(netherForestVegetationConfig.spreadWidth));
+                    IBlockData blockState2 = netherForestVegetationConfig.stateProvider.getState(random, blockPos2);
+                    if (worldGenLevel.isEmpty(blockPos2) && blockPos2.getY() > worldGenLevel.getMinBuildHeight() && blockState2.canPlace(worldGenLevel, blockPos2)) {
+                        worldGenLevel.setTypeAndData(blockPos2, blockState2, 2);
+                        ++j;
                     }
                 }
 
-                return l > 0;
+                return j > 0;
             } else {
                 return false;
             }

@@ -59,8 +59,8 @@ public class WorldGenFeatureDefinedStructurePoolList extends WorldGenFeatureDefi
     public StructureBoundingBox getBoundingBox(DefinedStructureManager structureManager, BlockPosition pos, EnumBlockRotation rotation) {
         Stream<StructureBoundingBox> stream = this.elements.stream().filter((structurePoolElement) -> {
             return structurePoolElement != WorldGenFeatureDefinedStructurePoolEmpty.INSTANCE;
-        }).map((structurePoolElement) -> {
-            return structurePoolElement.getBoundingBox(structureManager, pos, rotation);
+        }).map((element) -> {
+            return element.getBoundingBox(structureManager, pos, rotation);
         });
         return StructureBoundingBox.encapsulatingBoxes(stream::iterator).orElseThrow(() -> {
             return new IllegalStateException("Unable to calculate boundingbox for ListPoolElement");
@@ -96,8 +96,8 @@ public class WorldGenFeatureDefinedStructurePoolList extends WorldGenFeatureDefi
     }
 
     private void setProjectionOnEachElement(WorldGenFeatureDefinedStructurePoolTemplate.Matching projection) {
-        this.elements.forEach((structurePoolElement) -> {
-            structurePoolElement.setProjection(projection);
+        this.elements.forEach((element) -> {
+            element.setProjection(projection);
         });
     }
 }

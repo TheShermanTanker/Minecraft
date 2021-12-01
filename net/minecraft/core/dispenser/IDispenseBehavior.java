@@ -77,8 +77,8 @@ import org.apache.logging.log4j.Logger;
 
 public interface IDispenseBehavior {
     Logger LOGGER = LogManager.getLogger();
-    IDispenseBehavior NOOP = (blockSource, itemStack) -> {
-        return itemStack;
+    IDispenseBehavior NOOP = (pointer, stack) -> {
+        return stack;
     };
 
     ItemStack dispense(ISourceBlock pointer, ItemStack stack);
@@ -112,24 +112,24 @@ public interface IDispenseBehavior {
         BlockDispenser.registerBehavior(Items.EGG, new DispenseBehaviorProjectile() {
             @Override
             protected IProjectile a(World world, IPosition position, ItemStack stack) {
-                return SystemUtils.make(new EntityEgg(world, position.getX(), position.getY(), position.getZ()), (thrownEgg) -> {
-                    thrownEgg.setItem(stack);
+                return SystemUtils.make(new EntityEgg(world, position.getX(), position.getY(), position.getZ()), (entity) -> {
+                    entity.setItem(stack);
                 });
             }
         });
         BlockDispenser.registerBehavior(Items.SNOWBALL, new DispenseBehaviorProjectile() {
             @Override
             protected IProjectile a(World world, IPosition position, ItemStack stack) {
-                return SystemUtils.make(new EntitySnowball(world, position.getX(), position.getY(), position.getZ()), (snowball) -> {
-                    snowball.setItem(stack);
+                return SystemUtils.make(new EntitySnowball(world, position.getX(), position.getY(), position.getZ()), (entity) -> {
+                    entity.setItem(stack);
                 });
             }
         });
         BlockDispenser.registerBehavior(Items.EXPERIENCE_BOTTLE, new DispenseBehaviorProjectile() {
             @Override
             protected IProjectile a(World world, IPosition position, ItemStack stack) {
-                return SystemUtils.make(new EntityThrownExpBottle(world, position.getX(), position.getY(), position.getZ()), (thrownExperienceBottle) -> {
-                    thrownExperienceBottle.setItem(stack);
+                return SystemUtils.make(new EntityThrownExpBottle(world, position.getX(), position.getY(), position.getZ()), (entity) -> {
+                    entity.setItem(stack);
                 });
             }
 
@@ -149,8 +149,8 @@ public interface IDispenseBehavior {
                 return (new DispenseBehaviorProjectile() {
                     @Override
                     protected IProjectile a(World world, IPosition position, ItemStack stack) {
-                        return SystemUtils.make(new EntityPotion(world, position.getX(), position.getY(), position.getZ()), (thrownPotion) -> {
-                            thrownPotion.setItem(stack);
+                        return SystemUtils.make(new EntityPotion(world, position.getX(), position.getY(), position.getZ()), (entity) -> {
+                            entity.setItem(stack);
                         });
                     }
 
@@ -172,8 +172,8 @@ public interface IDispenseBehavior {
                 return (new DispenseBehaviorProjectile() {
                     @Override
                     protected IProjectile a(World world, IPosition position, ItemStack stack) {
-                        return SystemUtils.make(new EntityPotion(world, position.getX(), position.getY(), position.getZ()), (thrownPotion) -> {
-                            thrownPotion.setItem(stack);
+                        return SystemUtils.make(new EntityPotion(world, position.getX(), position.getY(), position.getZ()), (entity) -> {
+                            entity.setItem(stack);
                         });
                     }
 
@@ -253,8 +253,8 @@ public interface IDispenseBehavior {
             protected ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
 
-                for(EntityHorseAbstract abstractHorse : pointer.getWorld().getEntitiesOfClass(EntityHorseAbstract.class, new AxisAlignedBB(blockPos), (abstractHorsex) -> {
-                    return abstractHorsex.isAlive() && abstractHorsex.canWearArmor();
+                for(EntityHorseAbstract abstractHorse : pointer.getWorld().getEntitiesOfClass(EntityHorseAbstract.class, new AxisAlignedBB(blockPos), (entity) -> {
+                    return entity.isAlive() && entity.canWearArmor();
                 })) {
                     if (abstractHorse.isArmor(stack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
                         abstractHorse.getSlot(401).set(stack.cloneAndSubtract(1));
@@ -291,8 +291,8 @@ public interface IDispenseBehavior {
             public ItemStack a(ISourceBlock pointer, ItemStack stack) {
                 BlockPosition blockPos = pointer.getBlockPosition().relative(pointer.getBlockData().get(BlockDispenser.FACING));
 
-                for(EntityHorseChestedAbstract abstractChestedHorse : pointer.getWorld().getEntitiesOfClass(EntityHorseChestedAbstract.class, new AxisAlignedBB(blockPos), (abstractChestedHorsex) -> {
-                    return abstractChestedHorsex.isAlive() && !abstractChestedHorsex.isCarryingChest();
+                for(EntityHorseChestedAbstract abstractChestedHorse : pointer.getWorld().getEntitiesOfClass(EntityHorseChestedAbstract.class, new AxisAlignedBB(blockPos), (entity) -> {
+                    return entity.isAlive() && !entity.isCarryingChest();
                 })) {
                     if (abstractChestedHorse.isTamed() && abstractChestedHorse.getSlot(499).set(stack)) {
                         stack.subtract(1);
@@ -335,8 +335,8 @@ public interface IDispenseBehavior {
                 double h = random.nextGaussian() * 0.05D + (double)direction.getAdjacentY();
                 double i = random.nextGaussian() * 0.05D + (double)direction.getAdjacentZ();
                 EntitySmallFireball smallFireball = new EntitySmallFireball(level, d, e, f, g, h, i);
-                level.addEntity(SystemUtils.make(smallFireball, (smallFireballx) -> {
-                    smallFireballx.setItem(stack);
+                level.addEntity(SystemUtils.make(smallFireball, (entity) -> {
+                    entity.setItem(stack);
                 }));
                 stack.subtract(1);
                 return stack;

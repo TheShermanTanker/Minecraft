@@ -12,13 +12,19 @@ import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.phys.AxisAlignedBB;
 
 public class PathfinderGoalNearestAttackableTarget<T extends EntityLiving> extends PathfinderGoalTarget {
+    private static final int DEFAULT_RANDOM_INTERVAL = 10;
     protected final Class<T> targetType;
     protected final int randomInterval;
+    @Nullable
     protected EntityLiving target;
     protected PathfinderTargetCondition targetConditions;
 
     public PathfinderGoalNearestAttackableTarget(EntityInsentient mob, Class<T> targetClass, boolean checkVisibility) {
-        this(mob, targetClass, checkVisibility, false);
+        this(mob, targetClass, 10, checkVisibility, false, (Predicate<EntityLiving>)null);
+    }
+
+    public PathfinderGoalNearestAttackableTarget(EntityInsentient mob, Class<T> targetClass, boolean checkVisibility, Predicate<EntityLiving> targetPredicate) {
+        this(mob, targetClass, 10, checkVisibility, false, targetPredicate);
     }
 
     public PathfinderGoalNearestAttackableTarget(EntityInsentient mob, Class<T> targetClass, boolean checkVisibility, boolean checkCanNavigate) {
@@ -28,7 +34,7 @@ public class PathfinderGoalNearestAttackableTarget<T extends EntityLiving> exten
     public PathfinderGoalNearestAttackableTarget(EntityInsentient mob, Class<T> targetClass, int reciprocalChance, boolean checkVisibility, boolean checkCanNavigate, @Nullable Predicate<EntityLiving> targetPredicate) {
         super(mob, checkVisibility, checkCanNavigate);
         this.targetType = targetClass;
-        this.randomInterval = reciprocalChance;
+        this.randomInterval = reducedTickDelay(reciprocalChance);
         this.setFlags(EnumSet.of(PathfinderGoal.Type.TARGET));
         this.targetConditions = PathfinderTargetCondition.forCombat().range(this.getFollowDistance()).selector(targetPredicate);
     }

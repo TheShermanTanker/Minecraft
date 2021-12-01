@@ -22,20 +22,20 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ArgumentMinecraftKeyRegistered implements ArgumentType<MinecraftKey> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("advancement.advancementNotFound", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("advancement.advancementNotFound", id);
     });
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("recipe.notFound", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("recipe.notFound", id);
     });
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("predicate.unknown", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("predicate.unknown", id);
     });
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("attribute.unknown", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("attribute.unknown", id);
     });
-    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("item_modifier.unknown", object);
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType((id) -> {
+        return new ChatMessage("item_modifier.unknown", id);
     });
 
     public static ArgumentMinecraftKeyRegistered id() {
@@ -93,12 +93,10 @@ public class ArgumentMinecraftKeyRegistered implements ArgumentType<MinecraftKey
         return context.getArgument(name, MinecraftKey.class);
     }
 
-    @Override
     public MinecraftKey parse(StringReader stringReader) throws CommandSyntaxException {
         return MinecraftKey.read(stringReader);
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

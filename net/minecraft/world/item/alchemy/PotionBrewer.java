@@ -101,15 +101,15 @@ public class PotionBrewer {
         return false;
     }
 
-    public static ItemStack mix(ItemStack input, ItemStack ingredient) {
-        if (!ingredient.isEmpty()) {
-            PotionRegistry potion = PotionUtil.getPotion(ingredient);
-            Item item = ingredient.getItem();
+    public static ItemStack mix(ItemStack ingredient, ItemStack input) {
+        if (!input.isEmpty()) {
+            PotionRegistry potion = PotionUtil.getPotion(input);
+            Item item = input.getItem();
             int i = 0;
 
             for(int j = CONTAINER_MIXES.size(); i < j; ++i) {
                 PotionBrewer.PredicatedCombination<Item> mix = CONTAINER_MIXES.get(i);
-                if (mix.from == item && mix.ingredient.test(input)) {
+                if (mix.from == item && mix.ingredient.test(ingredient)) {
                     return PotionUtil.setPotion(new ItemStack(mix.to), potion);
                 }
             }
@@ -118,13 +118,13 @@ public class PotionBrewer {
 
             for(int l = POTION_MIXES.size(); i < l; ++i) {
                 PotionBrewer.PredicatedCombination<PotionRegistry> mix2 = POTION_MIXES.get(i);
-                if (mix2.from == potion && mix2.ingredient.test(input)) {
+                if (mix2.from == potion && mix2.ingredient.test(ingredient)) {
                     return PotionUtil.setPotion(new ItemStack(item), mix2.to);
                 }
             }
         }
 
-        return ingredient;
+        return input;
     }
 
     public static void bootStrap() {

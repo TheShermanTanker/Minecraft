@@ -29,10 +29,9 @@ public class SculkSensorBlockEntity extends TileEntity implements VibrationListe
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         nbt.setInt("last_vibration_frequency", this.lastVibrationFrequency);
-        return nbt;
     }
 
     public VibrationListener getListener() {

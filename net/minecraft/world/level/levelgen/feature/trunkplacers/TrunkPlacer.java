@@ -19,7 +19,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeature
 import net.minecraft.world.level.levelgen.feature.foliageplacers.WorldGenFoilagePlacer;
 
 public abstract class TrunkPlacer {
-    public static final Codec<TrunkPlacer> CODEC = IRegistry.TRUNK_PLACER_TYPES.dispatch(TrunkPlacer::type, TrunkPlacers::codec);
+    public static final Codec<TrunkPlacer> CODEC = IRegistry.TRUNK_PLACER_TYPES.byNameCodec().dispatch(TrunkPlacer::type, TrunkPlacers::codec);
     private static final int MAX_BASE_HEIGHT = 32;
     private static final int MAX_RAND = 24;
     public static final int MAX_HEIGHT = 80;

@@ -52,7 +52,7 @@ public class CriterionConditionBlock {
             } else {
                 if (this.nbt != CriterionConditionNBT.ANY) {
                     TileEntity blockEntity = world.getTileEntity(pos);
-                    if (blockEntity == null || !this.nbt.matches(blockEntity.save(new NBTTagCompound()))) {
+                    if (blockEntity == null || !this.nbt.matches(blockEntity.saveWithFullMetadata())) {
                         return false;
                     }
                 }

@@ -10,7 +10,6 @@ public class DataConverterSchemaV1510 extends DataConverterSchemaNamed {
         super(versionKey, parent);
     }
 
-    @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
         map.put("minecraft:command_block_minecart", map.remove("minecraft:commandblock_minecart"));

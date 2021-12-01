@@ -25,6 +25,7 @@ public final class IEntitySelector {
     public static final Predicate<Entity> NO_SPECTATORS = (entity) -> {
         return !entity.isSpectator();
     };
+    public static final Predicate<Entity> CAN_BE_COLLIDED_WITH = NO_SPECTATORS.and(Entity::canBeCollidedWith);
 
     private IEntitySelector() {
     }
@@ -39,11 +40,11 @@ public final class IEntitySelector {
     public static Predicate<Entity> pushableBy(Entity entity) {
         ScoreboardTeamBase team = entity.getScoreboardTeam();
         ScoreboardTeamBase.EnumTeamPush collisionRule = team == null ? ScoreboardTeamBase.EnumTeamPush.ALWAYS : team.getCollisionRule();
-        return (Predicate<Entity>)(collisionRule == ScoreboardTeamBase.EnumTeamPush.NEVER ? Predicates.alwaysFalse() : NO_SPECTATORS.and((entity2) -> {
-            if (!entity2.isCollidable()) {
+        return (Predicate<Entity>)(collisionRule == ScoreboardTeamBase.EnumTeamPush.NEVER ? Predicates.alwaysFalse() : NO_SPECTATORS.and((entityx) -> {
+            if (!entityx.isCollidable()) {
                 return false;
-            } else if (!entity.level.isClientSide || entity2 instanceof EntityHuman && ((EntityHuman)entity2).isLocalPlayer()) {
-                ScoreboardTeamBase team2 = entity2.getScoreboardTeam();
+            } else if (!entity.level.isClientSide || entityx instanceof EntityHuman && ((EntityHuman)entityx).isLocalPlayer()) {
+                ScoreboardTeamBase team2 = entityx.getScoreboardTeam();
                 ScoreboardTeamBase.EnumTeamPush collisionRule2 = team2 == null ? ScoreboardTeamBase.EnumTeamPush.ALWAYS : team2.getCollisionRule();
                 if (collisionRule2 == ScoreboardTeamBase.EnumTeamPush.NEVER) {
                     return false;

@@ -40,8 +40,8 @@ import net.minecraft.world.phys.MovingObjectPositionBlock;
 public class BlockDispenser extends BlockTileEntity {
     public static final BlockStateDirection FACING = BlockDirectional.FACING;
     public static final BlockStateBoolean TRIGGERED = BlockProperties.TRIGGERED;
-    public static final Map<Item, IDispenseBehavior> DISPENSER_REGISTRY = SystemUtils.make(new Object2ObjectOpenHashMap<>(), (object2ObjectOpenHashMap) -> {
-        object2ObjectOpenHashMap.defaultReturnValue(new DispenseBehaviorItem());
+    public static final Map<Item, IDispenseBehavior> DISPENSER_REGISTRY = SystemUtils.make(new Object2ObjectOpenHashMap<>(), (map) -> {
+        map.defaultReturnValue(new DispenseBehaviorItem());
     });
     private static final int TRIGGER_DURATION = 4;
 
@@ -99,7 +99,7 @@ public class BlockDispenser extends BlockTileEntity {
         boolean bl = world.isBlockIndirectlyPowered(pos) || world.isBlockIndirectlyPowered(pos.above());
         boolean bl2 = state.get(TRIGGERED);
         if (bl && !bl2) {
-            world.getBlockTickList().scheduleTick(pos, this, 4);
+            world.scheduleTick(pos, this, 4);
             world.setTypeAndData(pos, state.set(TRIGGERED, Boolean.valueOf(true)), 4);
         } else if (!bl && bl2) {
             world.setTypeAndData(pos, state.set(TRIGGERED, Boolean.valueOf(false)), 4);

@@ -42,12 +42,10 @@ public final class RegistryFileCodec<E> implements Codec<Supplier<E>> {
         this.allowInline = allowInlineDefinitions;
     }
 
-    @Override
     public <T> DataResult<T> encode(Supplier<E> supplier, DynamicOps<T> dynamicOps, T object) {
         return dynamicOps instanceof RegistryWriteOps ? ((RegistryWriteOps)dynamicOps).encode(supplier.get(), object, this.registryKey, this.elementCodec) : this.elementCodec.encode(supplier.get(), dynamicOps, object);
     }
 
-    @Override
     public <T> DataResult<Pair<Supplier<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
         return dynamicOps instanceof RegistryReadOps ? ((RegistryReadOps)dynamicOps).decodeElement(object, this.registryKey, this.elementCodec, this.allowInline) : this.elementCodec.decode(dynamicOps, object).map((pair) -> {
             return pair.mapFirst((object) -> {

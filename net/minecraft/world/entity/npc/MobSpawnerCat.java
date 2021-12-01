@@ -48,7 +48,7 @@ public class MobSpawnerCat implements MobSpawner {
                                 return this.spawnInVillage(world, blockPos);
                             }
 
-                            if (world.getStructureManager().getStructureAt(blockPos, true, StructureGenerator.SWAMP_HUT).isValid()) {
+                            if (world.getStructureManager().getStructureWithPieceAt(blockPos, StructureGenerator.SWAMP_HUT).isValid()) {
                                 return this.spawnInHut(world, blockPos);
                             }
                         }

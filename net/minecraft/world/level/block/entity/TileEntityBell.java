@@ -129,23 +129,23 @@ public class TileEntityBell extends TileEntity {
     }
 
     private static void makeRaidersGlow(World world, BlockPosition pos, List<EntityLiving> hearingEntities) {
-        hearingEntities.stream().filter((livingEntity) -> {
-            return isRaiderWithinRange(pos, livingEntity);
+        hearingEntities.stream().filter((entity) -> {
+            return isRaiderWithinRange(pos, entity);
         }).forEach(TileEntityBell::glow);
     }
 
     private static void showBellParticles(World world, BlockPosition pos, List<EntityLiving> hearingEntities) {
         MutableInt mutableInt = new MutableInt(16700985);
-        int i = (int)hearingEntities.stream().filter((livingEntity) -> {
-            return pos.closerThan(livingEntity.getPositionVector(), 48.0D);
+        int i = (int)hearingEntities.stream().filter((entity) -> {
+            return pos.closerThan(entity.getPositionVector(), 48.0D);
         }).count();
-        hearingEntities.stream().filter((livingEntity) -> {
-            return isRaiderWithinRange(pos, livingEntity);
-        }).forEach((livingEntity) -> {
+        hearingEntities.stream().filter((entity) -> {
+            return isRaiderWithinRange(pos, entity);
+        }).forEach((entity) -> {
             float f = 1.0F;
-            double d = Math.sqrt((livingEntity.locX() - (double)pos.getX()) * (livingEntity.locX() - (double)pos.getX()) + (livingEntity.locZ() - (double)pos.getZ()) * (livingEntity.locZ() - (double)pos.getZ()));
-            double e = (double)((float)pos.getX() + 0.5F) + 1.0D / d * (livingEntity.locX() - (double)pos.getX());
-            double g = (double)((float)pos.getZ() + 0.5F) + 1.0D / d * (livingEntity.locZ() - (double)pos.getZ());
+            double d = Math.sqrt((entity.locX() - (double)pos.getX()) * (entity.locX() - (double)pos.getX()) + (entity.locZ() - (double)pos.getZ()) * (entity.locZ() - (double)pos.getZ()));
+            double e = (double)((float)pos.getX() + 0.5F) + 1.0D / d * (entity.locX() - (double)pos.getX());
+            double g = (double)((float)pos.getZ() + 0.5F) + 1.0D / d * (entity.locZ() - (double)pos.getZ());
             int j = MathHelper.clamp((i - 21) / -2, 3, 15);
 
             for(int k = 0; k < j; ++k) {

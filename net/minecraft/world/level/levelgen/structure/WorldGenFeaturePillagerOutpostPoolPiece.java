@@ -11,7 +11,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.RegistryWriteOps;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
 import net.minecraft.world.level.levelgen.feature.structures.WorldGenFeatureDefinedStructureJigsawJunction;
 import net.minecraft.world.level.levelgen.feature.structures.WorldGenFeatureDefinedStructurePoolStructure;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,12 +42,12 @@ public class WorldGenFeaturePillagerOutpostPoolPiece extends StructurePiece {
         this.rotation = rotation;
     }
 
-    public WorldGenFeaturePillagerOutpostPoolPiece(WorldServer world, NBTTagCompound nbt) {
+    public WorldGenFeaturePillagerOutpostPoolPiece(StructurePieceSerializationContext context, NBTTagCompound nbt) {
         super(WorldGenFeatureStructurePieceType.JIGSAW, nbt);
-        this.structureManager = world.getStructureManager();
+        this.structureManager = context.structureManager();
         this.position = new BlockPosition(nbt.getInt("PosX"), nbt.getInt("PosY"), nbt.getInt("PosZ"));
         this.groundLevelDelta = nbt.getInt("ground_level_delta");
-        RegistryReadOps<NBTBase> registryReadOps = RegistryReadOps.create(DynamicOpsNBT.INSTANCE, world.getMinecraftServer().getResourceManager(), world.getMinecraftServer().getCustomRegistry());
+        RegistryReadOps<NBTBase> registryReadOps = RegistryReadOps.create(DynamicOpsNBT.INSTANCE, context.resourceManager(), context.registryAccess());
         this.element = WorldGenFeatureDefinedStructurePoolStructure.CODEC.parse(registryReadOps, nbt.getCompound("pool_element")).resultOrPartial(LOGGER::error).orElseThrow(() -> {
             return new IllegalStateException("Invalid pool element found");
         });
@@ -61,12 +61,12 @@ public class WorldGenFeaturePillagerOutpostPoolPiece extends StructurePiece {
     }
 
     @Override
-    protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
+    protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
         nbt.setInt("PosX", this.position.getX());
         nbt.setInt("PosY", this.position.getY());
         nbt.setInt("PosZ", this.position.getZ());
         nbt.setInt("ground_level_delta", this.groundLevelDelta);
-        RegistryWriteOps<NBTBase> registryWriteOps = RegistryWriteOps.create(DynamicOpsNBT.INSTANCE, world.getMinecraftServer().getCustomRegistry());
+        RegistryWriteOps<NBTBase> registryWriteOps = RegistryWriteOps.create(DynamicOpsNBT.INSTANCE, context.registryAccess());
         WorldGenFeatureDefinedStructurePoolStructure.CODEC.encodeStart(registryWriteOps, this.element).resultOrPartial(LOGGER::error).ifPresent((tag) -> {
             nbt.set("pool_element", tag);
         });
@@ -81,12 +81,12 @@ public class WorldGenFeaturePillagerOutpostPoolPiece extends StructurePiece {
     }
 
     @Override
-    public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-        return this.place(world, structureAccessor, chunkGenerator, random, boundingBox, pos, false);
+    public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        this.place(world, structureAccessor, chunkGenerator, random, chunkBox, pos, false);
     }
 
-    public boolean place(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, BlockPosition pos, boolean keepJigsaws) {
-        return this.element.place(this.structureManager, world, structureAccessor, chunkGenerator, this.position, pos, this.rotation, boundingBox, random, keepJigsaws);
+    public void place(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, BlockPosition pos, boolean keepJigsaws) {
+        this.element.place(this.structureManager, world, structureAccessor, chunkGenerator, this.position, pos, this.rotation, boundingBox, random, keepJigsaws);
     }
 
     @Override

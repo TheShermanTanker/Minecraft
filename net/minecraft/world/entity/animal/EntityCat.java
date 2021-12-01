@@ -104,6 +104,7 @@ public class EntityCat extends EntityTameableAnimal {
         map.put(10, new MinecraftKey("textures/entity/cat/all_black.png"));
     });
     private EntityCat.CatAvoidEntityGoal<EntityHuman> avoidPlayersGoal;
+    @Nullable
     private PathfinderGoalTempt temptGoal;
     private float lieDownAmount;
     private float lieDownAmountO;
@@ -383,7 +384,7 @@ public class EntityCat extends EntityTameableAnimal {
         }
 
         World level = world.getLevel();
-        if (level instanceof WorldServer && ((WorldServer)level).getStructureManager().getStructureAt(this.getChunkCoordinates(), true, StructureGenerator.SWAMP_HUT).isValid()) {
+        if (level instanceof WorldServer && ((WorldServer)level).getStructureManager().getStructureWithPieceAt(this.getChunkCoordinates(), StructureGenerator.SWAMP_HUT).isValid()) {
             this.setCatType(10);
             this.setPersistent();
         }
@@ -507,7 +508,9 @@ public class EntityCat extends EntityTameableAnimal {
 
     static class CatRelaxOnOwnerGoal extends PathfinderGoal {
         private final EntityCat cat;
+        @Nullable
         private EntityHuman ownerPlayer;
+        @Nullable
         private BlockPosition goalPos;
         private int onBedTicks;
 
@@ -608,7 +611,7 @@ public class EntityCat extends EntityTameableAnimal {
                 this.cat.getNavigation().moveTo((double)this.goalPos.getX(), (double)this.goalPos.getY(), (double)this.goalPos.getZ(), (double)1.1F);
                 if (this.cat.distanceToSqr(this.ownerPlayer) < 2.5D) {
                     ++this.onBedTicks;
-                    if (this.onBedTicks > 16) {
+                    if (this.onBedTicks > this.adjustedTickDelay(16)) {
                         this.cat.setLying(true);
                         this.cat.setRelaxStateOne(false);
                     } else {
@@ -636,9 +639,9 @@ public class EntityCat extends EntityTameableAnimal {
         @Override
         public void tick() {
             super.tick();
-            if (this.selectedPlayer == null && this.mob.getRandom().nextInt(600) == 0) {
+            if (this.selectedPlayer == null && this.mob.getRandom().nextInt(this.adjustedTickDelay(600)) == 0) {
                 this.selectedPlayer = this.player;
-            } else if (this.mob.getRandom().nextInt(500) == 0) {
+            } else if (this.mob.getRandom().nextInt(this.adjustedTickDelay(500)) == 0) {
                 this.selectedPlayer = null;
             }
 

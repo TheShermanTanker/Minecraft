@@ -4,8 +4,8 @@ import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.ai.attributes.AttributeMapBase;
 
 public class MobEffectAbsorption extends MobEffectBase {
-    protected MobEffectAbsorption(MobEffectInfo type, int color) {
-        super(type, color);
+    protected MobEffectAbsorption(MobEffectInfo category, int color) {
+        super(category, color);
     }
 
     @Override

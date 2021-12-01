@@ -93,8 +93,8 @@ public class ThreadedMailbox<T> implements IProfilerMeasured, Mailbox<T>, AutoCl
     @Override
     public void run() {
         try {
-            this.pollUntil((i) -> {
-                return i == 0;
+            this.pollUntil((runCount) -> {
+                return runCount == 0;
             });
         } finally {
             this.setAsIdle();
@@ -105,7 +105,7 @@ public class ThreadedMailbox<T> implements IProfilerMeasured, Mailbox<T>, AutoCl
 
     public void runAll() {
         try {
-            this.pollUntil((i) -> {
+            this.pollUntil((runCount) -> {
                 return true;
             });
         } finally {

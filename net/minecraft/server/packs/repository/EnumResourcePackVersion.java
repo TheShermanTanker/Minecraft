@@ -25,7 +25,7 @@ public enum EnumResourcePackVersion {
     }
 
     public static EnumResourcePackVersion forFormat(int packVersion, EnumResourcePackType type) {
-        int i = type.getVersion(SharedConstants.getGameVersion());
+        int i = type.getVersion(SharedConstants.getCurrentVersion());
         if (packVersion < i) {
             return TOO_OLD;
         } else {

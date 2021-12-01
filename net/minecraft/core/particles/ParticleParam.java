@@ -11,6 +11,7 @@ public interface ParticleParam {
 
     String writeToString();
 
+    /** @deprecated */
     @Deprecated
     public interface Deserializer<T extends ParticleParam> {
         T fromCommand(Particle<T> type, StringReader reader) throws CommandSyntaxException;

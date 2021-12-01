@@ -19,8 +19,8 @@ import net.minecraft.network.chat.ChatMessage;
 public class ArgumentTime implements ArgumentType<Integer> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0d", "0s", "0t", "0");
     private static final SimpleCommandExceptionType ERROR_INVALID_UNIT = new SimpleCommandExceptionType(new ChatMessage("argument.time.invalid_unit"));
-    private static final DynamicCommandExceptionType ERROR_INVALID_TICK_COUNT = new DynamicCommandExceptionType((object) -> {
-        return new ChatMessage("argument.time.invalid_tick_count", object);
+    private static final DynamicCommandExceptionType ERROR_INVALID_TICK_COUNT = new DynamicCommandExceptionType((time) -> {
+        return new ChatMessage("argument.time.invalid_tick_count", time);
     });
     private static final Object2IntMap<String> UNITS = new Object2IntOpenHashMap<>();
 
@@ -28,7 +28,6 @@ public class ArgumentTime implements ArgumentType<Integer> {
         return new ArgumentTime();
     }
 
-    @Override
     public Integer parse(StringReader stringReader) throws CommandSyntaxException {
         float f = stringReader.readFloat();
         String string = stringReader.readUnquotedString();
@@ -45,7 +44,6 @@ public class ArgumentTime implements ArgumentType<Integer> {
         }
     }
 
-    @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
         StringReader stringReader = new StringReader(suggestionsBuilder.getRemaining());
 
@@ -58,7 +56,6 @@ public class ArgumentTime implements ArgumentType<Integer> {
         return ICompletionProvider.suggest(UNITS.keySet(), suggestionsBuilder.createOffset(suggestionsBuilder.getStart() + stringReader.getCursor()));
     }
 
-    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }

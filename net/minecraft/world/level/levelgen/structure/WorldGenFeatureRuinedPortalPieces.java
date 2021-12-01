@@ -14,7 +14,6 @@ import net.minecraft.core.EnumDirection;
 import net.minecraft.nbt.DynamicOpsNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccess;
@@ -32,6 +31,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateBoolean;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
@@ -57,23 +57,23 @@ public class WorldGenFeatureRuinedPortalPieces extends DefinedStructurePiece {
     private final WorldGenFeatureRuinedPortalPieces.Position verticalPlacement;
     private final WorldGenFeatureRuinedPortalPieces.Properties properties;
 
-    public WorldGenFeatureRuinedPortalPieces(DefinedStructureManager structureManager, BlockPosition blockPos, WorldGenFeatureRuinedPortalPieces.Position verticalPlacement, WorldGenFeatureRuinedPortalPieces.Properties properties, MinecraftKey resourceLocation, DefinedStructure structureTemplate, EnumBlockRotation rotation, EnumBlockMirror mirror, BlockPosition blockPos2) {
-        super(WorldGenFeatureStructurePieceType.RUINED_PORTAL, 0, structureManager, resourceLocation, resourceLocation.toString(), makeSettings(mirror, rotation, verticalPlacement, blockPos2, properties), blockPos);
+    public WorldGenFeatureRuinedPortalPieces(DefinedStructureManager manager, BlockPosition pos, WorldGenFeatureRuinedPortalPieces.Position verticalPlacement, WorldGenFeatureRuinedPortalPieces.Properties properties, MinecraftKey id, DefinedStructure structure, EnumBlockRotation rotation, EnumBlockMirror mirror, BlockPosition blockPos) {
+        super(WorldGenFeatureStructurePieceType.RUINED_PORTAL, 0, manager, id, id.toString(), makeSettings(mirror, rotation, verticalPlacement, blockPos, properties), pos);
         this.verticalPlacement = verticalPlacement;
         this.properties = properties;
     }
 
-    public WorldGenFeatureRuinedPortalPieces(WorldServer world, NBTTagCompound nbt) {
-        super(WorldGenFeatureStructurePieceType.RUINED_PORTAL, nbt, world, (resourceLocation) -> {
-            return makeSettings(world, nbt, resourceLocation);
+    public WorldGenFeatureRuinedPortalPieces(DefinedStructureManager manager, NBTTagCompound nbt) {
+        super(WorldGenFeatureStructurePieceType.RUINED_PORTAL, nbt, manager, (id) -> {
+            return makeSettings(manager, nbt, id);
         });
         this.verticalPlacement = WorldGenFeatureRuinedPortalPieces.Position.byName(nbt.getString("VerticalPlacement"));
         this.properties = WorldGenFeatureRuinedPortalPieces.Properties.CODEC.parse(new Dynamic<>(DynamicOpsNBT.INSTANCE, nbt.get("Properties"))).getOrThrow(true, LOGGER::error);
     }
 
     @Override
-    protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-        super.addAdditionalSaveData(world, nbt);
+    protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+        super.addAdditionalSaveData(context, nbt);
         nbt.setString("Rotation", this.placeSettings.getRotation().name());
         nbt.setString("Mirror", this.placeSettings.getMirror().name());
         nbt.setString("VerticalPlacement", this.verticalPlacement.getName());
@@ -82,8 +82,8 @@ public class WorldGenFeatureRuinedPortalPieces extends DefinedStructurePiece {
         });
     }
 
-    private static DefinedStructureInfo makeSettings(WorldServer world, NBTTagCompound nbt, MinecraftKey id) {
-        DefinedStructure structureTemplate = world.getStructureManager().getOrCreate(id);
+    private static DefinedStructureInfo makeSettings(DefinedStructureManager manager, NBTTagCompound nbt, MinecraftKey id) {
+        DefinedStructure structureTemplate = manager.getOrCreate(id);
         BlockPosition blockPos = new BlockPosition(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2);
         return makeSettings(EnumBlockMirror.valueOf(nbt.getString("Mirror")), EnumBlockRotation.valueOf(nbt.getString("Rotation")), WorldGenFeatureRuinedPortalPieces.Position.byName(nbt.getString("VerticalPlacement")), blockPos, WorldGenFeatureRuinedPortalPieces.Properties.CODEC.parse(new Dynamic<>(DynamicOpsNBT.INSTANCE, nbt.get("Properties"))).getOrThrow(true, LOGGER::error));
     }
@@ -114,29 +114,26 @@ public class WorldGenFeatureRuinedPortalPieces extends DefinedStructurePiece {
     }
 
     @Override
-    public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
-        StructureBoundingBox boundingBox2 = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-        if (!boundingBox.isInside(boundingBox2.getCenter())) {
-            return true;
-        } else {
-            boundingBox.encapsulate(boundingBox2);
-            boolean bl = super.postProcess(world, structureAccessor, chunkGenerator, random, boundingBox, chunkPos, pos);
+    public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        StructureBoundingBox boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
+        if (chunkBox.isInside(boundingBox.getCenter())) {
+            chunkBox.encapsulate(boundingBox);
+            super.postProcess(world, structureAccessor, chunkGenerator, random, chunkBox, chunkPos, pos);
             this.spreadNetherrack(random, world);
             this.addNetherrackDripColumnsBelowPortal(random, world);
             if (this.properties.vines || this.properties.overgrown) {
-                BlockPosition.betweenClosedStream(this.getBoundingBox()).forEach((blockPos) -> {
+                BlockPosition.betweenClosedStream(this.getBoundingBox()).forEach((posx) -> {
                     if (this.properties.vines) {
-                        this.maybeAddVines(random, world, blockPos);
+                        this.maybeAddVines(random, world, posx);
                     }
 
                     if (this.properties.overgrown) {
-                        this.maybeAddLeavesAbove(random, world, blockPos);
+                        this.maybeAddLeavesAbove(random, world, posx);
                     }
 
                 });
             }
 
-            return bl;
         }
     }
 
@@ -310,7 +307,7 @@ public class WorldGenFeatureRuinedPortalPieces extends DefinedStructurePiece {
         public Properties() {
         }
 
-        public <T> Properties(boolean cold, float mossiness, boolean airPocket, boolean overgrown, boolean vines, boolean replaceWithBlackstone) {
+        public Properties(boolean cold, float mossiness, boolean airPocket, boolean overgrown, boolean vines, boolean replaceWithBlackstone) {
             this.cold = cold;
             this.mossiness = mossiness;
             this.airPocket = airPocket;

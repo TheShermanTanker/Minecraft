@@ -22,7 +22,6 @@ public class DataConverterCauldronRename extends DataFix {
         }
     }
 
-    @Override
     protected TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("cauldron_rename_fix", this.getInputSchema().getType(DataConverterTypes.BLOCK_STATE), (typed) -> {
             return typed.update(DSL.remainderFinder(), DataConverterCauldronRename::fix);

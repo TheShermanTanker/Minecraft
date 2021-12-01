@@ -2,6 +2,8 @@ package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Random;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -11,15 +13,16 @@ import org.apache.logging.log4j.Logger;
 
 public class UniformHeight extends HeightProvider {
     public static final Codec<UniformHeight> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter((uniformHeight) -> {
-            return uniformHeight.minInclusive;
-        }), VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter((uniformHeight) -> {
-            return uniformHeight.maxInclusive;
+        return instance.group(VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter((provider) -> {
+            return provider.minInclusive;
+        }), VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter((provider) -> {
+            return provider.maxInclusive;
         })).apply(instance, UniformHeight::new);
     });
     private static final Logger LOGGER = LogManager.getLogger();
     private final VerticalAnchor minInclusive;
     private final VerticalAnchor maxInclusive;
+    private final LongSet warnedFor = new LongOpenHashSet();
 
     private UniformHeight(VerticalAnchor minOffset, VerticalAnchor maxOffset) {
         this.minInclusive = minOffset;
@@ -35,7 +38,10 @@ public class UniformHeight extends HeightProvider {
         int i = this.minInclusive.resolveY(context);
         int j = this.maxInclusive.resolveY(context);
         if (i > j) {
-            LOGGER.warn("Empty height range: {}", (Object)this);
+            if (this.warnedFor.add((long)i << 32 | (long)j)) {
+                LOGGER.warn("Empty height range: {}", (Object)this);
+            }
+
             return i;
         } else {
             return MathHelper.randomBetweenInclusive(random, i, j);

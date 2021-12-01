@@ -12,10 +12,10 @@ public class ParticleParamRedstone extends ParticleParamDust {
     public static final Vector3fa REDSTONE_PARTICLE_COLOR = new Vector3fa(Vec3D.fromRGB24(16711680));
     public static final ParticleParamRedstone REDSTONE = new ParticleParamRedstone(REDSTONE_PARTICLE_COLOR, 1.0F);
     public static final Codec<ParticleParamRedstone> CODEC = RecordCodecBuilder.create((instance) -> {
-        return instance.group(Vector3fa.CODEC.fieldOf("color").forGetter((dustParticleOptions) -> {
-            return dustParticleOptions.color;
-        }), Codec.FLOAT.fieldOf("scale").forGetter((dustParticleOptions) -> {
-            return dustParticleOptions.scale;
+        return instance.group(Vector3fa.CODEC.fieldOf("color").forGetter((effect) -> {
+            return effect.color;
+        }), Codec.FLOAT.fieldOf("scale").forGetter((effect) -> {
+            return effect.scale;
         })).apply(instance, ParticleParamRedstone::new);
     });
     public static final ParticleParam.Deserializer<ParticleParamRedstone> DESERIALIZER = new ParticleParam.Deserializer<ParticleParamRedstone>() {

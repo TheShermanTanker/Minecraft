@@ -1,12 +1,12 @@
 package net.minecraft.world.level.levelgen.structure;
 
+import java.util.Map;
 import java.util.Random;
 import net.minecraft.SystemUtils;
 import net.minecraft.core.BaseBlockPosition;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.StructureManager;
@@ -18,6 +18,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.HeightMap;
 import net.minecraft.world.level.levelgen.feature.WorldGenFeatureStructurePieceType;
 import net.minecraft.world.level.levelgen.feature.configurations.WorldGenFeatureShipwreckConfiguration;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureInfo;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.DefinedStructureProcessorBlockIgnore;
@@ -27,10 +28,11 @@ public class WorldGenShipwreck {
     static final BlockPosition PIVOT = new BlockPosition(4, 0, 15);
     private static final MinecraftKey[] STRUCTURE_LOCATION_BEACHED = new MinecraftKey[]{new MinecraftKey("shipwreck/with_mast"), new MinecraftKey("shipwreck/sideways_full"), new MinecraftKey("shipwreck/sideways_fronthalf"), new MinecraftKey("shipwreck/sideways_backhalf"), new MinecraftKey("shipwreck/rightsideup_full"), new MinecraftKey("shipwreck/rightsideup_fronthalf"), new MinecraftKey("shipwreck/rightsideup_backhalf"), new MinecraftKey("shipwreck/with_mast_degraded"), new MinecraftKey("shipwreck/rightsideup_full_degraded"), new MinecraftKey("shipwreck/rightsideup_fronthalf_degraded"), new MinecraftKey("shipwreck/rightsideup_backhalf_degraded")};
     private static final MinecraftKey[] STRUCTURE_LOCATION_OCEAN = new MinecraftKey[]{new MinecraftKey("shipwreck/with_mast"), new MinecraftKey("shipwreck/upsidedown_full"), new MinecraftKey("shipwreck/upsidedown_fronthalf"), new MinecraftKey("shipwreck/upsidedown_backhalf"), new MinecraftKey("shipwreck/sideways_full"), new MinecraftKey("shipwreck/sideways_fronthalf"), new MinecraftKey("shipwreck/sideways_backhalf"), new MinecraftKey("shipwreck/rightsideup_full"), new MinecraftKey("shipwreck/rightsideup_fronthalf"), new MinecraftKey("shipwreck/rightsideup_backhalf"), new MinecraftKey("shipwreck/with_mast_degraded"), new MinecraftKey("shipwreck/upsidedown_full_degraded"), new MinecraftKey("shipwreck/upsidedown_fronthalf_degraded"), new MinecraftKey("shipwreck/upsidedown_backhalf_degraded"), new MinecraftKey("shipwreck/sideways_full_degraded"), new MinecraftKey("shipwreck/sideways_fronthalf_degraded"), new MinecraftKey("shipwreck/sideways_backhalf_degraded"), new MinecraftKey("shipwreck/rightsideup_full_degraded"), new MinecraftKey("shipwreck/rightsideup_fronthalf_degraded"), new MinecraftKey("shipwreck/rightsideup_backhalf_degraded")};
+    static final Map<String, MinecraftKey> MARKERS_TO_LOOT = Map.of("map_chest", LootTables.SHIPWRECK_MAP, "treasure_chest", LootTables.SHIPWRECK_TREASURE, "supply_chest", LootTables.SHIPWRECK_SUPPLY);
 
-    public static void addPieces(DefinedStructureManager structureManager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor structurePieceAccessor, Random random, WorldGenFeatureShipwreckConfiguration config) {
+    public static void addPieces(DefinedStructureManager structureManager, BlockPosition pos, EnumBlockRotation rotation, StructurePieceAccessor holder, Random random, WorldGenFeatureShipwreckConfiguration config) {
         MinecraftKey resourceLocation = SystemUtils.getRandom(config.isBeached ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, random);
-        structurePieceAccessor.addPiece(new WorldGenShipwreck.ShipwreckPiece(structureManager, resourceLocation, pos, rotation, config.isBeached));
+        holder.addPiece(new WorldGenShipwreck.ShipwreckPiece(structureManager, resourceLocation, pos, rotation, config.isBeached));
     }
 
     public static class ShipwreckPiece extends DefinedStructurePiece {
@@ -41,16 +43,16 @@ public class WorldGenShipwreck {
             this.isBeached = grounded;
         }
 
-        public ShipwreckPiece(WorldServer world, NBTTagCompound nbt) {
-            super(WorldGenFeatureStructurePieceType.SHIPWRECK_PIECE, nbt, world, (resourceLocation) -> {
+        public ShipwreckPiece(DefinedStructureManager manager, NBTTagCompound nbt) {
+            super(WorldGenFeatureStructurePieceType.SHIPWRECK_PIECE, nbt, manager, (resourceLocation) -> {
                 return makeSettings(EnumBlockRotation.valueOf(nbt.getString("Rot")));
             });
             this.isBeached = nbt.getBoolean("isBeached");
         }
 
         @Override
-        protected void addAdditionalSaveData(WorldServer world, NBTTagCompound nbt) {
-            super.addAdditionalSaveData(world, nbt);
+        protected void addAdditionalSaveData(StructurePieceSerializationContext context, NBTTagCompound nbt) {
+            super.addAdditionalSaveData(context, nbt);
             nbt.setBoolean("isBeached", this.isBeached);
             nbt.setString("Rot", this.placeSettings.getRotation().name());
         }
@@ -61,18 +63,15 @@ public class WorldGenShipwreck {
 
         @Override
         protected void handleDataMarker(String metadata, BlockPosition pos, WorldAccess world, Random random, StructureBoundingBox boundingBox) {
-            if ("map_chest".equals(metadata)) {
-                TileEntityLootable.setLootTable(world, random, pos.below(), LootTables.SHIPWRECK_MAP);
-            } else if ("treasure_chest".equals(metadata)) {
-                TileEntityLootable.setLootTable(world, random, pos.below(), LootTables.SHIPWRECK_TREASURE);
-            } else if ("supply_chest".equals(metadata)) {
-                TileEntityLootable.setLootTable(world, random, pos.below(), LootTables.SHIPWRECK_SUPPLY);
+            MinecraftKey resourceLocation = WorldGenShipwreck.MARKERS_TO_LOOT.get(metadata);
+            if (resourceLocation != null) {
+                TileEntityLootable.setLootTable(world, random, pos.below(), resourceLocation);
             }
 
         }
 
         @Override
-        public boolean postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox boundingBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
+        public void postProcess(GeneratorAccessSeed world, StructureManager structureAccessor, ChunkGenerator chunkGenerator, Random random, StructureBoundingBox chunkBox, ChunkCoordIntPair chunkPos, BlockPosition pos) {
             int i = world.getMaxBuildHeight();
             int j = 0;
             BaseBlockPosition vec3i = this.template.getSize();
@@ -94,7 +93,7 @@ public class WorldGenShipwreck {
 
             int m = this.isBeached ? i - vec3i.getY() / 2 - random.nextInt(3) : j;
             this.templatePosition = new BlockPosition(this.templatePosition.getX(), m, this.templatePosition.getZ());
-            return super.postProcess(world, structureAccessor, chunkGenerator, random, boundingBox, chunkPos, pos);
+            super.postProcess(world, structureAccessor, chunkGenerator, random, chunkBox, chunkPos, pos);
         }
     }
 }

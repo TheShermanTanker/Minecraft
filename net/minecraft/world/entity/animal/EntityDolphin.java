@@ -2,9 +2,6 @@ package net.minecraft.world.entity.animal;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPosition;
@@ -14,7 +11,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.network.syncher.DataWatcherObject;
 import net.minecraft.network.syncher.DataWatcherRegistry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.sounds.SoundEffects;
@@ -59,11 +55,8 @@ import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.monster.EntityGuardian;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
-import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.pathfinder.PathMode;
 import net.minecraft.world.phys.Vec3D;
@@ -324,15 +317,6 @@ public class EntityDolphin extends EntityWaterAnimal {
         }
     }
 
-    public static boolean checkDolphinSpawnRules(EntityTypes<EntityDolphin> type, GeneratorAccess world, EnumMobSpawn spawnReason, BlockPosition pos, Random random) {
-        if (pos.getY() > 45 && pos.getY() < world.getSeaLevel()) {
-            Optional<ResourceKey<BiomeBase>> optional = world.getBiomeName(pos);
-            return (!Objects.equals(optional, Optional.of(Biomes.OCEAN)) || !Objects.equals(optional, Optional.of(Biomes.DEEP_OCEAN))) && world.getFluid(pos).is(TagsFluid.WATER);
-        } else {
-            return false;
-        }
-    }
-
     @Override
     protected SoundEffect getSoundHurt(DamageSource source) {
         return SoundEffects.DOLPHIN_HURT;
@@ -469,7 +453,7 @@ public class EntityDolphin extends EntityWaterAnimal {
 
                 this.dolphin.getControllerLook().setLookAt(vec32.x, vec32.y, vec32.z, (float)(this.dolphin.getMaxHeadYRot() + 20), (float)this.dolphin.getMaxHeadXRot());
                 this.dolphin.getNavigation().moveTo(vec32.x, vec32.y, vec32.z, 1.3D);
-                if (level.random.nextInt(80) == 0) {
+                if (level.random.nextInt(this.adjustedTickDelay(80)) == 0) {
                     level.broadcastEntityEffect(this.dolphin, (byte)38);
                 }
             }
@@ -480,6 +464,7 @@ public class EntityDolphin extends EntityWaterAnimal {
     static class DolphinSwimWithPlayerGoal extends PathfinderGoal {
         private final EntityDolphin dolphin;
         private final double speedModifier;
+        @Nullable
         private EntityHuman player;
 
         DolphinSwimWithPlayerGoal(EntityDolphin dolphin, double speed) {

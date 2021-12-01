@@ -16,10 +16,10 @@ public class LootItemFunctionSetCount extends LootItemFunctionConditional {
     final NumberProvider value;
     final boolean add;
 
-    LootItemFunctionSetCount(LootItemCondition[] conditions, NumberProvider numberProvider, boolean bl) {
+    LootItemFunctionSetCount(LootItemCondition[] conditions, NumberProvider countRange, boolean add) {
         super(conditions);
-        this.value = numberProvider;
-        this.add = bl;
+        this.value = countRange;
+        this.add = add;
     }
 
     @Override

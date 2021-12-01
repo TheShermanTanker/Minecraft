@@ -46,7 +46,6 @@ public class VoxelShapeMergerDisjoint extends AbstractDoubleList implements Voxe
         return true;
     }
 
-    @Override
     public double getDouble(int i) {
         return i < this.lower.size() ? this.lower.getDouble(i) : this.upper.getDouble(i - this.lower.size());
     }

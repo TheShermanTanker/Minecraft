@@ -15,8 +15,8 @@ public class CustomFunctionCallbackTag implements CustomFunctionCallbackTimer<Mi
     }
 
     @Override
-    public void handle(MinecraftServer server, CustomFunctionCallbackTimerQueue<MinecraftServer> events, long time) {
-        CustomFunctionData serverFunctionManager = server.getFunctionData();
+    public void handle(MinecraftServer minecraftServer, CustomFunctionCallbackTimerQueue<MinecraftServer> timerQueue, long l) {
+        CustomFunctionData serverFunctionManager = minecraftServer.getFunctionData();
         Tag<CustomFunction> tag = serverFunctionManager.getTag(this.tagId);
 
         for(CustomFunction commandFunction : tag.getTagged()) {

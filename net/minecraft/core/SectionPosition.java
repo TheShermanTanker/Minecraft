@@ -1,5 +1,6 @@
 package net.minecraft.core;
 
+import it.unimi.dsi.fastutil.longs.LongConsumer;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -12,7 +13,7 @@ import net.minecraft.world.level.chunk.IChunkAccess;
 public class SectionPosition extends BaseBlockPosition {
     public static final int SECTION_BITS = 4;
     public static final int SECTION_SIZE = 16;
-    private static final int SECTION_MASK = 15;
+    public static final int SECTION_MASK = 15;
     public static final int SECTION_HALF_SIZE = 8;
     public static final int SECTION_MAX_INDEX = 15;
     private static final int PACKED_X_LENGTH = 22;
@@ -239,5 +240,34 @@ public class SectionPosition extends BaseBlockPosition {
                 }
             }
         }, false);
+    }
+
+    public static void aroundAndAtBlockPos(BlockPosition pos, LongConsumer consumer) {
+        aroundAndAtBlockPos(pos.getX(), pos.getY(), pos.getZ(), consumer);
+    }
+
+    public static void aroundAndAtBlockPos(long pos, LongConsumer consumer) {
+        aroundAndAtBlockPos(BlockPosition.getX(pos), BlockPosition.getY(pos), BlockPosition.getZ(pos), consumer);
+    }
+
+    public static void aroundAndAtBlockPos(int x, int y, int z, LongConsumer consumer) {
+        int i = blockToSectionCoord(x - 1);
+        int j = blockToSectionCoord(x + 1);
+        int k = blockToSectionCoord(y - 1);
+        int l = blockToSectionCoord(y + 1);
+        int m = blockToSectionCoord(z - 1);
+        int n = blockToSectionCoord(z + 1);
+        if (i == j && k == l && m == n) {
+            consumer.accept(asLong(i, k, m));
+        } else {
+            for(int o = i; o <= j; ++o) {
+                for(int p = k; p <= l; ++p) {
+                    for(int q = m; q <= n; ++q) {
+                        consumer.accept(asLong(o, p, q));
+                    }
+                }
+            }
+        }
+
     }
 }

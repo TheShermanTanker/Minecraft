@@ -31,13 +31,12 @@ public class TileEntityEnchantTable extends TileEntity implements INamableTileEn
     }
 
     @Override
-    public NBTTagCompound save(NBTTagCompound nbt) {
-        super.save(nbt);
+    protected void saveAdditional(NBTTagCompound nbt) {
+        super.saveAdditional(nbt);
         if (this.hasCustomName()) {
             nbt.setString("CustomName", IChatBaseComponent.ChatSerializer.toJson(this.name));
         }
 
-        return nbt;
     }
 
     @Override

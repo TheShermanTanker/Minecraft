@@ -1,45 +1,52 @@
 package net.minecraft;
 
-import com.mojang.bridge.game.GameVersion;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
 import java.time.Duration;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandExceptionProvider;
+import net.minecraft.world.level.ChunkCoordIntPair;
 
 public class SharedConstants {
+    /** @deprecated */
     @Deprecated
     public static final boolean SNAPSHOT = false;
+    /** @deprecated */
     @Deprecated
-    public static final int WORLD_VERSION = 2730;
+    public static final int WORLD_VERSION = 2860;
+    /** @deprecated */
     @Deprecated
-    public static final String VERSION_STRING = "1.17.1";
+    public static final String SERIES = "main";
+    /** @deprecated */
     @Deprecated
-    public static final String RELEASE_TARGET = "1.17.1";
+    public static final String VERSION_STRING = "1.18";
+    /** @deprecated */
     @Deprecated
-    public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 756;
+    public static final String RELEASE_TARGET = "1.18";
+    /** @deprecated */
     @Deprecated
-    public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 40;
-    public static final int SNBT_NAG_VERSION = 2678;
+    public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 757;
+    /** @deprecated */
+    @Deprecated
+    public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 60;
+    public static final int SNBT_NAG_VERSION = 2830;
     private static final int SNAPSHOT_PROTOCOL_BIT = 30;
+    /** @deprecated */
     @Deprecated
-    public static final int RESOURCE_PACK_FORMAT = 7;
+    public static final int RESOURCE_PACK_FORMAT = 8;
+    /** @deprecated */
     @Deprecated
-    public static final int DATA_PACK_FORMAT = 7;
+    public static final int DATA_PACK_FORMAT = 8;
     public static final String DATA_VERSION_TAG = "DataVersion";
-    public static final boolean CNC_PART_2 = false;
     public static final boolean CNC_PART_2_ITEMS_AND_BLOCKS = false;
-    public static final boolean NEW_WORLD_GENERATION = false;
-    public static final boolean EXTENDED_WORLD_HEIGHT = false;
-    public static final boolean AQUIFER_ENABLED_CARVERS = false;
     public static final boolean USE_NEW_RENDERSYSTEM = false;
     public static final boolean MULTITHREADED_RENDERING = false;
     public static final boolean FIX_TNT_DUPE = false;
     public static final boolean FIX_SAND_DUPE = false;
-    public static final boolean ENABLE_SNOOPER = false;
     public static final boolean USE_DEBUG_FEATURES = false;
-    public static final boolean ALLOW_INCOMPATIBLE_WORLD_HEIGHT = false;
+    public static final boolean DEBUG_OPEN_INCOMPATIBLE_WORLDS = false;
+    public static final boolean DEBUG_ALLOW_LOW_SIM_DISTANCE = false;
     public static final boolean DEBUG_HOTKEYS = false;
     public static final boolean DEBUG_UI_NARRATION = false;
     public static final boolean DEBUG_RENDER = false;
@@ -76,8 +83,13 @@ public class SharedConstants {
     public static final boolean DEBUG_PACKET_SERIALIZATION = false;
     public static final boolean DEBUG_CARVERS = false;
     public static final boolean DEBUG_ORE_VEINS = false;
+    public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
     public static final boolean DEBUG_SMALL_SPAWN = false;
     public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;
+    public static final boolean DEBUG_AQUIFERS = false;
+    public static final boolean DEBUG_JFR_PROFILING_ENABLE_LEVEL_LOADING = false;
+    public static boolean debugGenerateSquareTerrainWithoutNoise = false;
+    public static boolean debugGenerateStripedTerrainWithoutNoise = false;
     public static final boolean DEBUG_ONLY_GENERATE_HALF_THE_WORLD = false;
     public static final boolean DEBUG_DISABLE_FLUID_GENERATION = false;
     public static final boolean DEBUG_DISABLE_AQUIFERS = false;
@@ -88,6 +100,8 @@ public class SharedConstants {
     public static final boolean DEBUG_DISABLE_FEATURES = false;
     public static final boolean DEBUG_DISABLE_ORE_VEINS = false;
     public static final boolean DEBUG_DISABLE_NOODLE_CAVES = false;
+    public static final boolean DEBUG_DISABLE_BLENDING = false;
+    public static final boolean DEBUG_DISABLE_BELOW_ZERO_RETROGENERATION = false;
     public static final int DEFAULT_MINECRAFT_PORT = 25565;
     public static final boolean INGAME_DEBUG_OUTPUT = false;
     public static final boolean DEBUG_SUBTITLES = false;
@@ -98,7 +112,7 @@ public class SharedConstants {
     public static final boolean DEBUG_WORLD_RECREATE = false;
     public static final boolean DEBUG_SHOW_SERVER_DEBUG_VALUES = false;
     public static final boolean DEBUG_STORE_CHUNK_STACKTRACES = false;
-    public static final float RAIN_THRESHOLD = 0.15F;
+    public static final boolean DEBUG_FEATURE_COUNT = false;
     public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
     public static boolean CHECK_DATA_FIXER_SCHEMA = true;
     public static boolean IS_RUNNING_IN_IDE;
@@ -113,7 +127,7 @@ public class SharedConstants {
     public static final float AVERAGE_RANDOM_TICKS_PER_BLOCK_PER_MINUTE = 0.87890625F;
     public static final float AVERAGE_RANDOM_TICKS_PER_BLOCK_PER_GAME_DAY = 17.578125F;
     @Nullable
-    private static GameVersion CURRENT_VERSION;
+    private static WorldVersion CURRENT_VERSION;
 
     public static boolean isAllowedChatCharacter(char chr) {
         return chr != 167 && chr >= ' ' && chr != 127;
@@ -131,10 +145,10 @@ public class SharedConstants {
         return stringBuilder.toString();
     }
 
-    public static void setVersion(GameVersion version) {
+    public static void setVersion(WorldVersion gameVersion) {
         if (CURRENT_VERSION == null) {
-            CURRENT_VERSION = version;
-        } else if (version != CURRENT_VERSION) {
+            CURRENT_VERSION = gameVersion;
+        } else if (gameVersion != CURRENT_VERSION) {
             throw new IllegalStateException("Cannot override the current game version!");
         }
 
@@ -147,7 +161,7 @@ public class SharedConstants {
 
     }
 
-    public static GameVersion getGameVersion() {
+    public static WorldVersion getCurrentVersion() {
         if (CURRENT_VERSION == null) {
             throw new IllegalStateException("Game version not set");
         } else {
@@ -156,7 +170,17 @@ public class SharedConstants {
     }
 
     public static int getProtocolVersion() {
-        return 756;
+        return 757;
+    }
+
+    public static boolean debugVoidTerrain(ChunkCoordIntPair chunkPos) {
+        int i = chunkPos.getMinBlockX();
+        int j = chunkPos.getMinBlockZ();
+        if (!debugGenerateSquareTerrainWithoutNoise) {
+            return false;
+        } else {
+            return i > 8192 || i < 0 || j > 1024 || j < 0;
+        }
     }
 
     static {

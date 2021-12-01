@@ -37,7 +37,7 @@ public class BlockCoralFanWall extends BlockCoralFanWallAbstract {
             return Blocks.AIR.getBlockData();
         } else {
             if (state.get(WATERLOGGED)) {
-                world.getFluidTickList().scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
+                world.scheduleTick(pos, FluidTypes.WATER, FluidTypes.WATER.getTickDelay(world));
             }
 
             this.tryScheduleDieTick(state, world, pos);

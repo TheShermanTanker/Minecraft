@@ -5,9 +5,9 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import net.minecraft.network.PacketDataSerializer;
 
 public interface ArgumentSerializer<T extends ArgumentType<?>> {
-    void serializeToNetwork(T argumentType, PacketDataSerializer friendlyByteBuf);
+    void serializeToNetwork(T type, PacketDataSerializer buf);
 
-    T deserializeFromNetwork(PacketDataSerializer friendlyByteBuf);
+    T deserializeFromNetwork(PacketDataSerializer buf);
 
-    void serializeToJson(T argumentType, JsonObject jsonObject);
+    void serializeToJson(T type, JsonObject json);
 }

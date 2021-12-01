@@ -25,8 +25,8 @@ public class BehaviorOutside extends Behavior<EntityLiving> {
     protected void start(WorldServer world, EntityLiving entity, long time) {
         Optional<Vec3D> optional = Optional.ofNullable(this.getOutdoorPosition(world, entity));
         if (optional.isPresent()) {
-            entity.getBehaviorController().setMemory(MemoryModuleType.WALK_TARGET, optional.map((vec3) -> {
-                return new MemoryTarget(vec3, this.speedModifier, 0);
+            entity.getBehaviorController().setMemory(MemoryModuleType.WALK_TARGET, optional.map((pos) -> {
+                return new MemoryTarget(pos, this.speedModifier, 0);
             }));
         }
 
